@@ -11,7 +11,8 @@
         "skipLibCheck": true,
         /* Bundler mode */
         "moduleResolution": "Bundler",
-        // "allowImportingTsExtensions": true,
+        // mcp/main.ts 以 Node 原生类型剥离运行（node src/mcp/main.ts），需显式 .ts 扩展导入；noEmit:true 已满足其前置
+        "allowImportingTsExtensions": true,
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
         "isolatedModules": true,
