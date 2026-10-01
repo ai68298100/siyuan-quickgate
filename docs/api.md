@@ -29,6 +29,10 @@
 | `daily.status` | `{}` | `{docId, exists}` | 只探测不创建 |
 | `setting.open` | `{}` | `{ok:true}` | 打开思源设置 |
 | `editor.context` | `{}` | `{docId,rootTitle,blockId,selectedText}` | 全 null 表示无编辑器焦点（M0⑦ 后字段语义可能校准） |
+| `registry.list` | `{}` | `{manifestVersion, plugins:[{pluginId,displayName,maturity,manifestVersion,installedVersion,installed,protocol,capabilities,hubIntegration}], registrySource}` | 生态七插件清单（v0.2.0）；maturity ∈ stable/design/unlocated |
+| `diagnostics.report` | `{}` | `{protocol, plugin, version, bridge:{enabled,pollMs,basePath,commandsFileLines}, registry:{source,hostPlugins}, confirmExec, rawApiEnabled}` | 脱敏诊断快照（不含 Token/正文/个人路径） |
+| `config.discover` | `{}` | `{diaryNotebookId, inboxDocId, notes[]}` | 自动发现（spike⑧ 校准前 best-effort；失败回 null + notes 说明） |
+| `events.*` / `workflow.*` | — | — | **设计态契约**（docs/09 R1）：M2 实现，当前回 `unsupported` |
 | `plugin.api` | `{plugin, method, args}` | 桥返回 | 高级透传：默认关 + 允许名单 |
 
 ## 错误语义

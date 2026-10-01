@@ -15,7 +15,7 @@ import { probeCommandRegistry } from "./services/registry";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.1.0";
+const PLUGIN_VERSION = "0.2.0";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 export default class QuickGatePlugin extends Plugin {
@@ -189,7 +189,42 @@ export default class QuickGatePlugin extends Plugin {
             openSetting: () => this.openSettingPanel(),
             getCheckin: () => (window as unknown as { siyuanCheckin?: unknown }).siyuanCheckin,
             getContacts: () => (window as unknown as { LvContacts?: unknown }).LvContacts,
+            loadPetals: () => this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() }),
+            discoverConfig: () => this.discoverConfig(),
         };
+    }
+
+    /** 日记笔记本/收集箱自动发现（spike⑧ 校准前 best-effort，永不抛错） */
+    private async discoverConfig(): Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }> {
+        const notes: string[] = [];
+        let diaryNotebookId: string | null = null;
+        let inboxDocId: string | null = null;
+        try {
+            const resp = await this.kernelApi.post<{ notebooks?: Array<{ id: string; name: string; closed: boolean }> } | Array<{ id: string; name: string; closed: boolean }>>("/api/notebook/lsNotebooks", {});
+            const notebooks = Array.isArray(resp) ? resp : resp?.notebooks ?? [];
+            for (const nb of notebooks) {
+                if (nb.closed) continue;
+                try {
+                    const conf = await this.kernelApi.post<{ conf?: Record<string, unknown> }>("/api/notebook/getNotebookConf", { notebook: nb.id });
+                    const savePath = (conf?.conf?.dailynoteSavePath as string) ?? "";
+                    if (!diaryNotebookId && savePath) {
+                        diaryNotebookId = nb.id;
+                        notes.push(`日记笔记本：${nb.name}（dailynoteSavePath=${savePath}）`);
+                    }
+                } catch { /* 单笔记本 conf 失败不影响整体 */ }
+                if (!inboxDocId && /收集箱|inbox/i.test(nb.name)) {
+                    try {
+                        const docs = await this.kernelApi.post<{ files?: Array<{ id: string; name: string }> }>("/api/filetree/listDocsByPath", { notebook: nb.id, path: "/" });
+                        inboxDocId = docs?.files?.[0]?.id ?? null;
+                        if (inboxDocId) notes.push(`收集箱：${nb.name} 根文档`);
+                    } catch { /* 忽略 */ }
+                }
+            }
+        } catch (e) {
+            notes.push(`发现失败：${e instanceof Error ? e.message : String(e)}`);
+        }
+        if (!diaryNotebookId) notes.push("未发现日记笔记本（回退手填）");
+        return { diaryNotebookId, inboxDocId, notes };
     }
 
     private openSettingPanel() {
@@ -260,6 +295,25 @@ export default class QuickGatePlugin extends Plugin {
             await this.store.saveSettings();
         };
         row("plugin.api 高级透传（默认关）", rawInput);
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "b3-button b3-button--outline";
+        clearBtn.textContent = "清空命令队列";
+        clearBtn.onclick = async () => {
+            confirm("小驴快门", "清空 commands 与 results 桥文件，并重置处理台账？未消费命令将全部丢弃。", async () => {
+                try {
+                    const base = this.settings.bridgeBasePath;
+                    await this.kernelApi.putFileText(`${base}/commands.ndjson`, "");
+                    await this.kernelApi.putFileText(`${base}/results.ndjson`, "");
+                    this.store.processed = { schemaVersion: 1, processed: {} };
+                    await this.store.saveProcessed();
+                    showMessage("命令队列已清空", 3000);
+                } catch (e) {
+                    showMessage(`清空失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+                }
+            }, () => {});
+        };
+        row("排障", clearBtn);
 
         const auditBtn = document.createElement("button");
         auditBtn.className = "b3-button b3-button--outline";

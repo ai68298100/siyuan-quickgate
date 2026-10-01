@@ -2,6 +2,13 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.2.0（生态中枢 R1 第一批）
+
+- `registry.list`（manifest×loadPetals 合并）、`diagnostics.report`（脱敏）、`config.discover`（best-effort 自动发现）
+- `events.*`/`workflow.*` 设计态占位回 unsupported
+- 设置页「清空命令队列」；gen-icon 图标；architecture.svg；e2e/e2e.mjs 自动化验收子集
+- 测试 8 组 38 用例全绿；check/build 全绿
+
 ## 2026-10-02 · v0.1.0 脚手架（M0.5 完成，M0 spike 待思源真机）
 
 已完成（全部通过 `check`/`test`/`build`，无需内核）：

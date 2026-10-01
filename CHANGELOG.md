@@ -2,6 +2,20 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.2.0 · 2026-10-02（生态中枢 R1 第一批）
+
+### Added
+- `registry.list`：小驴七插件生态清单（src/assets/ecosystem-manifests.json 单一事实源）× `/api/petal/loadPetals` 实装状态合并
+- `diagnostics.report`：脱敏诊断快照（桥/注册表/开关状态；不含 Token 与用户内容）
+- `config.discover`：日记笔记本（getNotebookConf.dailynoteSavePath）与收集箱（名称约定）自动发现，失败降级
+- `events.*` / `workflow.*` 设计态占位：明确回 `unsupported`（M2 实现）
+- 设置页「清空命令队列」（commands/results/台账一并重置）
+- 图标：gen-icon.mjs 小驴系视觉（蓝紫门框 + 速度线 + 橙点），icon 160 + preview 1024×768
+- docs/architecture.svg 数据流图；e2e/e2e.mjs（对照 02 §8 的自动化验收子集，内核不可达时安全退出）
+
+### Fixed
+- `lsNotebooks`/`listDocsByPath` 响应形状适配（data.notebooks / data.files）
+
 ## v0.1.0 · 2026-10-02（脚手架，未发布集市）
 
 ### Added

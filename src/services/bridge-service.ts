@@ -22,6 +22,20 @@ export interface EditorContextResult {
     selectedText: string | null;
 }
 
+/** 生态清单（src/assets/ecosystem-manifests.json 的形状） */
+export interface EcosystemManifest {
+    version: number;
+    plugins: Array<{
+        pluginId: string;
+        displayName: string;
+        maturity: "stable" | "design" | "unlocated";
+        version: string | null;
+        protocol: string | null;
+        capabilities: string[];
+        hubIntegration: string;
+    }>;
+}
+
 export interface BridgeServiceDeps {
     api: KernelApi;
     store: BridgeStore;
@@ -43,6 +57,10 @@ export interface BridgeServiceDeps {
     openDoc: (id: string) => Promise<void> | void;
     /** 打开设置 */
     openSetting: () => void;
+    /** petal/loadPetals（已装插件表） */
+    loadPetals: () => Promise<Array<Record<string, unknown>>>;
+    /** 日记笔记本/收集箱自动发现（spike⑧ 校准前 best-effort） */
+    discoverConfig: () => Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }>;
     /** 公开桥获取器 */
     getCheckin: () => unknown;
     getContacts: () => unknown;
@@ -246,6 +264,73 @@ export class BridgeService {
                 const ctx = this.deps.editorContext();
                 return { status: "recorded", data: ctx ?? { docId: null, rootTitle: null, blockId: null, selectedText: null }, message: "已读取" };
             }
+
+            // ---- 生态中枢（R1）----
+            case "registry.list": {
+                let petals: Array<Record<string, unknown>> = [];
+                try {
+                    petals = await this.deps.loadPetals();
+                } catch { /* 内核不可达时也返回 manifest 口径 */ }
+                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const enabledMap = new Map<string, unknown>();
+                for (const p of petals) {
+                    const name = (p as { name?: unknown }).name;
+                    if (typeof name === "string") enabledMap.set(name, p);
+                }
+                const plugins = manifest.plugins.map((m) => {
+                    const petal = enabledMap.get(m.pluginId) as { version?: unknown; enabled?: unknown } | undefined;
+                    return {
+                        pluginId: m.pluginId,
+                        displayName: m.displayName,
+                        maturity: m.maturity,
+                        manifestVersion: m.version,
+                        installedVersion: typeof petal?.version === "string" ? petal.version : null,
+                        installed: enabledMap.has(m.pluginId),
+                        protocol: m.protocol,
+                        capabilities: m.capabilities,
+                        hubIntegration: m.hubIntegration,
+                    };
+                });
+                return {
+                    status: "recorded",
+                    data: { manifestVersion: manifest.version, plugins, registrySource: this.deps.registry().source },
+                    message: `生态清单 ${plugins.length} 款（stable ${plugins.filter((p) => p.maturity === "stable").length}）`,
+                };
+            }
+            case "diagnostics.report": {
+                const raw = await this.deps.api.getFileText(this.paths().commands);
+                const probe = this.deps.registry();
+                return {
+                    status: "recorded",
+                    data: {
+                        protocol: 1,
+                        plugin: this.deps.pluginName,
+                        version: this.deps.pluginVersion,
+                        bridge: {
+                            enabled: s.bridgeEnabled,
+                            pollMs: s.pollMs,
+                            basePath: s.bridgeBasePath,
+                            commandsFileLines: raw === null ? null : splitLines(raw).filter((l) => l.trim() !== "").length,
+                        },
+                        registry: { source: probe.source, hostPlugins: probe.plugins.length, reason: probe.reason ?? null },
+                        confirmExec: s.confirmExec,
+                        rawApiEnabled: s.rawApiEnabled,
+                        // 不输出 Token/正文/个人路径（docs/09 P1 红线）
+                    },
+                    message: "诊断快照（脱敏）",
+                };
+            }
+            case "config.discover": {
+                const d = await this.deps.discoverConfig();
+                return { status: "recorded", data: d, message: d.diaryNotebookId ? "已发现日记笔记本" : "未发现日记笔记本（回退手填）" };
+            }
+
+            // ---- 设计态契约（M2 实现，先返回结构化 unsupported）----
+            case "events.list":
+            case "events.subscribe":
+            case "workflow.plan":
+            case "workflow.execute":
+                return { status: "unsupported", data: null, message: `${cmd.op} 为设计态契约（docs/09 R1），将在 M2 实现` };
 
             // ---- 高级透传（默认关）----
             case "plugin.api": {
