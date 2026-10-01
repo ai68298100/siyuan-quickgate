@@ -2,6 +2,16 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## Unreleased（MCP stdio 代理——R39 评估稿落地，两个增量）
+
+### Added
+- **src/mcp/**：MCP stdio 代理（`node src/mcp/main.ts`），23 op 一比一映射为 MCP tools，供 Claude Desktop/Cursor 等 AI 客户端调用小驴生态能力面（checkin/contacts/commands/workflow——思源 3.8.6 内置 MCP 只覆盖内核 CRUD）
+- 安全模型：**默认只暴露 13 个只读工具**；写工具需 `LV_MCP_WRITE=1`（tools/list 隐藏 + tools/call 诚实拒绝）；`plugin.api`/`workflow.execute` 标 destructiveHint；快门既有防线（确认门控/黑名单/审计/允许名单）全共用
+- 逐 op 参数 schema（ARGS 表对齐 docs/api.md；template.new 形状以 kernel-ops 实现为准）；纪律测试强制每 op 登记 properties+描述
+- NDJSON 慢路径 + 广播快路径双通道；commands.run/workflow.execute 等待 35s 覆盖确认窗口
+- 测试 8+1 组（tools 集合===ALL_OPS 契约一致性强制）；95 总全绿；裸 Node 真机烟测通过（握手/13 只读/写拒绝/required 穿透）
+- e2e（真 AI 客户端 + 插件侧消费）待思源重启复测批；npm 独立发包待 e2e 后评估
+
 ## v0.6.5 · 2026-10-02（M2 尾巴：审计导出入口）
 
 ### Added

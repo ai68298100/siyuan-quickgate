@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · MCP stdio 代理两个增量（Unreleased，随仓库分发）
+
+- 第一增量：src/mcp/ 四件（tools/client/server/main）；23 op→tools 契约映射（只读13/写10）；默认只读+LV_MCP_WRITE 门控；8 单测+裸 Node 烟测（握手/写拒绝）
+- 第二增量：逐 op 参数 schema（ARGS 表 23 项全登记+纪律测试强制）；写模式烟测 required 穿透
+- 95 单测全绿；e2e（真 AI 客户端+插件消费）待复测批
+
 ## 2026-10-02 · v0.6.5（M2 尾巴：审计导出入口）
 
 - 设置页"导出审计 JSON"：完整 auditLog → 剪贴板（schemaVersion/exportedAt 包裹）
