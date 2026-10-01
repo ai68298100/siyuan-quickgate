@@ -91,7 +91,9 @@
       "op": "checkin.summary",
       "args": {},
       "effect": "read",
-      "requires": "siyuan-checkin v5 summary.read"
+      "requires": "siyuan-checkin v5 summary.read",
+      "since": "0.5.6",
+      "note": "data={today:SummaryContext(range/startDate/endDate/items/totalEvents/completedItems/scheduledItems), streaks:{itemId:天数}}；由 getSummaryContext(\"day\")+getStreaks 组合（v0.5.6 修正：上游公开面无 getSummary，此前静默返回空数据）"
     },
     {
       "op": "contacts.search",

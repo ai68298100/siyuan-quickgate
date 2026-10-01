@@ -2,6 +2,15 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.6 · 2026-10-02（checkin.summary 静默空数据修复）
+
+### Fixed
+- **`checkin.summary` 静默返回空数据**：上游打卡 v18.16 公开面**没有 `getSummary` 方法**（summary.read 由 `getSummaryContext(range)`+`getStreaks(itemIds)` 承载），适配器的可选调用 `b.getSummary?.({})` 在方法缺失时返回 `recorded` + `data:undefined`——消费方收到成功状态却无数据。改为组合调用并返回结构化 `{today: SummaryContext, streaks}`；两方法均不可用时诚实回 `unsupported`
+- 回归测试：桥无任何 summary 方法必须回 `unsupported`（不得静默 recorded）
+
+### Changed
+- api.md / 契约 JSON：`checkin.summary` data 形状明确为 `{today, streaks}`
+
 ## v0.5.5 · 2026-10-02（内核路由可测化 + plugin.api manifest 驱动）
 
 ### Added

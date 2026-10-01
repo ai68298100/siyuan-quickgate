@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.6（checkin.summary 静默空数据修复）
+
+- Fixed：适配器改组合 `getSummaryContext("day")+getStreaks`（上游 v18.16 无 getSummary，此前 recorded+undefined）；缺方法时诚实 unsupported；回归测试防再犯
+- api.md/契约 JSON 同步 data 形状 `{today, streaks}`
+- 单测 72 全绿；check/build 全绿
+
 ## 2026-10-02 · v0.5.5（内核路由可测化 + plugin.api manifest 驱动）
 
 - kernel-ops.ts 抽出（依赖注入可单测）；补齐文档声称但缺失的 events.list op；events.pull 对齐前端去重契约

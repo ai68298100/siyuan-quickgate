@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-    checkinItems, checkinRecord, contactsEnsure, contactsInteraction, splitNames,
+    checkinItems, checkinRecord, checkinSummary, contactsEnsure, contactsInteraction, splitNames,
     CheckinBridgeLike, ContactsBridgeLike,
 } from "../src/services/adapters";
 
@@ -12,7 +12,8 @@ const readyCheckin = (caps: string[]): CheckinBridgeLike => ({
         { id: "i2", name: "旧事项", archived: true },
     ],
     recordEvent: (args) => ({ ok: true, echo: args }),
-    getSummary: () => ({ streak: 3 }),
+    getSummaryContext: (range) => ({ range, totalEvents: 7, completedItems: 2, scheduledItems: 3 }),
+    getStreaks: (ids) => ({ [ids[0] ?? ""]: 3 }),
 });
 
 describe("checkin 适配器（能力协商）", () => {
@@ -42,6 +43,23 @@ describe("checkin 适配器（能力协商）", () => {
         expect((await checkinItems(() => undefined, {})).status).toBe("unsupported");
         const r = await checkinRecord(() => readyCheckin(["events.record"]), {}, "ref");
         expect(r.status).toBe("rejected");
+    });
+
+    it("summary：组合 getSummaryContext(day)+getStreaks（v0.5.6——上游无 getSummary）", async () => {
+        const r = await checkinSummary(() => readyCheckin(["summary.read"]));
+        expect(r.status).toBe("recorded");
+        const data = r.data as { today: { totalEvents: number }; streaks: Record<string, number> };
+        expect(data.today.totalEvents).toBe(7);
+        expect(data.streaks.i1).toBe(3);
+    });
+
+    it("summary 回归：桥无任何 summary 方法 → unsupported（不得静默 recorded 空数据）", async () => {
+        const bare = readyCheckin(["summary.read"]);
+        delete (bare as Partial<CheckinBridgeLike>).getSummaryContext;
+        delete (bare as Partial<CheckinBridgeLike>).getStreaks;
+        const r = await checkinSummary(() => bare);
+        expect(r.status).toBe("unsupported");
+        expect(r.message).toContain("getSummaryContext");
     });
 });
 

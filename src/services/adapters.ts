@@ -13,7 +13,9 @@ export interface CheckinBridgeLike {
     getItems?: () => unknown[];
     queryItems?: (args: unknown) => Promise<unknown[]> | unknown[];
     recordEvent?: (args: unknown) => Promise<unknown> | unknown;
-    getSummary?: (args?: unknown) => Promise<unknown> | unknown;
+    /** v18.16 公开面核实：无 getSummary；summary 由 getSummaryContext("day") + getStreaks 组合（v0.5.6 修正） */
+    getSummaryContext?: (range: "day" | "week" | "month") => Promise<unknown> | unknown;
+    getStreaks?: (itemIds: string[]) => Promise<unknown> | unknown;
 }
 
 export interface ContactsBridgeLike {
@@ -121,8 +123,24 @@ export async function checkinSummary(getBridge: () => CheckinBridgeLike | undefi
         return { status: "unsupported", data: null, message: "小驴打卡数据未就绪（超时 5s）" };
     }
     try {
-        const data = await b.getSummary?.({});
-        return { status: "recorded", data, message: "已读取" };
+        // v0.5.6 修正：上游 v18.16 公开面没有 getSummary 方法（此前可选调用静默返回空数据）。
+        // 组合 getSummaryContext("day")（SummaryContext：range/startDate/endDate/items/totalEvents/
+        // completedItems/scheduledItems）与 getStreaks(itemIds)（{itemId: 连击天数}）。
+        const gc = b.getSummaryContext;
+        const today = typeof gc === "function" ? await gc("day") : null;
+
+        let streaks: unknown = null;
+        if (typeof b.getStreaks === "function" && typeof b.getItems === "function") {
+            const ids = (b.getItems() ?? [])
+                .map((i) => String((i as { id?: unknown })?.id ?? ""))
+                .filter((s) => s.length > 0);
+            streaks = ids.length > 0 ? await b.getStreaks(ids) : {};
+        }
+
+        if (today === null && streaks === null) {
+            return { status: "unsupported", data: null, message: "打卡桥缺少 summary 方法（getSummaryContext/getStreaks 均不可用；v18.16 公开面已核实无 getSummary）" };
+        }
+        return { status: "recorded", data: { today, streaks }, message: "已读取（今日上下文 + 连击）" };
     } catch (e) {
         return { status: "failed", data: null, message: `汇总读取失败：${e instanceof Error ? e.message : String(e)}` };
     }
