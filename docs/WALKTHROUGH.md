@@ -5,12 +5,13 @@
 > 环境：本机内核 `http://127.0.0.1:1568`（非默认端口），Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`）。下述 `$TOKEN` 即该值；快门需先在思源集市/本地安装并开启「外部命令桥」。
 
 ## ① 命令注册表形状 ⬜
+- **静态已钉（v0.5.8）**：命令身份=`ICommand.langKey`（官方 app/src/types/index.d.ts；不存在 command/id——此前误读致列表为空）；文本=langText→`i18n[langKey]`；回调五形态（callback/globalCallback/execute 可外部执行，editor/dock/fileTree 标 focusOnly）
 - 计划：思源 DevTools 控制台执行
   ```js
   console.table(window.siyuan.ws.app.plugins.map(p => ({name: p.name, ver: p.version, cmds: p.commands?.length})))
   window.siyuan.ws.app.plugins.find(p=>p.name==="siyuan-speed-switch").commands?.slice(0,5)
   ```
-- 校准点：`p.commands[]` 的字段名（`id/title/plugin`？还是 `cmdName/langText`？）
+- 校准点：langKey 形态确认；`p.displayName`/`p.i18n` 是否如预期挂在实例上（挂不上则标题回退 id）；hotkeys[] 是否常见
 - 影响：src/services/registry.ts 探测链与 commands.list/search 输出形状
 - 结论：（待填）
 

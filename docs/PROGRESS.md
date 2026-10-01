@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.8（命令注册表探测修复）
+
+- Fixed：ICommand 身份=langKey（旧读 command/id → 全部命令被跳过、列表为空）；多回调形态支持（callback/execute/globalCallback 可执行，editor/dock/fileTree 标 focusOnly 诚实拒绝）；标题 i18n 代取；hotkeys[] 兼容
+- registry 单测 +5；全仓 14 文件 78 用例全绿；check/build 全绿
+- WALKTHROUGH spike① 同步（静态已钉，真机校准 displayName/i18n 细节）
+
 ## 2026-10-02 · v0.5.7（适配器签名全面审计）
 
 - 审计记录 vs 上游 v18.16 源码：queryItems/getItems/CheckinItem/人脉 recordInteraction 一致；三处不符已修（source 非法归一→显式 api、occurredAt 单条被忽略→路由 recordEventsBatch+BatchEntryResult 映射、getStreaks 数组形状→归一映射+streaksLongest）

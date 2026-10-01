@@ -2,6 +2,17 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.8 · 2026-10-02（命令注册表探测修复——langKey 身份）
+
+### Fixed
+- **`commands.*` 全部失效的探测缺陷**：思源官方 `ICommand` 的命令身份是 **`langKey`**（不存在 `command`/`id` 字段），registry.ts 此前读 `c.command ?? c.id`——langKey-only 注册的命令（普遍形态，如 `addCommand({langKey, langText, hotkey, callback})`）**全部被跳过**，commands.list 返回空、commands.run 报"命令不存在"。改为 langKey 优先（旧字段降级兜底）
+- **只声明焦点相关回调的命令被静默丢弃**：ICommand 有五种回调（callback/globalCallback/execute/editorCallback/dockCallback/fileTreeCallback），且"更具体的回调存在时 callback 不会被宿主触发"——探测改为接受 callback/execute/globalCallback（可无焦点执行）；editor/dock/fileTree 形态标记 `focusOnly`，commands.run 对其诚实回 `unsupported`（不盲执行）
+- **标题解析增强**：langText 缺省时按宿主行为从插件实例 `.i18n[langKey]` 代取；快捷键兼容 `hotkeys[]`（并入 accelerator）
+
+### Added
+- registry 单测 5 组：langKey 识别 / i18n 标题 / execute·globalCallback+hotkeys / focusOnly 标记与拒绝执行 / callback 优先与降级
+- WALKTHROUGH spike① 同步：静态已钉住 langKey 形状，真机仍需实证 displayName/i18n 细节
+
 ## v0.5.7 · 2026-10-02（适配器签名全面审计）
 
 ### Fixed
