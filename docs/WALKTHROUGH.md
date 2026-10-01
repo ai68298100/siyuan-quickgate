@@ -3,7 +3,7 @@
 > 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
 > **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.6.0** 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥与广播快路径默认关）。下文 `$TOKEN` 即该值。
-> 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧（①②④⑦⑪）需思源窗口内 DevTools。
+> 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧（①②④⑦⑪）需思源窗口内 DevTools。**⑦ 已于 R26 用本机 bundle 静态核实部分坐实（v0.6.2，发现 bug#7）；新增替代证据法：grep `D:\biji\SiYuan\resources\stage\build\app\` 编译产物可直接核实前端假设，不依赖 DevTools/网络。**
 > **重启复测一键化（R24）**：思源重启后跑 `node tools/verify-restart.mjs`（自动读 env）——③桥端到端含延迟 / ⑩⓪负向鉴权+路由 ping+events.list+降级 / ⑪事件物化计数 / ⑤广播存活 / **v1.5 postMessage→回执延迟测量**。一条命令完成复测批。
 
 ## ① 命令注册表形状 ⬜
@@ -50,8 +50,15 @@
 - 影响：registry.list 合并逻辑、设置页生态清单对照
 - 结论：（待填）
 
-## ⑦ editor.context 字段校准 ⬜
-- 计划：打开一篇文档，光标置于块内，控制台检查
+## ⑦ editor.context 字段校准 ◐（2026-10-02，本机 bundle 静态核实；**发现并修复 bug#7**；DevTools 现场部分待补）
+- **静态核实法**（DevTools 不可用时的替代证据链）：直接 grep 本机安装的编译产物 `D:\biji\SiYuan\resources\stage\build\app\common.js`——这是实际运行的代码
+- **bug#7**：`data-doc-id` 属性在整个 bundle 中不存在（只有 `data-doc-type`）→ readEditorContext 主路径恒空，一直在靠 fallback 工作；v0.6.2 修复
+- 实证（bundle 内联证据）：
+  - `.protyle` 容器自带 `data-node-id`=rootID（Protyle 类加载路径 `this.element.setAttribute("data-node-id", i.block.rootID)`，与 `fn__none` 切换同一方法）→ docId 主路径
+  - `.protyle-title` 元素在 render 时 `setAttribute("data-node-id")` → fallback 有效
+  - 标题文本官方读取路径是 `title.editElement.textContent.trim()`（即 `.protyle-title__input`）→ rootTitle 改为优先读它
+  - `fn__none` 由 Protyle 类在 tab 切换时 add/remove → `:not(.fn__none)` 过滤有效；官方自身不使用该选择器（走 `window.siyuan.layout` 树），但语义正确
+- 计划中的 DevTools 现场步骤保留（选中块/光标路径现场确认）：
   ```js
   const siyuan = window.siyuan; // 依次核对：
   siyuan.editor ?? Object.values(siyuan.ws.app.plugins).length
@@ -59,9 +66,8 @@
   window.siyuan.block?.id || document.querySelector(".protyle-wysiwyg--select")?.dataset?.nodeId // 选中块?
   getSelection().toString()
   ```
-- 校准点：readEditorContext 五个选择器的真实性（docId/rootTitle/blockId/selectedText）
-- 影响：src/index.ts readEditorContext
-- 结论：（待填）
+- 影响：src/index.ts readEditorContext（v0.6.2 已修复并内联证据注释）
+- 结论：docId/rootTitle 选择器已静态坐实；blockId 光标爬升逻辑（wysiwyg 块普遍带 data-node-id，bundle 佐证）与现场行为待 DevTools 补验
 
 ## ⑧ 日记笔记本自动发现字段 ✅（2026-10-02，3.8.5 真机；**发现并修复 bug#6**）
 - 实证：`getNotebookConf` → `conf.**dailyNoteSavePath**`（驼峰大写 N；旧代码读 `dailynoteSavePath` 全小写 → 自动发现恒失败，v0.5.9 修复）
