@@ -2,6 +2,17 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.6.3（registry 快捷键读宿主生效键 customHotkey）
+
+- bundle 静态核实（本机 3.8.5 安装产物）：Plugin 基类挂载 i18n/displayName/commands ✓；addCommand 以 langKey 解析后回写 hotkey=默认/customHotkey=生效，解析失败者移出 commands
+- accelerator 优先级修复 customHotkey > hotkey > hotkeys[]（+1 测试）；spike② confirm 30s 兜底必要性坐实
+- WALKTHROUGH ①② ⬜→✅；86 单测全绿；已部署工作空间 + GitHub pre-release
+
+## 2026-10-02 · v0.6.2（editor.context docId 主路径修复）
+
+- bug#7：data-doc-id 在 bundle 中不存在（仅 data-doc-type）→ docId 主路径改 `.protyle` 容器自带 `data-node-id`（rootID），`.protyle-title` 降为 fallback；rootTitle 优先 `.protyle-title__input`
+- spike⑦ ⬜→◐；确立"grep 本机安装编译产物"前端假设证据法
+
 ## 2026-10-02 · v0.6.1（config.discover 真机校准）
 
 - 非默认模板优先层（3.8.5 出厂默认模板字面量比对；实测 17 笔记本 16 默认+1 自定义 → 自定义者直接命中，无需等今日日记）

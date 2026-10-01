@@ -2,6 +2,24 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.6.3 · 2026-10-02（registry 快捷键读宿主生效键 customHotkey）
+
+### Fixed
+- `commands.list/search` 的 accelerator 优先级改为 **customHotkey > hotkey > hotkeys[]**：3.8.5 bundle 实证宿主 `addCommand` 会以 langKey 解析快捷键后**就地回写** `hotkey`（解析默认）与 `customHotkey`（用户实际生效键），官方消费的就是 customHotkey——旧逻辑读不到用户自定义键；解析失败者会被宿主移出 commands 数组（诚实面：list 输出的就是活着的命令）
+- Plugin 基类构造器实证挂载 `i18n/displayName/commands`（spike① 标题代取链成立）；`window.siyuan.ws.app.plugins` 遍历路径官方自证——WALKTHROUGH spike① ⬜→✅
+
+### Verified
+- spike② confirm API（bundle 实证）：回调式、void 返回、**无自动超时**，Esc/取消仅 destroy 不回调 → confirmWithFront 30s 自制超时是唯一兜底（契约一致，补证据注释）；WALKTHROUGH spike② ⬜→✅
+
+## v0.6.2 · 2026-10-02（editor.context docId 主路径修复）
+
+### Fixed
+- **bug#7：`editor.context` 的 docId 主路径恒空**——`data-doc-id` 属性在思源 bundle 中不存在（只有 `data-doc-type`），旧主路径永远取 null、全靠 fallback 撑着。v0.6.2 改用 `.protyle` 容器自带的 `data-node-id`（Protyle 类加载路径写入 rootID，与 `fn__none` 切换同一方法）；`.protyle-title` 的 `data-node-id` 降为 fallback
+- rootTitle 优先读官方 editElement（`.protyle-title__input`）再退 `.protyle-title` 整体 textContent
+
+### Verified
+- spike⑦ ⬜→◐（docId/rootTitle bundle 静态坐实；blockId 光标爬升留 DevTools 现场）——确立**"grep 本机安装编译产物"证据法**：前端 DOM 假设不必等 DevTools，实际运行的 bundle 比远端源码更硬
+
 ## v0.6.1 · 2026-10-02（config.discover 真机校准：非默认模板优先）
 
 ### Improved

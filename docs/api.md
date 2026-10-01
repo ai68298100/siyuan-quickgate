@@ -28,7 +28,7 @@
 | op | args | 成功 data | 说明 |
 |---|---|---|---|
 | `bridge.ping` | `{}` | `{protocol:1, plugin, version, pollMs, bridgeEnabled}` | 协商与健康探测 |
-| `commands.list` | `{plugin?}` | `{plugins:[{name,displayName,commands[]}], source}` | 每插件 ≤100 条，总 ≤100 插件；黑名单插件不返回 |
+| `commands.list` | `{plugin?}` | `{plugins:[{name,displayName,commands[]}], source}` | 每插件 ≤100 条，总 ≤100 插件；黑名单插件不返回；命令含 id(=langKey)/title/accelerator/focusOnly，accelerator 优先级 customHotkey（宿主生效键）> hotkey > hotkeys[]（v0.6.3） |
 | `commands.search` | `{keyword}` | `{commands:[…]}` | 内存过滤 ≤50 条 |
 | `commands.run` | `{plugin, command}` | `{ok:true}` | 默认确认门控（30s 超时拒绝）+ 审计 |
 | `checkin.items` | `{includeArchived?, limit?≤200}` | `{items:[{id,name,kind,unit,archived}]}` | 走打卡 v5 `items.read` |
@@ -40,7 +40,7 @@
 | `doc.open` | `{id}` | `{ok:true}` | 受控导航，不改数据 |
 | `daily.status` | `{}` | `{docId, exists}` | 只探测不创建 |
 | `setting.open` | `{}` | `{ok:true}` | 打开思源设置 |
-| `editor.context` | `{}` | `{docId,rootTitle,blockId,selectedText}` | 全 null 表示无编辑器焦点（M0⑦ 后字段语义可能校准） |
+| `editor.context` | `{}` | `{docId,rootTitle,blockId,selectedText}` | 全 null 表示无编辑器焦点；docId=活动 protyle 容器 `data-node-id`（fallback `.protyle-title` 同名属性，3.8.5 bundle 实证，v0.6.2 修复此前误用的 data-doc-id）；rootTitle 优先 `.protyle-title__input`；blockId=选区向上爬升至最近 `[data-node-id]` |
 | `events.list` | `{}` | `{events:[{name,source,idempotency}]}` | 白名单事件目录（v0.4.0 实现；来源准入见 events-workflow-draft） |
 | `events.pull` | `{names?, since?, limit?≤200}` | `{events:[HubEvent], files}` | 文件载体拉取；幂等键去重由调用方按 `idempotencyKey`。当前物化事件：`checkin:event-recorded`（v0.5.2 通道修正）与 `checkin:event-deleted`（v0.5.4，幂等键 `原键:deleted`，append-only 删除标记，与 recorded 行按键配对）；`analytics-updated` 不物化（D-0011） |
 | `workflow.plan` | `{steps:[{op,args}≤8]}` | `{plan:{planId,steps[],expiresAt}}` | 受控 op 白名单；写步骤带 confirm 标记；只出计划不执行 |
