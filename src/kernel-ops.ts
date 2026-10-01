@@ -98,18 +98,44 @@ export async function kernelConfigDiscover(deps: KernelDeps): Promise<Receipt> {
     const notes: string[] = [];
     let diaryNotebookId: string | null = null;
     try {
+        // spike⑧ 实证（3.8.5 真内核）：字段为 dailyNoteSavePath（驼峰）；3.8.5 里所有笔记本都带
+        // 相同默认模板（"/daily note/{{now…}}"），"非空即日记"启发式失效——需二级消歧：
+        // 恰一个候选→命中；多个候选→renderSprig 渲染当日 hpath 并检查日记文档是否真实存在，恰一个命中→命中。
         const resp = await deps.kpost<{ notebooks?: Array<{ id: string; name: string; closed: boolean }> } | Array<{ id: string; name: string; closed: boolean }>>("/api/notebook/lsNotebooks", {});
         const notebooks = Array.isArray(resp) ? resp : resp?.notebooks ?? [];
+        type Cand = { id: string; name: string; savePath: string };
+        const candidates: Cand[] = [];
         for (const nb of notebooks) {
             if (nb.closed) continue;
             try {
                 const conf = await deps.kpost<{ conf?: Record<string, unknown> }>("/api/notebook/getNotebookConf", { notebook: nb.id });
-                const savePath = (conf?.conf?.dailynoteSavePath as string) ?? "";
-                if (!diaryNotebookId && savePath) {
-                    diaryNotebookId = nb.id;
-                    notes.push(`日记笔记本：${nb.name}（${savePath}）`);
-                }
+                const c = conf?.conf ?? {};
+                const savePath = (c.dailyNoteSavePath as string) ?? (c.dailynoteSavePath as string) ?? "";
+                if (savePath) candidates.push({ id: nb.id, name: nb.name, savePath });
             } catch { /* 单笔记本失败不影响整体 */ }
+        }
+        if (candidates.length === 1) {
+            diaryNotebookId = candidates[0].id;
+            notes.push(`日记笔记本：${candidates[0].name}（dailyNoteSavePath=${candidates[0].savePath}）`);
+        } else if (candidates.length > 1) {
+            notes.push(`多个笔记本配置了日记路径（${candidates.map((c) => c.name).join("、")}），尝试按"今日日记文档存在性"消歧…`);
+            const withDiary: Cand[] = [];
+            for (const c of candidates) {
+                try {
+                    const hpath = await deps.kpost<string>("/api/template/renderSprig", { template: c.savePath });
+                    const parent = hpath.replace(/\/[^/]+$/, "") || "/";
+                    const leaf = hpath.slice(parent.length + 1);
+                    const docs = await deps.kpost<{ files?: Array<{ name: string }> }>("/api/filetree/listDocsByPath", { notebook: c.id, path: parent });
+                    const exists = (docs?.files ?? []).some((f) => f.name === leaf);
+                    if (exists) withDiary.push(c);
+                } catch { /* 单候选消歧失败忽略 */ }
+            }
+            if (withDiary.length === 1) {
+                diaryNotebookId = withDiary[0].id;
+                notes.push(`日记笔记本（按今日日记文档消歧）：${withDiary[0].name}`);
+            } else {
+                notes.push(withDiary.length === 0 ? "各候选笔记本均无今日日记文档，无法唯一判定" : `多个笔记本均有今日日记（${withDiary.map((c) => c.name).join("、")}），无法唯一判定`);
+            }
         }
     } catch (e) {
         notes.push(`发现失败：${e instanceof Error ? e.message : String(e)}`);

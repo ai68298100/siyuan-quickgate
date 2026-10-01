@@ -2,6 +2,20 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.9 · 2026-10-02（真内核实证：config.discover 修复 + spike 内核侧完成）
+
+### 环境解锁
+- 本机思源内核实证可达（**3.8.5 @ 127.0.0.1:6806 默认端口**；早前"1568 非默认端口"记录作废）；快门 v0.5.9 已部署进工作空间并 setPetalEnabled 启用（桥默认关）
+
+### Fixed
+- **bug#6：日记笔记本自动发现恒失败**——3.8.5 真机实证字段为 `conf.dailyNoteSavePath`（驼峰），旧代码读全小写 `dailynoteSavePath`；且**所有笔记本都带相同默认模板**，"非空即日记"启发式失效。两级消歧：恰一候选直接命中；多候选时 renderSprig 渲染当日 hpath + listDocsByPath 验证今日日记文档真实存在，恰一命中才判定（前端/kernel 两侧实现同步，测试覆盖）
+
+### Verified（spike 内核侧，见 docs/WALKTHROUGH.md）
+- ⑥ loadPetals 形状（name/version/enabled 与 registry.list 合并逻辑吻合 ✓；响应内嵌 js 源码体积大）
+- ⑨ storage/local putFile/getFile 200 ✓（D-0006 迁移技术可行；多端隔离待第二设备）
+- ⑩⓪ **无 Token → 401 ✓**（私有路由鉴权在基础设施层，CSRF 基线成立）；内核不热加载新 petal 的 kernel.js——路由功能面待内核重启复测（`lv-cli exec` 就绪）
+- 工作空间实装与生态清单校准一致（雷切 0.44.1/打卡 18.16.0/人脉 0.4.1）
+
 ## v0.5.8 · 2026-10-02（命令注册表探测修复——langKey 身份）
 
 ### Fixed

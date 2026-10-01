@@ -99,11 +99,11 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
         expect((r4.data as { events: unknown[] }).events.length).toBe(1);
     });
 
-    it("config.discover：dailynoteSavePath 命中首笔记本；closed 跳过；全未命中给提示", async () => {
+    it("config.discover：dailyNoteSavePath 唯一候选命中；closed 跳过；全未命中给提示", async () => {
         const { deps } = makeDeps({
             kpostScript: new Map([
                 ["/api/notebook/lsNotebooks", { notebooks: [{ id: "n1", name: "日记", closed: false }, { id: "n2", name: "归档", closed: true }] }],
-                ["/api/notebook/getNotebookConf", { conf: { dailynoteSavePath: "/diary" } }],
+                ["/api/notebook/getNotebookConf", { conf: { dailyNoteSavePath: "/diary/{{now | date \"2006-01-02\"}}" } }],
             ]),
         });
         const r = await createKernelOpHandler(deps)("config.discover", {});
@@ -115,6 +115,36 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
         const r2 = await createKernelOpHandler(deps2)("config.discover", {});
         expect((r2.data as { diaryNotebookId: string | null }).diaryNotebookId).toBeNull();
         expect((r2.data as { notes: string[] }).notes.join()).toContain("未发现");
+    });
+
+    it("config.discover 歧义消解（spike⑧ 实证：默认模板多笔记本同值）——按今日日记文档存在性定位", async () => {
+        const { deps } = makeDeps({
+            kpostScript: new Map([
+                ["/api/notebook/lsNotebooks", { notebooks: [{ id: "n1", name: "A", closed: false }, { id: "n2", name: "B", closed: false }] }],
+                ["/api/notebook/getNotebookConf", { conf: { dailyNoteSavePath: "/daily note/{{now | date \"2006-01-02\"}}" } }],
+                ["/api/template/renderSprig", "/daily note/2026-10-02"],
+                ["/api/filetree/listDocsByPath", { files: [{ name: "2026-10-02" }] }],
+            ]),
+        });
+        // getNotebookConf 是同一脚本端点，两笔记本同配置——消歧依赖 listDocsByPath；这里 n1/n2 都"存在"
+        // → 无法唯一判定。用可区分脚本重跑：为 n2 定制（kpostScript 按 payload 区分做不到，改用注入顺序函数）。
+        const calls: Array<{ endpoint: string; payload: Record<string, unknown> }> = [];
+        const deps2: KernelDeps = {
+            kpost: async (endpoint, payload = {}) => {
+                calls.push({ endpoint, payload });
+                if (endpoint === "/api/notebook/lsNotebooks") return { notebooks: [{ id: "n1", name: "A", closed: false }, { id: "n2", name: "B", closed: false }] } as never;
+                if (endpoint === "/api/notebook/getNotebookConf") return { conf: { dailyNoteSavePath: "/daily note/{{…}}" } } as never;
+                if (endpoint === "/api/template/renderSprig") return "/daily note/2026-10-02" as never;
+                if (endpoint === "/api/filetree/listDocsByPath") return { files: [{ name: payload.notebook === "n2" ? "2026-10-02" : "别的文档" }] } as never;
+                throw new Error(`unexpected ${endpoint}`);
+            },
+            getFileText: async () => null,
+            manifest: deps.manifest,
+            pluginName: "siyuan-quickgate",
+        };
+        const r2 = await createKernelOpHandler(deps2)("config.discover", {});
+        expect((r2.data as { diaryNotebookId: string }).diaryNotebookId).toBe("n2");
+        expect((r2.data as { notes: string[] }).notes.join()).toContain("消歧");
     });
 
     it("template.new：参数校验 rejected；templatePath 读取 + renderSprig + createDoc 链", async () => {

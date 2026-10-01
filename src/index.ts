@@ -17,7 +17,7 @@ import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.5.8";
+const PLUGIN_VERSION = "0.5.9";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -315,7 +315,10 @@ export default class QuickGatePlugin extends Plugin {
         };
     }
 
-    /** 日记笔记本/收集箱自动发现（spike⑧ 校准前 best-effort，永不抛错） */
+    /**
+     * 日记笔记本/收集箱自动发现（spike⑧ 已实证 3.8.5：字段为 dailyNoteSavePath 驼峰；
+     * 默认模板三个笔记本同值——需二级消歧，逻辑与 kernel-ops.kernelConfigDiscover 保持一致；永不抛错）
+     */
     private async discoverConfig(): Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }> {
         const notes: string[] = [];
         let diaryNotebookId: string | null = null;
@@ -323,15 +326,15 @@ export default class QuickGatePlugin extends Plugin {
         try {
             const resp = await this.kernelApi.post<{ notebooks?: Array<{ id: string; name: string; closed: boolean }> } | Array<{ id: string; name: string; closed: boolean }>>("/api/notebook/lsNotebooks", {});
             const notebooks = Array.isArray(resp) ? resp : resp?.notebooks ?? [];
+            type Cand = { id: string; name: string; savePath: string };
+            const candidates: Cand[] = [];
             for (const nb of notebooks) {
                 if (nb.closed) continue;
                 try {
                     const conf = await this.kernelApi.post<{ conf?: Record<string, unknown> }>("/api/notebook/getNotebookConf", { notebook: nb.id });
-                    const savePath = (conf?.conf?.dailynoteSavePath as string) ?? "";
-                    if (!diaryNotebookId && savePath) {
-                        diaryNotebookId = nb.id;
-                        notes.push(`日记笔记本：${nb.name}（dailynoteSavePath=${savePath}）`);
-                    }
+                    const c = conf?.conf ?? {};
+                    const savePath = (c.dailyNoteSavePath as string) ?? (c.dailynoteSavePath as string) ?? "";
+                    if (savePath) candidates.push({ id: nb.id, name: nb.name, savePath });
                 } catch { /* 单笔记本 conf 失败不影响整体 */ }
                 if (!inboxDocId && /收集箱|inbox/i.test(nb.name)) {
                     try {
@@ -339,6 +342,29 @@ export default class QuickGatePlugin extends Plugin {
                         inboxDocId = docs?.files?.[0]?.id ?? null;
                         if (inboxDocId) notes.push(`收集箱：${nb.name} 根文档`);
                     } catch { /* 忽略 */ }
+                }
+            }
+            if (candidates.length === 1) {
+                diaryNotebookId = candidates[0].id;
+                notes.push(`日记笔记本：${candidates[0].name}（dailyNoteSavePath=${candidates[0].savePath}）`);
+            } else if (candidates.length > 1) {
+                notes.push(`多个笔记本配置了日记路径（${candidates.map((c) => c.name).join("、")}），尝试按"今日日记文档存在性"消歧…`);
+                const withDiary: Cand[] = [];
+                for (const c of candidates) {
+                    try {
+                        const hpath = await this.kernelApi.post<string>("/api/template/renderSprig", { template: c.savePath });
+                        const parent = hpath.replace(/\/[^/]+$/, "") || "/";
+                        const leaf = hpath.slice(parent.length + 1);
+                        const docs = await this.kernelApi.post<{ files?: Array<{ name: string }> }>("/api/filetree/listDocsByPath", { notebook: c.id, path: parent });
+                        const exists = (docs?.files ?? []).some((f) => f.name === leaf);
+                        if (exists) withDiary.push(c);
+                    } catch { /* 单候选消歧失败忽略 */ }
+                }
+                if (withDiary.length === 1) {
+                    diaryNotebookId = withDiary[0].id;
+                    notes.push(`日记笔记本（按今日日记文档消歧）：${withDiary[0].name}`);
+                } else {
+                    notes.push(withDiary.length === 0 ? "各候选笔记本均无今日日记文档，无法唯一判定" : `多个笔记本均有今日日记（${withDiary.map((c) => c.name).join("、")}），无法唯一判定`);
                 }
             }
         } catch (e) {

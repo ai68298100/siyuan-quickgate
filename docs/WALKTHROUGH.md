@@ -1,8 +1,9 @@
 # WALKTHROUGH — M0 spike 实证记录
 
-> 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ❌ 证伪（附替代方案）
+> 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
-> 环境：本机内核 `http://127.0.0.1:1568`（非默认端口），Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`）。下述 `$TOKEN` 即该值；快门需先在思源集市/本地安装并开启「外部命令桥」。
+> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 v0.5.9 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥默认关）。下文 `$TOKEN` 即该值。
+> 内核侧 spike（⑥⑧⑨⑩⓪）已由自动化探针执行（2026-10-02）；前端侧（①②④⑤⑦⑪）需思源窗口内 DevTools。
 
 ## ① 命令注册表形状 ⬜
 - **静态已钉（v0.5.8）**：命令身份=`ICommand.langKey`（官方 app/src/types/index.d.ts；不存在 command/id——此前误读致列表为空）；文本=langText→`i18n[langKey]`；回调五形态（callback/globalCallback/execute 可外部执行，editor/dock/fileTree 标 focusOnly）
@@ -13,7 +14,13 @@
   ```
 - 校准点：langKey 形态确认；`p.displayName`/`p.i18n` 是否如预期挂在实例上（挂不上则标题回退 id）；hotkeys[] 是否常见
 - 影响：src/services/registry.ts 探测链与 commands.list/search 输出形状
-- 结论：（待填）
+- 结论：（待填——需前端 DevTools）
+
+## ⑥ petal/loadPetals 形状 ✅（2026-10-02，内核 3.8.5 真机自动探测）
+- 实证：`POST /api/petal/loadPetals {frontend:"desktop"}` → `data:[{name, displayName, version, enabled, incompatible, disabledInPublish, userDisabledInPublish, disallowInstall, js(完整源码内嵌)…}]`
+- registry.list 合并所需字段（name/version/enabled）全部吻合 ✓；注意响应内嵌 js 源码体积大，消费方应尽早截断
+- 本工作空间实装名单与生态清单校准一致：雷切 0.44.1 / 打卡 18.16.0 / 人脉 0.4.1（快门 v0.5.9 已部署启用）
+- 结论：registry.list 与设置页生态清单对照无需再改
 
 ## ② confirm API ⬜
 - 计划：控制台分别试 `confirm("标题","正文",()=>console.log("ok"))`（思源全局）与 `window.siyuan.ws.app.plugins[0]...`；观察返回值是 Promise 还是仅回调
@@ -55,38 +62,23 @@
 - 影响：src/index.ts readEditorContext
 - 结论：（待填）
 
-## ⑧ 日记笔记本自动发现字段 ⬜
-- 计划：对已知日记笔记本执行
-  `curl -s http://127.0.0.1:1568/api/notebook/getNotebookConf -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"notebook\":\"<笔记本ID>\"}"`
-- 校准点：`conf.dailynoteSavePath` 字段是否存在、值形如 `/2026/` 还是 `2026`；config.discover 判定逻辑按实调整
-- 结论：（待填）
+## ⑧ 日记笔记本自动发现字段 ✅（2026-10-02，3.8.5 真机；**发现并修复 bug#6**）
+- 实证：`getNotebookConf` → `conf.**dailyNoteSavePath**`（驼峰大写 N；旧代码读 `dailynoteSavePath` 全小写 → 自动发现恒失败，v0.5.9 修复）
+- **歧义发现**：3.8.5 所有笔记本都带相同默认模板 `/daily note/{{now | date "2006/01"}}/…`——"非空即日记"启发式失效
+- 校准：discoverConfig/kernelConfigDiscover 改两级消歧——恰一候选直接命中；多候选时 renderSprig 渲染当日 hpath + listDocsByPath 查今日日记文档真实存在，恰一命中才判定，否则 null+说明（本工作空间三笔记本同值且均无今日日记 → 诚实回退手填 ✓）
+- 结论：已修复并测试覆盖；真机消歧路径随内核侧验证
 
-## ⑨ storage/local 同步边界与文件 API 可达性 ⬜（D-0006 迁移决策）
-- 计划：控制台/内核路由各写读一次：
-  ```bash
-  curl -s http://127.0.0.1:1568/api/file/putFile -H "Authorization: Token $TOKEN" -F path=/storage/local/siyuan-quickgate/probe.txt -F file=@- <<< "probe"
-  curl -s http://127.0.0.1:1568/api/file/getFile  -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"path\":\"/storage/local/siyuan-quickgate/probe.txt\"}"
-  ```
-  再在第二台设备/同步对端确认 `/storage/local/` **不**随同步复制
-- 验收：读写可达 + 多端隔离 → 桥目录迁移立项（消解多设备命令串扰 + 同步流量）
-- 结论：（待填）→ 决定是否执行 D-0006 迁移
+## ⑨ storage/local 同步边界与文件 API 可达性 ◐（2026-10-02，单机部分通过）
+- 实证（3.8.5 真机）：`/storage/local/siyuan-quickgate/probe.txt` putFile 200 + getFile 200 回读一致 ✓——**D-0006 迁移技术可行**
+- ⬜ 剩余：第二设备/同步对端确认 `/storage/local/` 不随同步复制（单机无法验证）
+- 结论：单机可达性通过；多端隔离待补验后即可执行 D-0006 迁移
 
-## ⑩ 内核同步路由校准 ⬜（v0.5.0 实验性路由）
-- 计划：设置页确认插件启用后（无需开桥），直接打私有路由：
-  ```bash
-  # 0) 负向鉴权（安全基线）：不带 Token 应被 401/403 拒绝——localhost API 的 CSRF 面核实，
-  #    浏览器跨源页面无法伪造 Authorization 头，此层是唯一防线
-  curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:1568/plugin/private/siyuan-quickgate/exec -H "Content-Type: application/json" -d "{\"op\":\"bridge.ping\"}"
-  # 1) ping（应答 channel=kernel-sync）
-  curl -s http://127.0.0.1:1568/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"op\":\"bridge.ping\"}"
-  # 2) 白名单目录（v0.5.5 起支持）
-  curl -s http://127.0.0.1:1568/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"op\":\"events.list\"}"
-  # 3) 前端专属 op 的结构化降级
-  curl -s http://127.0.0.1:1568/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"op\":\"commands.run\",\"args\":{\"plugin\":\"x\",\"command\":\"y\"}}"
-  ```
-- 校准点：⓪**负向鉴权**（无 Token 请求必须 401/403；若匿名可调=严重安全问题，立即停用路由）①路由可达性（内核是否放行插件私有路由）②请求体解析（body.data.json() 还是 text()）③内核自呼 loadPetals 行为（registry.list 是否报"unexpected kpost"）④响应包形状与 kernel.d.ts 是否一致
-- 验收：①②③ 全部返回预期 JSON → 内核通道可转正为「内核可处理 op 的默认快路径」（Quicker SY·路由 探测 200 直呼）
-- 结论：（待填）
+## ⑩ 内核同步路由校准 ◐（2026-10-02，安全基线通过；handler 待内核重启）
+- 实证（v0.5.9 已部署进工作空间 `data/plugins/siyuan-quickgate/` 并 setPetalEnabled 启用）：
+  - ⓪ **无 Token → HTTP 401** ✓（Token 头是唯一防线，CSRF 基线成立；鉴权在私有路由基础设施层，先于插件 handler）
+  - 私有路由基础设施可达：`/plugin/private/siyuan-quickgate/exec` 返回 `[plugin:siyuan-quickgate] not found`——**内核不热加载新启用 petal 的 kernel.js**（需内核重启）
+- ⬜ 剩余：内核重启后复测（ping 应答 channel=kernel-sync / events.list / 前端 op 降级 / registry.list 内核自呼 loadPetals）——复测命令=`node tools/lv-cli.mjs exec --op bridge.ping`
+- 结论：**安全基线 ✓（可安心启用）**；功能面待内核重启，路由基础设施实证可达
 
 ## ⑪ event-deleted 物化验证 ⬜（v0.5.4 新增订阅）
 - 计划：装打卡 ≥18.16 → 打卡里删除一条打卡记录 → 检查

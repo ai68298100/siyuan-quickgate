@@ -2,6 +2,13 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.9（真内核实证 + config.discover 修复）
+
+- 内核 3.8.5 @6806 实证可达；快门部署进工作空间并启用（桥默认关）
+- Fixed bug#6：dailyNoteSavePath 驼峰 + 默认模板歧义两级消歧（前端/kernel 同步，测试覆盖）
+- spike 内核侧完成：⑥⑧⑨⑩⓪ 实证回填 WALKTHROUGH（安全基线 401 ✓）
+- 单测 79 全绿；check/build 全绿
+
 ## 2026-10-02 · v0.5.8（命令注册表探测修复）
 
 - Fixed：ICommand 身份=langKey（旧读 command/id → 全部命令被跳过、列表为空）；多回调形态支持（callback/execute/globalCallback 可执行，editor/dock/fileTree 标 focusOnly 诚实拒绝）；标题 i18n 代取；hotkeys[] 兼容
