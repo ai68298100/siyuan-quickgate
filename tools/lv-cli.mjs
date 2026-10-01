@@ -2,13 +2,13 @@
 /**
  * 小驴快门桥客户端（node CLI，零依赖）
  * 用法：
- *   SIYUAN_URL=http://127.0.0.1:1568 SIYUAN_TOKEN=xxx node tools/lv-cli.mjs ping
+ *   SIYUAN_URL=http://127.0.0.1:6806 SIYUAN_TOKEN=xxx node tools/lv-cli.mjs ping
  *   node tools/lv-cli.mjs run --plugin siyuan-checkin --command "打开打卡" --wait 8000
  *   node tools/lv-cli.mjs send --op checkin.record --args '{"itemId":"...","value":1}' [--plugin siyuan-quickgate]
  *   node tools/lv-cli.mjs receipt --id <命令id> [--plugin siyuan-quickgate]
  * 说明：无快门时也可对打卡/人脉自己的桥目录发命令（--plugin 指定目标插件）。
  */
-const url = (process.env.SIYUAN_URL || "http://127.0.0.1:1568").replace(/\/$/, "");
+const url = (process.env.SIYUAN_URL || "http://127.0.0.1:6806").replace(/\/$/, "");
 const token = process.env.SIYUAN_TOKEN || "";
 const PLUGIN = "siyuan-quickgate";
 
@@ -128,6 +128,23 @@ async function main() {
             }
             break;
         }
+        case "fast": {
+            // v1.5 广播快路径：postMessage 推信封到 qg-cmd 频道，插件 SSE 订阅毫秒级执行；
+            // 回执仍写 results.ndjson——收到回执即可算出端到端延迟（对比 send 的 NDJSON 慢路径）
+            const op = arg("--op") || "bridge.ping";
+            const args = JSON.parse(arg("--args", "{}"));
+            const channel = arg("--channel", "qg-cmd");
+            const id = genId();
+            const envelope = JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString() });
+            const t0 = Date.now();
+            await kernelPost("/api/broadcast/postMessage", { channel, message: envelope });
+            const postMs = Date.now() - t0;
+            console.log(JSON.stringify({ id, via: "broadcast", channel, postMs }, null, 2));
+            const r = await receipt(plugin, id, wait);
+            if (r.receivedAt || r.finishedAt) r.e2eMs = Date.now() - t0;
+            console.log(JSON.stringify(r, null, 2));
+            break;
+        }
         case "exec": {
             // 内核同步路由（v0.5.0 实验性）：同步直呼，不经桥文件
             const op = arg("--op");
@@ -141,9 +158,10 @@ async function main() {
             break;
         }
         default:
-            console.log("用法: lv-cli.mjs <ping|send|receipt|run|events|exec> [--plugin <目标插件>] [--op <op>] [--args <json>] [--id <id>] [--command <cmd>] [--wait <ms>]");
+            console.log("用法: lv-cli.mjs <ping|send|receipt|run|events|exec|fast> [--plugin <目标插件>] [--op <op>] [--args <json>] [--id <id>] [--command <cmd>] [--wait <ms>]");
             console.log("  events [pull|list] [--names a,b] [--since <iso>] [--limit n]   事件白名单/拉取（events.pull 服务端过滤）");
             console.log("  exec --op bridge.ping [--args {}]                              内核同步路由直呼（spike⑩ 校准用）");
+            console.log("  fast [--op bridge.ping] [--channel qg-cmd]                     v1.5 广播快路径（postMessage 推信封，毫秒级；回执算 e2eMs）");
             process.exit(1);
     }
 }

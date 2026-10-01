@@ -1,6 +1,6 @@
 # 小驴快门桥客户端（PowerShell，无第三方依赖）
 # 用法：
-#   $env:SIYUAN_URL = "http://127.0.0.1:1568"; $env:SIYUAN_TOKEN = "<token>"
+#   $env:SIYUAN_URL = "http://127.0.0.1:6806"; $env:SIYUAN_TOKEN = "<token>"
 #   .\Send-LvCommand.ps1 -Op bridge.ping
 #   .\Send-LvCommand.ps1 -Op checkin.record -ArgsJson '{"itemId":"...","value":1}' -WaitMs 8000
 #   .\Send-LvCommand.ps1 -Op commands.run -ArgsJson '{"plugin":"siyuan-checkin","command":"<命令>"}' -WaitMs 35000
@@ -11,7 +11,7 @@ param(
     [string]$Plugin = "siyuan-quickgate",
     [int]$WaitMs = 8000,
     [switch]$Exec,
-    [string]$BaseUrl = $(if ($env:SIYUAN_URL) { $env:SIYUAN_URL } else { "http://127.0.0.1:1568" }),
+    [string]$BaseUrl = $(if ($env:SIYUAN_URL) { $env:SIYUAN_URL } else { "http://127.0.0.1:6806" }),
     [string]$Token = $(if ($env:SIYUAN_TOKEN) { $env:SIYUAN_TOKEN } else { throw "请设置 SIYUAN_TOKEN 环境变量" })
 )
 
