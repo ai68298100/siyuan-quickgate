@@ -2,6 +2,13 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.0 · 2026-10-02（v2 内核同步通道 · 实验性）
+
+### Added
+- 内核插件私有路由 `POST /plugin/private/siyuan-quickgate/exec`（思源自带 Token+管理员鉴权）：**同步**处理无需前端的 op 子集——`bridge.ping / registry.list / diagnostics.report / events.list·pull / config.discover / template.new`；前端专属 op 回结构化 `unsupported`（指引 NDJSON 通道）
+- 收益：外部客户端对这些 op 从「写文件+轮询」（~750ms）变为**单次同步 HTTP**（~100ms 级），且不依赖前端窗口在线
+- 边界：实验性——spike⑤⑥⑧ 真机校准前不建议生产依赖；NDJSON 通道仍是默认主路径；前端中继（让内核路由也能执行 commands.*/checkin.*）评估中
+
 ## v0.4.1 · 2026-10-02（events 数据源桥接）
 
 ### Added

@@ -3,6 +3,15 @@
 > 人读版。机器可读：[contracts/quickgate-api-v1.json](./contracts/quickgate-api-v1.json)。
 > 传输与信封规范见项目设计文档「02-小驴桥协议 v1.1」，此处只列 op 契约。
 
+## 通道
+
+| 通道 | 延迟 | 覆盖 | 状态 |
+|---|---|---|---|
+| NDJSON（默认） | ~750ms @500ms 轮询 | 全部 op | ✅ 稳定 |
+| **内核同步路由**（v0.5.0 实验性） | ~100ms | 仅内核可处理子集：`bridge.ping / registry.list / diagnostics.report / events.list·pull / config.discover / template.new` | ⚠️ 实验性，spike 校准前不建议生产依赖 |
+
+内核通道用法：`POST {SY_URL}/plugin/private/siyuan-quickgate/exec`，头 `Authorization: Token <思源Token>`，体 `{"op":"…","args":{…}}`，响应 `data.data` 为与 NDJSON 同形状的回执。前端专属 op 回 `unsupported`。
+
 ## 通用
 
 - 传输：`data/storage/petal/siyuan-quickgate/bridge/{commands,results}.ndjson`（NDJSON，UTF-8 无 BOM）
