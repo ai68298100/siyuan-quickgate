@@ -141,7 +141,7 @@ async function main() {
             const postMs = Date.now() - t0;
             console.log(JSON.stringify({ id, via: "broadcast", channel, postMs }, null, 2));
             const r = await receipt(plugin, id, wait);
-            if (r.receivedAt || r.finishedAt) r.e2eMs = Date.now() - t0;
+            if (r.finishedAt) r.e2eMs = Date.now() - t0; // 回执字段=finishedAt（bridge-service 写入）
             console.log(JSON.stringify(r, null, 2));
             break;
         }
