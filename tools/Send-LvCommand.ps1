@@ -1,16 +1,19 @@
-# 小驴快门桥客户端（PowerShell，无第三方依赖）
+﻿# 小驴快门桥客户端（PowerShell，无第三方依赖）
 # 用法：
 #   $env:SIYUAN_URL = "http://127.0.0.1:6806"; $env:SIYUAN_TOKEN = "<token>"
 #   .\Send-LvCommand.ps1 -Op bridge.ping
 #   .\Send-LvCommand.ps1 -Op checkin.record -ArgsJson '{"itemId":"...","value":1}' -WaitMs 8000
 #   .\Send-LvCommand.ps1 -Op commands.run -ArgsJson '{"plugin":"siyuan-checkin","command":"<命令>"}' -WaitMs 35000
 #   .\Send-LvCommand.ps1 -Op bridge.ping -Exec        # 内核同步路由直呼（不经桥文件，spike⑩ 校准用）
+#   .\Send-LvCommand.ps1 -Op bridge.ping -Fast        # v1.5 广播快路径（postMessage 推 qg-cmd 频道，毫秒级；回执仍读 results.ndjson）
 param(
     [Parameter(Mandatory = $true)][string]$Op,
     [string]$ArgsJson = "{}",
     [string]$Plugin = "siyuan-quickgate",
     [int]$WaitMs = 8000,
     [switch]$Exec,
+    [switch]$Fast,
+    [string]$Channel = "qg-cmd",
     [string]$BaseUrl = $(if ($env:SIYUAN_URL) { $env:SIYUAN_URL } else { "http://127.0.0.1:6806" }),
     [string]$Token = $(if ($env:SIYUAN_TOKEN) { $env:SIYUAN_TOKEN } else { throw "请设置 SIYUAN_TOKEN 环境变量" })
 )
@@ -62,6 +65,22 @@ if ($Exec) {
     # 内核同步路由：POST /plugin/private/<plugin>/exec，同步返回回执（不经桥文件）
     $resp = Invoke-RestMethod -Method Post -Uri "$BaseUrl/plugin/private/$Plugin/exec" -Headers @{ Authorization = "Token $Token" } -ContentType "application/json" -Body (@{ op = $Op; args = ($ArgsJson | ConvertFrom-Json) } | ConvertTo-Json -Depth 10 -Compress)
     $resp | ConvertTo-Json -Depth 10 -Compress
+    exit 0
+}
+
+if ($Fast) {
+    # v1.5 广播快路径：postMessage 推信封到频道（默认 qg-cmd），插件 SSE 订阅毫秒级执行；
+    # 回执仍写 results.ndjson——复用 Wait-LvReceipt 并算端到端耗时
+    $id = "ps-{0}-{1}" -f (Get-Date -Format "yyyyMMdd-HHmmss"), ("{0:x4}" -f (Get-Random -Maximum 65535))
+    $envelope = @{ v = 1; id = $id; op = $Op; args = ($ArgsJson | ConvertFrom-Json); createdAt = (Get-Date).ToString("o") } | ConvertTo-Json -Depth 10 -Compress
+    $t0 = [DateTime]::UtcNow
+    Invoke-KernelPost "/api/broadcast/postMessage" @{ channel = $Channel; message = $envelope } | Out-Null
+    [pscustomobject]@{ id = $id; via = "broadcast"; channel = $Channel; postMs = [int]([DateTime]::UtcNow - $t0).TotalMilliseconds } | ConvertTo-Json -Compress
+    $receipt = Wait-LvReceipt -TargetPlugin $Plugin -Id $id -MaxMs $WaitMs
+    if ($receipt.status -ne "timeout") {
+        $receipt | Add-Member -NotePropertyName e2eMs -NotePropertyValue ([int]([DateTime]::UtcNow - $t0).TotalMilliseconds)
+    }
+    $receipt | ConvertTo-Json -Depth 6 -Compress
     exit 0
 }
 
