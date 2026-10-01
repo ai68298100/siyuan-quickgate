@@ -33,6 +33,11 @@
     { "op": "daily.status", "args": {}, "effect": "read" },
     { "op": "setting.open", "args": {}, "effect": "ui" },
     { "op": "editor.context", "args": {}, "effect": "read" },
+    { "op": "registry.list", "args": {}, "effect": "read", "since": "0.2.0", "note": "生态七插件清单：manifest×loadPetals 合并" },
+    { "op": "diagnostics.report", "args": {}, "effect": "read", "since": "0.2.0", "note": "脱敏诊断快照" },
+    { "op": "config.discover", "args": {}, "effect": "read", "since": "0.2.0", "note": "日记/收集箱自动发现（best-effort）" },
+    { "op": "events.list", "args": {}, "effect": "none", "status": "design", "note": "M2 实现，当前 unsupported" },
+    { "op": "workflow.plan", "args": {}, "effect": "none", "status": "design", "note": "M2 实现，当前 unsupported" },
     { "op": "plugin.api", "args": { "plugin": "string", "method": "string", "args": "unknown[]?" }, "effect": "passthrough", "default": "off", "allowlist": ["siyuan-checkin", "siyuan-contacts", "siyuan-speed-switch"] }
   ]
 }

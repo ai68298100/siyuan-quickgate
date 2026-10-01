@@ -59,6 +59,8 @@ export interface BridgeServiceDeps {
     openSetting: () => void;
     /** petal/loadPetals（已装插件表） */
     loadPetals: () => Promise<Array<Record<string, unknown>>>;
+    /** 业务执行可观测上限 ms（缺省 15000；commands.run 不受此限） */
+    execTimeoutMs?: () => number;
     /** 日记笔记本/收集箱自动发现（spike⑧ 校准前 best-effort） */
     discoverConfig: () => Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }>;
     /** 公开桥获取器 */
@@ -131,7 +133,7 @@ export class BridgeService {
             const t0 = now;
             let result: BridgeResult;
             try {
-                result = await this.dispatch(cmd);
+                result = await this.dispatchWithTimeout(cmd);
                 executions += 1;
             } catch (e) {
                 result = { status: "failed", data: null, message: `执行异常：${e instanceof Error ? e.message : String(e)}` };
@@ -171,6 +173,32 @@ export class BridgeService {
             plugin: this.deps.pluginName,
             ...r,
         };
+    }
+
+    /**
+     * 业务执行可观测上限（阻断项3 补充）：15s 未返回即回执 failed 并放行轮询，
+     * 底层操作继续运行（不假设可取消）；迟到完成仅记日志，不再补发回执。
+     * commands.run 的确认窗口（30s）走确认流程自身语义，不受此上限截断。
+     */
+    lateCompletions = 0;
+
+    private dispatchWithTimeout(cmd: BridgeCommand): Promise<BridgeResult> {
+        if (cmd.op === "commands.run") return this.dispatch(cmd); // 确认窗口语义自行管理
+        const EXEC_TIMEOUT_MS = this.deps.execTimeoutMs?.() ?? 15000;
+        return new Promise<BridgeResult>((resolve) => {
+            let settled = false;
+            const timer = setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                resolve({ status: "failed", data: null, message: `执行超过 ${Math.round(EXEC_TIMEOUT_MS / 100) / 10}s 未返回，已标记失败（若稍后完成，副作用已发生，见日志）` });
+                this.dispatch(cmd)
+                    .then(() => { this.lateCompletions += 1; console.warn(`[${this.deps.pluginName}] 迟到完成：${cmd.id} ${cmd.op}`); })
+                    .catch(() => { this.lateCompletions += 1; });
+            }, EXEC_TIMEOUT_MS);
+            this.dispatch(cmd)
+                .then((r) => { if (!settled) { settled = true; clearTimeout(timer); resolve(r); } })
+                .catch((e) => { if (!settled) { settled = true; clearTimeout(timer); resolve({ status: "failed", data: null, message: `执行异常：${e instanceof Error ? e.message : String(e)}` }); } });
+        });
     }
 
     private reject(message: string): BridgeResult {
@@ -323,6 +351,21 @@ export class BridgeService {
             case "config.discover": {
                 const d = await this.deps.discoverConfig();
                 return { status: "recorded", data: d, message: d.diaryNotebookId ? "已发现日记笔记本" : "未发现日记笔记本（回退手填）" };
+            }
+
+            // ---- 模板（内核 renderSprig 渲染，支持 {{}} 语法）----
+            case "template.new": {
+                const notebook = typeof a.notebook === "string" ? a.notebook : "";
+                const hpath = typeof a.hpath === "string" ? a.hpath : "";
+                if (!notebook || !hpath) return this.reject("notebook/hpath 缺失");
+                let content = typeof a.template === "string" ? a.template : "";
+                if (!content && typeof a.templatePath === "string") {
+                    content = (await this.deps.api.getFileText(`/templates/${a.templatePath.replace(/^\/+/, "")}`)) ?? "";
+                }
+                if (!content) return this.reject("template/templatePath 均为空");
+                const rendered = await this.deps.api.post<string>("/api/template/renderSprig", { template: content });
+                const docId = await this.deps.api.post<string>("/api/filetree/createDocWithMd", { notebook, path: hpath, markdown: rendered });
+                return { status: "recorded", data: { docId }, message: "已从模板创建" };
             }
 
             // ---- 设计态契约（M2 实现，先返回结构化 unsupported）----

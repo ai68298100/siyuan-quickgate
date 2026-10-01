@@ -2,6 +2,16 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.3.0 · 2026-10-02（可靠性收尾 + 模板）
+
+### Added
+- `template.new`：renderSprig 渲染（支持 `{{}}`）→ createDocWithMd；template/templatePath 二选一
+- 业务执行可观测上限（15s，可配）：超时回 `failed` 放行轮询，底层继续运行，迟到完成仅记日志（`commands.run` 不受此限，确认窗口语义自行管理）
+- 设备名持久化到 `data/storage/local`（不随同步，多设备 device 路由可用；local 不可用回退 settings）
+- 设置页：最近回执（20 条）、插件黑名单编辑、导出诊断包（脱敏，到剪贴板）
+- 卸载钩子提示；审计落盘 5s 节流（R2 写放大修正）
+- events/workflow 契约草案：docs/contracts/events-workflow-draft.md
+
 ## v0.2.0 · 2026-10-02（生态中枢 R1 第一批）
 
 ### Added

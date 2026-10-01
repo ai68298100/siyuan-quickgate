@@ -32,6 +32,7 @@
 | `registry.list` | `{}` | `{manifestVersion, plugins:[{pluginId,displayName,maturity,manifestVersion,installedVersion,installed,protocol,capabilities,hubIntegration}], registrySource}` | 生态七插件清单（v0.2.0）；maturity ∈ stable/design/unlocated |
 | `diagnostics.report` | `{}` | `{protocol, plugin, version, bridge:{enabled,pollMs,basePath,commandsFileLines}, registry:{source,hostPlugins}, confirmExec, rawApiEnabled}` | 脱敏诊断快照（不含 Token/正文/个人路径） |
 | `config.discover` | `{}` | `{diaryNotebookId, inboxDocId, notes[]}` | 自动发现（spike⑧ 校准前 best-effort；失败回 null + notes 说明） |
+| `template.new` | `{notebook, hpath, template?\|templatePath?}` | `{docId}` | 内核 renderSprig 渲染（支持 `{{}}` 语法）后 createDocWithMd；templatePath 相对 `/templates/`（v0.3.0） |
 | `events.*` / `workflow.*` | — | — | **设计态契约**（docs/09 R1）：M2 实现，当前回 `unsupported` |
 | `plugin.api` | `{plugin, method, args}` | 桥返回 | 高级透传：默认关 + 允许名单 |
 

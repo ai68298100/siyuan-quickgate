@@ -15,8 +15,21 @@ import { probeCommandRegistry } from "./services/registry";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.2.0";
+const PLUGIN_VERSION = "0.3.0";
 const CONFIRM_TIMEOUT_MS = 30000;
+
+/** 诊断包组装（脱敏：无 Token/正文/个人路径） */
+function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], service: BridgeService) {
+    return {
+        protocol: 1,
+        plugin: PLUGIN_NAME,
+        version: PLUGIN_VERSION,
+        settings: { ...settings },
+        lateCompletions: service.lateCompletions,
+        auditTail: auditLog.slice(-50),
+        exportedAt: new Date().toISOString(),
+    };
+}
 
 export default class QuickGatePlugin extends Plugin {
     private isMobile: boolean;
@@ -30,6 +43,7 @@ export default class QuickGatePlugin extends Plugin {
         this.isMobile = getFrontend() === "mobile" || getFrontend() === "browser-mobile";
         await this.store.loadAll();
         this.settings = this.store.settings;
+        await this.ensureDeviceName();
 
         this.addCommand({
             langKey: "openSetting",
@@ -57,6 +71,41 @@ export default class QuickGatePlugin extends Plugin {
         // 优雅停机：单飞循环在当前 tick 结束后退出，不撕正在进行的写
         this.poller?.stop();
         this.poller = undefined;
+        this.flushAudit();
+        showMessage("小驴快门已停用；其桥目录随插件数据一并保留/清理", 3000, "info");
+    }
+
+    uninstall() {
+        // 宿主卸载钩子：提示桥目录随 petal 数据删除（TODO M2：提供导出审计入口）
+        try {
+            showMessage("小驴快门已卸载：data/storage/petal/siyuan-quickgate/（含桥与审计）将随插件数据清理", 6000, "info");
+        } catch { /* 卸载期 UI 不可用时静默 */ }
+    }
+
+    /**
+     * 设备名：优先读 data/storage/local（不随同步，多设备各自独立）；无则生成并双写
+     * local 与 settings（settings 作为 local 不可用时的回退）。spike⑨ 后如迁移桥目录，此文件跟着走。
+     */
+    private async ensureDeviceName() {
+        if (this.settings.deviceName) return;
+        const localPath = "/storage/local/siyuan-quickgate/device.json";
+        try {
+            const raw = await this.kernelApi.getFileText(localPath);
+            if (raw) {
+                const obj = JSON.parse(raw) as { deviceName?: string };
+                if (obj.deviceName) {
+                    this.settings.deviceName = obj.deviceName;
+                    await this.store.saveSettings();
+                    return;
+                }
+            }
+        } catch { /* local 不可用 → 回退 settings */ }
+        const generated = `dev-${Math.random().toString(16).slice(2, 6)}`;
+        this.settings.deviceName = generated;
+        await this.store.saveSettings();
+        try {
+            await this.kernelApi.putFileText(localPath, JSON.stringify({ deviceName: generated, createdAt: new Date().toISOString() }));
+        } catch { /* 写 local 失败不阻断 */ }
     }
 
     private isMobileGuard(): boolean {
@@ -112,7 +161,22 @@ export default class QuickGatePlugin extends Plugin {
         if (this.auditLog.length > this.settings.auditMax) {
             this.auditLog = this.auditLog.slice(-this.settings.auditMax);
         }
-        void this.saveData("audit.json", { schemaVersion: 1, entries: this.auditLog });
+        this.scheduleAuditFlush(); // R2：节流合并写，避免每条命令一次 saveData
+    }
+
+    private auditTimer?: ReturnType<typeof setTimeout>;
+
+    private scheduleAuditFlush() {
+        if (this.auditTimer) return;
+        this.auditTimer = setTimeout(() => {
+            this.auditTimer = undefined;
+            this.flushAudit();
+        }, 5000);
+    }
+
+    private flushAudit() {
+        if (this.auditTimer) { clearTimeout(this.auditTimer); this.auditTimer = undefined; }
+        void this.saveData("audit.json", { schemaVersion: 1, entries: this.auditLog }).catch(() => {});
     }
 
     /** 编辑器上下文（M0⑦ 待实证，尽力而为永不抛错） */
@@ -329,6 +393,50 @@ export default class QuickGatePlugin extends Plugin {
             });
         };
         row("审计日志", auditBtn);
+
+        const receiptBtn = document.createElement("button");
+        receiptBtn.className = "b3-button b3-button--outline";
+        receiptBtn.textContent = "最近回执（20 条）";
+        receiptBtn.onclick = async () => {
+            try {
+                const text = (await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/results.ndjson`)) ?? "";
+                const lines = text.trim() ? text.trim().split("\n").slice(-20) : [];
+                const view = lines.map((l) => {
+                    try { const r = JSON.parse(l); return `${r.finishedAt} ${r.id} ${r.op} → ${r.status} (${r.elapsedMs}ms)`; }
+                    catch { return l.slice(0, 120); }
+                }).join("\n") || "（暂无回执）";
+                new Dialog({ title: "最近回执", content: `<div class="b3-typography" style="padding:12px;white-space:pre-wrap;font-size:12px">${view.replace(/</g, "&lt;")}</div>`, width: "680px" });
+            } catch (e) {
+                showMessage(`读取回执失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+            }
+        };
+        row("最近回执", receiptBtn);
+
+        const blacklistInput = document.createElement("textarea");
+        blacklistInput.className = "b3-text-field fn__block";
+        blacklistInput.rows = 2;
+        blacklistInput.value = this.settings.blacklist.join(", ");
+        blacklistInput.onchange = async () => {
+            this.settings.blacklist = blacklistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
+            this.store.settings = this.settings;
+            await this.store.saveSettings();
+        };
+        row("插件黑名单（逗号分隔，不暴露其命令）", blacklistInput);
+
+        const diagBtn = document.createElement("button");
+        diagBtn.className = "b3-button b3-button--outline";
+        diagBtn.textContent = "导出诊断包（到剪贴板）";
+        diagBtn.onclick = async () => {
+            try {
+                const service = new BridgeService(this.deps());
+                const mem = memDiagnostics(this.settings, this.auditLog, service);
+                await navigator.clipboard.writeText(JSON.stringify(mem, null, 2));
+                showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
+            } catch (e) {
+                showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+            }
+        };
+        row("诊断", diagBtn);
 
         const about = document.createElement("div");
         about.className = "b3-label";
