@@ -19,10 +19,13 @@
 ### 首批白名单（上游对齐后生效）
 | 事件 | 来源 | payload 要点 | 幂等键 |
 |---|---|---|---|
-| `checkin:event-recorded` | 打卡 v5（已有宿主事件） | itemId, value, occurredAt | source+externalRef |
+| `checkin:event-recorded` | 打卡 v5（**已订阅物化**，v0.5.2 通道修正：window CustomEvent） | itemId, value, occurredAt | source+externalRef |
+| `checkin:event-deleted` | 打卡 v5（**已订阅物化**，v0.5.4） | itemId, eventId | source+externalRef+`:deleted` 后缀 |
 | `lv-cards:reviewed` | 闪卡（design） | deckId, cardId, grade | sessionId+cardId |
 | `lv-exam:session-finished` | 考试（design） | paperId, score, durationMs | sessionId |
 | `lv-shiyi:captured` | 拾遗（unlocated） | docId, source | docId+capturedAt |
+
+**删除语义（append-only 载体）**：events.ndjson 只追加不修改；删除以独立标记行表达（`name=checkin:event-deleted`，幂等键=原事件键+`:deleted`）。消费方按幂等键配对：同键 `recorded` 行在前、`:deleted` 行在后=该记录已删除；无 recorded 行的 `:deleted`（如窗口外记录被删）按忽略处理。载体重压缩/多源合并时**必须保留删除标记**直至对应 recorded 行一并滚出窗口。`analytics-updated` 不进白名单物化（D-0011：高频会挤占滚动窗口）。
 
 ## workflow.*（受控跨插件编排）
 
