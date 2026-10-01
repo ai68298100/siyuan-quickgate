@@ -2,6 +2,12 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.4 · 2026-10-02（event-deleted 订阅物化）
+
+### Added
+- 订阅 `checkin:event-deleted`：`event` 单条与 `deletedEvents` 批量均物化为删除标记行，幂等键加 `:deleted` 后缀与原 recorded 行共存（append-only 载体语义）；批量删除一次读改写合并落盘
+- 决策 D-0011：`analytics-updated` **不订阅**——高频触发会挤占 200 行滚动窗口；数据变化信号由消费方轮询承担
+
 ## v0.5.3 · 2026-10-02（设置页生态清单版本对照）
 
 ### Added

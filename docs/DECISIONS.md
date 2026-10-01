@@ -42,3 +42,7 @@ workflow.plan 生命周期 5 分钟 + 一次性语义。持久化的收益（重
 ## D-0010 · 内核路由不做前端中继（R4 评估结案，2026-10-02）
 
 已核实官方 API（kernel.d.ts + 模板文档）：内核→前端只有**单向 broadcast**（`api.rpc.broadcast`），无同步的前端调用。前端中继技术可行（handler 挂起 resolver → broadcast 请求 → 前端 RPC 客户端执行 → 回调内核 RPC 解析），但：①前端离线需超时兜底 ②多前端竞态 ③双跳延迟与故障面。而 NDJSON 通道已覆盖前端 op（~750ms）。**结论：暂不实现中继**；内核路由保持"内核可处理子集"。重评触发：真实使用中同步性成为实测痛点（如工作流多步总耗时显著劣化体验）。
+
+## D-0011 · analytics-updated 不订阅物化（R7，2026-10-02）
+
+打卡 8 个契约事件中，快门订阅 event-recorded 与 event-deleted；**analytics-updated 不订阅**：它在每次记录/统计重算后高频触发，而 events.ndjson 是 200 行滚动窗口——高频心跳会把有业务价值的 recorded/deleted 行挤掉。数据变化信号由消费方轮询（events.pull / summary.read）承担。重评触发：出现明确的实时统计消费方（如雷切 home-widget 需要推送刷新）时，考虑独立载体文件或消费方侧去重后再接。item-* / suggestion-* 事件保持 observed（暂无消费场景，接入前先立 use case）。

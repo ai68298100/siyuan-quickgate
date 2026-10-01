@@ -46,6 +46,39 @@ export function normalizeCheckinEvent(detail: unknown, emittedAt: string): HubEv
     };
 }
 
+/**
+ * event-deleted → 删除标记 HubEvent 列表（event 单条 + deletedEvents 批量，均可空）。
+ * 幂等键加 `:deleted` 后缀：append-only 载体里与原 recorded 行共存，消费方按键配对应用删除。
+ */
+export function normalizeCheckinEventDeleted(detail: unknown, emittedAt: string): HubEvent[] {
+    if (!detail || typeof detail !== "object") return [];
+    const w = detail as { type?: unknown; event?: unknown; deletedEvents?: unknown };
+    if (w.type !== "event-deleted") return [];
+    const raws: unknown[] = [];
+    if (w.event && typeof w.event === "object") raws.push(w.event);
+    if (Array.isArray(w.deletedEvents)) {
+        raws.push(...w.deletedEvents.filter((x) => x !== null && typeof x === "object"));
+    }
+    const out: HubEvent[] = [];
+    for (const raw of raws) {
+        const d = raw as CheckinEventDetail & { id?: unknown };
+        if (typeof d.itemId !== "string" || !d.itemId) continue;
+        if (typeof d.occurredAt !== "string") continue;
+        const ref = typeof d.externalRef === "string" ? d.externalRef : `${d.itemId}:${d.occurredAt}`;
+        out.push({
+            name: "checkin:event-deleted",
+            source: "siyuan-checkin",
+            emittedAt,
+            payload: {
+                itemId: d.itemId,
+                eventId: typeof d.id === "string" ? d.id : null,
+            },
+            idempotencyKey: `${d.source ?? "manual"}:${ref}:deleted`,
+        });
+    }
+    return out;
+}
+
 /** 追加事件行（滚动上限与 results 一致） */
 export function appendEventLine(existingText: string, event: HubEvent, cap = 200): string {
     const lines = existingText.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n").filter((l) => l.trim() !== "");

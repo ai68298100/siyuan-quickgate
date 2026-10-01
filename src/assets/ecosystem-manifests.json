@@ -21,13 +21,13 @@
       "capabilities": ["items.read", "items.query", "events.read", "events.range.read", "events.record", "events.record.batch", "summary.read", "analytics.read", "metrics.read", "export.json", "export.csv", "calendar.read"],
       "events": [
         { "name": "checkin:event-recorded", "status": "available", "idempotency": "source+externalRef", "payload": { "type": "event-recorded", "event": { "itemId": "string", "value": "number", "occurredAt": "string" } }, "note": "快门已订阅物化（window CustomEvent，v0.5.2 通道修正）" },
-        { "name": "checkin:event-deleted", "status": "observed", "idempotency": "eventId|deletedEvents ids", "payload": { "type": "event-deleted", "event": "CheckinEvent?", "deletedEvents": "CheckinEvent[]?" }, "note": "订阅待接（R6）" },
+        { "name": "checkin:event-deleted", "status": "available", "idempotency": "source+externalRef+:deleted 后缀", "payload": { "type": "event-deleted", "event": "CheckinEvent?", "deletedEvents": "CheckinEvent[]?" }, "note": "已订阅物化（v0.5.4）；删除标记与 recorded 行共存于 append-only 载体" },
         { "name": "checkin:item-created", "status": "observed", "idempotency": "itemId+updatedAt", "payload": { "type": "item-created", "item": "CheckinItem" } },
         { "name": "checkin:item-updated", "status": "observed", "idempotency": "itemId+updatedAt", "payload": { "type": "item-updated", "item": "CheckinItem" } },
         { "name": "checkin:item-deleted", "status": "observed", "idempotency": "itemId+deletedAt", "payload": { "type": "item-deleted", "item": "CheckinItem?" } },
         { "name": "checkin:item-archived", "status": "observed", "idempotency": "itemId+archivePeriod", "payload": { "type": "item-archived", "item": "CheckinItem" }, "note": "仅自动归档路径广播" },
         { "name": "checkin:suggestion-workflow-updated", "status": "observed", "idempotency": "suggestionId+status", "payload": { "type": "suggestion-workflow-updated", "suggestionId": "string", "suggestionStatus": "pending|confirmed|cancelled|failed" } },
-        { "name": "checkin:analytics-updated", "status": "observed", "idempotency": "analyticsAsOf", "payload": { "type": "analytics-updated", "analyticsAsOf": "string?" }, "note": "订阅待接（R6）" }
+        { "name": "checkin:analytics-updated", "status": "observed", "idempotency": "analyticsAsOf", "payload": { "type": "analytics-updated", "analyticsAsOf": "string?" }, "note": "不订阅（D-0011：高频触发会挤占滚动窗口；消费方出现再按需接）" }
       ],
       "hubIntegration": "checkin.items/record/summary 透传适配器（源能力协商）"
     },

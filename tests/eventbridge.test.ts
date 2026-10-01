@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appendEventLine, normalizeCheckinEvent, unwrapCheckinDetail } from "../src/services/eventbridge";
+import { appendEventLine, normalizeCheckinEvent, normalizeCheckinEventDeleted, unwrapCheckinDetail } from "../src/services/eventbridge";
 
 describe("eventbridge（D-0009 事件物化）", () => {
     it("合法 detail → HubEvent，幂等键=source:externalRef", () => {
@@ -27,6 +27,36 @@ describe("eventbridge（D-0009 事件物化）", () => {
     it("非 event-recorded 的包裹不误解包", () => {
         const detail = { type: "event-deleted", event: { itemId: "i1", occurredAt: "t" } };
         expect(unwrapCheckinDetail(detail)).toBe(detail);
+    });
+
+    it("event-deleted：event 单条 → 一条 :deleted 标记（v0.5.4）", () => {
+        const detail = {
+            type: "event-deleted",
+            event: { id: "ev1", itemId: "i1", occurredAt: "2026-10-02T10:00:00Z", source: "api", externalRef: "ext-9" },
+        };
+        const out = normalizeCheckinEventDeleted(detail, "2026-10-02T11:00:00Z");
+        expect(out.length).toBe(1);
+        expect(out[0].name).toBe("checkin:event-deleted");
+        expect(out[0].idempotencyKey).toBe("api:ext-9:deleted");
+        expect((out[0].payload as { eventId: string }).eventId).toBe("ev1");
+    });
+
+    it("event-deleted：deletedEvents 批量 → 多条标记；无信息 → 空数组", () => {
+        const detail = {
+            type: "event-deleted",
+            deletedEvents: [
+                { itemId: "i1", occurredAt: "2026-10-02T10:00:00Z", source: "manual" },
+                { itemId: "i2", occurredAt: "2026-10-02T10:05:00Z" },
+                { itemId: "" }, // 非法：静默跳过
+                "junk", // 非对象：跳过
+            ],
+        };
+        const out = normalizeCheckinEventDeleted(detail, "t");
+        expect(out.length).toBe(2);
+        expect(out[0].idempotencyKey).toBe("manual:i1:2026-10-02T10:00:00Z:deleted");
+        expect(out[1].idempotencyKey).toBe("manual:i2:2026-10-02T10:05:00Z:deleted");
+        expect(normalizeCheckinEventDeleted({ type: "event-recorded" }, "t")).toEqual([]);
+        expect(normalizeCheckinEventDeleted(null, "t")).toEqual([]);
     });
 
     it("缺 externalRef → 从 itemId+occurredAt 派生", () => {

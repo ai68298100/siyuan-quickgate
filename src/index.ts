@@ -12,11 +12,12 @@ import { BridgeStore, DataIO } from "./services/store";
 import { BridgeService, EditorContextResult, EcosystemManifest } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
 import { probeCommandRegistry } from "./services/registry";
-import { appendEventLine, normalizeCheckinEvent } from "./services/eventbridge";
+import { appendEventLine, normalizeCheckinEvent, normalizeCheckinEventDeleted } from "./services/eventbridge";
+import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.5.3";
+const PLUGIN_VERSION = "0.5.4";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -82,10 +83,11 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     /**
-     * events 数据源桥接（R3）：订阅打卡公开宿主事件 → 物化到其桥目录 events.ndjson。
+     * events 数据源桥接（R3/R7）：订阅打卡公开宿主事件 → 物化到其桥目录 events.ndjson。
      * 订阅通道=window CustomEvent（上游 integrations.ts emitIntegrationEvent 只走
      * window.dispatchEvent；app.eventBus 仅承载思源内部事件，v18.16 源码实证——
-     * v0.4.1 曾误订 eventBus 导致永不触发，v0.5.2 修正）。总线不可用时静默降级，不影响主桥。
+     * v0.4.1 曾误订 eventBus 导致永不触发，v0.5.2 修正）。
+     * analytics-updated 不订阅（D-0011：高频触发会挤占滚动窗口）。总线不可用时静默降级。
      */
     private eventBridgeHandler?: (e: Event) => void;
 
@@ -94,9 +96,13 @@ export default class QuickGatePlugin extends Plugin {
         try {
             if (typeof window?.addEventListener !== "function") return;
             this.eventBridgeHandler = (e: Event) => {
-                void this.materializeCheckinEvent((e as CustomEvent).detail);
+                const emittedAt = new Date().toISOString();
+                const detail = (e as CustomEvent).detail;
+                const recorded = e.type === "checkin:event-recorded" ? normalizeCheckinEvent(detail, emittedAt) : null;
+                void this.materializeHubEvents(e.type === "checkin:event-deleted" ? normalizeCheckinEventDeleted(detail, emittedAt) : recorded ? [recorded] : null);
             };
             window.addEventListener("checkin:event-recorded", this.eventBridgeHandler);
+            window.addEventListener("checkin:event-deleted", this.eventBridgeHandler);
         } catch { /* window 事件不可用 → 静默降级 */ }
     }
 
@@ -104,17 +110,22 @@ export default class QuickGatePlugin extends Plugin {
         if (!this.eventBridgeHandler) return;
         try {
             window.removeEventListener("checkin:event-recorded", this.eventBridgeHandler);
+            window.removeEventListener("checkin:event-deleted", this.eventBridgeHandler);
         } catch { /* 忽略 */ }
         this.eventBridgeHandler = undefined;
     }
 
-    private async materializeCheckinEvent(detail: unknown) {
+    /** 批量物化：一次读改写追加多行；空列表不动文件 */
+    private async materializeHubEvents(events: HubEvent[] | null) {
+        if (!events || events.length === 0) return;
         try {
-            const e = normalizeCheckinEvent(detail, new Date().toISOString());
-            if (!e) return;
             const path = "/storage/petal/siyuan-checkin/bridge/events.ndjson";
             const old = (await this.kernelApi.getFileText(path)) ?? "";
-            await this.kernelApi.putFileText(path, appendEventLine(old, e));
+            let text = old;
+            for (const e of events) {
+                text = appendEventLine(text, e);
+            }
+            await this.kernelApi.putFileText(path, text);
         } catch (err) {
             console.warn(`[${PLUGIN_NAME}] 事件物化失败：`, err);
         }

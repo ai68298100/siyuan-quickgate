@@ -2,6 +2,16 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.4（event-deleted 订阅物化）
+
+- 订阅 `checkin:event-deleted`（event + deletedEvents 均物化，`:deleted` 幂等后缀）；materializeHubEvents 批量合并写
+- D-0011：analytics-updated 不订阅（高频挤占滚动窗口，消费方出现再按需接）
+- 单测 11 文件 57 用例全绿；check/build 全绿
+
+## 2026-10-02 · v0.5.3（设置页生态清单版本对照）
+
+- 设置页「生态清单版本」按钮：manifest × loadPetals 逐插件对照
+
 ## 2026-10-02 · v0.5.2（事件订阅通道修复 + 生态清单校准）
 
 - Fixed：事件桥改订 window CustomEvent（上游唯一发射通道；v0.4.1 误订 app.eventBus 永不触发）；`unwrapCheckinDetail` 兼容上游包裹形状
