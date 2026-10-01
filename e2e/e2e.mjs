@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
  * 快门 E2E 验收（对照项目设计文档 02 §8 十条 / 06 §10 六条的自动化子集）。
- * 需要思源运行且快门桥已开启；内核不可达时提示并退出码 2（不误报失败）。
+ * 需要思源运行且快门桥已开启；内核不可达或桥无响应时提示并退出码 2（不误报失败）。
+ * 桥存活预检（3s）：不通过则跳过 U1~U10（它们都经桥），只跑 U11 内核路由探针。
  *
- *   SIYUAN_URL=http://127.0.0.1:1568 SIYUAN_TOKEN=xxx node e2e/e2e.mjs
+ *   SIYUAN_URL=http://127.0.0.1:6806 SIYUAN_TOKEN=xxx node e2e/e2e.mjs
  */
-const url = (process.env.SIYUAN_URL || "http://127.0.0.1:1568").replace(/\/$/, "");
+const url = (process.env.SIYUAN_URL || "http://127.0.0.1:6806").replace(/\/$/, "");
 const token = process.env.SIYUAN_TOKEN || "";
 const PLUGIN = "siyuan-quickgate";
 const results = [];
@@ -73,6 +74,20 @@ async function main() {
     }
     console.log("== 快门 E2E（自动化子集）==\n");
 
+    // 桥存活预检（3s）：U1~U10 全部经桥，桥不活就别逐项 8s 超时慢慢死
+    const preId = genId();
+    {
+        const envelope = JSON.stringify({ v: 1, id: preId, op: "bridge.ping", args: {}, createdAt: new Date().toISOString() });
+        const path = `/storage/petal/${PLUGIN}/bridge/commands.ndjson`;
+        const old = (await kernelPost("/api/file/getFile", { path })) ?? "";
+        await putText(path, old.replace(/\n+$/, "") + "\n" + envelope);
+    }
+    const bridgeLive = (await waitReceipt(preId, 3000)).status !== "timeout";
+    if (!bridgeLive) {
+        console.log("  (桥无响应：插件前端未运行或外部命令桥未开启——U1~U10 跳过，只探 U11 内核路由；思源重启后可直接重跑本套件)\n");
+    }
+
+    if (bridgeLive) {
     // U1 正常链路：bridge.ping → recorded
     let id = await send("bridge.ping");
     let r = await waitReceipt(id);
@@ -134,6 +149,7 @@ async function main() {
     } else {
         console.log("  (U10b 跳过：events.ndjson 尚无删除标记——在打卡里删一条记录后再跑)");
     }
+    } // end bridgeLive
 
     // U11 内核同步路由探针（v0.5.0 实验性；404/网络错误都算"未启用"而非失败——spike⑩ 校准）
     try {
@@ -154,6 +170,7 @@ async function main() {
     }
 
     const failed = results.filter((x) => !x.ok).length;
+    if (!bridgeLive && results.length === 0) process.exit(2); // 桥不活=环境未就绪，不算测试失败
     console.log(`\n== 结果：${results.length - failed}/${results.length} 通过 ==`);
     process.exit(failed ? 1 : 0);
 }
