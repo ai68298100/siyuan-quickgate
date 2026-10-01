@@ -9,14 +9,14 @@ import "./index.scss";
 
 import { KernelApi } from "./services/kernelApi";
 import { BridgeStore, DataIO } from "./services/store";
-import { BridgeService, EditorContextResult } from "./services/bridge-service";
+import { BridgeService, EditorContextResult, EcosystemManifest } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
 import { probeCommandRegistry } from "./services/registry";
 import { appendEventLine, normalizeCheckinEvent } from "./services/eventbridge";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.5.2";
+const PLUGIN_VERSION = "0.5.3";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -507,6 +507,35 @@ export default class QuickGatePlugin extends Plugin {
             }
         };
         row("诊断", diagBtn);
+
+        const ecoBtn = document.createElement("button");
+        ecoBtn.className = "b3-button b3-button--outline";
+        ecoBtn.textContent = "生态清单版本";
+        ecoBtn.onclick = async () => {
+            try {
+                const manifest = (await import("./assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest & { updatedAt?: string };
+                let installed: Array<Record<string, unknown>> = [];
+                try {
+                    installed = await this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() });
+                } catch { /* 内核不可达 → 只展示 manifest 口径 */ }
+                const instMap = new Map(installed.map((p) => [String(p.name), p]));
+                const lines = manifest.plugins.map((m) => {
+                    const inst = instMap.get(m.pluginId) as { version?: unknown } | undefined;
+                    const iv = typeof inst?.version === "string" ? inst.version : "未安装";
+                    const stale = typeof inst?.version === "string" && m.version && inst.version !== m.version ? "（与清单不一致，可校准）" : "";
+                    return `${m.displayName}：清单 ${m.version ?? "-"} · 实装 ${iv}${stale} · ${m.maturity}`;
+                });
+                const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+                new Dialog({
+                    title: `生态清单（校准 ${manifest.updatedAt ?? "未知"}）`,
+                    content: `<div class="b3-typography" style="padding:12px;white-space:pre-wrap;font-size:12px">${esc(lines.join("\n"))}</div>`,
+                    width: "560px",
+                });
+            } catch (e) {
+                showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+            }
+        };
+        row("生态", ecoBtn);
 
         const about = document.createElement("div");
         about.className = "b3-label";
