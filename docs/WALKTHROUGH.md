@@ -2,8 +2,9 @@
 
 > 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
-> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 v0.5.9 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥默认关）。下文 `$TOKEN` 即该值。
-> 内核侧 spike（⑥⑧⑨⑩⓪）已由自动化探针执行（2026-10-02）；前端侧（①②④⑤⑦⑪）需思源窗口内 DevTools。
+> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.6.0** 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥与广播快路径默认关）。下文 `$TOKEN` 即该值。
+> 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧（①②④⑦⑪）需思源窗口内 DevTools。
+> **重启复测一键化（R24）**：思源重启后跑 `node tools/verify-restart.mjs`（自动读 env）——③桥端到端含延迟 / ⑩⓪负向鉴权+路由 ping+events.list+降级 / ⑪事件物化计数 / ⑤广播存活 / **v1.5 postMessage→回执延迟测量**。一条命令完成复测批。
 
 ## ① 命令注册表形状 ⬜
 - **静态已钉（v0.5.8）**：命令身份=`ICommand.langKey`（官方 app/src/types/index.d.ts；不存在 command/id——此前误读致列表为空）；文本=langText→`i18n[langKey]`；回调五形态（callback/globalCallback/execute 可外部执行，editor/dock/fileTree 标 focusOnly）
