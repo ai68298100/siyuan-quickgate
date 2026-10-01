@@ -34,6 +34,89 @@ const READ_ONLY_OPS: ReadonlySet<string> = new Set([
 /** 破坏性（可删改数据）而非仅副作用：plugin.api 任意调用、workflow.execute 执行计划 */
 const DESTRUCTIVE_OPS: ReadonlySet<string> = new Set(["plugin.api", "workflow.execute"]);
 
+/** 逐 op 参数 schema（形状对齐 docs/api.md；无参 op 为空 properties——纪律测试强制每 op 都登记） */
+const ARGS: Record<string, { properties: Record<string, { type: string; description: string }>; required?: string[] }> = {
+    "bridge.ping": { properties: {} },
+    "commands.list": { properties: { plugin: { type: "string", description: "可选，仅列出该插件" } } },
+    "commands.search": { properties: { keyword: { type: "string", description: "关键词（内存过滤 ≤50 条）" } }, required: ["keyword"] },
+    "commands.run": {
+        properties: {
+            plugin: { type: "string", description: "命令所属插件 id，如 siyuan-checkin" },
+            command: { type: "string", description: "命令 langKey（用 commands.list 查询）" },
+        },
+        required: ["plugin", "command"],
+    },
+    "checkin.items": {
+        properties: {
+            includeArchived: { type: "boolean", description: "可选，含归档项目" },
+            limit: { type: "number", description: "可选，≤200" },
+        },
+    },
+    "checkin.record": {
+        properties: {
+            itemId: { type: "string", description: "打卡项目 id（checkin.items 查询）" },
+            value: { type: "number", description: "数值（或 value/unit 二选一语义见上游）" },
+            note: { type: "string", description: "可选备注" },
+            occurredAt: { type: "string", description: "可选 ISO 时间；带值时走批量接口（单条接口不接受）" },
+        },
+        required: ["itemId"],
+    },
+    "checkin.summary": { properties: {} },
+    "contacts.search": { properties: { keyword: { type: "string", description: "可选关键词（≤50 条）" } } },
+    "contacts.ensure": { properties: { name: { type: "string", description: "人脉名" } }, required: ["name"] },
+    "contacts.interaction": {
+        properties: {
+            names: { type: "string", description: "人脉名（兼容中英文逗号/顿号/分号/空白分隔）；与 docIds 二选一" },
+            docIds: { type: "array", description: "人脉文档 id 数组" },
+            date: { type: "string", description: "可选日期" },
+            place: { type: "string", description: "可选地点" },
+            note: { type: "string", description: "可选备注" },
+        },
+    },
+    "doc.open": { properties: { id: { type: "string", description: "文档/块 id" } }, required: ["id"] },
+    "daily.status": { properties: {} },
+    "setting.open": { properties: {} },
+    "editor.context": { properties: {} },
+    "registry.list": { properties: {} },
+    "diagnostics.report": { properties: {} },
+    "config.discover": { properties: {} },
+    "template.new": {
+        properties: {
+            notebook: { type: "string", description: "目标笔记本 id" },
+            hpath: { type: "string", description: "文档人类可读路径（如 /2026/10/xxx）" },
+            template: { type: "string", description: "模板内容（Sprig 会渲染）；与 templatePath 二选一" },
+            templatePath: { type: "string", description: "模板相对路径（/templates/ 下）" },
+        },
+        required: ["notebook", "hpath"],
+    },
+    "events.list": { properties: {} },
+    "events.pull": {
+        properties: {
+            names: { type: "array", description: "可选事件名数组过滤" },
+            since: { type: "string", description: "可选起始时间" },
+            limit: { type: "number", description: "可选 ≤200" },
+        },
+    },
+    "workflow.plan": {
+        properties: {
+            steps: {
+                type: "array",
+                description: "≤8 步骤，每步 {op, args}；受控白名单；写步骤带 confirm 标记；只出计划不执行",
+            },
+        },
+        required: ["steps"],
+    },
+    "workflow.execute": { properties: { planId: { type: "string", description: "workflow.plan 返回的 planId；总确认 30s，一次性" } }, required: ["planId"] },
+    "plugin.api": {
+        properties: {
+            plugin: { type: "string", description: "目标插件 id" },
+            method: { type: "string", description: "公开桥方法名" },
+            args: { type: "object", description: "方法参数" },
+        },
+        required: ["plugin", "method"],
+    },
+};
+
 const DESCRIPTIONS: Record<string, string> = {
     "bridge.ping": "桥健康探测：返回 protocol/plugin/version/pollMs",
     "commands.list": "列出思源命令注册表（每插件 ≤100 条；黑名单插件不返回）",
@@ -64,12 +147,14 @@ export function buildToolDefs(): McpToolDef[] {
     return (ALL_OPS as readonly string[]).map((op) => {
         const readOnly = READ_ONLY_OPS.has(op);
         const destructive = DESTRUCTIVE_OPS.has(op);
+        const argSpec = ARGS[op] ?? { properties: {} };
         return {
             name: op,
             description: DESCRIPTIONS[op] ?? op,
             inputSchema: {
                 type: "object" as const,
-                properties: {},
+                properties: argSpec.properties,
+                ...(argSpec.required ? { required: argSpec.required } : {}),
                 additionalProperties: true,
             },
             annotations: readOnly

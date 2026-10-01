@@ -28,6 +28,20 @@ describe("MCP 工具映射（契约驱动）", () => {
         expect(defs.length).toBe(ALL_OPS.length);
     });
 
+    it("每个 op 都登记了参数 schema（含无参 op 的空 properties）——AI 可构造正确调用", () => {
+        const defs = buildToolDefs();
+        for (const t of defs) {
+            expect(t.inputSchema, `${t.name} 缺 properties`).toHaveProperty("properties");
+            expect(t.description.length, `${t.name} 描述过短`).toBeGreaterThan(4);
+        }
+        // 抽查必填项穿透到 schema
+        const byName = new Map(defs.map((t) => [t.name, t]));
+        expect(byName.get("commands.run")!.inputSchema.required).toEqual(["plugin", "command"]);
+        expect(byName.get("template.new")!.inputSchema.required).toEqual(["notebook", "hpath"]);
+        expect(byName.get("checkin.record")!.inputSchema.required).toEqual(["itemId"]);
+        expect(Object.keys(byName.get("bridge.ping")!.inputSchema.properties)).toEqual([]);
+    });
+
     it("只读/写分类与破坏性标注符合安全模型（docs/10 §3.14）", () => {
         const defs = buildToolDefs();
         const byName = new Map(defs.map((t) => [t.name, t]));
