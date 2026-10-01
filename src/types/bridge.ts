@@ -77,6 +77,8 @@ export interface QuickGateSettings {
     bridgeBasePath: string;
     /** 本机设备名（device 路由） */
     deviceName: string;
+    /** v1.5 广播快路径：前端 SSE 订阅 /es/broadcast/subscribe?channel=qg-cmd（新外部面，默认关） */
+    broadcastEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: QuickGateSettings = {
@@ -91,6 +93,7 @@ export const DEFAULT_SETTINGS: QuickGateSettings = {
     rawApiAllowlist: ["siyuan-checkin", "siyuan-contacts", "siyuan-speed-switch"],
     bridgeBasePath: "/storage/petal/siyuan-quickgate/bridge",
     deviceName: "",
+    broadcastEnabled: false,
 };
 
 /** 命令注册表条目（M0① 实证前为探测形状） */

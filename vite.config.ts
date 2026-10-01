@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "path";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, type Plugin } from "vitest/config";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import zipPack from "vite-plugin-zip-pack";
@@ -28,7 +28,7 @@ console.log("isSrcmap=>", isSrcmap);
 console.log("outputDir=>", outputDir);
 console.log("buildTarget=>", buildTarget);
 
-export default defineConfig(buildTarget === "kernel" ? {
+export default defineConfig((buildTarget === "kernel" ? {
     build: {
         outDir: outputDir,
         emptyOutDir: false,
@@ -124,8 +124,14 @@ export default defineConfig(buildTarget === "kernel" ? {
                 assetFileNames: (assetInfo) => assetInfo.name ?? "asset",
             },
         },
+    },
+
+    // R23：SSE 流式假件在 threads 池下会挂起 worker——单测统一走 forks 池
+    test: {
+        pool: "forks",
+        testTimeout: 8000,
     }
-});
+}) as import("vitest/config").UserConfig);
 
 function watchExternalFiles(patterns: string[]): Plugin {
     return {

@@ -38,10 +38,10 @@
 - 验收：每条命令只被一个窗口消费（回执仅一份、无重复执行）
 - 结论：（待填）
 
-## ⑤ SSE/WS 广播可用性 ⬜（v1.5 通道决策前置）
-- 计划：DevTools 里 `new WebSocket("ws://127.0.0.1:1568/ws/broadcast")`（带/不带 Token 两种）观察握手与消息；SSE 同理 `curl -N http://127.0.0.1:1568/sse/broadcast -H "Authorization: Token $TOKEN"`
-- 验收：能收到内核广播即通过 → v1.5 push 通道立项；否则维持 pull-only
-- 结论：（待填）
+## ⑤ SSE/WS 广播可用性 ✅（2026-10-02，3.8.5 真机自动探测——无需内核重启/无需前端）
+- 实证：`POST /api/broadcast/postMessage {channel:"qg-spike5",message}` → code:0（频道自动创建）；`GET /es/broadcast/subscribe?channel=qg-spike5`（SSE）→ 200 text/event-stream，**推送消息约 1s 内送达**（`id:35\nevent:qg-spike5\ndata:ping-sse\n\n`）；均以 Token 头鉴权生效
+- 结论：**v1.5 push 通道技术前提成立**（毫秒级、Token 鉴权、频道按名自治）。立项细化：外部客户端 postMessage 推命令到约定频道 ↔ 快门前端 SSE 订阅消费（与 NDJSON 慢路径并存，频道命名/鉴权粒度见 TODO M3）
+- 备注：`GET /api/broadcast/getChannels` 200 但响应空体（小怪癖，不阻塞）
 
 ## ⑥ petal/loadPetals 形状 ⬜
 - 计划：`curl -s http://127.0.0.1:1568/api/petal/loadPetals -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"frontend\":\"desktop\"}" | head -c 2000`

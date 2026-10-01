@@ -2,6 +2,19 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.6.0 · 2026-10-02（v1.5 广播快路径——毫秒级命令通道）
+
+### Added
+- **广播快路径**（spike⑤ 实证解锁）：设置新增独立开关 `broadcastEnabled`（**默认关**，新外部面红线）；开启后前端 SSE 订阅内核频道 `qg-cmd`，外部客户端 `POST /api/broadcast/postMessage {channel:"qg-cmd", message:<信封JSON>}` 推命令，**到达即执行（毫秒级）**，回执写回 results.ndjson
+- **双通道防重复执行（预留语义）**：NDJSON tick 与广播 SSE 共用幂等台账，"同步 check+mark 后才 await"——先到者执行、后到者按 id 跳过；confirm 门控/黑名单/审计全部共用
+- 断流指数退避重连（1s→30s）；AbortSignal 中断在读流，stop 即时生效
+- BroadcastSubscriber 单测 5 组（SSE 解析/坏信封静默/退避重连/不建立连接/预留语义+device+expired）
+- 单测 15 文件 84 用例；测试池统一 forks（threads 池下流式假件会挂起 worker）
+
+### 依赖
+- 内核广播接口（3.8.5 真机实证）：`POST /api/broadcast/postMessage` + `GET /es/broadcast/subscribe`，Token 头鉴权（外部推命令方）；前端同源订阅无需 Token
+- 联调状态：实现+单测完成；真机联调待内核重启（kernel.js/前端插件加载后）——复测清单见 docs/WALKTHROUGH.md ③⑩⑪
+
 ## v0.5.9 · 2026-10-02（真内核实证：config.discover 修复 + spike 内核侧完成）
 
 ### 环境解锁

@@ -153,7 +153,11 @@ export class BridgeService {
         }
 
         for (const cmd of toProcess) {
-            const t0 = this.deps.now?.() ?? Date.now(); // 循环内取时：elapsed 只含本条命令
+            // 预留语义（v0.6.0）：与广播快路径（executeAndRecord）共用"先记账后执行"，
+            // 同步 check+mark 原子——双通道（NDJSON tick / 广播 SSE）不重复执行同一 id
+            if (this.deps.store.isProcessed(cmd.id)) continue;
+            this.deps.store.markProcessed(cmd.id, this.deps.now?.() ?? Date.now());
+            const t0 = this.deps.now?.() ?? Date.now(); // 预留后取时：elapsed 只含本条命令
             let result: BridgeResult;
             try {
                 result = await this.dispatchWithTimeout(cmd);
@@ -173,7 +177,6 @@ export class BridgeService {
                     message: result.message, elapsedMs: elapsed,
                 }));
             }
-            this.deps.store.markProcessed(cmd.id, this.deps.now?.() ?? Date.now());
         }
 
         if (receipts.length > 0) {
@@ -202,6 +205,62 @@ export class BridgeService {
             plugin: this.deps.pluginName,
             ...r,
         };
+    }
+
+    /**
+     * v1.5 广播快路径的公共执行入口：设备路由/过期/预留→执行→回执。
+     * 预留语义（v0.6.0）：同步检查+markProcessed 后才 await——JS 单线程下两条命令通道
+     * （NDJSON tick 与广播 SSE）不会重复执行同一 id；先到者执行，后到者静默跳过。
+     */
+    async executeAndRecord(cmd: BridgeCommand): Promise<{ executed: boolean; receipt?: BridgeReceipt }> {
+        const now = this.deps.now?.() ?? Date.now();
+        if (cmd.device && cmd.device !== this.deps.deviceName()) return { executed: false }; // 非目标设备
+        if (this.deps.store.isProcessed(cmd.id)) return { executed: false };
+        if (isExpired(cmd, now)) {
+            this.stats.expired += 1;
+            let expiredReceipt: BridgeReceipt | undefined;
+            if (cmd.reply !== false) {
+                expiredReceipt = this.makeReceipt({
+                    id: cmd.id, op: cmd.op, status: "expired", data: null,
+                    message: "命令已过期（TTL 超时未消费）", elapsedMs: 0,
+                });
+                try {
+                    const resultsPath = this.paths().results;
+                    const old = (await this.deps.api.getFileText(resultsPath)) ?? "";
+                    await this.deps.api.putFileText(resultsPath, appendReceipt(old, expiredReceipt));
+                } catch { /* 忽略 */ }
+            }
+            return { executed: false, receipt: expiredReceipt };
+        }
+        this.deps.store.markProcessed(cmd.id, now); // 同步预留，防双通道竞态双执行
+        const t0 = this.deps.now?.() ?? Date.now();
+        let result: BridgeResult;
+        try {
+            result = await this.dispatchWithTimeout(cmd);
+        } catch (e) {
+            result = { status: "failed", data: null, message: `执行异常：${e instanceof Error ? e.message : String(e)}` };
+        }
+        const elapsed = (this.deps.now?.() ?? Date.now()) - t0;
+        this.stats.commands += 1;
+        this.stats.totalDispatchMs += elapsed;
+        if (result.status === "recorded") this.stats.ok += 1;
+        else if (result.status === "rejected") this.stats.rejected += 1;
+        else this.stats.failed += 1;
+
+        let receipt: BridgeReceipt | undefined;
+        if (cmd.reply !== false) {
+            receipt = this.makeReceipt({
+                id: cmd.id, op: cmd.op, status: result.status, data: result.data,
+                message: result.message, elapsedMs: elapsed,
+            });
+            try {
+                const resultsPath = this.paths().results;
+                const old = (await this.deps.api.getFileText(resultsPath)) ?? "";
+                await this.deps.api.putFileText(resultsPath, appendReceipt(old, receipt));
+            } catch { /* 回执写失败不阻断（台账已记账，调用方可按原 id 重查） */ }
+        }
+        await this.deps.store.saveProcessed().catch(() => {});
+        return { executed: true, receipt };
     }
 
     /**

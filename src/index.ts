@@ -11,6 +11,7 @@ import { KernelApi } from "./services/kernelApi";
 import { BridgeStore, DataIO } from "./services/store";
 import { BridgeService, EditorContextResult, EcosystemManifest } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
+import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
 import { appendEventLine, normalizeCheckinEvent, normalizeCheckinEventDeleted } from "./services/eventbridge";
 import { HubEvent } from "./services/events";
@@ -74,9 +75,11 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     onunload() {
-        // 优雅停机：单飞循环在当前 tick 结束后退出，不撕正在进行的写
+        // 优雅停机：单飞循环在当前 tick 结束后退出，不撕正在进行的写；广播订阅同步停止
         this.poller?.stop();
         this.poller = undefined;
+        void this.broadcastSub?.stop();
+        this.broadcastSub = undefined;
         this.stopEventBridge();
         this.flushAudit();
         showMessage("小驴快门已停用；其桥目录随插件数据一并保留/清理", 3000, "info");
@@ -90,6 +93,7 @@ export default class QuickGatePlugin extends Plugin {
      * analytics-updated 不订阅（D-0011：高频触发会挤占滚动窗口）。总线不可用时静默降级。
      */
     private eventBridgeHandler?: (e: Event) => void;
+    private broadcastSub?: BroadcastSubscriber;
 
     private startEventBridge() {
         if (this.eventBridgeHandler) return;
@@ -187,12 +191,26 @@ export default class QuickGatePlugin extends Plugin {
             shouldRun: () => this.settings.bridgeEnabled,
         });
         this.poller.start();
+        // v1.5 广播快路径（独立开关，默认关）：SSE 订阅 qg-cmd 频道，毫秒级命令通道
+        if (this.settings.broadcastEnabled && !this.broadcastSub?.running) {
+            this.broadcastSub = new BroadcastSubscriber({
+                enabled: () => this.settings.bridgeEnabled && this.settings.broadcastEnabled,
+                onCommand: (cmd) => service.executeAndRecord(cmd).then(() => {}),
+                log: (msg) => console.warn(`[${PLUGIN_NAME}] ${msg}`),
+            });
+            this.broadcastSub.start();
+            console.info(`[${PLUGIN_NAME}] 广播快路径已启动（频道 ${BROADCAST_CHANNEL}）`);
+        }
         console.info(`[${PLUGIN_NAME}] 桥已启动，间隔 ${this.settings.pollMs}ms`);
     }
 
-    private stopBridge() {
+    private async stopBridge() {
         this.poller?.stop();
         this.poller = undefined;
+        if (this.broadcastSub?.running) {
+            await this.broadcastSub.stop();
+            console.info(`[${PLUGIN_NAME}] 广播快路径已停止`);
+        }
     }
 
     /** 确认对话框：先尝试激活思源窗口（08-O10），30s 超时=拒绝 */
@@ -406,6 +424,23 @@ export default class QuickGatePlugin extends Plugin {
             showMessage(`外部命令桥已${this.settings.bridgeEnabled ? "开启" : "关闭"}`, 3000);
         };
         row("外部命令桥（默认关；开启后外部程序可发命令）", enabledInput);
+
+        const bcInput = document.createElement("input");
+        bcInput.type = "checkbox";
+        bcInput.className = "b3-switch";
+        bcInput.checked = this.settings.broadcastEnabled;
+        bcInput.onchange = async () => {
+            this.settings.broadcastEnabled = bcInput.checked;
+            this.store.settings = this.settings;
+            await this.store.saveSettings();
+            if (this.settings.broadcastEnabled && this.settings.bridgeEnabled && !this.isMobileGuard()) {
+                this.startBridge(); // startBridge 内部按开关幂等启动广播订阅
+            } else if (this.broadcastSub?.running) {
+                await this.broadcastSub.stop();
+            }
+            showMessage(`广播快路径已${this.settings.broadcastEnabled ? "开启（毫秒级命令通道 qg-cmd）" : "关闭"}`, 3000);
+        };
+        row("广播快路径 v1.5（默认关；需先开桥；postMessage→qg-cmd 频道毫秒级执行）", bcInput);
 
         const pollInput = document.createElement("input");
         pollInput.type = "number";

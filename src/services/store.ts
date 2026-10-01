@@ -42,6 +42,7 @@ export function normalizeSettings(raw: unknown): QuickGateSettings {
         s.bridgeBasePath = obj.bridgeBasePath;
     }
     if (typeof obj.deviceName === "string") s.deviceName = obj.deviceName.slice(0, 64);
+    if (typeof obj.broadcastEnabled === "boolean") s.broadcastEnabled = obj.broadcastEnabled;
     return s;
 }
 

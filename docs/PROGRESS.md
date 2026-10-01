@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.6.0（v1.5 广播快路径）
+
+- BroadcastSubscriber：SSE 订阅 qg-cmd 频道 → executeAndRecord 毫秒级执行；AbortSignal 停止；指数退避重连；broadcastEnabled 独立开关默认关
+- 预留语义：tick 与广播共用幂等台账，check+mark 同步原子防双执行；expired 分支补回 receipt 返回
+- 测试池统一 forks（threads 下流式假件挂起 worker，根因=假件零延时 sleep 饿死宏任务）；84 用例全绿
+
 ## 2026-10-02 · v0.5.9（真内核实证 + config.discover 修复）
 
 - 内核 3.8.5 @6806 实证可达；快门部署进工作空间并启用（桥默认关）
