@@ -4,11 +4,13 @@
 #   .\Send-LvCommand.ps1 -Op bridge.ping
 #   .\Send-LvCommand.ps1 -Op checkin.record -ArgsJson '{"itemId":"...","value":1}' -WaitMs 8000
 #   .\Send-LvCommand.ps1 -Op commands.run -ArgsJson '{"plugin":"siyuan-checkin","command":"<命令>"}' -WaitMs 35000
+#   .\Send-LvCommand.ps1 -Op bridge.ping -Exec        # 内核同步路由直呼（不经桥文件，spike⑩ 校准用）
 param(
     [Parameter(Mandatory = $true)][string]$Op,
     [string]$ArgsJson = "{}",
     [string]$Plugin = "siyuan-quickgate",
     [int]$WaitMs = 8000,
+    [switch]$Exec,
     [string]$BaseUrl = $(if ($env:SIYUAN_URL) { $env:SIYUAN_URL } else { "http://127.0.0.1:1568" }),
     [string]$Token = $(if ($env:SIYUAN_TOKEN) { $env:SIYUAN_TOKEN } else { throw "请设置 SIYUAN_TOKEN 环境变量" })
 )
@@ -54,6 +56,13 @@ function Wait-LvReceipt {
         Start-Sleep -Milliseconds 300
     }
     return [pscustomobject]@{ id = $Id; status = "timeout"; message = "等待 $MaxMs ms 未收到回执" }
+}
+
+if ($Exec) {
+    # 内核同步路由：POST /plugin/private/<plugin>/exec，同步返回回执（不经桥文件）
+    $resp = Invoke-RestMethod -Method Post -Uri "$BaseUrl/plugin/private/$Plugin/exec" -Headers @{ Authorization = "Token $Token" } -ContentType "application/json" -Body (@{ op = $Op; args = ($ArgsJson | ConvertFrom-Json) } | ConvertTo-Json -Depth 10 -Compress)
+    $resp | ConvertTo-Json -Depth 10 -Compress
+    exit 0
 }
 
 $id = Send-LvCommand -TargetPlugin $Plugin -Op $Op -Args $ArgsJson

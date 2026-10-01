@@ -111,8 +111,39 @@ async function main() {
             console.log(JSON.stringify(r, null, 2));
             break;
         }
+        case "events": {
+            // 直接读源插件桥目录的 events.ndjson（无快门也可用；--names/--since 过滤在 events.pull 有服务端实现）
+            const sub = process.argv[3] || "pull";
+            if (sub === "list") {
+                const id = await send(plugin, "events.list", {});
+                console.log(JSON.stringify(await receipt(plugin, id, wait), null, 2));
+            } else {
+                const args = {};
+                if (arg("--names")) args.names = arg("--names").split(",");
+                if (arg("--since")) args.since = arg("--since");
+                if (arg("--limit")) args.limit = parseInt(arg("--limit"), 10);
+                const id = await send(plugin, "events.pull", args);
+                const r = await receipt(plugin, id, wait);
+                console.log(JSON.stringify(r, null, 2));
+            }
+            break;
+        }
+        case "exec": {
+            // 内核同步路由（v0.5.0 实验性）：同步直呼，不经桥文件
+            const op = arg("--op");
+            const res = await fetch(`${url}/plugin/private/${plugin}/exec`, {
+                method: "POST",
+                headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ op, args: JSON.parse(arg("--args", "{}")) }),
+            });
+            const json = await res.json();
+            console.log(JSON.stringify(json.data ?? json, null, 2));
+            break;
+        }
         default:
-            console.log("用法: lv-cli.mjs <ping|send|receipt|run> [--plugin <目标插件>] [--op <op>] [--args <json>] [--id <id>] [--command <cmd>] [--wait <ms>]");
+            console.log("用法: lv-cli.mjs <ping|send|receipt|run|events|exec> [--plugin <目标插件>] [--op <op>] [--args <json>] [--id <id>] [--command <cmd>] [--wait <ms>]");
+            console.log("  events [pull|list] [--names a,b] [--since <iso>] [--limit n]   事件白名单/拉取（events.pull 服务端过滤）");
+            console.log("  exec --op bridge.ping [--args {}]                              内核同步路由直呼（spike⑩ 校准用）");
             process.exit(1);
     }
 }
