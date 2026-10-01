@@ -133,7 +133,16 @@ function incrementVersion(version, type) {
         await writeJsonFile(pluginJsonPath, pluginData);
         await writeJsonFile(packageJsonPath, packageData);
 
-        console.log(`\n✅  Version successfully updated to: \x1b[32m${newVersion}\x1b[0m\n`);
+        // R2：同步 README 徽章版本（固定文件名，无动态路径）
+        for (const readme of ['README.md', 'README.zh-CN.md']) {
+            if (fs.existsSync(readme)) {
+                const text = fs.readFileSync(readme, 'utf8');
+                const updated = text.replace(/version-\d+\.\d+\.\d+-blue/, `version-${newVersion}-blue`);
+                if (updated !== text) fs.writeFileSync(readme, updated, 'utf8');
+            }
+        }
+
+        console.log(`\n✅  Version successfully updated to: \x1b[32m${newVersion}\x1b[0m (README badges synced)\n`);
 
     } catch (error) {
         console.error('❌  Error:', error);
