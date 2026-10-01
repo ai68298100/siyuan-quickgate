@@ -9,6 +9,8 @@ import { appendReceipt } from "./results";
 import { BridgeStore } from "./store";
 import { KernelApi } from "./kernelApi";
 import { RegistryProbeResult, runCommand } from "./registry";
+import { eventWhitelist, pullEvents } from "./events";
+import { executePlan, makePlan, WorkflowPlan, WORKFLOW_ALLOWED_OPS } from "./workflow";
 import {
     checkinItems, checkinRecord, checkinSummary,
     contactsSearch, contactsEnsure, contactsInteraction,
@@ -70,6 +72,9 @@ export interface BridgeServiceDeps {
 }
 
 export class BridgeService {
+    /** workflow.plan 一次性计划池（内存即可：短生命周期，5 分钟过期） */
+    private plans = new Map<string, WorkflowPlan>();
+
     constructor(private deps: BridgeServiceDeps) {}
 
     private paths() {
@@ -368,12 +373,66 @@ export class BridgeService {
                 return { status: "recorded", data: { docId }, message: "已从模板创建" };
             }
 
-            // ---- 设计态契约（M2 实现，先返回结构化 unsupported）----
-            case "events.list":
-            case "events.subscribe":
-            case "workflow.plan":
-            case "workflow.execute":
-                return { status: "unsupported", data: null, message: `${cmd.op} 为设计态契约（docs/09 R1），将在 M2 实现` };
+            // ---- 设计态契约（M2 实现：events 文件载体 + workflow 受控编排）----
+            case "events.list": {
+                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const wl = eventWhitelist(manifest);
+                const events = [...wl.entries()].map(([name, meta]) => ({ name, ...meta }));
+                return { status: "recorded", data: { events }, message: `白名单事件 ${events.length} 个` };
+            }
+            case "events.pull": {
+                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const wl = eventWhitelist(manifest);
+                const files: string[] = [];
+                for (const source of new Set([...wl.values()].map((v) => v.source))) {
+                    files.push(`/storage/petal/${source}/bridge/events.ndjson`);
+                }
+                const texts: string[] = [];
+                for (const f of files) {
+                    const t = await this.deps.api.getFileText(f);
+                    if (t) texts.push(t);
+                }
+                const events = pullEvents(texts.join("\n"), wl, files, {
+                    names: Array.isArray(a.names) ? a.names.filter((x): x is string => typeof x === "string") : undefined,
+                    since: typeof a.since === "string" ? a.since : undefined,
+                    limit: typeof a.limit === "number" ? Math.min(a.limit, 200) : undefined,
+                });
+                return { status: "recorded", data: { events, files }, message: `拉取 ${events.length} 条` };
+            }
+            case "workflow.plan": {
+                const r = makePlan(a.steps, {
+                    planId: `wf-${this.deps.now?.() ?? Date.now()}`,
+                    now: this.deps.now?.() ?? Date.now(),
+                    whitelistOp: (op) => WORKFLOW_ALLOWED_OPS.has(op),
+                });
+                if (r.kind !== "plan") return this.reject(r.message);
+                this.plans.set(r.plan.planId, r.plan);
+                return { status: "recorded", data: { plan: r.plan }, message: `计划 ${r.plan.steps.length} 步，5 分钟内 execute` };
+            }
+            case "workflow.execute": {
+                const planId = typeof a.planId === "string" ? a.planId : "";
+                const plan = this.plans.get(planId);
+                this.plans.delete(planId); // 一次性：执行即消费
+                const r = await executePlan(plan, {
+                    confirmAll: async (steps) => {
+                        const summary = steps.map((s) => `${s.index + 1}. ${s.op}${s.confirm ? "（写）" : ""}`).join("\n");
+                        return this.deps.confirm(`执行工作流（${steps.length} 步）：\n${summary}`);
+                    },
+                    runStep: async (step) => {
+                        const cmd: BridgeCommand = {
+                            v: 1, id: `${planId}-${step.index}`, op: step.op, args: step.args,
+                            createdAt: new Date().toISOString(),
+                        };
+                        return await this.dispatch(cmd);
+                    },
+                });
+                if (r.kind !== "done") return this.reject(r.message);
+                return {
+                    status: "recorded",
+                    data: { done: r.done, stoppedAt: r.stoppedAt, steps: r.steps },
+                    message: r.stoppedAt === null ? `全部 ${r.done} 步完成` : `第 ${r.stoppedAt + 1} 步失败停止（已完成 ${r.done} 步不回滚）`,
+                };
+            }
 
             // ---- 高级透传（默认关）----
             case "plugin.api": {

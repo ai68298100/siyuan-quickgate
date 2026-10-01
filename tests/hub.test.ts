@@ -123,15 +123,15 @@ describe("生态中枢 op（R1）", () => {
         expect(receipt.data.inboxDocId).toBe("doc-x");
     });
 
-    it("events.*/workflow.* 设计态 → unsupported", async () => {
+    it("events.*/workflow.* 已实现（v0.4.0）：list/pull/plan 正常返回", async () => {
         const mem = new MemKernel();
         send(mem, "e1", "events.list");
         const s = make(mem);
         const r1 = await run(mem, s);
-        expect(r1[0].status).toBe("unsupported");
+        expect(r1[0].status).toBe("recorded"); // 白名单含 checkin:event-recorded（stable）
         send(mem, "w1", "workflow.plan");
         const r2 = await run(mem, s);
-        expect(r2[0].status).toBe("unsupported");
-        expect(r2[0].message).toContain("M2");
+        expect(r2.at(-1)!.status).toBe("rejected"); // 空 steps → rejected（实现生效的证据）
+        expect(r2.at(-1)!.message).toContain("steps");
     });
 });

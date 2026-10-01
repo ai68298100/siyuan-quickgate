@@ -2,6 +2,19 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.4.0 · 2026-10-02（M2：events/workflow 实现）
+
+### Added
+- `events.list`：白名单事件目录（manifest 驱动：stable 插件的 available 事件）
+- `events.pull`：文件载体拉取（各来源 `/storage/petal/<plugin>/bridge/events.ndjson`），`names/since/limit` 过滤；spike⑤ 后可加 push 载体，契约不变
+- `workflow.plan`：≤8 步受控计划（受控 op 白名单、写步骤确认标记、5 分钟过期），只出计划不执行
+- `workflow.execute`：一次性总确认 → 逐步执行 → 单步失败即停止（已完成不回滚），每步独立回执
+- manifest 增加 events 声明字段（checkin available；闪卡 design）
+
+### Notes
+- events 的真实数据源仍需上游插件按契约写 events.ndjson（打卡宿主事件桥接排 M2 后半）
+- 4 组新测试（白名单/拉取/计划校验/失败停止），47 用例全绿
+
 ## v0.3.0 · 2026-10-02（可靠性收尾 + 模板）
 
 ### Added

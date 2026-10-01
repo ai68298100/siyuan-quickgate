@@ -19,6 +19,9 @@
       "version": "18.9.0",
       "protocol": "window.siyuanCheckin v5",
       "capabilities": ["items.read", "items.query", "events.read", "events.range.read", "events.record", "events.record.batch", "summary.read", "analytics.read", "metrics.read", "export.json", "export.csv"],
+      "events": [
+        { "name": "checkin:event-recorded", "status": "available", "idempotency": "source+externalRef", "payload": { "itemId": "string", "value": "number", "occurredAt": "string" } }
+      ],
       "hubIntegration": "checkin.items/record/summary 透传适配器（源能力协商）"
     },
     {
@@ -46,6 +49,9 @@
       "version": "0.5.0",
       "protocol": "规划中（Gateway / lv-cards:* 事件）",
       "capabilities": [],
+      "events": [
+        { "name": "lv-cards:reviewed", "status": "design", "idempotency": "sessionId+cardId" }
+      ],
       "hubIntegration": "仅 manifest/诊断"
     },
     {

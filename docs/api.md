@@ -29,6 +29,10 @@
 | `daily.status` | `{}` | `{docId, exists}` | 只探测不创建 |
 | `setting.open` | `{}` | `{ok:true}` | 打开思源设置 |
 | `editor.context` | `{}` | `{docId,rootTitle,blockId,selectedText}` | 全 null 表示无编辑器焦点（M0⑦ 后字段语义可能校准） |
+| `events.list` | `{}` | `{events:[{name,source,idempotency}]}` | 白名单事件目录（v0.4.0 实现；来源准入见 events-workflow-draft） |
+| `events.pull` | `{names?, since?, limit?≤200}` | `{events:[HubEvent], files}` | 文件载体拉取；幂等键去重由调用方按 `idempotencyKey` |
+| `workflow.plan` | `{steps:[{op,args}≤8]}` | `{plan:{planId,steps[],expiresAt}}` | 受控 op 白名单；写步骤带 confirm 标记；只出计划不执行 |
+| `workflow.execute` | `{planId}` | `{done, stoppedAt?, steps[]}` | 总确认（30s）→ 逐步执行 → 单步失败停止；计划一次性 |
 | `registry.list` | `{}` | `{manifestVersion, plugins:[{pluginId,displayName,maturity,manifestVersion,installedVersion,installed,protocol,capabilities,hubIntegration}], registrySource}` | 生态七插件清单（v0.2.0）；maturity ∈ stable/design/unlocated |
 | `diagnostics.report` | `{}` | `{protocol, plugin, version, bridge:{enabled,pollMs,basePath,commandsFileLines}, registry:{source,hostPlugins}, confirmExec, rawApiEnabled}` | 脱敏诊断快照（不含 Token/正文/个人路径） |
 | `config.discover` | `{}` | `{diaryNotebookId, inboxDocId, notes[]}` | 自动发现（spike⑧ 校准前 best-effort；失败回 null + notes 说明） |

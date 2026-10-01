@@ -13,31 +13,208 @@
     "defaultTtlMs": 60000
   },
   "envelope": {
-    "required": ["v", "id", "op"],
-    "optional": ["args", "createdAt", "ttlMs", "reply", "device"],
+    "required": [
+      "v",
+      "id",
+      "op"
+    ],
+    "optional": [
+      "args",
+      "createdAt",
+      "ttlMs",
+      "reply",
+      "device"
+    ],
     "idPattern": "^[A-Za-z0-9_-]{1,64}$"
   },
-  "receiptStatuses": ["recorded", "duplicate", "rejected", "failed", "unsupported", "expired"],
+  "receiptStatuses": [
+    "recorded",
+    "duplicate",
+    "rejected",
+    "failed",
+    "unsupported",
+    "expired"
+  ],
   "ops": [
-    { "op": "bridge.ping", "args": {}, "effect": "read" },
-    { "op": "commands.list", "args": { "plugin": "string?" }, "effect": "read" },
-    { "op": "commands.search", "args": { "keyword": "string?" }, "effect": "read" },
-    { "op": "commands.run", "args": { "plugin": "string", "command": "string" }, "effect": "write", "confirm": true, "confirmTimeoutMs": 30000 },
-    { "op": "checkin.items", "args": { "includeArchived": "bool?", "limit": "int?<=200" }, "effect": "read", "requires": "siyuan-checkin v5 items.read" },
-    { "op": "checkin.record", "args": { "itemId": "string", "value": "number?", "unit": "string?", "note": "string?", "occurredAt": "string?" }, "effect": "write", "requires": "siyuan-checkin v5 events.record", "idempotency": "source=quickgate, externalRef=envelope.id" },
-    { "op": "checkin.summary", "args": {}, "effect": "read", "requires": "siyuan-checkin v5 summary.read" },
-    { "op": "contacts.search", "args": { "keyword": "string?" }, "effect": "read", "requires": "siyuan-contacts v1" },
-    { "op": "contacts.ensure", "args": { "name": "string<=64" }, "effect": "write", "requires": "siyuan-contacts v1" },
-    { "op": "contacts.interaction", "args": { "names": "string[]?", "docIds": "string[]?", "date": "string?", "place": "string?", "note": "string?" }, "effect": "write", "requires": "siyuan-contacts v1", "idempotency": "ref=envelope.id" },
-    { "op": "doc.open", "args": { "id": "string" }, "effect": "navigation" },
-    { "op": "daily.status", "args": {}, "effect": "read" },
-    { "op": "setting.open", "args": {}, "effect": "ui" },
-    { "op": "editor.context", "args": {}, "effect": "read" },
-    { "op": "registry.list", "args": {}, "effect": "read", "since": "0.2.0", "note": "生态七插件清单：manifest×loadPetals 合并" },
-    { "op": "diagnostics.report", "args": {}, "effect": "read", "since": "0.2.0", "note": "脱敏诊断快照" },
-    { "op": "config.discover", "args": {}, "effect": "read", "since": "0.2.0", "note": "日记/收集箱自动发现（best-effort）" },
-    { "op": "events.list", "args": {}, "effect": "none", "status": "design", "note": "M2 实现，当前 unsupported" },
-    { "op": "workflow.plan", "args": {}, "effect": "none", "status": "design", "note": "M2 实现，当前 unsupported" },
-    { "op": "plugin.api", "args": { "plugin": "string", "method": "string", "args": "unknown[]?" }, "effect": "passthrough", "default": "off", "allowlist": ["siyuan-checkin", "siyuan-contacts", "siyuan-speed-switch"] }
+    {
+      "op": "bridge.ping",
+      "args": {},
+      "effect": "read"
+    },
+    {
+      "op": "commands.list",
+      "args": {
+        "plugin": "string?"
+      },
+      "effect": "read"
+    },
+    {
+      "op": "commands.search",
+      "args": {
+        "keyword": "string?"
+      },
+      "effect": "read"
+    },
+    {
+      "op": "commands.run",
+      "args": {
+        "plugin": "string",
+        "command": "string"
+      },
+      "effect": "write",
+      "confirm": true,
+      "confirmTimeoutMs": 30000
+    },
+    {
+      "op": "checkin.items",
+      "args": {
+        "includeArchived": "bool?",
+        "limit": "int?<=200"
+      },
+      "effect": "read",
+      "requires": "siyuan-checkin v5 items.read"
+    },
+    {
+      "op": "checkin.record",
+      "args": {
+        "itemId": "string",
+        "value": "number?",
+        "unit": "string?",
+        "note": "string?",
+        "occurredAt": "string?"
+      },
+      "effect": "write",
+      "requires": "siyuan-checkin v5 events.record",
+      "idempotency": "source=quickgate, externalRef=envelope.id"
+    },
+    {
+      "op": "checkin.summary",
+      "args": {},
+      "effect": "read",
+      "requires": "siyuan-checkin v5 summary.read"
+    },
+    {
+      "op": "contacts.search",
+      "args": {
+        "keyword": "string?"
+      },
+      "effect": "read",
+      "requires": "siyuan-contacts v1"
+    },
+    {
+      "op": "contacts.ensure",
+      "args": {
+        "name": "string<=64"
+      },
+      "effect": "write",
+      "requires": "siyuan-contacts v1"
+    },
+    {
+      "op": "contacts.interaction",
+      "args": {
+        "names": "string[]?",
+        "docIds": "string[]?",
+        "date": "string?",
+        "place": "string?",
+        "note": "string?"
+      },
+      "effect": "write",
+      "requires": "siyuan-contacts v1",
+      "idempotency": "ref=envelope.id"
+    },
+    {
+      "op": "doc.open",
+      "args": {
+        "id": "string"
+      },
+      "effect": "navigation"
+    },
+    {
+      "op": "daily.status",
+      "args": {},
+      "effect": "read"
+    },
+    {
+      "op": "setting.open",
+      "args": {},
+      "effect": "ui"
+    },
+    {
+      "op": "editor.context",
+      "args": {},
+      "effect": "read"
+    },
+    {
+      "op": "registry.list",
+      "args": {},
+      "effect": "read",
+      "since": "0.2.0",
+      "note": "生态七插件清单：manifest×loadPetals 合并"
+    },
+    {
+      "op": "diagnostics.report",
+      "args": {},
+      "effect": "read",
+      "since": "0.2.0",
+      "note": "脱敏诊断快照"
+    },
+    {
+      "op": "config.discover",
+      "args": {},
+      "effect": "read",
+      "since": "0.2.0",
+      "note": "日记/收集箱自动发现（best-effort）"
+    },
+    {
+      "op": "plugin.api",
+      "args": {
+        "plugin": "string",
+        "method": "string",
+        "args": "unknown[]?"
+      },
+      "effect": "passthrough",
+      "default": "off",
+      "allowlist": [
+        "siyuan-checkin",
+        "siyuan-contacts",
+        "siyuan-speed-switch"
+      ]
+    },
+    {
+      "op": "events.list",
+      "args": {},
+      "effect": "read",
+      "since": "0.4.0",
+      "note": "白名单事件目录（manifest 驱动）"
+    },
+    {
+      "op": "events.pull",
+      "args": {
+        "names": "string[]?",
+        "since": "string?",
+        "limit": "int?<=200"
+      },
+      "effect": "read",
+      "since": "0.4.0",
+      "note": "文件载体拉取，幂等键去重归调用方"
+    },
+    {
+      "op": "workflow.plan",
+      "args": {
+        "steps": "array<=8"
+      },
+      "effect": "plan",
+      "since": "0.4.0",
+      "note": "受控 op 白名单，只出计划不执行，5 分钟过期"
+    },
+    {
+      "op": "workflow.execute",
+      "args": {
+        "planId": "string"
+      },
+      "effect": "write",
+      "since": "0.4.0",
+      "note": "总确认30s→逐步执行→失败停止，计划一次性"
+    }
   ]
 }
