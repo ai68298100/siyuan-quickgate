@@ -29,7 +29,7 @@
 - ⬜ Release 正式版（spike 全绿后 v1.0.0-rc；当前为预发布序列）
 
 ## M3+（评估池，均有前置门槛）
-- MCP 通道（spike 后评估；对标 Sisyphus，差异化=小驴生态能力面）
+- MCP 通道（✅已评估 docs 项目 docs/10 §3.14：值得做、列 M3 首项——独立 stdio 代理 @lv/mcp-quickgate ↔ 内核 HTTP，零插件改动，默认只读+写 op 需 mcpWriteEnabled；**执行前置=复测批通过**；对标 Sisyphus，差异化=小驴生态能力面）
 - 笔记本级写权限分级（第二先例：siyuan-bridge-skill forbidden_notebooks）
 - doc.resolve（hpath 寻址，备选池）
 - OpenAPI 3 文档（集市上架门槛后）
