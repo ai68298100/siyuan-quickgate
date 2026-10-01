@@ -73,6 +73,9 @@
 ## ⑩ 内核同步路由校准 ⬜（v0.5.0 实验性路由）
 - 计划：设置页确认插件启用后（无需开桥），直接打私有路由：
   ```bash
+  # 0) 负向鉴权（安全基线）：不带 Token 应被 401/403 拒绝——localhost API 的 CSRF 面核实，
+  #    浏览器跨源页面无法伪造 Authorization 头，此层是唯一防线
+  curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:1568/plugin/private/siyuan-quickgate/exec -H "Content-Type: application/json" -d "{\"op\":\"bridge.ping\"}"
   # 1) ping（应答 channel=kernel-sync）
   curl -s http://127.0.0.1:1568/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"op\":\"bridge.ping\"}"
   # 2) 白名单目录（v0.5.5 起支持）
@@ -80,7 +83,7 @@
   # 3) 前端专属 op 的结构化降级
   curl -s http://127.0.0.1:1568/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"op\":\"commands.run\",\"args\":{\"plugin\":\"x\",\"command\":\"y\"}}"
   ```
-- 校准点：①路由可达性与鉴权（内核是否放行插件私有路由）②请求体解析（body.data.json() 还是 text()）③内核自呼 loadPetals 行为（registry.list 是否报"unexpected kpost"）④响应包形状与 kernel.d.ts 是否一致
+- 校准点：⓪**负向鉴权**（无 Token 请求必须 401/403；若匿名可调=严重安全问题，立即停用路由）①路由可达性（内核是否放行插件私有路由）②请求体解析（body.data.json() 还是 text()）③内核自呼 loadPetals 行为（registry.list 是否报"unexpected kpost"）④响应包形状与 kernel.d.ts 是否一致
 - 验收：①②③ 全部返回预期 JSON → 内核通道可转正为「内核可处理 op 的默认快路径」（Quicker SY·路由 探测 200 直呼）
 - 结论：（待填）
 
