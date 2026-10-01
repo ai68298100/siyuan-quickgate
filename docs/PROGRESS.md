@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.1（可观测性补全 + 计时修正）
+
+- BridgeService 累计统计：commands/ok/rejected/failed/expired/totalDispatchMs/lastActivityAt（内存态）；设置页队列状态弹窗与诊断包展示（含平均耗时）
+- Fixed：多命令 tick 的 elapsedMs 基准移入循环内（此前第 2+ 条命令耗时叠加前面命令）
+- 单测 11 文件 53 用例全绿（新增注入时钟计时与分账 2 例）；check/build 全绿
+
 ## 2026-10-02 · v0.2.0（生态中枢 R1 第一批）
 
 - `registry.list`（manifest×loadPetals 合并）、`diagnostics.report`（脱敏）、`config.discover`（best-effort 自动发现）

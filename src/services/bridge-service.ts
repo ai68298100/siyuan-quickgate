@@ -75,6 +75,20 @@ export class BridgeService {
     /** workflow.plan 一次性计划池（内存即可：短生命周期，5 分钟过期） */
     private plans = new Map<string, WorkflowPlan>();
 
+    /** 累计统计（内存态，内核/插件重载归零；设置页与诊断包展示用） */
+    readonly stats = {
+        /** 实际执行过的命令数（不含跳过/坏行/过期） */
+        commands: 0,
+        ok: 0,
+        rejected: 0,
+        failed: 0,
+        expired: 0,
+        /** 执行耗时累计 ms（与 commands 对应，均值=totalDispatchMs/commands） */
+        totalDispatchMs: 0,
+        /** 最近一次读到非空命令文件的时间（ms；空转不刷新） */
+        lastActivityAt: null as number | null,
+    };
+
     constructor(private deps: BridgeServiceDeps) {}
 
     private paths() {
@@ -98,6 +112,7 @@ export class BridgeService {
 
         const raw = await this.deps.api.getFileText(commands);
         if (raw === null || raw.trim() === "") return { executed: 0, receipts: 0 };
+        this.stats.lastActivityAt = this.deps.now?.() ?? Date.now();
 
         const now = this.deps.now?.() ?? Date.now();
         const receipts: BridgeReceipt[] = [];
@@ -122,6 +137,7 @@ export class BridgeService {
             if (this.deps.store.isProcessed(cmd.id)) continue; // 复活行：静默跳过（已有回执）
             if (cmd.device && cmd.device !== this.deps.deviceName()) continue; // 非目标设备：不消费不回执
             if (isExpired(cmd, now)) {
+                this.stats.expired += 1;
                 if (cmd.reply !== false) {
                     receipts.push(this.makeReceipt({
                         id: cmd.id, op: cmd.op, status: "expired", data: null,
@@ -135,7 +151,7 @@ export class BridgeService {
         }
 
         for (const cmd of toProcess) {
-            const t0 = now;
+            const t0 = this.deps.now?.() ?? Date.now(); // 循环内取时：elapsed 只含本条命令
             let result: BridgeResult;
             try {
                 result = await this.dispatchWithTimeout(cmd);
@@ -143,10 +159,16 @@ export class BridgeService {
             } catch (e) {
                 result = { status: "failed", data: null, message: `执行异常：${e instanceof Error ? e.message : String(e)}` };
             }
+            const elapsed = (this.deps.now?.() ?? Date.now()) - t0;
+            this.stats.commands += 1;
+            this.stats.totalDispatchMs += elapsed;
+            if (result.status === "recorded") this.stats.ok += 1;
+            else if (result.status === "rejected") this.stats.rejected += 1;
+            else this.stats.failed += 1;
             if (cmd.reply !== false) {
                 receipts.push(this.makeReceipt({
                     id: cmd.id, op: cmd.op, status: result.status, data: result.data,
-                    message: result.message, elapsedMs: (this.deps.now?.() ?? Date.now()) - t0,
+                    message: result.message, elapsedMs: elapsed,
                 }));
             }
             this.deps.store.markProcessed(cmd.id, this.deps.now?.() ?? Date.now());

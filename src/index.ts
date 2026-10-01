@@ -16,17 +16,19 @@ import { appendEventLine, normalizeCheckinEvent } from "./services/eventbridge";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.5.0";
+const PLUGIN_VERSION = "0.5.1";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
 function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], service: BridgeService) {
+    const st = service.stats;
     return {
         protocol: 1,
         plugin: PLUGIN_NAME,
         version: PLUGIN_VERSION,
         settings: { ...settings },
         lateCompletions: service.lateCompletions,
+        stats: { ...st, avgDispatchMs: st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null },
         auditTail: auditLog.slice(-50),
         exportedAt: new Date().toISOString(),
     };
@@ -416,9 +418,19 @@ export default class QuickGatePlugin extends Plugin {
             try {
                 const text = (await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/commands.ndjson`)) ?? "";
                 const lines = text.trim() ? text.trim().split("\n").length : 0;
-                showMessage(`待处理命令 ${lines} 条 · 迟到完成 ${this.activeService?.lateCompletions ?? 0} 次 · 台账 ${Object.keys(this.store.processed.processed).length} 条`, 5000, "info");
+                const st = this.activeService?.stats;
+                const avg = st && st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null;
+                const parts = [
+                    `待处理命令 ${lines} 条`,
+                    `台账 ${Object.keys(this.store.processed.processed).length} 条`,
+                    `迟到完成 ${this.activeService?.lateCompletions ?? 0} 次`,
+                    st ? `本次运行已执行 ${st.commands} 条（成功 ${st.ok} / 拒绝 ${st.rejected} / 失败 ${st.failed} / 过期 ${st.expired}）` : "服务未启动",
+                    avg !== null ? `平均耗时 ${avg}ms` : null,
+                    st?.lastActivityAt ? `最近活动 ${new Date(st.lastActivityAt).toLocaleTimeString()}` : null,
+                ].filter((p): p is string => p !== null);
+                showMessage(parts.join(" · "), 6000, "info");
             } catch (e) {
-                showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 5000, "error");
+                showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
         };
         row("可观测性（R2）", queueBtn);

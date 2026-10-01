@@ -141,3 +141,63 @@ describe("bridge-service tick（队列可靠性集成）", () => {
         expect(receipt.message).toContain("no.such.op");
     });
 });
+
+describe("bridge-service 累计统计（可观测性）", () => {
+    it("执行后计数与耗时累计；elapsed 只含本条命令（注入时钟）", async () => {
+        const mem = new MemKernel();
+        mem.files.set("/bridge/commands.ndjson", cmd("s1") + "\n" + cmd("s2"));
+        const store = new BridgeStore({ load: async () => null, save: async () => {} });
+        let clock = 1000;
+        let reads = 0;
+        // now() 调用序列：①tick 基准 ②lastActivity ③t0(s1) ④elapsed(s1)+40 ⑤markProcessed ⑥t0(s2)+10 ⑦elapsed(s2)+10 ⑧markProcessed
+        const steps = [0, 0, 10, 40, 0, 10, 10, 0];
+        const service = new BridgeService({
+            api: mem.api,
+            store,
+            settings,
+            pluginName: "siyuan-quickgate",
+            pluginVersion: "0.1.0",
+            deviceName: () => "dev-a",
+            registry: () => ({ source: "fallback", plugins: [] }),
+            confirm: async () => true,
+            audit: () => {},
+            editorContext: () => null,
+            dailyStatus: async () => ({ docId: null, exists: false }),
+            openDoc: () => {},
+            openSetting: () => {},
+            getCheckin: () => undefined,
+            getContacts: () => undefined,
+            now: () => {
+                clock += steps[reads] ?? 0;
+                reads += 1;
+                return clock;
+            },
+        });
+        await service.tick();
+        expect(service.stats.commands).toBe(2);
+        expect(service.stats.ok).toBe(2);
+        expect(service.stats.rejected).toBe(0);
+        expect(service.stats.failed).toBe(0);
+        // s1: t0=1010, elapsed 至 1050=40ms；s2: t0=1060, elapsed 至 1070=10ms（不叠加）
+        expect(service.stats.totalDispatchMs).toBe(50);
+        expect(service.stats.lastActivityAt).not.toBeNull();
+        const results = mem.files.get("/bridge/results.ndjson")!;
+        const lines = results.trim().split("\n").map((l) => JSON.parse(l) as BridgeReceipt);
+        expect(lines.map((r) => r.elapsedMs)).toEqual([40, 10]);
+    });
+
+    it("失败/拒绝/过期分账（unsupported 计入 failed）", async () => {
+        const mem = new MemKernel();
+        const expired = JSON.stringify({ v: 1, id: "e1", op: "bridge.ping", args: {}, createdAt: new Date(Date.now() - 120000).toISOString(), ttlMs: 1000 });
+        mem.files.set(
+            "/bridge/commands.ndjson",
+            cmd("ok1") + "\n" + cmd("rj1", "no.such.op") + "\n" + expired,
+        );
+        const { service } = makeService(mem);
+        await service.tick();
+        expect(service.stats.commands).toBe(2); // 过期不进入执行统计
+        expect(service.stats.ok).toBe(1);
+        expect(service.stats.failed).toBe(1); // unsupported 归 failed 桶
+        expect(service.stats.expired).toBe(1);
+    });
+});
