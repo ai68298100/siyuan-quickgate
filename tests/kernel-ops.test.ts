@@ -117,8 +117,33 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
         expect((r2.data as { notes: string[] }).notes.join()).toContain("未发现");
     });
 
-    it("config.discover 歧义消解（spike⑧ 实证：默认模板多笔记本同值）——按今日日记文档存在性定位", async () => {
-        const { deps } = makeDeps({
+    it("config.discover R25 实证场景：默认模板多数派+自定义模板一个 → 自定义者直接命中（无需等今日日记）", async () => {
+        const DEFAULT_T = `/daily note/{{now | date "2006/01"}}/{{now | date "2006-01-02"}}`;
+        const calls: Array<{ endpoint: string; payload: Record<string, unknown> }> = [];
+        const deps2: KernelDeps = {
+            kpost: async (endpoint, payload = {}) => {
+                calls.push({ endpoint, payload });
+                if (endpoint === "/api/notebook/lsNotebooks") return { notebooks: [{ id: "d1", name: "默认甲", closed: false }, { id: "d2", name: "默认乙", closed: false }, { id: "cx", name: "DailyNote", closed: false }] } as never;
+                if (endpoint === "/api/notebook/getNotebookConf") {
+                    const id = (payload as { notebook: string }).notebook;
+                    return { conf: { dailyNoteSavePath: id === "cx" ? `/{{now | date "2006/01"}}/x` : DEFAULT_T } } as never;
+                }
+                throw new Error(`unexpected ${endpoint}`); // 不应走到 renderSprig/listDocs
+            },
+            getFileText: async () => null,
+            manifest: {
+                version: 1,
+                plugins: [],
+            } as never,
+            pluginName: "siyuan-quickgate",
+        };
+        const r = await createKernelOpHandler(deps2)("config.discover", {});
+        expect((r.data as { diaryNotebookId: string }).diaryNotebookId).toBe("cx");
+        expect((r.data as { notes: string[] }).notes.join()).toContain("自定义日记模板");
+        expect(calls.some((c) => c.endpoint === "/api/template/renderSprig")).toBe(false); // 缩小范围后无需消歧
+    });
+
+    it("config.discover 歧义消解（spike⑧ 实证：默认模板多笔记本同值）——按今日日记文档存在性定位", async () => {        const { deps } = makeDeps({
             kpostScript: new Map([
                 ["/api/notebook/lsNotebooks", { notebooks: [{ id: "n1", name: "A", closed: false }, { id: "n2", name: "B", closed: false }] }],
                 ["/api/notebook/getNotebookConf", { conf: { dailyNoteSavePath: "/daily note/{{now | date \"2006-01-02\"}}" } }],

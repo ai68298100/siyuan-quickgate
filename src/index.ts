@@ -18,7 +18,7 @@ import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.5.9";
+const PLUGIN_VERSION = "0.6.1";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -366,9 +366,21 @@ export default class QuickGatePlugin extends Plugin {
                 diaryNotebookId = candidates[0].id;
                 notes.push(`日记笔记本：${candidates[0].name}（dailyNoteSavePath=${candidates[0].savePath}）`);
             } else if (candidates.length > 1) {
-                notes.push(`多个笔记本配置了日记路径（${candidates.map((c) => c.name).join("、")}），尝试按"今日日记文档存在性"消歧…`);
+                // R25 实证：非默认模板者优先（默认模板字面量取自 3.8.5 出厂值；自定义者几乎必是日记笔记本）
+                const DEFAULT_DAILY_TEMPLATE = `/daily note/{{now | date "2006/01"}}/{{now | date "2006-01-02"}}`;
+                let scope = candidates;
+                const customized = candidates.filter((c) => c.savePath !== DEFAULT_DAILY_TEMPLATE);
+                if (customized.length > 0) {
+                    scope = customized;
+                    notes.push(`按"自定义日记模板"缩小范围：${scope.map((c) => c.name).join("、")}`);
+                }
+                if (scope.length === 1) {
+                    diaryNotebookId = scope[0].id;
+                    notes.push(`日记笔记本：${scope[0].name}（dailyNoteSavePath=${scope[0].savePath}）`);
+                } else {
+                notes.push(`多个笔记本配置了日记路径（${scope.map((c) => c.name).join("、")}），尝试按"今日日记文档存在性"消歧…`);
                 const withDiary: Cand[] = [];
-                for (const c of candidates) {
+                for (const c of scope) {
                     try {
                         const hpath = await this.kernelApi.post<string>("/api/template/renderSprig", { template: c.savePath });
                         const parent = hpath.replace(/\/[^/]+$/, "") || "/";
@@ -383,6 +395,7 @@ export default class QuickGatePlugin extends Plugin {
                     notes.push(`日记笔记本（按今日日记文档消歧）：${withDiary[0].name}`);
                 } else {
                     notes.push(withDiary.length === 0 ? "各候选笔记本均无今日日记文档，无法唯一判定" : `多个笔记本均有今日日记（${withDiary.map((c) => c.name).join("、")}），无法唯一判定`);
+                }
                 }
             }
         } catch (e) {

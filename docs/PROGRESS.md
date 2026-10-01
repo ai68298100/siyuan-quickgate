@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.6.1（config.discover 真机校准）
+
+- 非默认模板优先层（3.8.5 出厂默认模板字面量比对；实测 17 笔记本 16 默认+1 自定义 → 自定义者直接命中，无需等今日日记）
+- 只读实测：readDailyStatus SQL ✓、renderSprig ✓、listDocsByPath 形状 ✓（data:null 已防护）
+- 单测 15 文件 85 用例全绿；check/build 全绿；已重新部署工作空间
+
 ## 2026-10-02 · v0.6.0（v1.5 广播快路径）
 
 - BroadcastSubscriber：SSE 订阅 qg-cmd 频道 → executeAndRecord 毫秒级执行；AbortSignal 停止；指数退避重连；broadcastEnabled 独立开关默认关

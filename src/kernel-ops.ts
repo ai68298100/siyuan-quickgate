@@ -114,13 +114,22 @@ export async function kernelConfigDiscover(deps: KernelDeps): Promise<Receipt> {
                 if (savePath) candidates.push({ id: nb.id, name: nb.name, savePath });
             } catch { /* 单笔记本失败不影响整体 */ }
         }
-        if (candidates.length === 1) {
-            diaryNotebookId = candidates[0].id;
-            notes.push(`日记笔记本：${candidates[0].name}（dailyNoteSavePath=${candidates[0].savePath}）`);
-        } else if (candidates.length > 1) {
-            notes.push(`多个笔记本配置了日记路径（${candidates.map((c) => c.name).join("、")}），尝试按"今日日记文档存在性"消歧…`);
+        // R25 实证（3.8.5 真机）：17 笔记本中 16 个是未动过的默认模板、1 个自定义——自定义者即日记笔记本。
+        // 默认模板字面量取自 3.8.5 出厂值；非默认候选存在时优先只看它们（无需等今日日记写出）。
+        const DEFAULT_DAILY_TEMPLATE = `/daily note/{{now | date "2006/01"}}/{{now | date "2006-01-02"}}`;
+        let scope = candidates;
+        const customized = candidates.filter((c) => c.savePath !== DEFAULT_DAILY_TEMPLATE);
+        if (candidates.length > 1 && customized.length > 0) {
+            scope = customized;
+            notes.push(`按"自定义日记模板"缩小范围：${scope.map((c) => c.name).join("、")}`);
+        }
+        if (scope.length === 1) {
+            diaryNotebookId = scope[0].id;
+            notes.push(`日记笔记本：${scope[0].name}（dailyNoteSavePath=${scope[0].savePath}）`);
+        } else if (scope.length > 1) {
+            notes.push(`多个笔记本配置了日记路径（${scope.map((c) => c.name).join("、")}），尝试按"今日日记文档存在性"消歧…`);
             const withDiary: Cand[] = [];
-            for (const c of candidates) {
+            for (const c of scope) {
                 try {
                     const hpath = await deps.kpost<string>("/api/template/renderSprig", { template: c.savePath });
                     const parent = hpath.replace(/\/[^/]+$/, "") || "/";
