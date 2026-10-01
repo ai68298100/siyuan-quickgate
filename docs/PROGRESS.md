@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.2（事件订阅通道修复 + 生态清单校准）
+
+- Fixed：事件桥改订 window CustomEvent（上游唯一发射通道；v0.4.1 误订 app.eventBus 永不触发）；`unwrapCheckinDetail` 兼容上游包裹形状
+- ecosystem-manifests 校准：雷切 0.44.1（+3 能力）、打卡 18.16.0（8 事件全登记）、人脉 0.4.1（桥不变）；打卡 apiVersion=5 实证无破坏
+- 单测 11 文件 55 用例全绿；check 全绿
+
 ## 2026-10-02 · v0.5.1（可观测性补全 + 计时修正）
 
 - BridgeService 累计统计：commands/ok/rejected/failed/expired/totalDispatchMs/lastActivityAt（内存态）；设置页队列状态弹窗与诊断包展示（含平均耗时）

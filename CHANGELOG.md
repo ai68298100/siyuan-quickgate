@@ -2,6 +2,15 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.2 · 2026-10-02（事件订阅通道修复 + 生态清单校准）
+
+### Fixed
+- **v0.4.1 事件桥订阅通道错误**：上游打卡的集成事件只走 `window.dispatchEvent(new CustomEvent(...))`（integrations.ts 实证；app.eventBus 仅承载思源内部事件），v0.4.1 误订 `app.eventBus` 导致物化**永不触发**。改订 window 事件；detail 为包裹形状 `{type:"event-recorded", event:{…}}`，归一化新增 `unwrapCheckinDetail` 兼容包裹/平铺（D-0009 勘误已记）
+
+### Changed
+- ecosystem-manifests 按各仓库远端 main 校准（2026-10-02）：雷切 0.40.0→**0.44.1**（+get-document-outline / home-adapter-diagnostics / restore-document-set 三能力）、打卡 18.9.0→**18.16.0**（契约 8 事件全量登记，calendar.read 能力）、人脉 0.1.0→**0.4.1**（桥 v1 不变）
+- 打卡 apiVersion 实证仍为 5（checkin-api-v5.json），适配器无破坏性变更
+
 ## v0.5.1 · 2026-10-02（可观测性补全 + 计时修正）
 
 ### Added

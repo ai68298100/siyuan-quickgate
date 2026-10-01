@@ -16,7 +16,7 @@ import { appendEventLine, normalizeCheckinEvent } from "./services/eventbridge";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.5.1";
+const PLUGIN_VERSION = "0.5.2";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -83,34 +83,29 @@ export default class QuickGatePlugin extends Plugin {
 
     /**
      * events 数据源桥接（R3）：订阅打卡公开宿主事件 → 物化到其桥目录 events.ndjson。
-     * 只消费公开事件总线；总线不可用（宿主版本差异）时静默降级，不影响主桥。
+     * 订阅通道=window CustomEvent（上游 integrations.ts emitIntegrationEvent 只走
+     * window.dispatchEvent；app.eventBus 仅承载思源内部事件，v18.16 源码实证——
+     * v0.4.1 曾误订 eventBus 导致永不触发，v0.5.2 修正）。总线不可用时静默降级，不影响主桥。
      */
-    private eventBusHandler?: (e: { detail?: unknown }) => void;
+    private eventBridgeHandler?: (e: Event) => void;
 
     private startEventBridge() {
-        if (this.eventBusHandler) return;
+        if (this.eventBridgeHandler) return;
         try {
-            const bus = (window as unknown as {
-                siyuan?: { ws?: { app?: { eventBus?: {
-                    on: (name: string, h: (e: { detail?: unknown }) => void) => void;
-                    off: (name: string, h: (e: { detail?: unknown }) => void) => void;
-                } } } };
-            }).siyuan?.ws?.app?.eventBus;
-            if (!bus || typeof bus.on !== "function") return;
-            this.eventBusHandler = (e) => { void this.materializeCheckinEvent(e?.detail); };
-            bus.on("checkin:event-recorded", this.eventBusHandler);
-        } catch { /* 宿主事件总线不可用 → 静默降级 */ }
+            if (typeof window?.addEventListener !== "function") return;
+            this.eventBridgeHandler = (e: Event) => {
+                void this.materializeCheckinEvent((e as CustomEvent).detail);
+            };
+            window.addEventListener("checkin:event-recorded", this.eventBridgeHandler);
+        } catch { /* window 事件不可用 → 静默降级 */ }
     }
 
     private stopEventBridge() {
-        if (!this.eventBusHandler) return;
+        if (!this.eventBridgeHandler) return;
         try {
-            const bus = (window as unknown as {
-                siyuan?: { ws?: { app?: { eventBus?: { off: (name: string, h: (e: { detail?: unknown }) => void) => void } } } };
-            }).siyuan?.ws?.app?.eventBus;
-            bus?.off?.("checkin:event-recorded", this.eventBusHandler);
+            window.removeEventListener("checkin:event-recorded", this.eventBridgeHandler);
         } catch { /* 忽略 */ }
-        this.eventBusHandler = undefined;
+        this.eventBridgeHandler = undefined;
     }
 
     private async materializeCheckinEvent(detail: unknown) {

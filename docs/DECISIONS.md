@@ -36,7 +36,8 @@ workflow.plan 生命周期 5 分钟 + 一次性语义。持久化的收益（重
 
 ## D-0009 · events 载体由快门代为物化（R3，2026-10-02）
 
-打卡宿主事件（checkin:event-recorded）由快门订阅公开事件总线并**代写**到 `/storage/petal/siyuan-checkin/bridge/events.ndjson`——上游零改动即可产出事件流。纪律边界：只消费公开宿主事件总线；写的是快门自己维护的桥文件，不触碰打卡私有存储。上游（闪卡/考试）未来可自写（推荐）或由快门以同样模式桥接。
+打卡宿主事件（checkin:event-recorded）由快门订阅公开宿主事件并**代写**到 `/storage/petal/siyuan-checkin/bridge/events.ndjson`——上游零改动即可产出事件流。纪律边界：只消费公开宿主事件；写的是快门自己维护的桥文件，不触碰打卡私有存储。上游（闪卡/考试）未来可自写（推荐）或由快门以同样模式桥接。
+**通道勘误（v0.5.2，2026-10-02）**：上游发射通道是 **`window.dispatchEvent(new CustomEvent(...))`**（integrations.ts `emitIntegrationEvent`，v18.16 源码实证；打卡对 app.eventBus 只用 `loaded-protyle-*` 内部事件）。v0.4.1 曾误订 `app.eventBus` 导致永不触发，v0.5.2 改订 window 事件；detail 为包裹形状 `{type:"event-recorded", event:{…}}`，归一化兼容包裹/平铺两种。
 
 ## D-0010 · 内核路由不做前端中继（R4 评估结案，2026-10-02）
 

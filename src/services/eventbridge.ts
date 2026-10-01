@@ -6,7 +6,7 @@
  */
 import { HubEvent } from "./events";
 
-/** 打卡宿主事件 detail 的防御性形状 */
+/** 打卡宿主事件 detail 的防御性形状（window CustomEvent detail；上游 integrations.ts 包裹为 {type, event}） */
 export interface CheckinEventDetail {
     itemId?: unknown;
     value?: unknown;
@@ -16,10 +16,19 @@ export interface CheckinEventDetail {
     externalRef?: unknown;
 }
 
+/** 从 CustomEvent detail 取出 CheckinEvent：兼容上游包裹形状 {type:"event-recorded", event:{…}} 与平铺形状 */
+export function unwrapCheckinDetail(detail: unknown): unknown {
+    if (!detail || typeof detail !== "object") return detail;
+    const w = detail as { type?: unknown; event?: unknown };
+    if (w.type === "event-recorded" && w.event && typeof w.event === "object") return w.event;
+    return detail;
+}
+
 /** 归一化为 HubEvent；不合法返回 null（静默跳过） */
 export function normalizeCheckinEvent(detail: unknown, emittedAt: string): HubEvent | null {
-    if (!detail || typeof detail !== "object") return null;
-    const d = detail as CheckinEventDetail;
+    const unwrapped = unwrapCheckinDetail(detail);
+    if (!unwrapped || typeof unwrapped !== "object") return null;
+    const d = unwrapped as CheckinEventDetail;
     if (typeof d.itemId !== "string" || !d.itemId) return null;
     if (typeof d.occurredAt !== "string") return null;
     const ref = typeof d.externalRef === "string" ? d.externalRef : `${d.itemId}:${d.occurredAt}`;

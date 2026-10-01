@@ -1,6 +1,6 @@
 {
   "name": "siyuan-quickgate",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "type": "module",
   "description": "Lv QuickGate: SiYuan ecosystem hub & external gateway (command registry, data pass-through, editor context, NDJSON bridge)",
   "repository": "https://github.com/ai68298100/siyuan-quickgate",
