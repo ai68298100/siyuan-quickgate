@@ -3,19 +3,22 @@
 > 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
 > **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.6.0** 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥与广播快路径默认关）。下文 `$TOKEN` 即该值。
-> 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧（①②④⑦⑪）需思源窗口内 DevTools。**⑦ 已于 R26 用本机 bundle 静态核实部分坐实（v0.6.2，发现 bug#7）；新增替代证据法：grep `D:\biji\SiYuan\resources\stage\build\app\` 编译产物可直接核实前端假设，不依赖 DevTools/网络。**
+> 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧 spike ①②⑦ 已用本机 bundle 静态核实（R26/R27，**不需要 DevTools**）：grep `D:\biji\SiYuan\resources\stage\build\app\` 编译产物可直接核实前端假设——这是实际运行的代码，比远端源码更硬。剩余 DevTools 现场：④ 多窗口 Web Lock、⑦ blockId 光标爬升、⑪ 事件现场、① 可选复核。
 > **重启复测一键化（R24）**：思源重启后跑 `node tools/verify-restart.mjs`（自动读 env）——③桥端到端含延迟 / ⑩⓪负向鉴权+路由 ping+events.list+降级 / ⑪事件物化计数 / ⑤广播存活 / **v1.5 postMessage→回执延迟测量**。一条命令完成复测批。
 
-## ① 命令注册表形状 ⬜
+## ① 命令注册表形状 ✅（2026-10-02，bundle 静态核实；原 DevTools 尾巴全部钉住）
 - **静态已钉（v0.5.8）**：命令身份=`ICommand.langKey`（官方 app/src/types/index.d.ts；不存在 command/id——此前误读致列表为空）；文本=langText→`i18n[langKey]`；回调五形态（callback/globalCallback/execute 可外部执行，editor/dock/fileTree 标 focusOnly）
-- 计划：思源 DevTools 控制台执行
+- **bundle 实证（R27，本机 3.8.5 安装产物 common.js）**：
+  - Plugin 基类构造器 `this.i18n=We.i18n,this.displayName=We.displayName,this.commands=[]`——**p.i18n/p.displayName 挂载成立**，标题代取链有效 ✓
+  - `addCommand(c)`：以 `(name, langKey, c.hotkey, c.hotkeys)` 解析后**就地回写** `c.hotkey`=解析默认值、`c.customHotkey`=用户生效键（keymap 查 langKey，身份=langKey 再证）；`customHotkey` 非字符串者报错并从 commands **移除** ✓
+  - `window.siyuan.ws.app.plugins` 数组遍历路径官方自身多处使用 ✓；官方对命令快捷键的消费就是读 `customHotkey`
+  - 校准点"hotkeys[] 是否常见"→ 结论：`hotkeys[]` 只是声明形态，运行时真值是宿主回写的 `customHotkey`/`hotkey`——registry v0.6.3 起 accelerator 优先级改为 customHotkey > hotkey > hotkeys[]
+- DevTools 现场步骤保留（可选复核，无校准负债）：
   ```js
   console.table(window.siyuan.ws.app.plugins.map(p => ({name: p.name, ver: p.version, cmds: p.commands?.length})))
-  window.siyuan.ws.app.plugins.find(p=>p.name==="siyuan-speed-switch").commands?.slice(0,5)
   ```
-- 校准点：langKey 形态确认；`p.displayName`/`p.i18n` 是否如预期挂在实例上（挂不上则标题回退 id）；hotkeys[] 是否常见
-- 影响：src/services/registry.ts 探测链与 commands.list/search 输出形状
-- 结论：（待填——需前端 DevTools）
+- 影响：src/services/registry.ts（v0.6.3 更新+证据注释）；测试覆盖三级优先级
+- 结论：注册表探测链全部静态坐实，无剩余假设
 
 ## ⑥ petal/loadPetals 形状 ✅（2026-10-02，内核 3.8.5 真机自动探测）
 - 实证：`POST /api/petal/loadPetals {frontend:"desktop"}` → `data:[{name, displayName, version, enabled, incompatible, disabledInPublish, userDisabledInPublish, disallowInstall, js(完整源码内嵌)…}]`
@@ -23,11 +26,12 @@
 - 本工作空间实装名单与生态清单校准一致：雷切 0.44.1 / 打卡 18.16.0 / 人脉 0.4.1（快门 v0.5.9 已部署启用）
 - 结论：registry.list 与设置页生态清单对照无需再改
 
-## ② confirm API ⬜
-- 计划：控制台分别试 `confirm("标题","正文",()=>console.log("ok"))`（思源全局）与 `window.siyuan.ws.app.plugins[0]...`；观察返回值是 Promise 还是仅回调
-- 校准点：confirmWithFront 的 30s 自制超时是否必要、resolve 语义
-- 影响：src/index.ts confirmWithFront
-- 结论：（待填）
+## ② confirm API ✅（2026-10-02，bundle 静态核实）
+- 实证（3.8.5 common.js）：宿主 `confirm` 为**回调式、无返回值（void）、无自动超时**——确认按钮 `confirmCB(dialog)` 后 destroy；**Esc/取消按钮仅 destroy，3.8.5 取消分支未见回调调用**
+- 校准结论：confirmWithFront 的 **30s 自制超时必要**（对话框可无限期停留；取消路径可能不触发任何回调，超时是唯一兜底 resolve(false)）；现有第 4 参 cancel 回调无害（不被触发时超时兜底，被触发时提前 resolve）
+- DevTools 现场步骤保留（可选复核）：`confirm("t","c",()=>console.log("ok"))` 观察返回值
+- 影响：src/index.ts confirmWithFront（契约一致，仅补证据注释）
+- 结论：无需行为修改
 
 ## ③ 桥文件端到端 ⬜
 - 计划：设置页开桥 → `node tools/lv-cli.mjs ping`
@@ -43,12 +47,6 @@
 - 实证：`POST /api/broadcast/postMessage {channel:"qg-spike5",message}` → code:0（频道自动创建）；`GET /es/broadcast/subscribe?channel=qg-spike5`（SSE）→ 200 text/event-stream，**推送消息约 1s 内送达**（`id:35\nevent:qg-spike5\ndata:ping-sse\n\n`）；均以 Token 头鉴权生效
 - 结论：**v1.5 push 通道技术前提成立**（毫秒级、Token 鉴权、频道按名自治）。立项细化：外部客户端 postMessage 推命令到约定频道 ↔ 快门前端 SSE 订阅消费（与 NDJSON 慢路径并存，频道命名/鉴权粒度见 TODO M3）
 - 备注：`GET /api/broadcast/getChannels` 200 但响应空体（小怪癖，不阻塞）
-
-## ⑥ petal/loadPetals 形状 ⬜
-- 计划：`curl -s http://127.0.0.1:1568/api/petal/loadPetals -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"frontend\":\"desktop\"}" | head -c 2000`
-- 校准点：条目字段名（name/version/enabled？）、`frontend` 参数语义（不带参数 vs desktop vs mobile 的差异）
-- 影响：registry.list 合并逻辑、设置页生态清单对照
-- 结论：（待填）
 
 ## ⑦ editor.context 字段校准 ◐（2026-10-02，本机 bundle 静态核实；**发现并修复 bug#7**；DevTools 现场部分待补）
 - **静态核实法**（DevTools 不可用时的替代证据链）：直接 grep 本机安装的编译产物 `D:\biji\SiYuan\resources\stage\build\app\common.js`——这是实际运行的代码

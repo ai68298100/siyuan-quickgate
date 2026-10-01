@@ -45,6 +45,23 @@ describe("registry 探测（v0.5.8 审计：ICommand.langKey 身份/多回调形
         expect(cmds[0].focusOnly).toBeUndefined();
     });
 
+    it("accelerator 优先级：customHotkey（宿主生效键）> hotkey（解析默认）> hotkeys[]（原始形态）", () => {
+        const probe = probeCommandRegistry(fakeWindow([
+            {
+                name: "p1", i18n: {},
+                commands: [
+                    // 宿主 addCommand 回写后的典型形态：两键都有，customHotkey 是用户实际生效值
+                    { langKey: "a", callback: () => 1, hotkey: "Ctrl+Shift+A", customHotkey: "Ctrl+Alt+A" },
+                    // 绕过 addCommand 直塞的罕见形态：只有原始 hotkeys[]
+                    { langKey: "b", callback: () => 2, hotkeys: ["Ctrl+B"] },
+                ],
+            },
+        ]));
+        const cmds = probe.plugins[0].commands;
+        expect(cmds[0].accelerator).toBe("Ctrl+Alt+A");
+        expect(cmds[1].accelerator).toBe("Ctrl+B");
+    });
+
     it("editorCallback-only → focusOnly 标记；runCommand 诚实 unsupported（不盲执行）", async () => {
         const probe = probeCommandRegistry(fakeWindow([
             {

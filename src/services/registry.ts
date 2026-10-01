@@ -6,8 +6,12 @@
  *   - 回调五形态：callback（焦点无关）/ globalCallback / execute / editorCallback / dockCallback /
  *     fileTreeCallback——**更具体的回调存在时 callback 不会被宿主触发**（ICommand 注释原文）；
  *     editor/fileTree/dock 三形需要焦点上下文参数，外部执行仅支持 callback/execute/globalCallback
- *   - 快捷键：hotkey 或 hotkeys[]（优先）
+ *   - 快捷键：customHotkey（宿主 addCommand 解析写回的生效键）→ hotkey → hotkeys[]
  * 运行时仍以 spike① 实证为准；探测到的形状必须记录进 docs/WALKTHROUGH.md。
+ * 2026-10-02 bundle 静态核实（本机 3.8.5 安装产物 common.js）：
+ *   - Plugin 基类构造器挂载 this.i18n/.displayName/.commands=[] ✓（p.i18n/p.displayName 探测链成立）
+ *   - addCommand 用 (name,langKey,hotkey,hotkeys) 解析后回写 hotkey=默认/customHotkey=生效值，
+ *     解析失败者报错并从 commands 移除；window.siyuan.ws.app.plugins 遍历路径 ✓
  */
 import { PluginCommandInfo } from "../types/bridge";
 
@@ -65,7 +69,10 @@ export function probeCommandRegistry(getWindow: () => any = () => (globalThis as
                     (typeof c.customHotTitle === "string" && c.customHotTitle) ||
                     (typeof c.title === "string" && c.title) ||
                     id;
+                // 快捷键：customHotkey（宿主 addCommand 就地写入的用户生效键，3.8.5 bundle 实证）
+                // → hotkey（宿主解析后的默认键串）→ hotkeys[]（绕过 addCommand 直塞时的原始形态）
                 const accelerator =
+                    (typeof c.customHotkey === "string" && c.customHotkey) ||
                     (typeof c.hotkey === "string" && c.hotkey) ||
                     (Array.isArray(c.hotkeys) && c.hotkeys.length > 0 ? c.hotkeys.join(",") : undefined);
                 list.push({

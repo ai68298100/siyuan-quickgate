@@ -18,7 +18,7 @@ import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.6.2";
+const PLUGIN_VERSION = "0.6.3";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -213,7 +213,12 @@ export default class QuickGatePlugin extends Plugin {
         }
     }
 
-    /** 确认对话框：先尝试激活思源窗口（08-O10），30s 超时=拒绝 */
+    /**
+     * 确认对话框：先尝试激活思源窗口（08-O10），30s 超时=拒绝。
+     * 3.8.5 bundle 实证：宿主 confirm 为回调式、无返回值、无自动超时——
+     * 确认按钮回调后 destroy；Esc/取消仅 destroy（3.8.5 取消分支未见回调调用）。
+     * 30s 自制超时是唯一兜底，必须保留。
+     */
     private async confirmWithFront(title: string): Promise<boolean> {
         try {
             window.focus();
