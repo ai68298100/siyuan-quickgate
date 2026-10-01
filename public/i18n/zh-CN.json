@@ -1,0 +1,11 @@
+{
+    "openSetting": "小驴快门：打开设置",
+    "pingBridge": "小驴快门：桥自检（bridge.ping）",
+    "settingTitle": "小驴快门 · 设置",
+    "bridgeEnabled": "外部命令桥（默认关）",
+    "pollMs": "轮询间隔（ms）",
+    "confirmExec": "命令执行前确认（默认开）",
+    "rawApi": "plugin.api 高级透传（默认关）",
+    "audit": "审计日志",
+    "about": "小驴生态联动中枢 + 外部网关。只消费公开注册能力与公开桥方法，不读取其他插件私有存储。"
+}

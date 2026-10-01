@@ -1,0 +1,49 @@
+{
+  "name": "siyuan-quickgate",
+  "author": "ai68298100",
+  "url": "https://github.com/ai68298100/siyuan-quickgate",
+  "version": "0.1.0",
+  "minAppVersion": "3.8.4",
+  "backends": [
+    "windows",
+    "linux",
+    "darwin",
+    "ios",
+    "android",
+    "harmony",
+    "docker"
+  ],
+  "frontends": [
+    "desktop",
+    "mobile",
+    "browser-desktop",
+    "browser-mobile",
+    "desktop-window"
+  ],
+  "displayName": {
+    "default": "Lv QuickGate",
+    "zh-CN": "小驴快门",
+    "en-US": "Lv QuickGate"
+  },
+  "description": {
+    "default": "Lv ecosystem hub & external gateway: command registry, data pass-through, editor context and NDJSON bridge for Quicker/CLI/HTTP Shortcut clients.",
+    "zh-CN": "小驴生态联动中枢与外部网关：命令注册表、数据透传、编辑器上下文与 NDJSON 外部命令桥（Quicker/快捷指令/CLI 复用同一契约）",
+    "en-US": "Lv ecosystem hub & external gateway for SiYuan"
+  },
+  "readme": {
+    "default": "README.md",
+    "zh-CN": "README.zh-CN.md"
+  },
+  "icon": "icon.png",
+  "preview": "preview.png",
+  "disabledInPublish": true,
+  "keywords": [
+    "quickgate",
+    "快门",
+    "bridge",
+    "quicker",
+    "gateway",
+    "小驴",
+    "自动化"
+  ]
+}

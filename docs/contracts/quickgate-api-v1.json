@@ -1,0 +1,38 @@
+{
+  "protocol": 1,
+  "name": "siyuan-quickgate",
+  "displayName": "小驴快门 / Lv QuickGate",
+  "apiVersion": 1,
+  "transport": {
+    "kind": "ndjson-files",
+    "basePath": "/storage/petal/siyuan-quickgate/bridge",
+    "commandsFile": "commands.ndjson",
+    "resultsFile": "results.ndjson",
+    "resultsMaxLines": 200,
+    "argsMaxBytes": 32768,
+    "defaultTtlMs": 60000
+  },
+  "envelope": {
+    "required": ["v", "id", "op"],
+    "optional": ["args", "createdAt", "ttlMs", "reply", "device"],
+    "idPattern": "^[A-Za-z0-9_-]{1,64}$"
+  },
+  "receiptStatuses": ["recorded", "duplicate", "rejected", "failed", "unsupported", "expired"],
+  "ops": [
+    { "op": "bridge.ping", "args": {}, "effect": "read" },
+    { "op": "commands.list", "args": { "plugin": "string?" }, "effect": "read" },
+    { "op": "commands.search", "args": { "keyword": "string?" }, "effect": "read" },
+    { "op": "commands.run", "args": { "plugin": "string", "command": "string" }, "effect": "write", "confirm": true, "confirmTimeoutMs": 30000 },
+    { "op": "checkin.items", "args": { "includeArchived": "bool?", "limit": "int?<=200" }, "effect": "read", "requires": "siyuan-checkin v5 items.read" },
+    { "op": "checkin.record", "args": { "itemId": "string", "value": "number?", "unit": "string?", "note": "string?", "occurredAt": "string?" }, "effect": "write", "requires": "siyuan-checkin v5 events.record", "idempotency": "source=quickgate, externalRef=envelope.id" },
+    { "op": "checkin.summary", "args": {}, "effect": "read", "requires": "siyuan-checkin v5 summary.read" },
+    { "op": "contacts.search", "args": { "keyword": "string?" }, "effect": "read", "requires": "siyuan-contacts v1" },
+    { "op": "contacts.ensure", "args": { "name": "string<=64" }, "effect": "write", "requires": "siyuan-contacts v1" },
+    { "op": "contacts.interaction", "args": { "names": "string[]?", "docIds": "string[]?", "date": "string?", "place": "string?", "note": "string?" }, "effect": "write", "requires": "siyuan-contacts v1", "idempotency": "ref=envelope.id" },
+    { "op": "doc.open", "args": { "id": "string" }, "effect": "navigation" },
+    { "op": "daily.status", "args": {}, "effect": "read" },
+    { "op": "setting.open", "args": {}, "effect": "ui" },
+    { "op": "editor.context", "args": {}, "effect": "read" },
+    { "op": "plugin.api", "args": { "plugin": "string", "method": "string", "args": "unknown[]?" }, "effect": "passthrough", "default": "off", "allowlist": ["siyuan-checkin", "siyuan-contacts", "siyuan-speed-switch"] }
+  ]
+}

@@ -1,0 +1,20 @@
+name: "功能建议"
+description: "新 op、新适配器、协议演进建议"
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 场景
+      description: 想完成什么事？现在为什么做不了？
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议方案
+      description: op 形状 / 语义 / 幂等与确认策略
+  - type: checkboxes
+    id: discipline
+    attributes:
+      label: 边界确认
+      options:
+        - label: 只涉及公开 API / 公开桥，不读取其他插件私有存储

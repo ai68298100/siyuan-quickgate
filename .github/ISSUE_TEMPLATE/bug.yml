@@ -1,0 +1,28 @@
+name: "Bug 反馈"
+description: "快门行为不符合 docs/api.md 契约或出现异常"
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么
+      description: 期望行为 vs 实际行为；附 results.ndjson 中的对应回执（脱敏后）
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 用 lv-cli.mjs send --op ...
+        2. ...
+  - type: input
+    id: env
+    attributes:
+      label: 环境
+      placeholder: "思源 3.8.5 / Windows 11 / 快门 v0.1.0 / 桥开关状态"
+  - type: checkboxes
+    id: sanity
+    attributes:
+      label: 自查
+      options:
+        - label: 已脱敏（无 Token、无个人路径）
+        - label: 已确认桥开关与轮询间隔

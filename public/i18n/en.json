@@ -1,0 +1,11 @@
+{
+    "openSetting": "Lv QuickGate: Open settings",
+    "pingBridge": "Lv QuickGate: Bridge self-test (bridge.ping)",
+    "settingTitle": "Lv QuickGate · Settings",
+    "bridgeEnabled": "External command bridge (default off)",
+    "pollMs": "Poll interval (ms)",
+    "confirmExec": "Confirm before command execution (default on)",
+    "rawApi": "plugin.api raw pass-through (default off)",
+    "audit": "Audit log",
+    "about": "Lv ecosystem hub & external gateway. Consumes only publicly registered capabilities and public bridge methods; never reads other plugins' private storage."
+}
