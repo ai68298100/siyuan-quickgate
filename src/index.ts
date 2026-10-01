@@ -18,7 +18,7 @@ import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.6.1";
+const PLUGIN_VERSION = "0.6.2";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -254,12 +254,20 @@ export default class QuickGatePlugin extends Plugin {
         void this.saveData("audit.json", { schemaVersion: 1, entries: this.auditLog }).catch(() => {});
     }
 
-    /** 编辑器上下文（M0⑦ 待实证，尽力而为永不抛错） */
+    /**
+     * 编辑器上下文（尽力而为永不抛错）。
+     * 选择器证据（2026-10-02 对照本机安装 bundle resources/stage/build/app/common.js 静态核实）：
+     * - .protyle 容器自带 data-node-id=rootID（Protyle 类加载路径 setAttribute，与 fn__none 切换同方法）；
+     *   注意 data-doc-id 在 bundle 中不存在（只有 data-doc-type），勿用。
+     * - .protyle-title 元素在 render 时也 setAttribute("data-node-id")；标题文本官方走 .protyle-title__input（editElement）。
+     * - fn__none 由 Protyle 类在 tab 切换时 add/remove，:not(.fn__none) 过滤有效。
+     * DevTools 实证（spike⑦ 现场部分）仍待用户机验证。
+     */
     private readEditorContext(): EditorContextResult | null {
         try {
             const activeProtyle = document.querySelector(".layout__center .protyle:not(.fn__none)") as HTMLElement | null;
             if (!activeProtyle) return null;
-            const docId = activeProtyle.getAttribute("data-doc-id")
+            const docId = activeProtyle.getAttribute("data-node-id")
                 ?? (activeProtyle.querySelector(".protyle-title") as HTMLElement | null)?.getAttribute("data-node-id")
                 ?? null;
             const sel = window.getSelection();
@@ -273,7 +281,9 @@ export default class QuickGatePlugin extends Plugin {
                 while (el && !el.getAttribute?.("data-node-id")) el = el.parentElement;
                 blockId = el?.getAttribute("data-node-id") ?? null;
             }
-            const rootTitle = (activeProtyle.querySelector(".protyle-title") as HTMLElement | null)?.textContent?.trim() ?? null;
+            const rootTitle = (activeProtyle.querySelector(".protyle-title__input") as HTMLElement | null)?.textContent?.trim()
+                ?? (activeProtyle.querySelector(".protyle-title") as HTMLElement | null)?.textContent?.trim()
+                ?? null;
             return { docId, rootTitle, blockId, selectedText };
         } catch {
             return null; // 降级：不阻断
