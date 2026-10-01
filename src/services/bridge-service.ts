@@ -35,6 +35,8 @@ export interface EcosystemManifest {
         protocol: string | null;
         capabilities: string[];
         hubIntegration: string;
+        /** 插件暴露在 window 上的公开桥全局名（如 siyuanCheckin）；无则缺省 */
+        windowBridge?: string;
     }>;
 }
 
@@ -463,8 +465,10 @@ export class BridgeService {
                 const method = typeof a.method === "string" ? a.method : "";
                 if (!plugin || !method) return this.reject("plugin/method 缺失");
                 if (!s.rawApiAllowlist.includes(plugin)) return this.reject(`插件 ${plugin} 不在 plugin.api 允许名单`);
+                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const globalName = manifest.plugins.find((m) => m.pluginId === plugin)?.windowBridge ?? "";
                 const w = globalThis as unknown as { window?: { [k: string]: unknown } };
-                const bridge = (w.window?.[plugin === "siyuan-checkin" ? "siyuanCheckin" : plugin === "siyuan-contacts" ? "LvContacts" : ""] as Record<string, unknown>) ?? null;
+                const bridge = (globalName ? w.window?.[globalName] : null) as Record<string, unknown> | null | undefined;
                 const fn = bridge && typeof (bridge as Record<string, unknown>)[method] === "function" ? (bridge as Record<string, unknown>)[method] as () => unknown : undefined;
                 if (!fn) return { status: "unsupported", data: null, message: "桥方法不存在" };
                 try {

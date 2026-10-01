@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.5（内核路由可测化 + plugin.api manifest 驱动）
+
+- kernel-ops.ts 抽出（依赖注入可单测）；补齐文档声称但缺失的 events.list op；events.pull 对齐前端去重契约
+- plugin.api 窗口桥映射 manifest 驱动（windowBridge 字段）
+- 单测 12 文件 67 用例全绿；check/build 全绿
+
 ## 2026-10-02 · v0.5.4（event-deleted 订阅物化）
 
 - 订阅 `checkin:event-deleted`（event + deletedEvents 均物化，`:deleted` 幂等后缀）；materializeHubEvents 批量合并写

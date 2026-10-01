@@ -196,7 +196,7 @@
       },
       "effect": "read",
       "since": "0.4.0",
-      "note": "文件载体拉取，幂等键去重归调用方"
+      "note": "文件载体拉取，幂等键去重归调用方。物化事件：checkin:event-recorded（v0.5.2）、checkin:event-deleted（v0.5.4，幂等键=原键+:deleted，append-only 删除标记）；analytics-updated 不物化（D-0011）"
     },
     {
       "op": "workflow.plan",

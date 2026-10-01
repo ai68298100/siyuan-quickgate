@@ -2,6 +2,16 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.5 · 2026-10-02（内核路由可测化 + plugin.api manifest 驱动）
+
+### Added
+- `src/kernel-ops.ts`：内核同步路由 op 逻辑抽出（依赖注入，可单测）；**补齐 `events.list` op**（v0.5.0 起文档声称支持但未实现，实际返回"未知 op"）；`events.pull` 对齐前端契约（idempotencyKey 去重 + 缺字段行跳过，此前内核版不去重）
+- plugin.api 窗口桥映射改 manifest 驱动（`windowBridge` 字段），替换硬编码三元表达式——管家/闪卡等未来插件零代码接入透传
+- 单测 +10：kernel-ops 七组（ping/registry 降级/events 白名单与去重/config.discover/template 链/前端专属 op 指引）+ plugin.api 四态（开关/名单/映射透传/方法缺失）
+
+### Changed
+- kernel.ts 瘦身为纯 goja 接线（kpost/getFileText + 路由挂载）
+
 ## v0.5.4 · 2026-10-02（event-deleted 订阅物化）
 
 ### Added

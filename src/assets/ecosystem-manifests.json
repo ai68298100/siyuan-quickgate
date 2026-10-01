@@ -18,6 +18,7 @@
       "maturity": "stable",
       "version": "18.16.0",
       "protocol": "window.siyuanCheckin v5",
+      "windowBridge": "siyuanCheckin",
       "capabilities": ["items.read", "items.query", "events.read", "events.range.read", "events.record", "events.record.batch", "summary.read", "analytics.read", "metrics.read", "export.json", "export.csv", "calendar.read"],
       "events": [
         { "name": "checkin:event-recorded", "status": "available", "idempotency": "source+externalRef", "payload": { "type": "event-recorded", "event": { "itemId": "string", "value": "number", "occurredAt": "string" } }, "note": "快门已订阅物化（window CustomEvent，v0.5.2 通道修正）" },
@@ -37,6 +38,7 @@
       "maturity": "stable",
       "version": "0.4.1",
       "protocol": "window.LvContacts v1",
+      "windowBridge": "LvContacts",
       "capabilities": ["searchPeople", "getPerson", "ensurePerson", "recordInteraction"],
       "hubIntegration": "contacts.search/ensure/interaction 透传适配器"
     },

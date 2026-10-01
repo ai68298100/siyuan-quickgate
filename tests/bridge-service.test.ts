@@ -201,3 +201,78 @@ describe("bridge-service 累计统计（可观测性）", () => {
         expect(service.stats.expired).toBe(1);
     });
 });
+
+describe("plugin.api 高级透传（安全敏感：开关+允许名单+manifest 窗口桥映射）", () => {
+    const command = (id: string, args: Record<string, unknown>) =>
+        JSON.stringify({ v: 1, id, op: "plugin.api", args, createdAt: new Date().toISOString(), ttlMs: 60000 });
+
+    function makeRawService(mem: MemKernel) {
+        const store = new BridgeStore({ load: async () => null, save: async () => {} });
+        const service = new BridgeService({
+            api: mem.api,
+            store,
+            settings: () => ({ ...settings(), rawApiEnabled: true, rawApiAllowlist: ["siyuan-checkin"] }),
+            pluginName: "siyuan-quickgate",
+            pluginVersion: "0.1.0",
+            deviceName: () => "dev-a",
+            registry: () => ({ source: "fallback", plugins: [] }),
+            confirm: async () => true,
+            audit: () => {},
+            editorContext: () => null,
+            dailyStatus: async () => ({ docId: null, exists: false }),
+            openDoc: () => {},
+            openSetting: () => {},
+            getCheckin: () => undefined,
+            getContacts: () => undefined,
+        });
+        return service;
+    }
+
+    it("开关关 → unsupported；不在允许名单 → rejected", async () => {
+        const mem = new MemKernel();
+        mem.files.set("/bridge/commands.ndjson", cmd("p0", "plugin.api"));
+        const { service } = makeService(mem); // 默认 rawApiEnabled=false
+        await service.tick();
+        let receipt = JSON.parse(mem.files.get("/bridge/results.ndjson")!.trim().split("\n")[0]) as BridgeReceipt;
+        expect(receipt.status).toBe("unsupported");
+
+        const mem2 = new MemKernel();
+        mem2.files.set("/bridge/commands.ndjson", command("p1", { plugin: "siyuan-contacts", method: "searchPeople" }));
+        const service2 = makeRawService(mem2); // 名单只有 siyuan-checkin
+        await service2.tick();
+        receipt = JSON.parse(mem2.files.get("/bridge/results.ndjson")!.trim()) as BridgeReceipt;
+        expect(receipt.status).toBe("rejected");
+        expect(receipt.message).toContain("允许名单");
+    });
+
+    it("manifest windowBridge 映射：siyuan-checkin → window.siyuanCheckin 透传成功", async () => {
+        const mem = new MemKernel();
+        mem.files.set("/bridge/commands.ndjson", command("p2", { plugin: "siyuan-checkin", method: "getSummary", args: [] }));
+        (globalThis as unknown as { window?: Record<string, unknown> }).window = {
+            siyuanCheckin: { getSummary: async () => ({ total: 42 }) },
+        };
+        try {
+            const service = makeRawService(mem);
+            await service.tick();
+            const receipt = JSON.parse(mem.files.get("/bridge/results.ndjson")!.trim()) as BridgeReceipt;
+            expect(receipt.status).toBe("recorded");
+            expect(receipt.data).toEqual({ total: 42 });
+        } finally {
+            delete (globalThis as unknown as { window?: unknown }).window;
+        }
+    });
+
+    it("方法不存在 → unsupported", async () => {
+        const mem = new MemKernel();
+        mem.files.set("/bridge/commands.ndjson", command("p3", { plugin: "siyuan-checkin", method: "noSuchMethod" }));
+        (globalThis as unknown as { window?: Record<string, unknown> }).window = { siyuanCheckin: {} };
+        try {
+            const service = makeRawService(mem);
+            await service.tick();
+            const receipt = JSON.parse(mem.files.get("/bridge/results.ndjson")!.trim()) as BridgeReceipt;
+            expect(receipt.status).toBe("unsupported");
+        } finally {
+            delete (globalThis as unknown as { window?: unknown }).window;
+        }
+    });
+});
