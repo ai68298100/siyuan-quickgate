@@ -96,7 +96,7 @@ export const DEFAULT_SETTINGS: QuickGateSettings = {
     broadcastEnabled: false,
 };
 
-/** 命令注册表条目（M0① 实证前为探测形状） */
+/** 命令注册表条目（spike① 已实证：id=langKey；形状见 services/registry.ts 头注与 WALKTHROUGH ①） */
 export interface PluginCommandInfo {
     plugin: string;
     pluginDisplayName?: string;

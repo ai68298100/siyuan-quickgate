@@ -2,6 +2,11 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.6.4（陈旧对冲注释清账）
+
+- src 五处"待实证/待校准"注释按实证结论刷新；registry 降级原因（桥上可见）改为真实可达性措辞
+- 纯文档性变更；86 单测全绿；发版同轮更新 CHANGELOG+PROGRESS（R28 教训执行）
+
 ## 2026-10-02 · v0.6.3（registry 快捷键读宿主生效键 customHotkey）
 
 - bundle 静态核实（本机 3.8.5 安装产物）：Plugin 基类挂载 i18n/displayName/commands ✓；addCommand 以 langKey 解析后回写 hotkey=默认/customHotkey=生效，解析失败者移出 commands

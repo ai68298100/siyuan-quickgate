@@ -2,6 +2,12 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.6.4 · 2026-10-02（陈旧对冲注释清账）
+
+### Changed
+- registry 降级原因措辞更新（桥上用户可见）：~~"宿主注册表形状不符（spike ① 待实证）"~~ → "window.siyuan.ws.app.plugins 不可达（非桌面端或插件尚未加载）"——形状已实证，降级的真实原因只有可达性
+- src 内五处"待实证/待校准"对冲注释按实证结论刷新（registry 头注/kernel-ops 自呼/daily.status SQL/PluginCommandInfo 类型注）——文档性变更，无行为改动
+
 ## v0.6.3 · 2026-10-02（registry 快捷键读宿主生效键 customHotkey）
 
 ### Fixed

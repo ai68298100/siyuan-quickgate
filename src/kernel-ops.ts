@@ -38,7 +38,7 @@ export async function kernelRegistryList(deps: KernelDeps): Promise<Receipt> {
     let petals: Array<Record<string, unknown>> = [];
     try {
         petals = await deps.kpost<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: "desktop" });
-    } catch { /* 内核自呼在本运行时的行为待 spike 校准；失败按空处理 */ }
+    } catch { /* kernel.js 内自呼失败（spike⑩ handler 待内核重启复测）→ 按空清单降级 */ }
     const byName = new Map<string, Record<string, unknown>>();
     for (const p of petals) {
         const n = (p as { name?: unknown }).name;

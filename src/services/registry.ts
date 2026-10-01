@@ -1,17 +1,14 @@
 /**
- * 命令注册表探测（M0 spike ① 待实证）：单点封装，探测失败自动降级。
- * 形状依据（v0.5.8 审计，思源 master app/src/types/index.d.ts ICommand 实证）：
+ * 命令注册表探测：单点封装，探测失败自动降级。
+ * 形状依据（v0.5.8 审计 + v0.6.3 本机 3.8.5 bundle 静态坐实，spike① ✅）：
  *   - 命令身份=**langKey**（不存在 command/id 字段——v0.5.7 前误读导致列表为空）
- *   - 显示文本=langText；缺省时由宿主按 i18n[langKey] 解析（插件实例 .i18n 可代取）
+ *   - 显示文本=langText；缺省时由宿主按 i18n[langKey] 解析（插件实例 .i18n 可代取——
+ *     Plugin 基类构造器实证挂载 this.i18n/this.displayName）
  *   - 回调五形态：callback（焦点无关）/ globalCallback / execute / editorCallback / dockCallback /
  *     fileTreeCallback——**更具体的回调存在时 callback 不会被宿主触发**（ICommand 注释原文）；
  *     editor/fileTree/dock 三形需要焦点上下文参数，外部执行仅支持 callback/execute/globalCallback
  *   - 快捷键：customHotkey（宿主 addCommand 解析写回的生效键）→ hotkey → hotkeys[]
- * 运行时仍以 spike① 实证为准；探测到的形状必须记录进 docs/WALKTHROUGH.md。
- * 2026-10-02 bundle 静态核实（本机 3.8.5 安装产物 common.js）：
- *   - Plugin 基类构造器挂载 this.i18n/.displayName/.commands=[] ✓（p.i18n/p.displayName 探测链成立）
- *   - addCommand 用 (name,langKey,hotkey,hotkeys) 解析后回写 hotkey=默认/customHotkey=生效值，
- *     解析失败者报错并从 commands 移除；window.siyuan.ws.app.plugins 遍历路径 ✓
+ * 证据明细见 docs/WALKTHROUGH.md ①；现场复核为可选，不再阻塞。
  */
 import { PluginCommandInfo } from "../types/bridge";
 
@@ -44,7 +41,7 @@ export function probeCommandRegistry(getWindow: () => any = () => (globalThis as
         const app = w?.siyuan?.ws?.app;
         const plugins = app?.plugins;
         if (!Array.isArray(plugins)) {
-            return { source: "fallback", plugins: [], reason: "宿主注册表形状不符（spike ① 待实证），已降级" };
+            return { source: "fallback", plugins: [], reason: "window.siyuan.ws.app.plugins 不可达（非桌面端或插件尚未加载），已降级" };
         }
         const out: RegistryProbeResult["plugins"] = [];
         for (const p of plugins) {

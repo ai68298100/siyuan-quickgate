@@ -18,7 +18,7 @@ import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.6.3";
+const PLUGIN_VERSION = "0.6.4";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -295,7 +295,7 @@ export default class QuickGatePlugin extends Plugin {
         }
     }
 
-    /** 今日日记状态：只探测不创建（对齐雷切语义）；getConf 字段名 M0⑧ 实证前用标题日期法 */
+    /** 今日日记状态：只探测不创建（对齐雷切语义）；SQL 标题日期法已于 R25 真机实测 code=0 ✓（字段名实证见 spike⑧） */
     private async readDailyStatus(): Promise<{ docId: string | null; exists: boolean }> {
         try {
             const today = new Date();
