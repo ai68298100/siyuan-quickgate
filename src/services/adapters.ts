@@ -13,7 +13,10 @@ export interface CheckinBridgeLike {
     getItems?: () => unknown[];
     queryItems?: (args: unknown) => Promise<unknown[]> | unknown[];
     recordEvent?: (args: unknown) => Promise<unknown> | unknown;
-    /** v18.16 公开面核实：无 getSummary；summary 由 getSummaryContext("day") + getStreaks 组合（v0.5.6 修正） */
+    /** 批量接口（唯一接受 occurredAt 的写入路径）；返回 BatchEntryResult[]（kind: recorded|duplicate|discarded|blocked|rejected） */
+    recordEventsBatch?: (inputs: unknown[]) => Promise<unknown> | unknown;
+    /** v18.16 公开面核实：无 getSummary；summary 由 getSummaryContext("day") + getStreaks 组合（v0.5.6 修正）。
+     *  getStreaks 实际返回数组 {itemId,current,longest,milestones?}[]（v0.5.7 审计），适配器归一为映射。 */
     getSummaryContext?: (range: "day" | "week" | "month") => Promise<unknown> | unknown;
     getStreaks?: (itemIds: string[]) => Promise<unknown> | unknown;
 }
@@ -96,15 +99,40 @@ export async function checkinRecord(
         return { status: "unsupported", data: null, message: "小驴打卡数据未就绪（超时 5s）" };
     }
     try {
-        const data = await b.recordEvent?.({
+        const base = {
             itemId: args.itemId,
             value: typeof args.value === "number" ? args.value : 1,
             unit: typeof args.unit === "string" ? args.unit : undefined,
             note: typeof args.note === "string" ? args.note : undefined,
-            occurredAt: typeof args.occurredAt === "string" ? args.occurredAt : undefined,
-            source: "quickgate",
+            // v0.5.7 审计：上游 source 白名单（manual/tomato/import/api/sireader/siplayer/weread/yeguif）
+            // 外值静默归一为 "api"——quickgate 不是合法 source，直接传 "api"，身份由 externalRef 承担
+            source: "api" as const,
             externalRef,
-        });
+        };
+
+        // occurredAt 只有批量接口接受（单条 recordEvent 会静默忽略→时间被记成现在）：
+        // 带 occurredAt 时走 recordEventsBatch 并把 BatchEntryResult 映射回快门状态
+        if (typeof args.occurredAt === "string" && args.occurredAt) {
+            const batch = b.recordEventsBatch;
+            if (typeof batch !== "function") {
+                return { status: "unsupported", data: null, message: "打卡桥缺少 recordEventsBatch，无法按指定时间记录（occurredAt）" };
+            }
+            const results = (await batch([{
+                ...base, occurredAt: args.occurredAt,
+            }])) as Array<{ kind?: string; eventId?: string; reason?: string }> | undefined;
+            const entry = Array.isArray(results) ? results[0] : undefined;
+            const kind = entry?.kind ?? "rejected";
+            if (kind === "recorded" || kind === "duplicate") {
+                return {
+                    status: "recorded",
+                    data: { eventId: entry?.eventId ?? null, duplicate: kind === "duplicate" },
+                    message: kind === "duplicate" ? "已存在（幂等命中，未重复记录）" : "已按指定时间记录",
+                };
+            }
+            return { status: "rejected", data: null, message: `打卡桥拒绝（${kind}${entry?.reason ? `：${entry.reason}` : ""}）` };
+        }
+
+        const data = await b.recordEvent?.(base);
         if (data === undefined) {
             return { status: "rejected", data: null, message: "打卡桥拒绝了该记录（参数非法或事项不可用）" };
         }
@@ -125,22 +153,40 @@ export async function checkinSummary(getBridge: () => CheckinBridgeLike | undefi
     try {
         // v0.5.6 修正：上游 v18.16 公开面没有 getSummary 方法（此前可选调用静默返回空数据）。
         // 组合 getSummaryContext("day")（SummaryContext：range/startDate/endDate/items/totalEvents/
-        // completedItems/scheduledItems）与 getStreaks(itemIds)（{itemId: 连击天数}）。
+        // completedItems/scheduledItems）与 getStreaks。
+        // v0.5.7 审计：getStreaks 实际返回数组 {itemId,current,longest,milestones?}[]——归一为映射，
+        // 消费方拿到的 {streaks:{itemId:当前连击}, streaksLongest:{itemId:最长连击}} 与文档一致。
         const gc = b.getSummaryContext;
         const today = typeof gc === "function" ? await gc("day") : null;
 
         let streaks: unknown = null;
+        let streaksLongest: unknown = null;
         if (typeof b.getStreaks === "function" && typeof b.getItems === "function") {
             const ids = (b.getItems() ?? [])
                 .map((i) => String((i as { id?: unknown })?.id ?? ""))
                 .filter((s) => s.length > 0);
-            streaks = ids.length > 0 ? await b.getStreaks(ids) : {};
+            if (ids.length > 0) {
+                const raw = await b.getStreaks(ids);
+                const cur: Record<string, number> = {};
+                const longest: Record<string, number> = {};
+                for (const row of Array.isArray(raw) ? raw as Array<Record<string, unknown>> : []) {
+                    const id = typeof row?.itemId === "string" ? row.itemId : "";
+                    if (!id) continue;
+                    if (typeof row.current === "number") cur[id] = row.current;
+                    if (typeof row.longest === "number") longest[id] = row.longest;
+                }
+                streaks = cur;
+                streaksLongest = longest;
+            } else {
+                streaks = {};
+                streaksLongest = {};
+            }
         }
 
         if (today === null && streaks === null) {
             return { status: "unsupported", data: null, message: "打卡桥缺少 summary 方法（getSummaryContext/getStreaks 均不可用；v18.16 公开面已核实无 getSummary）" };
         }
-        return { status: "recorded", data: { today, streaks }, message: "已读取（今日上下文 + 连击）" };
+        return { status: "recorded", data: { today, streaks, streaksLongest }, message: "已读取（今日上下文 + 连击）" };
     } catch (e) {
         return { status: "failed", data: null, message: `汇总读取失败：${e instanceof Error ? e.message : String(e)}` };
     }

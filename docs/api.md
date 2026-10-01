@@ -31,8 +31,8 @@
 | `commands.search` | `{keyword}` | `{commands:[…]}` | 内存过滤 ≤50 条 |
 | `commands.run` | `{plugin, command}` | `{ok:true}` | 默认确认门控（30s 超时拒绝）+ 审计 |
 | `checkin.items` | `{includeArchived?, limit?≤200}` | `{items:[{id,name,kind,unit,archived}]}` | 走打卡 v5 `items.read` |
-| `checkin.record` | `{itemId, value?, unit?, note?, occurredAt?}` | 打卡桥返回 | 走 `events.record`；`source=quickgate` |
-| `checkin.summary` | `{}` | `{today:{range,startDate,endDate,items,totalEvents,completedItems,scheduledItems}, streaks:{itemId:天数}}` | 走 `summary.read`；由 `getSummaryContext("day")+getStreaks` 组合（v0.5.6——上游公开面无 getSummary，此前静默返回空数据的缺陷已修） |
+| `checkin.record` | `{itemId, value?, unit?, note?, occurredAt?}` | 打卡桥返回；带 `occurredAt` 时走批量接口 | 走 `events.record`；`source=api`（v0.5.7——上游 source 白名单无 quickgate，会静默归一 api），幂等身份=externalRef；**occurredAt 单条接口不接受**（会被静默记成当前时间），带值时路由 `recordEventsBatch` |
+| `checkin.summary` | `{}` | `{today:{range,startDate,endDate,items,totalEvents,completedItems,scheduledItems}, streaks:{itemId:当前连击}, streaksLongest:{itemId:最长连击}}` | 走 `summary.read`；由 `getSummaryContext("day")+getStreaks` 组合（v0.5.6——上游公开面无 getSummary，此前静默返回空数据的缺陷已修）；streaks 由上游数组行归一为映射（v0.5.7） |
 | `contacts.search` | `{keyword?}` | `{people:[…]}` ≤50 | 走人脉 v1 `searchPeople` |
 | `contacts.ensure` | `{name}` | `{docId,name,created}` | 走 `ensurePerson` |
 | `contacts.interaction` | `{names?/docIds?, date?, place?, note?}` | `{recorded, people:[…]}` | names 兼容中英文逗号/顿号/分号/空白；`ref=信封 id` 幂等 |

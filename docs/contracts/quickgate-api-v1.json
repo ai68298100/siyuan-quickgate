@@ -85,7 +85,9 @@
       },
       "effect": "write",
       "requires": "siyuan-checkin v5 events.record",
-      "idempotency": "source=quickgate, externalRef=envelope.id"
+      "idempotency": "source=api, externalRef=envelope.id",
+      "since": "0.5.7",
+      "note": "occurredAt 仅批量接口接受：带值时路由 recordEventsBatch 并映射 BatchEntryResult（duplicate→recorded+标记）；source 固定 api（上游白名单无 quickgate，会静默归一）"
     },
     {
       "op": "checkin.summary",

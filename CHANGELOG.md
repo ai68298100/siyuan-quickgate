@@ -2,6 +2,17 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.5.7 · 2026-10-02（适配器签名全面审计）
+
+### Fixed
+- **`source:"quickgate"` 非法**：上游 source 白名单（manual/tomato/import/api/sireader/siplayer/weread/yeguif）外值被静默归一为 `api`——适配器改为显式传 `api`，身份由 externalRef 承担（幂等不受影响）；契约文档同步纠正
+- **`occurredAt` 被单条接口静默忽略**：`recordEvent` 不接受 occurredAt（时间会记成"现在"）；带 occurredAt 时改路由 `recordEventsBatch` 并把 BatchEntryResult 映射回快门状态（recorded/duplicate→recorded（duplicate 带标记）、rejected/blocked/discarded→rejected+原因）；缺批量方法时诚实 `unsupported`
+- **`getStreaks` 返回形状误判**：实际为数组 `{itemId,current,longest,milestones?}[]`（v0.5.6 误当映射透传）——归一为 `streaks:{itemId:当前}` + `streaksLongest:{itemId:最长}`，与文档一致
+- 审计结论：`queryItems({includeArchived})`/`getItems`/`CheckinItem` 字段/人脉 `recordInteraction(ids,{ref,date,place,note})` 全部与上游一致，无需修改
+
+### Added
+- 回归测试：source=api 断言、occurredAt 四分支（recorded/duplicate/rejected/缺批量方法）、streaks 数组归一
+
 ## v0.5.6 · 2026-10-02（checkin.summary 静默空数据修复）
 
 ### Fixed

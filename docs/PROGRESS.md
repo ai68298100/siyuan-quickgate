@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.5.7（适配器签名全面审计）
+
+- 审计记录 vs 上游 v18.16 源码：queryItems/getItems/CheckinItem/人脉 recordInteraction 一致；三处不符已修（source 非法归一→显式 api、occurredAt 单条被忽略→路由 recordEventsBatch+BatchEntryResult 映射、getStreaks 数组形状→归一映射+streaksLongest）
+- 人脉 v1 侧审计干净
+- 单测 13 文件 76 用例全绿；check/build 全绿
+
 ## 2026-10-02 · v0.5.6（checkin.summary 静默空数据修复）
 
 - Fixed：适配器改组合 `getSummaryContext("day")+getStreaks`（上游 v18.16 无 getSummary，此前 recorded+undefined）；缺方法时诚实 unsupported；回归测试防再犯
