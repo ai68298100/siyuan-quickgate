@@ -2,6 +2,14 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.4.1 · 2026-10-02（events 数据源桥接）
+
+### Added
+- events 数据源桥接（D-0009）：订阅打卡公开宿主事件 `checkin:event-recorded` → 物化到 `/storage/petal/siyuan-checkin/bridge/events.ndjson`（上游零改动产出事件流）；桥开关联动启停，onunload 退订
+- 设置页可观测性：待处理命令数/迟到完成次数/台账规模一目了然（R2）
+- 决策 D-0008：workflow 计划不持久化（评估结案）；D-0009：events 载体代物化
+- e2e 扩展：events.list / workflow.plan 用例（execute 弹确认框，自动跑时跳过）
+
 ## v0.4.0 · 2026-10-02（M2：events/workflow 实现）
 
 ### Added

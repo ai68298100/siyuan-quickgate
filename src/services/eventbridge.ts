@@ -1,0 +1,45 @@
+/**
+ * events 数据源桥接（R3）：把公开宿主事件物化为 events.ndjson。
+ * 首个来源：小驴打卡的 checkin:event-recorded（公开宿主事件总线）。
+ * 纪律：只消费公开事件，不读私有存储；解析失败静默跳过；幂等键由事件自身携带。
+ * 去重：events.pull 的消费方按 idempotencyKey 去重（契约），此处只做尽力而为的去重提示。
+ */
+import { HubEvent } from "./events";
+
+/** 打卡宿主事件 detail 的防御性形状 */
+export interface CheckinEventDetail {
+    itemId?: unknown;
+    value?: unknown;
+    unit?: unknown;
+    occurredAt?: unknown;
+    source?: unknown;
+    externalRef?: unknown;
+}
+
+/** 归一化为 HubEvent；不合法返回 null（静默跳过） */
+export function normalizeCheckinEvent(detail: unknown, emittedAt: string): HubEvent | null {
+    if (!detail || typeof detail !== "object") return null;
+    const d = detail as CheckinEventDetail;
+    if (typeof d.itemId !== "string" || !d.itemId) return null;
+    if (typeof d.occurredAt !== "string") return null;
+    const ref = typeof d.externalRef === "string" ? d.externalRef : `${d.itemId}:${d.occurredAt}`;
+    return {
+        name: "checkin:event-recorded",
+        source: "siyuan-checkin",
+        emittedAt,
+        payload: {
+            itemId: d.itemId,
+            value: typeof d.value === "number" ? d.value : null,
+            unit: typeof d.unit === "string" ? d.unit : null,
+            source: typeof d.source === "string" ? d.source : null,
+        },
+        idempotencyKey: `${d.source ?? "manual"}:${ref}`,
+    };
+}
+
+/** 追加事件行（滚动上限与 results 一致） */
+export function appendEventLine(existingText: string, event: HubEvent, cap = 200): string {
+    const lines = existingText.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n").filter((l) => l.trim() !== "");
+    lines.push(JSON.stringify(event));
+    return lines.slice(-cap).join("\n") + "\n";
+}

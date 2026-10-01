@@ -105,6 +105,24 @@ async function main() {
     r = await waitReceipt(id);
     check("U7 config.discover", r.status === "recorded", `日记=${r.data?.diaryNotebookId ?? "未发现"}`);
 
+    // U8 events.list 白名单
+    id = await send("events.list");
+    r = await waitReceipt(id);
+    check("U8 events.list", r.status === "recorded" && (r.data?.events ?? []).some((e) => e.name === "checkin:event-recorded"), `白名单=${r.data?.events?.length}`);
+
+    // U9 workflow：plan → execute（只读步骤，无需确认内容）
+    id = await send("workflow.plan");
+    r = await waitReceipt(id, 15000);
+    check("U9a workflow.plan 空 steps → rejected", r.status === "rejected", r.message);
+    id = await send("workflow.plan", { steps: [{ op: "daily.status" }] });
+    r = await waitReceipt(id);
+    const planId = r.data?.plan?.planId;
+    check("U9b workflow.plan 出计划", r.status === "recorded" && !!planId);
+    if (planId) {
+        // 注意：会弹思源确认框，需有人在 30s 内点确认——自动化场景默认跳过 execute
+        console.log("  (workflow.execute 会弹确认框，跳过自动执行；手动验收时用 planId=", planId, ")");
+    }
+
     const failed = results.filter((x) => !x.ok).length;
     console.log(`\n== 结果：${results.length - failed}/${results.length} 通过 ==`);
     process.exit(failed ? 1 : 0);

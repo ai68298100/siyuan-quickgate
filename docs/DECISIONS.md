@@ -29,3 +29,11 @@ processed-ids 存 `bridge-state.json`（schemaVersion+normalize，坏数据回�
 ## D-0007 · commands.run 确认前置激活思源窗口（08-O10）
 
 confirm 前调 `window.focus()`；30s 超时=拒绝；回执文案注明"思源在后台未确认"场景。
+
+## D-0008 · workflow 计划不持久化（R3 评估结案，2026-10-02）
+
+workflow.plan 生命周期 5 分钟 + 一次性语义。持久化的收益（重启后仍可 execute）与成本（额外状态文件、过期清理、多实例一致性）不匹配：重启后重新 plan 一次的成本≈0（计划本来就是客户端生成的）。结论：**保持内存池**，重启后 execute 回 `rejected`（提示重新 plan）——该行为已文档化进 api.md。
+
+## D-0009 · events 载体由快门代为物化（R3，2026-10-02）
+
+打卡宿主事件（checkin:event-recorded）由快门订阅公开事件总线并**代写**到 `/storage/petal/siyuan-checkin/bridge/events.ndjson`——上游零改动即可产出事件流。纪律边界：只消费公开宿主事件总线；写的是快门自己维护的桥文件，不触碰打卡私有存储。上游（闪卡/考试）未来可自写（推荐）或由快门以同样模式桥接。

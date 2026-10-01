@@ -12,10 +12,11 @@ import { BridgeStore, DataIO } from "./services/store";
 import { BridgeService, EditorContextResult } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
 import { probeCommandRegistry } from "./services/registry";
+import { appendEventLine, normalizeCheckinEvent } from "./services/eventbridge";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.4.0";
+const PLUGIN_VERSION = "0.4.1";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -36,6 +37,7 @@ export default class QuickGatePlugin extends Plugin {
     private store = new BridgeStore(this.asDataIO());
     private kernelApi = new KernelApi();
     private poller?: SingleFlightPoller;
+    private activeService?: BridgeService;
     private settings: QuickGateSettings = { ...DEFAULT_SETTINGS };
     private auditLog: AuditEntry[] = [];
 
@@ -60,6 +62,7 @@ export default class QuickGatePlugin extends Plugin {
 
         if (this.settings.bridgeEnabled && !this.isMobileGuard()) {
             this.startBridge();
+            this.startEventBridge();
         }
     }
 
@@ -71,8 +74,53 @@ export default class QuickGatePlugin extends Plugin {
         // 优雅停机：单飞循环在当前 tick 结束后退出，不撕正在进行的写
         this.poller?.stop();
         this.poller = undefined;
+        this.stopEventBridge();
         this.flushAudit();
         showMessage("小驴快门已停用；其桥目录随插件数据一并保留/清理", 3000, "info");
+    }
+
+    /**
+     * events 数据源桥接（R3）：订阅打卡公开宿主事件 → 物化到其桥目录 events.ndjson。
+     * 只消费公开事件总线；总线不可用（宿主版本差异）时静默降级，不影响主桥。
+     */
+    private eventBusHandler?: (e: { detail?: unknown }) => void;
+
+    private startEventBridge() {
+        if (this.eventBusHandler) return;
+        try {
+            const bus = (window as unknown as {
+                siyuan?: { ws?: { app?: { eventBus?: {
+                    on: (name: string, h: (e: { detail?: unknown }) => void) => void;
+                    off: (name: string, h: (e: { detail?: unknown }) => void) => void;
+                } } } };
+            }).siyuan?.ws?.app?.eventBus;
+            if (!bus || typeof bus.on !== "function") return;
+            this.eventBusHandler = (e) => { void this.materializeCheckinEvent(e?.detail); };
+            bus.on("checkin:event-recorded", this.eventBusHandler);
+        } catch { /* 宿主事件总线不可用 → 静默降级 */ }
+    }
+
+    private stopEventBridge() {
+        if (!this.eventBusHandler) return;
+        try {
+            const bus = (window as unknown as {
+                siyuan?: { ws?: { app?: { eventBus?: { off: (name: string, h: (e: { detail?: unknown }) => void) => void } } } };
+            }).siyuan?.ws?.app?.eventBus;
+            bus?.off?.("checkin:event-recorded", this.eventBusHandler);
+        } catch { /* 忽略 */ }
+        this.eventBusHandler = undefined;
+    }
+
+    private async materializeCheckinEvent(detail: unknown) {
+        try {
+            const e = normalizeCheckinEvent(detail, new Date().toISOString());
+            if (!e) return;
+            const path = "/storage/petal/siyuan-checkin/bridge/events.ndjson";
+            const old = (await this.kernelApi.getFileText(path)) ?? "";
+            await this.kernelApi.putFileText(path, appendEventLine(old, e));
+        } catch (err) {
+            console.warn(`[${PLUGIN_NAME}] 事件物化失败：`, err);
+        }
     }
 
     uninstall() {
@@ -123,6 +171,7 @@ export default class QuickGatePlugin extends Plugin {
     private startBridge() {
         if (this.poller?.isRunning) return;
         const service = new BridgeService(this.deps());
+        this.activeService = service;
         this.poller = new SingleFlightPoller({
             intervalMs: this.settings.pollMs,
             backoffMaxMs: this.settings.backoffMaxMs,
@@ -359,6 +408,20 @@ export default class QuickGatePlugin extends Plugin {
             await this.store.saveSettings();
         };
         row("plugin.api 高级透传（默认关）", rawInput);
+
+        const queueBtn = document.createElement("button");
+        queueBtn.className = "b3-button b3-button--outline";
+        queueBtn.textContent = "队列状态";
+        queueBtn.onclick = async () => {
+            try {
+                const text = (await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/commands.ndjson`)) ?? "";
+                const lines = text.trim() ? text.trim().split("\n").length : 0;
+                showMessage(`待处理命令 ${lines} 条 · 迟到完成 ${this.activeService?.lateCompletions ?? 0} 次 · 台账 ${Object.keys(this.store.processed.processed).length} 条`, 5000, "info");
+            } catch (e) {
+                showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 5000, "error");
+            }
+        };
+        row("可观测性（R2）", queueBtn);
 
         const clearBtn = document.createElement("button");
         clearBtn.className = "b3-button b3-button--outline";
