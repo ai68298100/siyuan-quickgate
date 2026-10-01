@@ -35,3 +35,9 @@ description: 通过小驴快门（Lv QuickGate）的外部命令桥操作思源�
 2. `commands.run` / `workflow.execute` 会弹思源确认框（30 秒不点=拒绝）；等待 ≥35s。
 3. 自由文本不进 SQL；`events.pull` 消费方按 `idempotencyKey` 去重。
 4. 未知 op / 插件缺席 → 回执 `unsupported`，如实告知用户，不要伪造成功。
+
+## 写安全（R10 借鉴社区先例 duxiaoxiong/siyuan-bridge-skill）
+
+- **读后写保护**：修改既有内容（`updateBlock` 类、`workflow` 含写步骤）前，必须先读目标文档/块确认内容与预期一致；读不到或明显不符 → 停下向用户报告，**绝不盲写**。新建块（append 类）不受此限。
+- **笔记本禁区**：写入前用 `/api/notebook/lsNotebooks` 比对目标笔记本；用户声明过的禁区笔记本（如归档/同步对端）一律不写。快门侧的等价机制=笔记本级写权限分级（评估中，见 TODO R8）。
+- **写后留痕**：每次写入在会话内记录 `{op, 目标, 回执 id}`；用户追问"刚才写了什么"时能如实回答。快门审计（audit.json）是第二份留痕，可经设置页导出核对。

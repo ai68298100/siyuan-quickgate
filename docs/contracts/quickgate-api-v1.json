@@ -130,6 +130,18 @@
       "effect": "navigation"
     },
     {
+      "op": "template.new",
+      "args": {
+        "notebook": "string",
+        "hpath": "string",
+        "template": "string?",
+        "templatePath": "string?"
+      },
+      "effect": "write",
+      "since": "0.3.0",
+      "note": "renderSprig 渲染后 createDocWithMd；template 与 templatePath 二选一（缺省读 /templates/<templatePath>）"
+    },
+    {
       "op": "daily.status",
       "args": {},
       "effect": "read"

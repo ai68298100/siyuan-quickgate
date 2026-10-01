@@ -123,6 +123,36 @@ async function main() {
         console.log("  (workflow.execute 会弹确认框，跳过自动执行；手动验收时用 planId=", planId, ")");
     }
 
+    // U10 events.pull：拉取物化事件（含 v0.5.4 event-deleted）；顺带读源文件核对行存在
+    id = await send("events.pull", { limit: 50 });
+    r = await waitReceipt(id);
+    const pulledNames = (r.data?.events ?? []).map((e) => e.name);
+    const hasDeletedFile = ((await kernelPost("/api/file/getFile", { path: "/storage/petal/siyuan-checkin/bridge/events.ndjson" })) ?? "").includes("checkin:event-deleted");
+    check("U10a events.pull 可拉取", r.status === "recorded", `事件=${pulledNames.length}`);
+    if (hasDeletedFile) {
+        check("U10b event-deleted 行存在且可拉取", pulledNames.includes("checkin:event-deleted"), `已拉删除标记=${pulledNames.filter((n) => n === "checkin:event-deleted").length}`);
+    } else {
+        console.log("  (U10b 跳过：events.ndjson 尚无删除标记——在打卡里删一条记录后再跑)");
+    }
+
+    // U11 内核同步路由探针（v0.5.0 实验性；404/网络错误都算"未启用"而非失败——spike⑩ 校准）
+    try {
+        const res = await fetch(`${url}/plugin/private/${PLUGIN}/exec`, {
+            method: "POST",
+            headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ op: "bridge.ping" }),
+        });
+        if (res.ok) {
+            const j = await res.json();
+            const receipt = j.data ?? {};
+            check("U11 内核路由 ping", receipt.op === "bridge.ping" && receipt.status === "recorded", `channel=${receipt.data?.channel}`);
+        } else {
+            console.log(`  (U11 跳过：内核路由 HTTP ${res.status}——插件未启用或路由未放行，spike⑩ 校准)`);
+        }
+    } catch (e) {
+        console.log("  (U11 跳过：内核路由不可达——", e.message, ")");
+    }
+
     const failed = results.filter((x) => !x.ok).length;
     console.log(`\n== 结果：${results.length - failed}/${results.length} 通过 ==`);
     process.exit(failed ? 1 : 0);

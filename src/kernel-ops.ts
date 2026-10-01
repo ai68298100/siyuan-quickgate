@@ -5,6 +5,7 @@
  */
 import { eventWhitelist, parseEventLine } from "./services/events";
 import type { EcosystemManifest } from "./services/bridge-service";
+import { FRONTEND_ONLY_OPS } from "./ops";
 
 export type Args = Record<string, unknown>;
 
@@ -147,12 +148,7 @@ export function kernelDiagnostics(deps: KernelDeps): Receipt {
     };
 }
 
-export const FRONTEND_ONLY = new Set([
-    "commands.list", "commands.search", "commands.run",
-    "checkin.items", "checkin.record", "checkin.summary",
-    "contacts.search", "contacts.ensure", "contacts.interaction",
-    "doc.open", "setting.open", "editor.context", "plugin.api",
-]);
+export const FRONTEND_ONLY: Set<string> = new Set(FRONTEND_ONLY_OPS);
 
 export function createKernelOpHandler(deps: KernelDeps): (op: string, args: Args) => Promise<Receipt> {
     return async (op, args) => {
