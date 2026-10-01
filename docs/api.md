@@ -10,7 +10,9 @@
 | NDJSON（默认） | ~750ms @500ms 轮询 | 全部 op | ✅ 稳定 |
 | **内核同步路由**（v0.5.0 实验性） | ~100ms | 仅内核可处理子集：`bridge.ping / registry.list / diagnostics.report / events.list·pull / config.discover / template.new` | ⚠️ 实验性，spike 校准前不建议生产依赖 |
 
-内核通道用法：`POST {SY_URL}/plugin/private/siyuan-quickgate/exec`，头 `Authorization: Token <思源Token>`，体 `{"op":"…","args":{…}}`，响应 `data.data` 为与 NDJSON 同形状的回执。前端专属 op 回 `unsupported`。
+内核通道用法：`POST {SY_URL}/plugin/private/siyuan-quickgate/exec`，头 `Authorization: Token <思源Token>`，体 `{"op":"…","args":{…}}`，响应 `data.data` 为与 NDJSON 同形状的回执。前端专属 op 回 `unsupported`。**无 Token 请求必须被 401/403 拒绝**（spike⑩⓪ 负向探针；该头是 localhost 通道唯一 CSRF 防线）。
+
+**参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec]`。
 
 ## 通用
 
