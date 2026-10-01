@@ -18,7 +18,7 @@ import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.6.4";
+const PLUGIN_VERSION = "0.6.5";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -136,7 +136,7 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     uninstall() {
-        // 宿主卸载钩子：提示桥目录随 petal 数据删除（TODO M2：提供导出审计入口）
+        // 宿主卸载钩子：提示桥目录随 petal 数据删除（导出审计入口已在设置页提供）
         try {
             showMessage("小驴快门已卸载：data/storage/petal/siyuan-quickgate/（含桥与审计）将随插件数据清理", 6000, "info");
         } catch { /* 卸载期 UI 不可用时静默 */ }
@@ -563,6 +563,20 @@ export default class QuickGatePlugin extends Plugin {
             });
         };
         row("审计日志", auditBtn);
+
+        const auditExportBtn = document.createElement("button");
+        auditExportBtn.className = "b3-button b3-button--outline";
+        auditExportBtn.textContent = "导出审计 JSON";
+        auditExportBtn.onclick = async () => {
+            try {
+                const payload = JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), entries: this.auditLog }, null, 2);
+                await navigator.clipboard.writeText(payload);
+                showMessage(`已复制 ${this.auditLog.length} 条审计到剪贴板`, 4000, "info");
+            } catch (e) {
+                showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+            }
+        };
+        row("审计导出（完整 auditLog → 剪贴板）", auditExportBtn);
 
         const receiptBtn = document.createElement("button");
         receiptBtn.className = "b3-button b3-button--outline";

@@ -2,6 +2,14 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.6.5 · 2026-10-02（M2 尾巴：审计导出入口）
+
+### Added
+- 设置页新增**"导出审计 JSON"**：完整 auditLog（含 schemaVersion/exportedAt 包裹）一键复制到剪贴板——卸载提示里"审计随插件数据清理"的对应出口（此前只有"查看最近 20 条"）
+
+### Housekeeping
+- 同轮健康核查：CI 最近三跑全绿；发布资产可达；lv-cli fast 的 e2eMs 条件修正（回执字段=finishedAt）；上游三家（雷切/打卡/人脉）最新 release 与生态清单零漂移
+
 ## v0.6.4 · 2026-10-02（陈旧对冲注释清账）
 
 ### Changed
