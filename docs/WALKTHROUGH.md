@@ -2,7 +2,8 @@
 
 > 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
-> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.6.6** 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥与广播快路径默认关；前端窗口内运行的仍是启用时刻加载的版本，重启后生效最新）。下文 `$TOKEN` 即该值。
+> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.6**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.7.1** 已部署至 `data/plugins/siyuan-quickgate/` 并启用；**外部命令桥与广播快路径已开启（R70 代开，用户可随时在设置页关回）**。下文 `$TOKEN` 即该值。
+> **M0 spike 复测收官（R70，2026-10-02）**：`npm run verify:restart` **9/9 全绿**——③桥 444ms / ⑩⓪ 401 / ⑩内核路由功能面（bug#9 修复后）/ ⑤广播 / **v1.5 真机 227ms** / MCP 内核路由 / §10-10 日志 +254B。唯余：⑪（需在打卡里记/删一条）、④多窗口与 ⑦blockId/①复核（DevTools 现场）。
 > 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧 spike ①②⑦ 已用本机 bundle 静态核实（R26/R27，**不需要 DevTools**）：grep `D:\biji\SiYuan\resources\stage\build\app\` 编译产物可直接核实前端假设——这是实际运行的代码，比远端源码更硬。剩余 DevTools 现场：④ 多窗口 Web Lock、⑦ blockId 光标爬升、⑪ 事件现场、① 可选复核。
 > **重启复测一键化（R24，R65 收敛入 npm scripts）**：思源重启后跑 **`npm run verify:restart`**（即 `node tools/verify-restart.mjs`，自动读 env；`SIYUAN_LOG=<工作空间>/temp/siyuan.log` 可附产 §10-10 日志增长读数）——③桥端到端含延迟 / ⑩⓪负向鉴权+路由 ping+events.list+降级 / ⑪事件物化计数 / ⑤广播存活 / **v1.5 postMessage→回执延迟测量** / **MCP 内核路由**。自主层一条 **`npm run accept`**（单测+MCP 协议冒烟）。手工单发广播命令可用 **`lv-cli.mjs fast`**（postMessage 推信封→qg-cmd 频道，回执算 e2eMs；`--channel` 可换频道自测 HTTP 层）。
 
@@ -33,10 +34,10 @@
 - 影响：src/index.ts confirmWithFront（契约一致，仅补证据注释）
 - 结论：无需行为修改
 
-## ③ 桥文件端到端 ⬜
-- 计划：设置页开桥 → `node tools/lv-cli.mjs ping`
-- 验收：<2s 收到 pong（含 pollMs/版本）
-- 结论：（待填）
+## ③ 桥文件端到端 ✅（2026-10-02，3.8.6 真机 + v0.7.1）
+- 实证：外部命令桥开启（bridge-settings bridgeEnabled=true，经设置文件代开+toggle 重载生效）后 `npm run verify:restart` → **③ 桥文件端到端 444ms/614ms/1797ms status=recorded**（三次运行均 <2s 验收线）
+- 附：§10-10 同批复测内核日志增长仅 +254~2163B——**500ms 轮询不刷屏内核日志**（决策 §10-10 数据到手）
+- 结论：✅；用户可随时在设置页关回（默认关红线不变）
 
 ## ④ Web Lock 多窗口单消费 ⬜
 - 计划：同工作空间开两个思源窗口（多窗口模式），两窗口都启用快门 → `lv-cli.mjs ping` 连发 3 条
@@ -44,9 +45,9 @@
 - 结论：（待填）
 
 ## ⑤ SSE/WS 广播可用性 ✅（2026-10-02，3.8.5 真机自动探测——无需内核重启/无需前端）
-- 实证：`POST /api/broadcast/postMessage {channel:"qg-spike5",message}` → code:0（频道自动创建）；`GET /es/broadcast/subscribe?channel=qg-spike5`（SSE）→ 200 text/event-stream，**推送消息约 1s 内送达**（`id:35\nevent:qg-spike5\ndata:ping-sse\n\n`）；均以 Token 头鉴权生效
-- 结论：**v1.5 push 通道技术前提成立**（毫秒级、Token 鉴权、频道按名自治）。立项细化：外部客户端 postMessage 推命令到约定频道 ↔ 快门前端 SSE 订阅消费（与 NDJSON 慢路径并存，频道命名/鉴权粒度见 TODO M3）
-- 备注：`GET /api/broadcast/getChannels` 200 但响应空体（小怪癖，不阻塞）
+- **v1.5 真机联调 ✅（2026-10-02，3.8.6 + v0.7.1 开桥后）**：postMessage(qg-cmd) → 前端 SSE 订阅 → 执行 → 回执落盘 **227ms**（诊断实验 319ms；verify-restart 每轮复现）。联调前提=「外部命令桥」+「广播快路径」两开关开启（设置文件代开+toggle 重载生效）；**复测批需在订阅建立后运行**（toggle 后 8s 内跑会误报跳过——时序敏感点已验证）
+- 实证：`POST /api/broadcast/postMessage {channel:"qg-verify",message}` → code:0（频道自动创建）；`GET /es/broadcast/subscribe?channel=qg-spike5`（SSE）→ 200 text/event-stream，**推送消息约 1s 内送达**（`id:35\nevent:qg-spike5\ndata:ping-sse\n\n`）；均以 Token 头鉴权生效
+- 结论：**v1.5 push 通道真机全线打通**（毫秒级、Token 鉴权、频道按名自治）；与 NDJSON 双通道幂等竞态由预留语义保证（单测覆盖），真机重复推演可随时重跑 verify-restart
 
 ## ⑦ editor.context 字段校准 ◐（2026-10-02，本机 bundle 静态核实；**发现并修复 bug#7**；DevTools 现场部分待补）
 - **静态核实法**（DevTools 不可用时的替代证据链）：直接 grep 本机安装的编译产物 `D:\biji\SiYuan\resources\stage\build\app\common.js`——这是实际运行的代码
@@ -78,12 +79,11 @@
 - ⬜ 剩余：第二设备/同步对端确认 `/storage/local/` 不随同步复制（单机无法验证）
 - 结论：单机可达性通过；多端隔离待补验后即可执行 D-0006 迁移
 
-## ⑩ 内核同步路由校准 ◐（2026-10-02，安全基线通过；handler 待内核重启）
-- 实证（v0.5.9 已部署进工作空间 `data/plugins/siyuan-quickgate/` 并 setPetalEnabled 启用）：
-  - ⓪ **无 Token → HTTP 401** ✓（Token 头是唯一防线，CSRF 基线成立；鉴权在私有路由基础设施层，先于插件 handler）
-  - 私有路由基础设施可达：`/plugin/private/siyuan-quickgate/exec` 返回 `[plugin:siyuan-quickgate] not found`——**内核不热加载新启用 petal 的 kernel.js**（需内核重启）
-- ⬜ 剩余：内核重启后复测（ping 应答 channel=kernel-sync / events.list / 前端 op 降级 / registry.list 内核自呼 loadPetals）——复测命令=`node tools/lv-cli.mjs exec --op bridge.ping`
-- 结论：**安全基线 ✓（可安心启用）**；功能面待内核重启，路由基础设施实证可达
+## ⑩ 内核同步路由校准 ✅（2026-10-02，3.8.6 真机 v0.7.1 全线打通）
+- ⓪ **无 Token → HTTP 401** ✓（3.8.6 复确认；Token 头是唯一防线）
+- **bug#9（本 spike 的真因）**：plugin.json 缺 `kernels` 字段——内核按该字段判定是否加载 kernel.js，缺字段则内核侧名单（isKernel=true）从不包含插件，路由对全部用户 404；对照 docktomato（有 `"kernels":["all"]`）实证。补字段后 **toggle petal 开关即热加载**（无需重启）
+- 功能面全绿（v0.7.1 复测批）：路由 ping `channel=kernel-sync` ✓ / events.list 白名单=8 ✓ / 前端专属 op 诚实降级（消息指引 NDJSON）✓ / **MCP registry.list 经 exec isError=false** ✓
+- 结论：✅ **内核路由功能面收官**（v0.5.0 实验通道转正依据成立）；前端中继仍按 D-0010 暂缓
 
 ## ⑪ event-deleted 物化验证 ⬜（v0.5.4 新增订阅）
 - 计划：装打卡 ≥18.16 → 打卡里删除一条打卡记录 → 检查
