@@ -48,12 +48,15 @@ jobs:
           echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
 
-      - name: JWT 认证验证（需认证 API 实测）
+      - name: JWT 认证验证（需认证 API 实测，输出响应体定位 400）
         run: |
           echo "用内核重写的 JWT 调需认证 API（registry.list 经路由）："
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -d '{"op":"registry.list","args":{}}')
-          echo "  registry.list: HTTP $CODE"
-          if [ "$CODE" = "429" ]; then echo "  429 限速窗口——冷却 120s"; sleep 120; fi
+          curl -s -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -d '{"op":"registry.list","args":{}}' -w "\n[HTTP %{http_code}]" || true
+          echo ""
+          echo "对照：内核 API（非私有路由，需认证）——notebook/lsNotebooks："
+          curl -s -X POST http://127.0.0.1:6806/api/notebook/lsNotebooks -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -w "\n[HTTP %{http_code}]" || true
+          echo ""
+          if [ "$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -d '{"op":"registry.list","args":{}}')" = "429" ]; then echo "  429 限速窗口——冷却 120s"; sleep 120; fi
 
       - name: 部署插件（dist/ → workspace plugins + 启用）
         run: |
