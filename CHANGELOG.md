@@ -2,6 +2,16 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.7.1 · 2026-10-02（bug#9：kernel.js 加载前提——plugin.json 缺 kernels 字段）
+
+### Fixed
+- **bug#9（内核路由对全部用户失效）**：plugin.json 缺少 **`kernels`** 字段——思源内核按该字段判定是否加载插件的 kernel.js（对照 siyuan-plugin-docktomato 实证：其有 `"kernels": ["all"]` 而被内核加载；快门缺字段即从未进内核侧名单 `isKernel=true`）。补 `"kernels": ["all"]` 后内核同步路由即刻可用（toggle petal 开关即可热加载，无需重启）。v0.7.0 的发布包同样受影响，故以此版本重发
+
+### Verified（3.8.6 真机复测批）
+- ⑩ 内核路由 ping `channel=kernel-sync` ✓ / events.list 白名单=8 ✓ / 前端专属 op 诚实降级 ✓
+- **MCP 内核路由打通**：tools/call registry.list 经 exec 1866ms（含 node 启动）isError=false ✓
+- ⑩⓪ 无 Token 401（3.8.6 下复确认）✓；③桥端到端/v1.5 联调待用户开启「外部命令桥」开关后 `npm run verify:restart` 即测
+
 ## v0.7.0 · 2026-10-02（MCP stdio 代理 + 内核路由通道 + 面向发布的三通道定位）
 
 ### Added
