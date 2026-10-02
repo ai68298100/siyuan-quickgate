@@ -1802,3 +1802,6 @@
 
 - [x] 【R97·CI 容器化实验·七轮收官（暂停）】第七轮决定性发现：容器 api.token 首探即生成，但为 **122 字符新格式**（OCI 开头；本机 11 位系旧格式迁移遗留）+ accessAuthCode 模式下 version API 返回 **400**（非 401/200）——v3.8.6+ 新版 Token/鉴权行为**超出官方文档覆盖**，需上游 issue 或源码确认后方可继续。实验分支 ci-e2e-experiment 保留（workflow 含全部诊断）。**结论：容器化 e2e 技术可行已证（serve/部署/插件启用全通），卡点=新版鉴权行为确认（上游依赖）**
 - [x] 【R97·等上游→R98·源码考古已确认】v3.8.6 内核 auth.go 实证（gh API 拉取 v3.8.6 tag 源码）：引入 **JWT 机制**（golang-jwt/v5，jwtKey 32 字节随机生成，iss=siyuan-kernel，多 audience 含 siyuan-kernel-plugin——**122 字符 Token 即内核插件 JWT**）+ `/api/system/setAPIToken` 端点存在（CheckAuth+Admin）。**CI 容器 Token 对策定版：容器首启前直接向 volume conf.json 预置 api.token=固定值（volume 可写，无需等内核生成）**——下轮实验执行
+
+- [x] 【R100·CI 容器化 e2e 六轮】预置 conf api.token 生效但内核将其重写为 122 字符 JWT（api.token 长度 122/OCI 前缀实测）；探针修正发现=version API 免认证（对照无 token 也 200，假说 A/B 均 200 不能证伪）；⑩ 路由 429=认证失败限速窗口未冷却（restart 不清）
+- [ ] 【R100-G1·下一轮】429 冷却对策（verify 前 sleep 60~120s 或限速窗口实测）+ 用内核重写的 122 JWT 调需认证 API（registry.list）验证 → 内核侧四类转绿后合 main
