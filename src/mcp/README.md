@@ -42,8 +42,10 @@ Claude Desktop 配置（`claude_desktop_config.json`）：
 
 ## 状态与边界
 
-- ✅ 单测 10 组（契约一致性/安全过滤/JSON-RPC 语义/错误分支/参数 schema 纪律/内核路由三态），98 总全绿
+- ✅ 单测 10 组（契约一致性/安全过滤/JSON-RPC 语义/错误分支/参数 schema 纪律/内核路由三态），99 总全绿
 - ✅ 裸 Node 真机烟测：initialize 握手 / tools/list（默认 13） / 写工具拒绝提示 / required 穿透
 - ✅ **协议级冒烟**（`node tools/mcp-smoke.mjs`，6 断言全过）：完整 stdio 序列 vs 真进程——握手/列表/隐藏/拒绝/写模式/诚实超时
-- ⬜ e2e：真实 AI 客户端完整会话 + 插件侧消费（待思源重启复测批通过）
-- ⬜ npm 独立发包（@lv/mcp-quickgate）：待 e2e 后评估；当前随仓库分发
+- ✅ **真机 e2e 全链（R81）**：三通道全部经真实前端消费（广播 recorded/内核路由 recorded/NDJSON 投递）
+- ✅ **npm 打包脚手架**（`npm run build:mcp`）：esbuild bundle → dist-mcp/（mcp-quickgate.js + package.json），SMOKE_TARGET 可验 bundle，冒烟 6/6
+- ⬜ 发布到 npm registry：需 npm 账号（用户侧），`npm run build:mcp` 产物即发布物
+- ⬜ 真 AI host 实测（Claude Desktop/Cursor 贴上方配置）
