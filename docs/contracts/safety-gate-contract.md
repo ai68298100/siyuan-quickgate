@@ -41,3 +41,17 @@
 - 笔记本级写权限分级（R8②已评估：暂不立项，触发条件=新增 doc.append/block.insert 类通用写 op）
 - `workflow.cancel`/自动化急停（R82-P0 熔断，与 C4 取消合并设计）
 - capability effects 下沉到 manifest（capability-registry-contract §4）
+
+
+## 5. 附件：思源内核 CheckAuth 认证顺序（v3.8.6 源码实证，R101）
+
+kernel/model/session.go CheckAuth 判定顺序：
+1. **JWT 角色直通**：GetGinContextRole ∈ {Administrator,Editor,Reader} 直接放行（JWT=siyuan-kernel 签发，auth.go：golang-jwt/v5+32 字节随机密钥+多 audience 含 siyuan-kernel-plugin——**CI 容器提取的 122 字符 token 即此类**）；
+2. **API Token**：Authorization 头 Token /token /Bearer /bearer 四前缀 → authByAPIToken 比对 conf api.token；
+3. **query token**：?token= 等效；
+4. **accessAuthCode 未设置**：SiYuanAccessAuthCodeBypass 或 localhost+非跨站 → Administrator（R21⓪ 的 401 基线在 accessAuthCode 设置态）；
+5. **accessAuthCode 已设置（CI 容器态）**：localhost 请求需过 **Sec-Fetch-Site 跨站检查**（GHSA-9gpj-3rm3-x42m）与 Origin 检查——curl 无这些头，默认放行；非 localhost 直接 401。
+
+**CI 容器 registry.list 400 的定位**：认证层（1~3）已过（400≠401），400 在业务/私有路由层——kernelRegistryList 容器内自呼 loadPetals 或会话依赖，需容器内逐层调试（实验分支继续）。
+
+**本机直通 vs 容器 400 差异根因候选**：本机思源窗口存在已认证会话（浏览器 cookie）+ Sec-Fetch 头差异；容器纯 curl 无会话头。
