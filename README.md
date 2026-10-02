@@ -36,7 +36,7 @@ events.ndjson     # public host-event stream (materialized by QuickGate on behal
 
 Envelope: `{v:1, id, op, args, createdAt, ttlMs?, reply?, device?}` — receipts echo `id` with `status ∈ recorded|duplicate|rejected|failed|unsupported|expired`. Full contract: [docs/api.md](./docs/api.md) · machine-readable: [docs/contracts/quickgate-api-v1.json](./docs/contracts/quickgate-api-v1.json) (the op face is enforced against `src/ops.ts` by a consistency test).
 
-Clients included in [`tools/`](./tools): zero-dependency node CLI (`ping/send/run/events/exec`) and a PowerShell script (`-Exec` hits the kernel route directly). Quicker subprograms use the same envelope.
+Clients included in [`tools/`](./tools): zero-dependency node CLI (`ping/send/run/events/exec/fast`) and a PowerShell script (`-Exec` kernel route, `-Fast` broadcast). Quicker subprograms use the same envelope. For AI clients, [`src/mcp/`](./src/mcp) exposes all 23 ops as MCP tools over stdio (13 read-only by default; write tools need `LV_MCP_WRITE=1`).
 
 ## Safety
 

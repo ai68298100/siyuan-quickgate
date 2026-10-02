@@ -36,7 +36,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 信封：`{v:1, id, op, args, createdAt, ttlMs?, reply?, device?}`；回执按 `id` 对应，`status ∈ recorded|duplicate|rejected|failed|unsupported|expired`。完整契约见 [docs/api.md](./docs/api.md)，机器可读版 [docs/contracts/quickgate-api-v1.json](./docs/contracts/quickgate-api-v1.json)（op 面由 `src/ops.ts` 单一来源 + 一致性测试强制对齐）。
 
-[`tools/`](./tools) 内置两个零依赖客户端（node CLI：`ping/send/run/events/exec`；PowerShell：`-Exec` 直呼内核路由）；Quicker 子程序走同一信封。
+[`tools/`](./tools) 内置两个零依赖客户端（node CLI：`ping/send/run/events/exec/fast`；PowerShell：`-Exec` 直呼内核路由、`-Fast` 走广播）；Quicker 子程序走同一信封。面向 AI 客户端：[`src/mcp/`](./src/mcp) 把 23 个 op 经 stdio 暴露为 MCP tools（默认 13 个只读；写工具需 `LV_MCP_WRITE=1`）。
 
 ## 安全
 
