@@ -1813,3 +1813,5 @@
 - [x] 【R104·等实验→R105 已解决】kernel.js 容器加载机制：**根因=bazaar trust 未确认**（IsPetalsEnabled：Docker 容器需手动确认集市信任，首启默认禁用）→ 预置 conf 补 bazaar:{trust:true} 后 CI 容器内核侧全线转绿（⑩路由 kernel-sync/events.list/降级/MCP registry.list 301ms 全 recorded，R105 十轮收官）
 
 - [x] 【R105·CI 容器化 e2e 十轮（收官）+合 main】bazaar 节预置（trust=true+petalDisabled=false）=**最后一块拼图**——IsPetalsEnabled 源码（model/plugin.go）：Docker 容器需手动确认集市信任，首启默认禁用内核插件；bazaar trust 预置后 **CI 容器内核侧全线转绿**：⑩路由 ping channel=kernel-sync ✓/events.list 白名单=8 ✓/前端 op 诚实降级 ✓/**MCP registry.list 经 exec 301ms isError=false ✓**；实验 workflow 已合 main（触发=workflow_dispatch 手动）；实验分支删除。**CI 容器化 e2e 内核侧验收从实验转为基础设施**——每次可手动触发全量内核侧回归
+
+- [x] 【R110·MCP 真 e2e 全链首次通过】三通道全部经真实前端消费：bridge.ping 广播快路径 recorded + registry.list 内核路由 recorded + editor.context NDJSON 慢路径 recorded + daily.status NDJSON 写路径投递 recorded——R71 开桥+R83 回滚演练+R105 bazaar trust 修复三步铺垫后，MCP 代理的最后缺口（插件消费侧）真机确认闭合。v0.7.2 解除 pre-release 转正式版 Latest
