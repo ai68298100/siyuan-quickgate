@@ -11,6 +11,16 @@ import { readFileSync } from "node:fs";
 import { createMcpServer } from "./server.ts";
 import { KernelBridgeClient } from "./bridge-client.ts";
 
+// bundle 态：dist-mcp/ 自带 package.json（build:mcp 生成）；源态：读仓库根 package.json
+const version = (() => {
+    for (const u of ["../../package.json", "./package.json"]) {
+        try {
+            return (JSON.parse(readFileSync(new URL(u, import.meta.url), "utf8")) as { version: string }).version;
+        } catch { /* 试下一个路径 */ }
+    }
+    return "0.0.0";
+})();
+
 const url = (process.env.SIYUAN_URL || "http://127.0.0.1:6806").replace(/\/$/, "");
 const token = process.env.SIYUAN_TOKEN || "";
 if (!token) {
@@ -18,7 +28,6 @@ if (!token) {
     process.exit(1);
 }
 const writeEnabled = process.env.LV_MCP_WRITE === "1";
-const version = (JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")) as { version: string }).version;
 
 const client = new KernelBridgeClient({ url, token });
 const server = createMcpServer(client, { writeEnabled, version });
