@@ -2,6 +2,11 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.7.0（MCP stdio 代理 + 三通道定位，面向发布）
+
+- src/mcp/ 四件（tools/client/server/main）+ 参数 schema + 内核路由通道 + mcp-smoke 冒烟；README 双语三通道重写；repo desc/topics 更新
+- 验收入口收敛 npm run accept / verify:restart；98 单测 + 冒烟 6/6；发版同轮 CHANGELOG+PROGRESS
+
 ## 2026-10-02 · v0.6.6（审计历史跨重启恢复 + 测试定时炸弹拆除）
 
 - bug#8：audit.json 只写不读 → onload loadAudit 恢复（逐条校验+截尾），消除重启后历史静默销毁

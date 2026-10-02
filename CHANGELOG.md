@@ -2,6 +2,23 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.7.0 · 2026-10-02（MCP stdio 代理 + 内核路由通道 + 面向发布的三通道定位）
+
+### Added
+- **src/mcp/ MCP stdio 代理**：23 op 一比一映射为 MCP tools，AI 客户端（Claude Desktop/Cursor）可执行思源命令、记打卡、记人脉互动、跑受控工作流——内置 MCP server 未覆盖的小驴生态面（差异化论证 docs/10 §3.14）
+- **安全模型**：默认只暴露 13 个只读工具；写工具需 `LV_MCP_WRITE=1`（tools/list 隐藏+tools/call 诚实拒绝）；`plugin.api`/`workflow.execute` 标 destructiveHint；快门侧防线（确认门控/黑名单/审计/允许名单）全共用
+- **逐 op 参数 schema**（ARGS 表对齐 api.md；template.new 形状以 kernel-ops 为准）；纪律测试强制每 op 登记 properties+描述
+- **MCP 内核路由通道（R50）**：KERNEL_OPS 优先走 `/plugin/private/<plugin>/exec` 直呼——**外部命令桥默认关时 7 个内核 op 对 MCP 也可用**；失败回退只读广播快路径→NDJSON
+- **tools/mcp-smoke.mjs 协议级冒烟**：完整 stdio 序列 vs 真进程（握手/列表/隐藏/拒绝/写模式/诚实超时）
+- **npm 验收入口**：`accept`（单测+MCP 冒烟）/ `verify:restart`（七类真机数据）/ `smoke:mcp`
+- verify-restart 扩容：MCP 内核路由检查 + §10-10 内核日志增长测量（SIYUAN_LOG）
+
+### Docs
+- 双语 README 升级为三通道定位（对比表）+ MCP 独立节 + 验收入口；GitHub 仓库 description/topics 同步
+
+### Verified
+- 98 单测 + MCP 协议冒烟 6/6；裸 Node 真机烟测（内核路由 404→回退→诚实超时）；e2e（真 AI 客户端+插件消费）待思源重启复测批
+
 ## v0.6.6 · 2026-10-02（审计历史跨重启恢复 + 测试定时炸弹拆除）
 
 ### Fixed
@@ -10,19 +27,6 @@
 
 ### Verified
 - 存量 bridge-settings.json（v0.5.9 形态，缺 broadcastEnabled）经 normalizeSettings 逐字段校验：缺失字段回落默认（广播=关，红线默认）——重启升级兼容性实证无忧
-
-## Unreleased（MCP stdio 代理——R39 评估稿落地）
-
-### Added
-- **内核同步路由通道（R50）**：tools/call 对 KERNEL_OPS（7 个）优先走 `/plugin/private/<plugin>/exec` 直呼（~100ms）——**桥开关默认关时这 7 个 op 也可用**（kernel.js 随 petal 启用即加载），契合默认零外部面姿态；路由未放行自动回退（只读走广播快路径，其余 NDJSON）；+1 路由测试（成功/回退/旧客户端三态），98 总全绿；真机烟测：404→回退→诚实超时 ✓
-
-### Added（R42/R43 第一二增量）
-- **src/mcp/**：MCP stdio 代理（`node src/mcp/main.ts`），23 op 一比一映射为 MCP tools，供 Claude Desktop/Cursor 等 AI 客户端调用小驴生态能力面（checkin/contacts/commands/workflow——思源 3.8.6 内置 MCP 只覆盖内核 CRUD）
-- 安全模型：**默认只暴露 13 个只读工具**；写工具需 `LV_MCP_WRITE=1`（tools/list 隐藏 + tools/call 诚实拒绝）；`plugin.api`/`workflow.execute` 标 destructiveHint；快门既有防线（确认门控/黑名单/审计/允许名单）全共用
-- 逐 op 参数 schema（ARGS 表对齐 docs/api.md；template.new 形状以 kernel-ops 实现为准）；纪律测试强制每 op 登记 properties+描述
-- NDJSON 慢路径 + 广播快路径双通道；commands.run/workflow.execute 等待 35s 覆盖确认窗口
-- 测试 9 组（tools 集合===ALL_OPS 契约一致性强制）；98 总全绿；裸 Node 真机烟测通过（握手/13 只读/写拒绝/required 穿透/内核路由回退）
-- e2e（真 AI 客户端 + 插件侧消费）待思源重启复测批；npm 独立发包待 e2e 后评估
 
 ## v0.6.5 · 2026-10-02（M2 尾巴：审计导出入口）
 

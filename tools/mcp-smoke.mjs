@@ -18,6 +18,12 @@ function session(writeMode) {
         const child = spawn(process.execPath, ["src/mcp/main.ts"], { env, stdio: ["pipe", "pipe", "pipe"] });
         let buf = "";
         const pending = new Map();
+        let exited = false;
+        let exitHint = "";
+        child.on("exit", (code) => {
+            exited = true;
+            if (code !== 0) exitHint = `代理进程提前退出 code=${code}（常见原因：SIYUAN_TOKEN 未设置——直接跑脚本时先 export $(grep -v '^#' "$APPDATA/siyuan/env" | xargs)）`;
+        });
         child.stdout.on("data", (c) => {
             buf += String(c);
             let idx;
@@ -31,14 +37,14 @@ function session(writeMode) {
                 } catch { /* 跳过 */ }
             }
         });
-        child.stderr.on("data", () => {});
+        child.stderr.on("data", (c) => { if (!exitHint) exitHint = String(c).split("\n")[0].slice(0, 120); });
         const call = (method, params) => new Promise((res) => {
             const id = pending.size + 1 + Math.floor(Math.random() * 1000);
             pending.set(id, res);
             child.stdin.write(JSON.stringify({ jsonrpc: "2.0", id, method, params }) + "\n");
         });
         const notify = (method) => child.stdin.write(JSON.stringify({ jsonrpc: "2.0", method }) + "\n");
-        const withTimeout = (p, ms, tag) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(`${tag} ${ms}ms 超时`)), ms))]);
+        const withTimeout = (p, ms, tag) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(exited ? (exitHint || `代理进程退出（${tag} 阶段）`) : `${tag} ${ms}ms 超时`)), ms))]);
         resolve({
             call: (m, p) => withTimeout(call(m, p), 20000, m),
             notify,

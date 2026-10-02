@@ -2,9 +2,9 @@
 
 [English](./README.md)
 
-[![Version](https://img.shields.io/badge/version-0.6.6-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.7.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
-**小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、HA 脚本以及小驴系插件，共用同一套公开契约（23 个 op）——
+**小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（23 个 op）——
 
 - `commands.*` — 发现/搜索/执行任意已装插件的命令面板条目（默认确认门控 + 审计）
 - `checkin.*` / `contacts.*` — 向小驴打卡（API v5）、小驴人脉（bridge v1）的公开桥做结构化透传
@@ -14,7 +14,13 @@
 - `template.new` / `doc.open` / `daily.status` / `editor.context` / `setting.open` — 模板建文档、受控导航、编辑器上下文
 - `plugin.api` — 原始桥方法透传（默认关 + 允许名单 + manifest 驱动窗口桥映射）
 
-**双通道**：NDJSON 桥（默认主路径，异步）+ **内核同步路由**（v0.5.0 实验性，`POST /plugin/private/siyuan-quickgate/exec` 同步处理内核可处理的 op 子集，无需前端窗口在线）。
+**三通道**（同一信封、共用一份幂等台账）：
+
+| 通道 | 延迟 | 覆盖 | 说明 |
+|---|---|---|---|
+| NDJSON 桥（默认主路径） | ~750ms @ 500ms 轮询 | 全部 op | 异步；文件位于 `data/storage/petal/<插件>/bridge/` |
+| 内核同步路由（v0.5.0） | ~100ms | 内核可处理子集（7 op） | `POST /plugin/private/siyuan-quickgate/exec`；**外部命令桥关闭时也可用** |
+| 广播快路径 v1.5（v0.6.0） | ~10–100ms | 全部前端 op | SSE 订阅 `qg-cmd` 频道；默认关；与 NDJSON 共用台账的预留语义防双执行 |
 
 > **集市状态：暂缓上架**。当前唯一分发渠道是 GitHub Release：下载 `package.zip` → 思源「设置 → 集市 → 下载页 → 右上角菜单 → 导入安装包」。
 
@@ -36,7 +42,23 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 信封：`{v:1, id, op, args, createdAt, ttlMs?, reply?, device?}`；回执按 `id` 对应，`status ∈ recorded|duplicate|rejected|failed|unsupported|expired`。完整契约见 [docs/api.md](./docs/api.md)，机器可读版 [docs/contracts/quickgate-api-v1.json](./docs/contracts/quickgate-api-v1.json)（op 面由 `src/ops.ts` 单一来源 + 一致性测试强制对齐）。
 
-[`tools/`](./tools) 内置两个零依赖客户端（node CLI：`ping/send/run/events/exec/fast`；PowerShell：`-Exec` 直呼内核路由、`-Fast` 走广播）；Quicker 子程序走同一信封。面向 AI 客户端：[`src/mcp/`](./src/mcp) 把 23 个 op 经 stdio 暴露为 MCP tools（默认 13 个只读；写工具需 `LV_MCP_WRITE=1`）。
+[`tools/`](./tools) 内置两个零依赖客户端（node CLI：`ping/send/run/events/exec/fast`；PowerShell：`-Exec` 直呼内核路由、`-Fast` 走广播）；Quicker 子程序走同一信封。
+
+### 面向 AI 助手：MCP
+
+[`src/mcp/`](./src/mcp) 把 23 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，这是任何内置 MCP server 都没有覆盖的能力面（差异化论证见项目文档 docs/10 §3.14）。
+
+- **默认只暴露 13 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
+- `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
+- 快门侧防线全部共用：确认门控、黑名单、审计日志、plugin.api 允许名单
+
+```json
+{ "mcpServers": { "lv-quickgate": {
+    "command": "node",
+    "args": ["<仓库路径>/src/mcp/main.ts"],
+    "env": { "SIYUAN_TOKEN": "<token>" }
+} } }
+```
 
 ## 安全
 
@@ -55,10 +77,11 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm test    # vitest（无需内核）
-corepack pnpm accept  # 单测 + MCP 协议冒烟（自主层验收门）
+corepack pnpm accept  # 验收门：单测(98) + MCP 协议冒烟(6)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # 软链进工作空间联调
 ```
+
+部署并重启思源后，跑 `npm run verify:restart`（可加 `SIYUAN_LOG=<工作空间>/temp/siyuan.log` 附产日志增长读数）——一次产出完整验收数据：桥端到端延迟、内核路由 op、事件物化计数、广播存活、v1.5 快路径延迟、MCP 内核路由、内核日志增长。
 
 许可证：[MIT](./LICENSE) · 作者：[@ai68298100](https://github.com/ai68298100)
