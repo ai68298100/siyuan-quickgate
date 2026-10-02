@@ -121,7 +121,7 @@ export default defineConfig((buildTarget === "kernel" ? {
 
             output: {
                 entryFileNames: "[name].js",
-                assetFileNames: (assetInfo) => assetInfo.name ?? "asset",
+                assetFileNames: (assetInfo: { name?: string }) => assetInfo.name ?? "asset",
             },
         },
     },
@@ -131,7 +131,7 @@ export default defineConfig((buildTarget === "kernel" ? {
         pool: "forks",
         testTimeout: 8000,
     }
-}) as import("vitest/config").UserConfig);
+}) as any);
 
 function watchExternalFiles(patterns: string[]): Plugin {
     return {
