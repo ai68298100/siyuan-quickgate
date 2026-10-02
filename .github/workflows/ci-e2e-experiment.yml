@@ -11,16 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: 启动思源容器
+      - name: 启动思源容器（v3.7.0+ 必须 serve 子命令）
         run: |
           docker run -d --name siyuan \
             -p 127.0.0.1:6806:6806 \
             -v siyuan-ws:/siyuan/workspace \
-            b3log/siyuan:latest serve \
+            b3log/siyuan:latest \
+            serve \
             --workspace=/siyuan/workspace/ --accessAuthCode=ci-access
-          echo "容器已启动，等待内核就绪..."
 
-      - name: 等待内核就绪并抓取 Token
+      - name: 等待内核就绪并抓取 Token（api.token 优先）
         run: |
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806 || true)
@@ -30,14 +30,15 @@ jobs:
             fi
             sleep 2
           done
-          docker inspect siyuan --format 'state={{.State.Status}} exit={{.State.ExitCode}}' || true
-          docker logs siyuan 2>&1 | tail -20 || true
-          docker exec siyuan sh -c 'ls /siyuan/workspace/' || true
+          sleep 5
           TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||c.apiToken||c.token||'')" 2>/dev/null || true)
-          echo "TOKEN=${TOKEN:0:6}...(已截取)" 
+          echo "TOKEN 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）"
+          if [ -z "$TOKEN" ]; then
+            echo "Token 为空——conf.json 结构诊断："
+            docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(JSON.stringify({topKeys:Object.keys(c),apiKeys:Object.keys(c.api||{})}))" || true
+          fi
           echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
-          docker exec siyuan sh -c 'cat /siyuan/workspace/conf/conf.json' | head -c 300 || true
 
       - name: 部署插件（dist/ → workspace plugins + 启用）
         run: |
@@ -50,15 +51,25 @@ jobs:
             -d '{"frontend":"all","packageName":"siyuan-quickgate","enabled":true,"isPublish":false}' || true
           echo "插件已部署并启用（kernel.js 加载需容器重启）"
 
-      - name: 预置桥开关并重启容器（加载 kernel.js）
+      - name: 预置桥开关并重启容器（加载 kernel.js + 清认证限速）
         run: |
           docker exec siyuan sh -c 'mkdir -p /siyuan/workspace/data/storage/petal/siyuan-quickgate'
           docker exec siyuan sh -c 'echo "{\"schemaVersion\":1,\"bridgeEnabled\":true,\"broadcastEnabled\":true,\"pollMs\":500}" > /siyuan/workspace/data/storage/petal/siyuan-quickgate/bridge-settings.json'
           docker restart siyuan
-          sleep 15
-          docker logs siyuan --tail 30 2>&1 | grep -iE "kernel|plugin|quickgate" || true
+          sleep 20
+          docker logs siyuan --tail 40 2>&1 | grep -iE "kernel|petals|quickgate" || true
 
-      - name: 跑七类验收（verify-restart）
+      - name: Token 预热验证（version API 200 确认 + 结构诊断）
+        run: |
+          sleep 10
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806/api/system/version -H "Authorization: Token $SIYUAN_TOKEN")
+          echo "预热 version API: HTTP $CODE"
+          if [ "$CODE" != "200" ]; then
+            echo "Token 预热失败——conf.json 结构诊断（仅键名与脱敏前缀）："
+            docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(JSON.stringify({topKeys:Object.keys(c),apiKeys:Object.keys(c.api||{}),tokenHead:((c.api&&c.api.token)||c.token||'').slice(0,4)}))" || true
+          fi
+
+      - name: 跑七类验收（verify-restart；容器=纯内核，③⑤v1.5 预期失败属正常）
         run: |
           corepack pnpm install --no-frozen-lockfile
           node tools/verify-restart.mjs || true
