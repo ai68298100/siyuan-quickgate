@@ -266,7 +266,7 @@
 ### 5.6 M3 可选加速（✅ v0.5.0 内核同步通道 + ✅ v0.6.0 广播快路径均已实现）
 - [x] 【R23】**v1.5 广播 push 通道实现（v0.6.0）**：BroadcastSubscriber（SSE 订阅 qg-cmd 频道/AbortSignal 停止/指数退避重连）+ BridgeService.executeAndRecord（预留语义：同步 check+mark 防 NDJSON/广播双通道双执行；expired 补回执）；`broadcastEnabled` 独立开关默认关（红线）；api.md 三通道表更新。**真机联调待内核重启**
 - [x] 【R22·spike⑤】广播通道三件实证（postMessage/SSE 订阅/Token 鉴权）——docs/WALKTHROUGH ⑤ 回填
-- [ ] 【R23·等实测】v1.5 真机联调（内核重启后）：postMessage 推信封 → 毫秒级执行 → 回执落盘；与 NDJSON 双通道幂等竞态实测【等内核重启】→ **已一键化：`node tools/verify-restart.mjs`（R24），重启后一条命令跑完③⑩⑪⑤/v1.5 全部复测**
+- [x] 【R23·等实测】v1.5 真机联调——✅ **已实测（R70，2026-10-02）**：v1.5 回执落盘 **227ms**（诊断实验 319ms；复测批每轮复现）；时序注意=toggle 后 8s 内跑会误报跳过（SSE 订阅建立中）
 - [x] 【R24·工具】verify-restart.mjs 一键复测脚本（自动读 env；③含延迟测量/⑩四项/⑪计数/⑤存活/v1.5 延迟；内核不可达退出码 2 不误报）——本机预跑 3/5 通过，其余两项均正确归因于"待内核重启"
 - [x] 【R23·工程】vitest 池统一 forks（threads 池下流式假件零延时 sleep 饿死宏任务挂起 worker）；config 用 vitest/config + UserConfig 断言
 - [x] v2 内核同步路由：`POST /plugin/private/siyuan-quickgate/exec` 同步处理内核可处理 op 子集（ping/registry/diagnostics/events/config/template），前端专属 op 回结构化 unsupported（v0.5.0，实验性；spike 真机校准前不建议生产依赖）
@@ -1419,9 +1419,9 @@
 
 - [x] 【R124-G1-R0·C1 回执主线·开发】✅ v0 草案已落地：docs/contracts/result-contract.md——规范状态封闭集（recorded/duplicate/rejected/failed/unsupported/expired + 客户端 timeout=unknown 语义）、三载体映射（桥/workflow/MCP 投影）、补救唯一规则集；仅收录已实现形状，新入口必须映射本合同
 - [ ] 【R124-G1-R0·C2 意图主线·评估】把 R85/R98/R116/R118 的 Intent、Context、Plan、澄清和确认绑定合并为一个上下文合同；验收不再有并行字段命名。
-- [ ] 【R124-G1-R0·C3 能力主线·评估】把 R71/R77/R103/R115 的 manifest、owner、effects、版本和可用性合并为 Capability Registry 合同；验收 declared/observed/available/stale/unknown 分开。
-- [ ] 【R124-G1-R0·C4 可靠主线·评估】把 R69/R74/R78/R82/R83/R121 的幂等、超时、取消、迟到回执、冲突和诊断合并为可靠执行合同；验收写操作只保留一个重试/恢复规则。
-- [ ] 【R124-G1-R0·安全门·评估】把 R72/R78/R96/§11/R120 的权限、确认、外发、注入、急停和审计合并为 Policy & Safety Gate；验收面板、Agent、MCP、Quicker 不得绕过。
+- [x] 【R124-G1-R0·C3 能力主线·开发】✅ v0 落地：docs/contracts/capability-registry-contract.md——条目 schema（manifests 实际字段）/可用性五态（declared/observed/available/stale/unknown；后三态 planned 已登记）/owner 唯一+写入必枚举不变量/消费面五处对照/已知差距（effects 未下沉 manifest）
+- [x] 【R124-G1-R0·C4 可靠主线·开发】✅ v0 落地：docs/contracts/reliability-contract.md——幂等（D-0002/0003/012+预留语义）/超时四层（TTL 60s/执行 15s/客户端 8s·35s/MCP 同）/取消=planned（workflow.cancel+急停合并设计，已登记）/迟到回执（禁改写）/冲突（台账收敛+WebLock 待多窗口复验）/诊断（diagnostics+审计+verify:restart 七类）；重试唯一规则引用 result-contract §3，不重复定义
+- [x] 【R124-G1-R0·安全门·开发】✅ v0 落地：docs/contracts/safety-gate-contract.md——五条红线（外部面默认关/不读私有存储/无Token 401/四不/未知不成功）+ 入口无关防线矩阵（六列五防线，dispatch 层统一实现）+ MCP 专属门控表 + planned（笔记本分级/急停/effects 下沉）；不变量=MCP 不新增特权、新入口必须走同一 dispatch
 - [ ] 【R124-G1-R0·证据上下文·评估】把 R80/R85/R98/R99/R116/R119 的来源、引用、版本、截断、敏感等级和缺源合并为 Context & Evidence Envelope。
 - [ ] 【R124-G1-R0·观测预算·评估】把 R74/R87/R104/R116/R121 的技术 SLO、AI token/费用和用户价值指标拆成三类 ledger；验收成本指标不替代闭环价值。
 - [ ] 【R124-G1-R0·发布证据·评估】把 R69/R70/R78/R88/§8/§9 的版本、事实、兼容、脱敏、包内容和回滚合并为 Release Evidence 清单。
