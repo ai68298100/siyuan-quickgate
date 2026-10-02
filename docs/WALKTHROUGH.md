@@ -2,7 +2,7 @@
 
 > 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
-> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.6.0** 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥与广播快路径默认关）。下文 `$TOKEN` 即该值。
+> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.5**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.6.6** 已部署至 `data/plugins/siyuan-quickgate/` 并经 `/api/petal/setPetalEnabled` 启用（桥与广播快路径默认关；前端窗口内运行的仍是启用时刻加载的版本，重启后生效最新）。下文 `$TOKEN` 即该值。
 > 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧 spike ①②⑦ 已用本机 bundle 静态核实（R26/R27，**不需要 DevTools**）：grep `D:\biji\SiYuan\resources\stage\build\app\` 编译产物可直接核实前端假设——这是实际运行的代码，比远端源码更硬。剩余 DevTools 现场：④ 多窗口 Web Lock、⑦ blockId 光标爬升、⑪ 事件现场、① 可选复核。
 > **重启复测一键化（R24）**：思源重启后跑 `node tools/verify-restart.mjs`（自动读 env）——③桥端到端含延迟 / ⑩⓪负向鉴权+路由 ping+events.list+降级 / ⑪事件物化计数 / ⑤广播存活 / **v1.5 postMessage→回执延迟测量**。一条命令完成复测批。手工单发广播命令可用 **`lv-cli.mjs fast`**（R30 新增：postMessage 推信封→qg-cmd 频道，回执算 e2eMs；`--channel` 可换频道自测 HTTP 层）。
 
