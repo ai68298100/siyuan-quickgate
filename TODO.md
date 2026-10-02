@@ -1801,4 +1801,4 @@
 - [ ] 【R96-G1·等实验】CI 内核侧 e2e 转绿：限速对策（restart 清零或延迟窗口）+ api.token 验证 + ⑩路由/⓪401/events.list/降级 四项在容器转绿【实验分支自主迭代】
 
 - [x] 【R97·CI 容器化实验·七轮收官（暂停）】第七轮决定性发现：容器 api.token 首探即生成，但为 **122 字符新格式**（OCI 开头；本机 11 位系旧格式迁移遗留）+ accessAuthCode 模式下 version API 返回 **400**（非 401/200）——v3.8.6+ 新版 Token/鉴权行为**超出官方文档覆盖**，需上游 issue 或源码确认后方可继续。实验分支 ci-e2e-experiment 保留（workflow 含全部诊断）。**结论：容器化 e2e 技术可行已证（serve/部署/插件启用全通），卡点=新版鉴权行为确认（上游依赖）**
-- [ ] 【R97·等上游】v3.8.6+ 新版 API Token 格式（122 字符）与 accessAuthCode 模式下 API 调用方式确认（官方文档/源码/issue）→ 确认后恢复容器化 e2e 实验【等上游文档】
+- [x] 【R97·等上游→R98·源码考古已确认】v3.8.6 内核 auth.go 实证（gh API 拉取 v3.8.6 tag 源码）：引入 **JWT 机制**（golang-jwt/v5，jwtKey 32 字节随机生成，iss=siyuan-kernel，多 audience 含 siyuan-kernel-plugin——**122 字符 Token 即内核插件 JWT**）+ `/api/system/setAPIToken` 端点存在（CheckAuth+Admin）。**CI 容器 Token 对策定版：容器首启前直接向 volume conf.json 预置 api.token=固定值（volume 可写，无需等内核生成）**——下轮实验执行
