@@ -20,7 +20,7 @@ jobs:
             serve \
             --workspace=/siyuan/workspace/ --accessAuthCode=ci-access
 
-      - name: 等待内核就绪并抓取 Token（api.token 优先）
+      - name: 等待内核就绪
         run: |
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806 || true)
@@ -30,11 +30,19 @@ jobs:
             fi
             sleep 2
           done
-          sleep 5
-          TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||c.apiToken||c.token||'')" 2>/dev/null || true)
+          sleep 10  # 等 conf.json 的 api.token 生成
+
+      - name: 抓取 Token（等 api.token 生成，拒绝顶层 token/授权码派生值）
+        run: |
+          TOKEN=""
+          for i in $(seq 1 30); do
+            TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||'')" 2>/dev/null || true)
+            if [ -n "$TOKEN" ]; then echo "api.token 已生成（第 $i 次探测）"; break; fi
+            sleep 2
+          done
           echo "TOKEN 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）"
           if [ -z "$TOKEN" ]; then
-            echo "Token 为空——conf.json 结构诊断："
+            echo "60s 后 api.token 仍为空——conf.json 结构诊断："
             docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(JSON.stringify({topKeys:Object.keys(c),apiKeys:Object.keys(c.api||{})}))" || true
           fi
           echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
@@ -56,17 +64,17 @@ jobs:
           docker exec siyuan sh -c 'mkdir -p /siyuan/workspace/data/storage/petal/siyuan-quickgate'
           docker exec siyuan sh -c 'echo "{\"schemaVersion\":1,\"bridgeEnabled\":true,\"broadcastEnabled\":true,\"pollMs\":500}" > /siyuan/workspace/data/storage/petal/siyuan-quickgate/bridge-settings.json'
           docker restart siyuan
-          sleep 20
+          sleep 25
           docker logs siyuan --tail 40 2>&1 | grep -iE "kernel|petals|quickgate" || true
 
-      - name: Token 预热验证（version API 200 确认 + 结构诊断）
+      - name: Token 预热验证（version API 200 确认）
         run: |
           sleep 10
           CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806/api/system/version -H "Authorization: Token $SIYUAN_TOKEN")
           echo "预热 version API: HTTP $CODE"
           if [ "$CODE" != "200" ]; then
-            echo "Token 预热失败——conf.json 结构诊断（仅键名与脱敏前缀）："
-            docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(JSON.stringify({topKeys:Object.keys(c),apiKeys:Object.keys(c.api||{}),tokenHead:((c.api&&c.api.token)||c.token||'').slice(0,4)}))" || true
+            echo "Token 预热失败——诊断 api.token 状态："
+            docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(JSON.stringify({apiTokenLen:((c.api&&c.api.token)||'').length,topTokenLen:(c.token||'').length}))" || true
           fi
 
       - name: 跑七类验收（verify-restart；容器=纯内核，③⑤v1.5 预期失败属正常）
