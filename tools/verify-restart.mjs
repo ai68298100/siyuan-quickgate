@@ -77,6 +77,14 @@ async function main() {
     }
     check("内核可达", true, `v${version}`);
 
+    // §10-10 数据点：内核日志增长测量（SIYUAN_LOG=path 时启用；桥开着时 8s 窗口≈16 个轮询周期）
+    const logPath = process.env.SIYUAN_LOG;
+    let logSize0 = null;
+    if (logPath) {
+        try { logSize0 = (await import("node:fs")).statSync(logPath).size; console.log(`  (内核日志基线 ${logSize0} 字节)`); }
+        catch { console.log("  (SIYUAN_LOG 指向的文件不可读，跳过日志增长测量)"); logSize0 = null; }
+    }
+
     // ③ 桥文件端到端（需桥开启=前端快门在跑）
     const cmdPath = `/storage/petal/${PLUGIN}/bridge/commands.ndjson`;
     const resPath = `/storage/petal/${PLUGIN}/bridge/results.ndjson`;
@@ -146,6 +154,14 @@ async function main() {
     }
     if (r15) check("v1.5 广播快路径联调", true, `postMessage→回执落盘 ${r15.ms}ms`);
     else console.log("  (v1.5 联调跳过：回执未出现——需设置开启「广播快路径」且前端快门在线；NDJSON 慢路径兜底时也能收到，仅延迟~750ms)");
+
+    // §10-10 日志增长读数（桥开着时整个复测窗口的 getFile/putFile 轮询都会计入）
+    if (logSize0 !== null && logPath) {
+        try {
+            const delta = (await import("node:fs")).statSync(logPath).size - logSize0;
+            console.log(`  (§10-10 内核日志增长：+${delta} 字节 / 复测全程——若量级异常大再评估轮询降噪)`);
+        } catch { /* 忽略 */ }
+    }
 
     // MCP 代理内核路由通道（R50）：stdio 驱动 src/mcp/main.ts，验证 registry.list 经 exec 返回 recorded
     try {
