@@ -10,6 +10,7 @@ dev
 dist
 build
 tmp
+*.tmp
 
 # 本地凭据与运行数据（绝不入库）
 *.local.json
