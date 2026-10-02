@@ -69,6 +69,7 @@
 - [x] 【R63·循环A】**令牌泄漏安全扫描（两项目零命中）**：真实 Token 值与令牌形状字面量在 quickgate 仓库与设计文档项目全部文件类型中零命中——所有引用走环境变量/用户配置变量；.gitignore 的凭据条目（*.local.json/bridge-*.json/audit.json/.env）覆盖到位
 - [x] 【R64·循环B】**验收流程收敛为一条命令**：package.json 新增 `accept`（=单测+MCP 冒烟，实跑 98/98+6/6 ✓）、`smoke:mcp`、`verify:restart` 三个脚本——重启后验收从记四条命令变成 `npm run accept` 全绿 + `npm run verify:restart` 七类数据
 - [x] 【R65·循环A】**验收入口文档同步三处**：WALKTHROUGH 复测节改 npm run 形式（并补 SIYUAN_LOG 用法与 MCP 项）、双语 README 开发节补 `pnpm accept` 行
+- [x] 【R66·循环A】**设计文档项目建立版本控制（安全措施）**：发现 13 份设计文档+350 项 TODO 账本+参考件（~1MB）60 余轮全部为无撤销覆盖编辑——git init + 初始快照提交（9e03b49，28 文件；已有 .gitignore 覆盖凭据/运行时目录，token/secret 通配在案）。非破坏性（删 .git 即撤销）；后续 R 轮的文档改动可逐轮留痕
 - [ ] 【实测】思源开启 HTTPS 后 URL 协议变化对动作的影响（配置项兼容 https）
 - [ ] 【实测】Defender/杀软对 Quicker C# 脚本与临时文件的误报
 - [ ] 【实测】勿扰模式下 notify 可见性
