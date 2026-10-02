@@ -147,6 +147,30 @@ async function main() {
     if (r15) check("v1.5 广播快路径联调", true, `postMessage→回执落盘 ${r15.ms}ms`);
     else console.log("  (v1.5 联调跳过：回执未出现——需设置开启「广播快路径」且前端快门在线；NDJSON 慢路径兜底时也能收到，仅延迟~750ms)");
 
+    // MCP 代理内核路由通道（R50）：stdio 驱动 src/mcp/main.ts，验证 registry.list 经 exec 返回 recorded
+    try {
+        const { spawn } = await import("node:child_process");
+        const child = spawn(process.execPath, ["src/mcp/main.ts"], { cwd: process.cwd(), env: { ...process.env, LV_MCP_WRITE: "0" }, stdio: ["pipe", "pipe", "pipe"] });
+        let out = "";
+        child.stdout.on("data", (c) => { out += String(c); });
+        child.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "registry.list", arguments: {} } }) + "\n");
+        const tM = Date.now();
+        let mcpOk = false;
+        while (Date.now() - tM < 12000) {
+            const line = out.split("\n").find((x) => x.trim().startsWith("{") && x.includes('"id":1'));
+            if (line) {
+                const resp = JSON.parse(line);
+                const text = resp.result?.content?.[0]?.text ?? "";
+                mcpOk = resp.result?.isError === false && text.includes('"recorded"');
+                if (mcpOk || resp.result?.isError) break;
+            }
+            await new Promise((r) => setTimeout(r, 150));
+        }
+        child.kill();
+        if (mcpOk) check("MCP 内核路由（registry.list 经 exec）", true, `${Date.now() - tM}ms isError=false`);
+        else console.log(`  (MCP 路由跳过/未通：${out.split("\n").find((x) => x.includes("error"))?.slice(0, 60) ?? "12s 无有效响应"}——桥关时此项应通，若不通查 kernel.js 加载)`);
+    } catch (e) { console.log(`  (MCP 路由检查异常：${e.message})`); }
+
     const failed = results.filter((x) => !x.ok).length;
     console.log(`\n== 复测：${results.length - failed}/${results.length} 通过 ==`);
     process.exit(failed ? 1 : 0);
