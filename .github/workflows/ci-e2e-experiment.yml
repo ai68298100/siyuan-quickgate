@@ -33,7 +33,7 @@ jobs:
           docker inspect siyuan --format 'state={{.State.Status}} exit={{.State.ExitCode}}' || true
           docker logs siyuan 2>&1 | tail -20 || true
           docker exec siyuan sh -c 'ls /siyuan/workspace/' || true
-          TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(c.token||c.apiToken||'')" 2>/dev/null || true)
+          TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||c.apiToken||c.token||'')" 2>/dev/null || true)
           echo "TOKEN=${TOKEN:0:6}...(已截取)" 
           echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
