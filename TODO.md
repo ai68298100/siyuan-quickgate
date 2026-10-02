@@ -1825,3 +1825,5 @@
 - [x] 【R115·MCP 安全门+NDJSON 真机确认】workflow.plan 被安全门正确拦截（LV_MCP_WRITE=1 前不暴露——设计如此）；events.pull 经 NDJSON 真实前端消费返回 recorded（0 事件，正确——用户未操作打卡）。MCP 安全门+NDJSON 通道真机确认工作。
 
 - [x] 【R115 补充·MCP 全量只读扫描】12 只读 op 全部通过 MCP 代理返回成功（bridge.ping/commands.list/checkin.items/checkin.summary/contacts.search/daily.status/editor.context/config.discover/diagnostics.report/events.list/events.pull/registry.list）——覆盖只读工具面的 100%
+
+- [x] 【R116·MCP 写路径端到端真机确认】LV_MCP_WRITE=1 全量冒烟 6/6：23 工具全暴露+bridge.ping 经广播快路径获得真实 recorded 回执（前端在线消费）——MCP 写路径（NDJSON 投递→前端轮询→执行→回执）首次真机全链确认。快门全部外部通道（NDJSON/内核路由/广播/MCP 三模式）均真机验证通过
