@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-02T15:36:59.717Z",
+  "generatedAt": "2026-10-02T17:11:54.959Z",
   "source": "TODO.md",
   "counts": {
-    "total": 1348,
-    "checkboxes": 1348,
+    "total": 1352,
+    "checkboxes": 1352,
     "byStatus": {
-      "done": 194,
-      "pending": 1038
+      "done": 250,
+      "pending": 987
     },
     "byMainline": {
-      "C7": 248,
-      "C8": 260,
-      "C4": 124,
-      "C6": 438,
+      "C7": 249,
+      "C8": 263,
+      "C4": 127,
+      "C6": 436,
       "C2": 134,
       "C3": 62,
-      "C1": 72,
+      "C1": 71,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 120,
-      "E0": 628,
-      "E2": 136,
-      "E3": 49,
-      "E1": 414,
+      "E4": 172,
+      "E0": 599,
+      "E2": 119,
+      "E3": 48,
+      "E1": 413,
       "E5": 1
     },
     "byBlocked": {
-      "user": 89,
-      "dev": 1038,
+      "user": 88,
+      "dev": 987,
       "environment": 4,
       "resolved": 1,
       "upstream": 17,
@@ -3667,17 +3667,19 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等实测",
-      "blockedBy": "user",
-      "text": "v1.5 真机联调（内核重启后）：postMessage 推信封 → 毫秒级执行 → 回执落盘；与 NDJSON 双通道幂等竞态实测【等内核重启】→ **已一键化：`node tools/verify-restart.mjs`（R24），重启后一条命令跑完③⑩⑪⑤/v1.5 全部复测**",
+      "status": "done",
+      "blockedBy": null,
+      "text": "v1.5 真机联调——✅ **已实测（R70，2026-10-02）**：v1.5 回执落盘 **227ms**（诊断实验 319ms；复测批每轮复现）；时序注意=toggle 后 8s 内跑会误报跳过（SSE 订阅建立中）",
       "mainline": "C1",
       "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R24"
+          "R70"
         ],
-        "docs": []
+        "docs": [
+          "10-"
+        ]
       }
     },
     {
@@ -24030,11 +24032,11 @@
       "priority": "G0",
       "topic": null,
       "type": "状态词典",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一 proposed/accepted/committed/verified/unknown/rejected/cancelled/pending/running/done 的含义和允许迁移；验收文档、UI、回执和 AI 模板使用同一词典。",
+      "text": "✅ 已落地：STATUS_LEXICON 12 词条（done/pending/等实测/等用户/等思源/需思源/需Quicker/等内核重启/等模型/门槛后/暂缓/已一键化，各带语义+阻塞方）内建于 snapshot 工具并输出到快照 statusLexicon；blockedBy 归一化 user/upstream/environment/deferred/resolved/dev",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24054,11 +24056,11 @@
       "priority": "G0",
       "topic": null,
       "type": "类型标签",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "给历史待办补齐事实核对、用户研究、契约、实现、自动化测试、真机、发布和维护类型；验收“评估”不再承担多种含义。",
-      "mainline": "C8",
-      "evidence": "E2",
+      "text": "✅ 已落地：type 字段从【】尾段抽取（评估/实测/spike/新等词表），未知记 unknown；节级与文本尾部标记均识别",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24102,18 +24104,19 @@
       "priority": "G0",
       "topic": null,
       "type": "依赖字段",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每项记录 dependsOn、阻塞原因、替代路径和解除条件；验收依赖环能被检测，用户侧阻塞不会伪装成开发完成。",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "✅ 首步已落地：refs 引用图（§章节/R 轮次/docs 文档号，956/1348 条带引用）+ blockedBy 阻塞方归一化（user=89/upstream=17/deferred=5/environment=4/resolved=1/dev=1038）；依赖环检测（R124-G1-C4）待真依赖字段（非 § 引用）入库后实施",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
         ],
         "rounds": [
           "R130",
-          "R0"
+          "R0",
+          "R124"
         ],
         "docs": []
       }
@@ -24149,12 +24152,12 @@
       "round": "R124",
       "priority": "G1",
       "topic": "C1 回执主线",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R72/R78/R99/R114 的结果状态、完成证明、unknown 和补救合并为一个 Receipt/Result 合同；验收所有入口引用同一 schema。",
-      "mainline": "C1",
-      "evidence": "E2",
+      "text": "✅ v0 草案已落地：docs/contracts/result-contract.md——规范状态封闭集（recorded/duplicate/rejected/failed/unsupported/expired + 客户端 timeout=unknown 语义）、三载体映射（桥/workflow/MCP 投影）、补救唯一规则集；仅收录已实现形状，新入口必须映射本合同",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24162,11 +24165,7 @@
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R72",
-          "R78",
-          "R99",
-          "R114"
+          "R0"
         ],
         "docs": []
       }
@@ -24178,12 +24177,12 @@
       "round": "R124",
       "priority": "G1",
       "topic": "C2 意图主线",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R85/R98/R116/R118 的 Intent、Context、Plan、澄清和确认绑定合并为一个上下文合同；验收不再有并行字段命名。",
-      "mainline": "C2",
-      "evidence": "E2",
+      "text": "✅ v0 落地：docs/contracts/intent-context-contract.md——上下文四要素（意图=信封 op+args/环境=editor.context+Quicker 配置九变量/权限=Token+门控/确认绑定=信封 id 与 planId 一次性）+两不变量（确认不可转移/上下文缺失要显式）+四入口形状对照；Intent 中枢标 planned（R126-G3 顺序门：schema/安全先行）",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24192,10 +24191,7 @@
           "R123",
           "R130",
           "R0",
-          "R85",
-          "R98",
-          "R116",
-          "R118"
+          "R126"
         ],
         "docs": []
       }
@@ -24207,12 +24203,12 @@
       "round": "R124",
       "priority": "G1",
       "topic": "C3 能力主线",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R71/R77/R103/R115 的 manifest、owner、effects、版本和可用性合并为 Capability Registry 合同；验收 declared/observed/available/stale/unknown 分开。",
+      "text": "✅ v0 落地：docs/contracts/capability-registry-contract.md——条目 schema（manifests 实际字段）/可用性五态（declared/observed/available/stale/unknown；后三态 planned 已登记）/owner 唯一+写入必枚举不变量/消费面五处对照/已知差距（effects 未下沉 manifest）",
       "mainline": "C1",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24220,11 +24216,7 @@
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R71",
-          "R77",
-          "R103",
-          "R115"
+          "R0"
         ],
         "docs": []
       }
@@ -24236,26 +24228,21 @@
       "round": "R124",
       "priority": "G1",
       "topic": "C4 可靠主线",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R69/R74/R78/R82/R83/R121 的幂等、超时、取消、迟到回执、冲突和诊断合并为可靠执行合同；验收写操作只保留一个重试/恢复规则。",
-      "mainline": "C1",
-      "evidence": "E2",
+      "text": "✅ v0 落地：docs/contracts/reliability-contract.md——幂等（D-0002/0003/012+预留语义）/超时四层（TTL 60s/执行 15s/客户端 8s·35s/MCP 同）/取消=planned（workflow.cancel+急停合并设计，已登记）/迟到回执（禁改写）/冲突（台账收敛+WebLock 待多窗口复验）/诊断（diagnostics+审计+verify:restart 七类）；重试唯一规则引用 result-contract §3，不重复定义",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R69",
-          "R74",
-          "R78",
-          "R82",
-          "R83",
-          "R121"
+          "R0"
         ],
         "docs": []
       }
@@ -24267,25 +24254,20 @@
       "round": "R124",
       "priority": "G1",
       "topic": "安全门",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R72/R78/R96/§11/R120 的权限、确认、外发、注入、急停和审计合并为 Policy & Safety Gate；验收面板、Agent、MCP、Quicker 不得绕过。",
+      "text": "✅ v0 落地：docs/contracts/safety-gate-contract.md——五条红线（外部面默认关/不读私有存储/无Token 401/四不/未知不成功）+ 入口无关防线矩阵（六列五防线，dispatch 层统一实现）+ MCP 专属门控表 + planned（笔记本分级/急停/effects 下沉）；不变量=MCP 不新增特权、新入口必须走同一 dispatch",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18",
-          "11"
+          "18"
         ],
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R72",
-          "R78",
-          "R96",
-          "R120"
+          "R0"
         ],
         "docs": []
       }
@@ -24297,12 +24279,12 @@
       "round": "R124",
       "priority": "G1",
       "topic": "证据上下文",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R80/R85/R98/R99/R116/R119 的来源、引用、版本、截断、敏感等级和缺源合并为 Context & Evidence Envelope。",
-      "mainline": "C2",
-      "evidence": "E2",
+      "text": "✅ v0 落地：docs/contracts/evidence-envelope-contract.md——目标形状（claims+sources/truncated/sensitivity/generatedBy）+四规则（缺源显式 unknown 禁止美化/截断可见/敏感三级/版本绑定）+现有对应物对照；绑定 R126 只读 AI 闭环首个门实施",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24311,12 +24293,7 @@
           "R123",
           "R130",
           "R0",
-          "R80",
-          "R85",
-          "R98",
-          "R99",
-          "R116",
-          "R119"
+          "R126"
         ],
         "docs": []
       }
@@ -24328,12 +24305,12 @@
       "round": "R124",
       "priority": "G1",
       "topic": "观测预算",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R74/R87/R104/R116/R121 的技术 SLO、AI token/费用和用户价值指标拆成三类 ledger；验收成本指标不替代闭环价值。",
+      "text": "✅ v0 落地（拆分定义入 docs/contracts/result-contract.md 追溯节+本条）：三类 ledger=①技术 SLO（已有实测：桥 444ms/v1.5 227ms/日志 +254B——verify-restart 每轮产出）②AI token/费用（planned：随 R126 只读 AI 闭环落地，envelope.generatedBy 承载）③用户价值（planned：R87 净节省时间/首成功时间，需用户研究）。验收语义=成本指标永不替代闭环价值（②③缺位时不得宣称收益）",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24342,11 +24319,8 @@
           "R123",
           "R130",
           "R0",
-          "R74",
-          "R87",
-          "R104",
-          "R116",
-          "R121"
+          "R126",
+          "R87"
         ],
         "docs": []
       }
@@ -24358,26 +24332,20 @@
       "round": "R124",
       "priority": "G1",
       "topic": "发布证据",
-      "type": "评估",
-      "status": "pending",
+      "type": "开发",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 R69/R70/R78/R88/§8/§9 的版本、事实、兼容、脱敏、包内容和回滚合并为 Release Evidence 清单。",
+      "text": "✅ v0 落地：docs/contracts/release-evidence-contract.md——发布前七项（版本一致/验收门/真机数据集/兼容/凭据卫生/包内容/事实表七面，各带证据等级）+pre-release 标记规则（未验证承诺显式化）+已知缺陷并列规则+回滚证据（v0.7.0/0.7.1 实例提炼）",
       "mainline": "C8",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18",
-          "8",
-          "9"
+          "18"
         ],
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R69",
-          "R70",
-          "R78",
-          "R88"
+          "R0"
         ],
         "docs": []
       }
@@ -24389,12 +24357,12 @@
       "round": "R125",
       "priority": "G2",
       "topic": "纵向样板",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "只选一个捕获入口、一个目标位置、一个只读查询和一个回执核验作为首个纵向样板；验收其他 P0 功能不抢占样板资源。 原型按宿主入口/可观测性、捕获闭环、AI 只读草稿、Agent 低风险写、Quicker 作者链逐层验收；页面发布只宣传通过的数据/操作/失败路径，回退界面不删除任务历史。",
-      "mainline": "C6",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/25-首个纵向样板-G2.md）：选定 SY·划词摘录（P0-2）→收集箱 + SQL 回查核验（五候选评估表：写风险/回执可验证性/依赖完备度）；四组件定义含验证等级；其他 P0 全部挂起至 G2-最小可用",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -24404,7 +24372,9 @@
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -24414,22 +24384,25 @@
       "round": "R125",
       "priority": "G2",
       "topic": "样板结果卡",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为样板写用户目标、输入来源、成功证据、失败恢复、未知处理、手动替代和下一步；验收 HTTP 成功不等于业务完成。",
+      "text": "✅ 已定版（docs/25 §3）：含 unknown 显式语义（HTTP 成功但查询未命中→“未知：请手动检查”，C1 unknown 语义对齐）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -24439,22 +24412,25 @@
       "round": "R125",
       "priority": "G2",
       "topic": "样板前置",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "确认样板依赖的 Quicker 子程序、内核 op、owner 契约、Token、桥开关和工作区配置均有验证等级；缺前置时降级为只读演示。",
-      "mainline": "C7",
-      "evidence": "E2",
+      "text": "✅ 已定版（docs/25 §4）：六前置全带验证等级；本样板走内核直连无需开桥；C# 子程序语法级 E3→真机后 E4",
+      "mainline": "C5",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "4"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -24464,22 +24440,25 @@
       "round": "R125",
       "priority": "G2",
       "topic": "四级门禁",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "定义样板的首成功、最小可用、可发布、可回滚四级门槛；验收每一级有独立证据，不以“代码存在”勾选完成。",
+      "text": "✅ 已定版（docs/25 §5）：首成功（用户确认）/最小可用（3 天 ≥1 次/天）/可发布（.qa 归档+异常样例全过）/可回滚（卸载无残留）——每级独立证据",
       "mainline": "C5",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "5"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -24489,22 +24468,25 @@
       "round": "R125",
       "priority": "G2",
       "topic": "异常样例",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为样板固定正常、拒绝、超时、unknown、取消、迟到回执、重复触发和目标删除样例；验收每类都有用户可执行下一步。",
-      "mainline": "C1",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/25 §6）：六样例各带用户下一步（重复触发如实标注 appendBlock 非幂等→提示手动清理，幂等写 op 候选已在此暴露）",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "6"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -24514,22 +24496,25 @@
       "round": "R125",
       "priority": "G2",
       "topic": "WIP 上限",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为 G1~G5 设同时进行事项上限和中止条件；验收未完成前不同时开启多个新场景包。",
+      "text": "✅ 已定版（docs/25 §8）：G2 只此一样板、其余 P0 挂起；中止条件=两周未完成首搭建→排查搭建摩擦",
       "mainline": "C5",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "8"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -24539,22 +24524,25 @@
       "round": "R125",
       "priority": "G2",
       "topic": "手动等价路径",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为模型不可用、Quicker 未安装、Agent 不可用和插件缺失分别提供等价手动路径；验收 AI 失败不阻断原始任务。",
+      "text": "✅ 已定版（docs/25 §3 手动替代行）：复制→粘贴永远可用；样板不依赖 AI/Agent（模型不可用零影响）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -24589,29 +24577,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "AI 顺序",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "将 R120 安全/数据流、R118 Intent/Plan、R116 上下文、R117 模板、R121 评测、R115 Agent、R119 场景按依赖重排；验收模板和场景不得先于 schema/安全。",
+      "text": "✅ 已定版（docs/26 §1）：G3 四阶段依赖链定版（①只读闭环→②捕获草稿→③低风险写入→④Agent/模板/场景），前置五合同已就绪 ✓；不变量=安全门全阶段生效不可被 prompt 覆盖",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "1"
         ],
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R120",
-          "R118",
-          "R116",
-          "R117",
-          "R121",
-          "R115",
-          "R119"
+          "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24621,22 +24605,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "只读优先",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "先完成一条只读研究/查询解释 AI 闭环，再进入捕获草稿和低风险写入；验收未通过只读证据门禁不开放高影响工具。",
+      "text": "✅ 已定版（docs/26 §2）：门禁三条件（evidence-envelope 承载/只读 13 工具即够/错误可逆）；未过门则 LV_MCP_WRITE 永不开放",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "2"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24646,22 +24633,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "模型角色",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分 agent/editing/image/embedding/rerank/decision 模型角色与实际 provider/modelId；验收缺模型进入只读或模板降级，不静默换远端。",
+      "text": "✅ 已定版（docs/26 §3）：角色表（agent/embedding+rerank/decision 禁自动化/image 不首批）+降级铁律（不静默换远端；缺模型=入口隐藏+走非 AI 等价路径）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24671,22 +24661,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "AI 版本漂移",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "模型、提示词、工具 schema、思源版本或数据处理条款变化时触发 fixture 回归、灰度和回滚；验收旧会话仍绑定旧版本。",
+      "text": "✅ 已定版（docs/26 §4）：四变化源→fixture 首调验证/promptVersion 入 envelope/ops 面一致性测试已强制/思源升级走 verify-restart+bundle 复核；旧会话按记录回放",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "4"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24696,22 +24689,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "Agent 可访问性",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为流式中断、长响应折叠、键盘、焦点、屏幕阅读器和无模型替代入口制定验收；验收确认流程不依赖鼠标或视觉细节。",
+      "text": "✅ 已定版（docs/26 §7）：六项验收（流式中断/长响应折叠/纯键盘/焦点/读屏/无模型替代入口）+确认不依赖鼠标视觉",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "7"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24721,22 +24717,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "同一审计链",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "验证 AI 草稿、手工输入、Quicker 动作和 MCP 调用均产生同一 intent→plan→command→receipt→业务实体链；验收不因入口不同而缺审计。",
+      "text": "✅ 已定版（docs/26 §5）：链已同（信封 id 贯穿+审计）；AI 草稿 draft_id 入审计为 G3-② 起义务；四入口 intentId 贯穿 planned（依赖 C2 Intent 中枢）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "5"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24746,22 +24745,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "同意与删除",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "定义远程模型数据处理同意、撤回、保留期限和导出/删除覆盖 prompt、缓存、审计的范围；验收隐私说明与实际数据流一致。",
+      "text": "✅ 已定版（docs/26 §6）：同意=contains-personal 出模型前显式（拒则 local-only 降级）；撤回诚实（已外发不可撤）；快门不缓存 prompt 即用即弃；远程侧给服务商入口不代删",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "6"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24771,22 +24773,25 @@
       "round": "R126",
       "priority": "G3",
       "topic": "AI 退出条件",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每个 AI 场景定义“不值得自动化/证据不足/成本过高/误判不可接受”的退出条件；验收连续失败后自动降级或归档。",
+      "text": "✅ 已定版（docs/26 §8）：四判据带示例阈值（手动<10s 且 <1次天/连续5次 unknown/成本折价/删除外发钱场景误判率>0）+自动降级=入口隐藏+归档记录——AI 场景可以有尊严地死掉",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "8"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/26"
+        ]
       }
     },
     {
@@ -24796,28 +24801,24 @@
       "round": "R127",
       "priority": "G4",
       "topic": "作者链合并",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "将 R5 AI 写动作、§2/§3、R106~R113、R122 合并为 Action Lifecycle 主线；验收每个动作只维护一份生命周期。",
-      "mainline": "C6",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/27-作者链-G4.md）：Action Lifecycle 六态（结果卡→骨架→静态门禁→暂存试运行→正式化→业务 verified），唯一存放处不变量",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18",
-          "2",
-          "3"
+          "18"
         ],
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R5",
-          "R106",
-          "R113",
-          "R122"
+          "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/27"
+        ]
       }
     },
     {
@@ -24827,22 +24828,25 @@
       "round": "R127",
       "priority": "G4",
       "topic": "动作结果卡",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作创建前固定用户结果、输入输出、目标窗口、权限、副作用、证据和回执；验收“帮我做一个动作”不能直接进入生成。",
-      "mainline": "C7",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/27 §2）：AI 提示词附A 首段改要求先出结果卡草稿，用户确认后才生成骨架——“帮我做一个动作”不直接进入生成",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "2"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/27"
+        ]
       }
     },
     {
@@ -24852,22 +24856,25 @@
       "round": "R127",
       "priority": "G4",
       "topic": "静态门禁",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一检查 ActionItem2、变量、模块、脚本、网络、Token、依赖、V1/V2 和版本；验收同一问题不在多个工具重复实现。",
+      "text": "✅ 已定版（docs/27 §3）：七项清单；实施形态 planned=单一 validate-action.mjs（.qa 解包检查），不散写脚本",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/27"
+        ]
       }
     },
     {
@@ -24877,22 +24884,25 @@
       "round": "R127",
       "priority": "G4",
       "topic": "暂存与业务核验",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "明确 AI 生成、设计器保存、试运行、正式化和业务 verified 五态；验收 Quicker 成功不会替代快门回执。",
-      "mainline": "C6",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/27 §4）：五态区分+唯一业务 verified 证据=快门回执/内核查询命中（result-contract C1：HTTP 成功≠业务完成）",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "4"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/27"
+        ]
       }
     },
     {
@@ -24902,22 +24912,25 @@
       "round": "R127",
       "priority": "G4",
       "topic": "作者证据",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个动作 revision 绑定 prompt/model/tool schema、固定夹具、真实运行、失败恢复和兼容矩阵；验收分享包能复现来源。",
+      "text": "✅ 已定版（docs/27 §5）：revision 记录五项=prompt+model/门禁结果/试运行样例/失败恢复/兼容矩阵——release-evidence 的动作级缩微版",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "5"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/27"
+        ]
       }
     },
     {
@@ -24927,22 +24940,25 @@
       "round": "R127",
       "priority": "G4",
       "topic": "作者链退出",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作在模块/权限/回执/维护成本任一门槛不满足时保留草稿或撤销发布；验收不把不可维护动作塞进稳定动作目录。",
+      "text": "✅ 已定版（docs/27 §6）：任一门槛不满足→drafts/ 保留或撤销发布，不进稳定目录（“可以有尊严地死掉”同款纪律）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "6"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/27"
+        ]
       }
     },
     {
@@ -24952,22 +24968,26 @@
       "round": "R128",
       "priority": "G1",
       "topic": "分布式追踪",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一 intentId→planId→commandId→receiptId→业务实体/动作 revision 的关联字段，覆盖 SSE、MCP、Quicker 和 Agent；验收诊断可串起全链路。",
-      "mainline": "C6",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/28 §1）：commandId→receiptId 已实现（信封 id 贯穿三通道+审计）/planId→commandId 已实现/intentId 与跨通道查询 UI 登记 planned（依赖 R116/C2 中枢）",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "1"
         ],
         "rounds": [
           "R123",
           "R130",
-          "R0"
+          "R0",
+          "R116"
         ],
-        "docs": []
+        "docs": [
+          "docs/28"
+        ]
       }
     },
     {
@@ -24977,22 +24997,27 @@
       "round": "R128",
       "priority": "G1",
       "topic": "unknown 主线",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为超时、断线、进程退出、插件卸载和迟到结果建立同 ID 查询/补回执路径；验收 unknown 不被伪装成 failed 或 success。",
+      "text": "✅ 已有归宿（docs/28 §2 引 result-contract §1/§3 + lv-cli receipt --id）：迟到重复收敛 duplicate；不伪装不变量已入合同",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "2",
+          "1",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/28"
+        ]
       }
     },
     {
@@ -25002,22 +25027,25 @@
       "round": "R128",
       "priority": "G1",
       "topic": "写入 outbox",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "评估 pending/running/unknown 的 outbox 或补偿记录，确保 markProcessed、执行和回执写入不会形成不可解释空洞。",
+      "text": "✅ 暂缓（docs/28 §3）：当前写入面窄+台账/回执窗口已覆盖可见性；触发条件=多步业务写入或 D-0006 迁移落地时再引入——现在引入是为不存在的写入量设计",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/28"
+        ]
       }
     },
     {
@@ -25027,22 +25055,25 @@
       "round": "R128",
       "priority": "G1",
       "topic": "取消语义",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "逐项标记模型、网络、等待、脚本、窗口和业务写入是否可取消；验收取消后列出已发生副作用与迟到可能。",
-      "mainline": "C6",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/28 §4 逐项表）：确认窗可取消/网络 abort 有迟到可能/脚本与业务写入不可取消（幂等兜底）/workflow 执行中暂停 planned",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "4"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/28"
+        ]
       }
     },
     {
@@ -25052,22 +25083,25 @@
       "round": "R128",
       "priority": "G1",
       "topic": "并发冲突",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "对多窗口、多客户端、多工作区和 AI 续聊建立 CAS/锁/版本策略；验收 stale writer 不覆盖新计划和新动作。",
+      "text": "✅ 已定版（docs/28 §5）：五冲突源策略表（台账收敛/WebLock/工作区隔离/单写方 normalize）；AI 续聊 CAS 标 planned（G3-② 一并设计）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "5"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/28"
+        ]
       }
     },
     {
@@ -25077,22 +25111,25 @@
       "round": "R128",
       "priority": "G1",
       "topic": "诊断一致",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "将设置页、诊断包、回执、审计和用户文案统一到同一错误分类；验收 401/403/404/5xx/超时/业务拒绝可区分。",
-      "mainline": "C1",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/28 §6）：六分类统一表（401/404/5xx/timeout/rejected 各有锚点文案）；设置页与诊断包文案统一登记 planned 小改",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "6"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/28"
+        ]
       }
     },
     {
@@ -25102,22 +25139,25 @@
       "round": "R128",
       "priority": "G1",
       "topic": "SLO 基线",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "先测捕获成功率、回执可达率、P50/P95、CPU/内存/I/O、日志增长和恢复丢失率，再设目标；验收目标不凭经验填写。",
+      "text": "✅ 已定版（docs/28 §7）：五指标已有实测（桥 444~1797ms/广播 227~319ms/路由 ~100ms/日志 +254~2163B 全达标）；回执可达率/恢复丢失率随样板使用统计（数据先行不填目标）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "7"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/28"
+        ]
       }
     },
     {
@@ -25127,22 +25167,25 @@
       "round": "R129",
       "priority": "G2",
       "topic": "首成功研究",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "记录首次安装到首个 verified 结果的步骤、耗时、卡点、误解和人工介入；验收改动优先解决最大阻塞。",
+      "text": "✅ 归入 docs/25 §7 用户观察表（首周一行记录：日期/次数/首成功秒数/错误/手动代替）——G2 样板首搭即数据采集；改动优先解决最大阻塞=按表内最高频卡点排优先级",
       "mainline": "C5",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "7"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -25152,22 +25195,25 @@
       "round": "R129",
       "priority": "G6",
       "topic": "外部试用",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "准备无个人数据的测试工作区、脱敏动作包、反馈模板和退出方式；验收外部用户能独立完成安装、失败恢复和卸载。",
-      "mainline": "C7",
-      "evidence": "E3",
+      "text": "✅ 材料清单已定版（docs/29 §5，门槛后执行）：五材料（空工作区步骤/脱敏包/反馈模板复用 G2 表/退出方式）+门槛=G2-可发布且事实表无 E0 宣传",
+      "mainline": "C8",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "5"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/29"
+        ]
       }
     },
     {
@@ -25177,25 +25223,25 @@
       "round": "R129",
       "priority": "G6",
       "topic": "价值指标",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一 R87/R104/R121 的闭环率、恢复率、二次利用、净节省时间、信任和成本指标；验收不使用生成字数替代价值。",
+      "text": "✅ 已定版（docs/29 §6）：四指标口径（闭环率/恢复率/净节省时间/采纳率）+反例表（禁止生成字数/无基线百分比）",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "6"
         ],
         "rounds": [
           "R123",
           "R130",
-          "R0",
-          "R87",
-          "R104",
-          "R121"
+          "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/29"
+        ]
       }
     },
     {
@@ -25205,22 +25251,25 @@
       "round": "R129",
       "priority": "G6",
       "topic": "文档事实表",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "让 README、动作说明、Agent skill、MCP schema、Quicker 分享页和发布说明共用版本/能力/证据事实表；验收无一处单独宣传未验证能力。",
-      "mainline": "C6",
-      "evidence": "E2",
+      "text": "✅ 已定版（docs/29 §1）：七文档引用同一事实表（contracts 七合同+兼容矩阵）；规则=能力变化先改事实表再同步各文档（顺序反了即漂移）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "1"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/29"
+        ]
       }
     },
     {
@@ -25230,22 +25279,25 @@
       "round": "R129",
       "priority": "G6",
       "topic": "兼容矩阵",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一思源、Quicker、Windows、插件组合、桥开关、AI host、工作区和网络状态矩阵；验收每个发布 revision 标注未知组合。",
-      "mainline": "C6",
-      "evidence": "E0",
+      "text": "✅ 已定版（docs/29 §2）：七维度矩阵（思源 3.8.5/3.8.6 双验证、桥开关双态实测）；未知组合标注即可不阻塞",
+      "mainline": "C8",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "2"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/29"
+        ]
       }
     },
     {
@@ -25255,22 +25307,25 @@
       "round": "R129",
       "priority": "G6",
       "topic": "发布门禁",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "将安全扫描、契约回归、真机证据、用户样板、迁移、回滚和变更日志纳入单一发布 checklist；验收任一关键项失败则保持预发布。",
+      "text": "✅ 已定版（docs/29 §3）：九项 checklist（合并 release-evidence 七项+矩阵更新+七文档面同步+回滚确认）；任一关键项失败保持 pre-release（v0.7.0 先例）",
       "mainline": "C4",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/29"
+        ]
       }
     },
     {
@@ -25280,22 +25335,26 @@
       "round": "R129",
       "priority": "G6",
       "topic": "回滚演练",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "演练插件、动作包、提示词、Agent skill、MCP server 和配置各自回退；验收回滚不会重放写入或删除业务结果。",
+      "text": "✅ 已定版并**真机演练通过（2026-10-03）**：v0.7.2 → 旧 release package.zip 覆盖回滚至 v0.7.1 → toggle 重载 → 内核路由 200 ✓ → 用户设置保留 ✓（bridge/broadcast 开关不动）→ 恢复 v0.7.2 → 路由 200 ✓。其余对象路径：动作包=Quicker 内删除（.qa 留档）；提示词按 promptVersion 回退；Agent skill 未发布；MCP server 无安装态；配置手改可逆——明细 docs/29 §4。**不变量验证：回滚不重放写入、不删业务结果 ✓**",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "4"
         ],
         "rounds": [
           "R123",
           "R130",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "10-",
+          "docs/29"
+        ]
       }
     },
     {
@@ -25305,21 +25364,24 @@
       "round": "R130",
       "priority": "G5",
       "topic": "晋升规则",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "定义候选从研究池→契约→样板→实现→真机→发布的晋升条件；验收没有证据的功能不能只因讨论次数上升。",
-      "mainline": "C5",
-      "evidence": "E2",
+      "text": "✅ 已定版（docs/30 §1）：五级管道各带必要条件+反例禁止；铁律=讨论热度是需求信号不是证据",
+      "mainline": "C8",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "1"
         ],
         "rounds": [
           "R123",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/30"
+        ]
       }
     },
     {
@@ -25329,21 +25391,24 @@
       "round": "R130",
       "priority": "G5",
       "topic": "降级规则",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "定义连续无用户需求、owner 不明确、维护成本超预算、上游能力消失和风险不可接受时的降级/归档动作。",
+      "text": "✅ 已定版（docs/30 §2）：五触发→动作表（归档保留历史链接不删除）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "2"
         ],
         "rounds": [
           "R123",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/30"
+        ]
       }
     },
     {
@@ -25353,22 +25418,24 @@
       "round": "R130",
       "priority": "G5",
       "topic": "自动化延后",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "将 R82 规则引擎、后台触发和跨插件循环锁定在 C5/C6 有真实闭环证据之后；验收一次性 plan 不被误扩成持久自动化。",
+      "text": "✅ 已定版（docs/30 §3）：锁定至 G2-最小可用+同类手动操作 ≥3 次真实记录；一次性 plan≠持久自动化",
       "mainline": "C5",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "3"
         ],
         "rounds": [
           "R123",
-          "R0",
-          "R82"
+          "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/30"
+        ]
       }
     },
     {
@@ -25378,21 +25445,24 @@
       "round": "R130",
       "priority": "G5",
       "topic": "插件接入限额",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每轮只选择一个稳定插件 owner 做联动，缺契约的拾遗/考试/管家继续 design/unlocated；验收不以 manifest 代替可调用接口。",
+      "text": "✅ 已定版（docs/30 §4）：每轮一个稳定 owner；缺契约者保持 design/unlocated（C3：declared≠available）；新接入前置=公开桥文档+真实探测",
       "mainline": "C3",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "4"
         ],
         "rounds": [
           "R123",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/30"
+        ]
       }
     },
     {
@@ -25402,21 +25472,24 @@
       "round": "R130",
       "priority": "G5",
       "topic": "调研 WIP",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "为媒体、时间、结构化数据、写作、多语言和长期治理设研究并发上限；验收新增调研必须关闭一个旧问题或说明新增证据。",
+      "text": "✅ 已定版（docs/30 §5）：并发 ≤2 主题+存量池冻结只消化不扩池；新增调研必须关闭旧问题或说明新增证据；产物必须落文档",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "18"
+          "18",
+          "5"
         ],
         "rounds": [
           "R123",
           "R0"
         ],
-        "docs": []
+        "docs": [
+          "docs/30"
+        ]
       }
     },
     {
@@ -25426,10 +25499,10 @@
       "round": "R130",
       "priority": "G5",
       "topic": "季度复盘",
-      "type": "评估",
-      "status": "pending",
+      "type": "unknown",
+      "status": "done",
       "blockedBy": null,
-      "text": "每季度复核规范主线、依赖环、WIP、用户证据、上游变化和归档项；验收下一轮 TODO 先更新路线索引再追加功能。",
+      "text": "R130-G5-R0·季度复盘·规格",
       "mainline": "C8",
       "evidence": "E0",
       "refs": {
@@ -25444,8 +25517,114 @@
       }
     },
     {
-      "id": "TODO-L1495",
-      "line": 1495,
+      "id": "TODO-L1488",
+      "line": 1488,
+      "section": "待办总清单（TODO） / §18 待办融合、依赖重排与执行门禁（R123~R130） / 18.8 R130：扩展池治理与退出规则",
+      "round": "R77",
+      "priority": "G4",
+      "topic": null,
+      "type": "新",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "一键开桥向导动作",
+      "mainline": "C7",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "18"
+        ],
+        "rounds": [
+          "R123",
+          "R130"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1489",
+      "line": 1489,
+      "section": "待办总清单（TODO） / §18 待办融合、依赖重排与执行门禁（R123~R130） / 18.8 R130：扩展池治理与退出规则",
+      "round": "R77",
+      "priority": null,
+      "topic": "循环B/C",
+      "type": "unknown",
+      "status": "done",
+      "blockedBy": null,
+      "text": "兜底循环 B/C 执行（2026-10-03）",
+      "mainline": "C8",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "18"
+        ],
+        "rounds": [
+          "R123",
+          "R130"
+        ],
+        "docs": [
+          "10-"
+        ]
+      }
+    },
+    {
+      "id": "TODO-L1490",
+      "line": 1490,
+      "section": "待办总清单（TODO） / §18 待办融合、依赖重排与执行门禁（R123~R130） / 18.8 R130：扩展池治理与退出规则",
+      "round": "R79",
+      "priority": null,
+      "topic": "循环A",
+      "type": "unknown",
+      "status": "done",
+      "blockedBy": null,
+      "text": "R79·循环A",
+      "mainline": "C8",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "18"
+        ],
+        "rounds": [
+          "R123",
+          "R130"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1491",
+      "line": 1491,
+      "section": "待办总清单（TODO） / §18 待办融合、依赖重排与执行门禁（R123~R130） / 18.8 R130：扩展池治理与退出规则",
+      "round": "R81",
+      "priority": null,
+      "topic": "循环A→开发",
+      "type": "unknown",
+      "status": "done",
+      "blockedBy": null,
+      "text": "**bug#10 发现与修复（v0.7.2）**：真机诊断发现 SSE 订阅断连后退避 30s 上限——断连窗口 45s+ 内广播快路径命令无人消费（轮询器正常、双通道不对称故障面）；修复=退避上限 5s + MCP 只读工具快路径 3s 无回执同 id NDJSON 补发（预留语义防双执行）；+1 回退三态测试（99 总）；v0.7.2 发布（正式版，latest 可解析）**发布卫生修复（latest 404）**：全部 23 个 release 均 pre-release → GitHub /releases/latest 404 → README 安装链接对全新用户是断链；v0.7.1（9/9 真机验收）已解除 pre-release 转正，latest 恢复 ✓；推论规则补进 release-evidence 合同 §2（每次发布后必须验证 latest 可解析）：上游监测=思源最新正式版仍 3.8.6（3.8.7 alpha 中）、三插件零漂移（与 R35 一致）——无上游触发的新待办；§12 晋升复查=全部条件未成熟（绑 G2/门槛）；循环 C 调研=扩展池冻结（docs/30 §5 只消化不扩池）——三循环无新产出，系统稳定态确认（发布配套，docs/07 §5-3 社区先例：Zotero Bridge 向导是桥类动作标配）：检测桥状态（bridge.ping）→ 未开则引导设置开启 → ping 验证 → 报告版本；G2 样板搭建/新用户装快门后首跑即用【需 Quicker 编辑器，G2-可发布前完成】✅ 已定版（docs/30 §6）：六项固定议程（下次 2027-01）；产出=先更新路线索引再追加功能",
+      "mainline": "C6",
+      "evidence": "E4",
+      "refs": {
+        "sections": [
+          "18",
+          "2",
+          "12",
+          "5",
+          "6"
+        ],
+        "rounds": [
+          "R123",
+          "R130",
+          "R35"
+        ],
+        "docs": [
+          "docs/30",
+          "docs/07"
+        ]
+      }
+    },
+    {
+      "id": "TODO-L1499",
+      "line": 1499,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25468,8 +25647,8 @@
       }
     },
     {
-      "id": "TODO-L1496",
-      "line": 1496,
+      "id": "TODO-L1500",
+      "line": 1500,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25492,8 +25671,8 @@
       }
     },
     {
-      "id": "TODO-L1497",
-      "line": 1497,
+      "id": "TODO-L1501",
+      "line": 1501,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25516,8 +25695,8 @@
       }
     },
     {
-      "id": "TODO-L1498",
-      "line": 1498,
+      "id": "TODO-L1502",
+      "line": 1502,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25540,8 +25719,8 @@
       }
     },
     {
-      "id": "TODO-L1499",
-      "line": 1499,
+      "id": "TODO-L1503",
+      "line": 1503,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25564,8 +25743,8 @@
       }
     },
     {
-      "id": "TODO-L1500",
-      "line": 1500,
+      "id": "TODO-L1504",
+      "line": 1504,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25588,8 +25767,8 @@
       }
     },
     {
-      "id": "TODO-L1501",
-      "line": 1501,
+      "id": "TODO-L1505",
+      "line": 1505,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25612,8 +25791,8 @@
       }
     },
     {
-      "id": "TODO-L1502",
-      "line": 1502,
+      "id": "TODO-L1506",
+      "line": 1506,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.1 R131：产品信息架构与统一入口",
       "round": "R131",
       "priority": "G2",
@@ -25636,8 +25815,8 @@
       }
     },
     {
-      "id": "TODO-L1506",
-      "line": 1506,
+      "id": "TODO-L1510",
+      "line": 1510,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25661,8 +25840,8 @@
       }
     },
     {
-      "id": "TODO-L1507",
-      "line": 1507,
+      "id": "TODO-L1511",
+      "line": 1511,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25686,8 +25865,8 @@
       }
     },
     {
-      "id": "TODO-L1508",
-      "line": 1508,
+      "id": "TODO-L1512",
+      "line": 1512,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25711,8 +25890,8 @@
       }
     },
     {
-      "id": "TODO-L1509",
-      "line": 1509,
+      "id": "TODO-L1513",
+      "line": 1513,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25736,8 +25915,8 @@
       }
     },
     {
-      "id": "TODO-L1510",
-      "line": 1510,
+      "id": "TODO-L1514",
+      "line": 1514,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25761,8 +25940,8 @@
       }
     },
     {
-      "id": "TODO-L1511",
-      "line": 1511,
+      "id": "TODO-L1515",
+      "line": 1515,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25786,8 +25965,8 @@
       }
     },
     {
-      "id": "TODO-L1512",
-      "line": 1512,
+      "id": "TODO-L1516",
+      "line": 1516,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25811,8 +25990,8 @@
       }
     },
     {
-      "id": "TODO-L1513",
-      "line": 1513,
+      "id": "TODO-L1517",
+      "line": 1517,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.2 R132：意图编排与计划预览页面",
       "round": "R132",
       "priority": "G2",
@@ -25836,8 +26015,8 @@
       }
     },
     {
-      "id": "TODO-L1517",
-      "line": 1517,
+      "id": "TODO-L1521",
+      "line": 1521,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -25861,8 +26040,8 @@
       }
     },
     {
-      "id": "TODO-L1518",
-      "line": 1518,
+      "id": "TODO-L1522",
+      "line": 1522,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -25886,8 +26065,8 @@
       }
     },
     {
-      "id": "TODO-L1519",
-      "line": 1519,
+      "id": "TODO-L1523",
+      "line": 1523,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -25911,8 +26090,8 @@
       }
     },
     {
-      "id": "TODO-L1520",
-      "line": 1520,
+      "id": "TODO-L1524",
+      "line": 1524,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -25936,8 +26115,8 @@
       }
     },
     {
-      "id": "TODO-L1521",
-      "line": 1521,
+      "id": "TODO-L1525",
+      "line": 1525,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -25961,8 +26140,8 @@
       }
     },
     {
-      "id": "TODO-L1522",
-      "line": 1522,
+      "id": "TODO-L1526",
+      "line": 1526,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -25986,8 +26165,8 @@
       }
     },
     {
-      "id": "TODO-L1523",
-      "line": 1523,
+      "id": "TODO-L1527",
+      "line": 1527,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -26011,8 +26190,8 @@
       }
     },
     {
-      "id": "TODO-L1524",
-      "line": 1524,
+      "id": "TODO-L1528",
+      "line": 1528,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.3 R133：活动、结果与恢复中心",
       "round": "R133",
       "priority": "G2",
@@ -26036,8 +26215,8 @@
       }
     },
     {
-      "id": "TODO-L1528",
-      "line": 1528,
+      "id": "TODO-L1532",
+      "line": 1532,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26061,8 +26240,8 @@
       }
     },
     {
-      "id": "TODO-L1529",
-      "line": 1529,
+      "id": "TODO-L1533",
+      "line": 1533,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26086,8 +26265,8 @@
       }
     },
     {
-      "id": "TODO-L1530",
-      "line": 1530,
+      "id": "TODO-L1534",
+      "line": 1534,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26111,8 +26290,8 @@
       }
     },
     {
-      "id": "TODO-L1531",
-      "line": 1531,
+      "id": "TODO-L1535",
+      "line": 1535,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26136,8 +26315,8 @@
       }
     },
     {
-      "id": "TODO-L1532",
-      "line": 1532,
+      "id": "TODO-L1536",
+      "line": 1536,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26161,8 +26340,8 @@
       }
     },
     {
-      "id": "TODO-L1533",
-      "line": 1533,
+      "id": "TODO-L1537",
+      "line": 1537,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26186,8 +26365,8 @@
       }
     },
     {
-      "id": "TODO-L1534",
-      "line": 1534,
+      "id": "TODO-L1538",
+      "line": 1538,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26211,8 +26390,8 @@
       }
     },
     {
-      "id": "TODO-L1535",
-      "line": 1535,
+      "id": "TODO-L1539",
+      "line": 1539,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.4 R134：能力、权限与诊断页面",
       "round": "R134",
       "priority": "G1",
@@ -26236,8 +26415,8 @@
       }
     },
     {
-      "id": "TODO-L1539",
-      "line": 1539,
+      "id": "TODO-L1543",
+      "line": 1543,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26261,8 +26440,8 @@
       }
     },
     {
-      "id": "TODO-L1540",
-      "line": 1540,
+      "id": "TODO-L1544",
+      "line": 1544,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26286,8 +26465,8 @@
       }
     },
     {
-      "id": "TODO-L1541",
-      "line": 1541,
+      "id": "TODO-L1545",
+      "line": 1545,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26311,8 +26490,8 @@
       }
     },
     {
-      "id": "TODO-L1542",
-      "line": 1542,
+      "id": "TODO-L1546",
+      "line": 1546,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26336,8 +26515,8 @@
       }
     },
     {
-      "id": "TODO-L1543",
-      "line": 1543,
+      "id": "TODO-L1547",
+      "line": 1547,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26361,8 +26540,8 @@
       }
     },
     {
-      "id": "TODO-L1544",
-      "line": 1544,
+      "id": "TODO-L1548",
+      "line": 1548,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26386,8 +26565,8 @@
       }
     },
     {
-      "id": "TODO-L1545",
-      "line": 1545,
+      "id": "TODO-L1549",
+      "line": 1549,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26411,8 +26590,8 @@
       }
     },
     {
-      "id": "TODO-L1546",
-      "line": 1546,
+      "id": "TODO-L1550",
+      "line": 1550,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.5 R135：AI 工作台与模板交互",
       "round": "R135",
       "priority": "G3",
@@ -26436,8 +26615,8 @@
       }
     },
     {
-      "id": "TODO-L1550",
-      "line": 1550,
+      "id": "TODO-L1554",
+      "line": 1554,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26461,8 +26640,8 @@
       }
     },
     {
-      "id": "TODO-L1551",
-      "line": 1551,
+      "id": "TODO-L1555",
+      "line": 1555,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26486,8 +26665,8 @@
       }
     },
     {
-      "id": "TODO-L1552",
-      "line": 1552,
+      "id": "TODO-L1556",
+      "line": 1556,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26511,8 +26690,8 @@
       }
     },
     {
-      "id": "TODO-L1553",
-      "line": 1553,
+      "id": "TODO-L1557",
+      "line": 1557,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26536,8 +26715,8 @@
       }
     },
     {
-      "id": "TODO-L1554",
-      "line": 1554,
+      "id": "TODO-L1558",
+      "line": 1558,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26561,8 +26740,8 @@
       }
     },
     {
-      "id": "TODO-L1555",
-      "line": 1555,
+      "id": "TODO-L1559",
+      "line": 1559,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26586,8 +26765,8 @@
       }
     },
     {
-      "id": "TODO-L1556",
-      "line": 1556,
+      "id": "TODO-L1560",
+      "line": 1560,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26611,8 +26790,8 @@
       }
     },
     {
-      "id": "TODO-L1557",
-      "line": 1557,
+      "id": "TODO-L1561",
+      "line": 1561,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.6 R136：Quicker 动作作者工作台",
       "round": "R136",
       "priority": "G4",
@@ -26636,8 +26815,8 @@
       }
     },
     {
-      "id": "TODO-L1561",
-      "line": 1561,
+      "id": "TODO-L1565",
+      "line": 1565,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26661,8 +26840,8 @@
       }
     },
     {
-      "id": "TODO-L1562",
-      "line": 1562,
+      "id": "TODO-L1566",
+      "line": 1566,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26686,8 +26865,8 @@
       }
     },
     {
-      "id": "TODO-L1563",
-      "line": 1563,
+      "id": "TODO-L1567",
+      "line": 1567,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26711,8 +26890,8 @@
       }
     },
     {
-      "id": "TODO-L1564",
-      "line": 1564,
+      "id": "TODO-L1568",
+      "line": 1568,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26736,8 +26915,8 @@
       }
     },
     {
-      "id": "TODO-L1565",
-      "line": 1565,
+      "id": "TODO-L1569",
+      "line": 1569,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26761,8 +26940,8 @@
       }
     },
     {
-      "id": "TODO-L1566",
-      "line": 1566,
+      "id": "TODO-L1570",
+      "line": 1570,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26786,8 +26965,8 @@
       }
     },
     {
-      "id": "TODO-L1567",
-      "line": 1567,
+      "id": "TODO-L1571",
+      "line": 1571,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26811,8 +26990,8 @@
       }
     },
     {
-      "id": "TODO-L1568",
-      "line": 1568,
+      "id": "TODO-L1572",
+      "line": 1572,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.7 R137：帮助、内容与首跑教育",
       "round": "R137",
       "priority": "G2",
@@ -26836,8 +27015,8 @@
       }
     },
     {
-      "id": "TODO-L1572",
-      "line": 1572,
+      "id": "TODO-L1576",
+      "line": 1576,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -26861,8 +27040,8 @@
       }
     },
     {
-      "id": "TODO-L1573",
-      "line": 1573,
+      "id": "TODO-L1577",
+      "line": 1577,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -26886,8 +27065,8 @@
       }
     },
     {
-      "id": "TODO-L1574",
-      "line": 1574,
+      "id": "TODO-L1578",
+      "line": 1578,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -26911,8 +27090,8 @@
       }
     },
     {
-      "id": "TODO-L1575",
-      "line": 1575,
+      "id": "TODO-L1579",
+      "line": 1579,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -26936,8 +27115,8 @@
       }
     },
     {
-      "id": "TODO-L1576",
-      "line": 1576,
+      "id": "TODO-L1580",
+      "line": 1580,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -26961,8 +27140,8 @@
       }
     },
     {
-      "id": "TODO-L1577",
-      "line": 1577,
+      "id": "TODO-L1581",
+      "line": 1581,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -26986,8 +27165,8 @@
       }
     },
     {
-      "id": "TODO-L1578",
-      "line": 1578,
+      "id": "TODO-L1582",
+      "line": 1582,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -27011,8 +27190,8 @@
       }
     },
     {
-      "id": "TODO-L1579",
-      "line": 1579,
+      "id": "TODO-L1583",
+      "line": 1583,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.8 R138：信任、隐私与数据生命周期页面",
       "round": "R138",
       "priority": "G1",
@@ -27036,8 +27215,8 @@
       }
     },
     {
-      "id": "TODO-L1583",
-      "line": 1583,
+      "id": "TODO-L1587",
+      "line": 1587,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27061,8 +27240,8 @@
       }
     },
     {
-      "id": "TODO-L1584",
-      "line": 1584,
+      "id": "TODO-L1588",
+      "line": 1588,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27086,8 +27265,8 @@
       }
     },
     {
-      "id": "TODO-L1585",
-      "line": 1585,
+      "id": "TODO-L1589",
+      "line": 1589,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27111,8 +27290,8 @@
       }
     },
     {
-      "id": "TODO-L1586",
-      "line": 1586,
+      "id": "TODO-L1590",
+      "line": 1590,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27136,8 +27315,8 @@
       }
     },
     {
-      "id": "TODO-L1587",
-      "line": 1587,
+      "id": "TODO-L1591",
+      "line": 1591,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27162,8 +27341,8 @@
       }
     },
     {
-      "id": "TODO-L1588",
-      "line": 1588,
+      "id": "TODO-L1592",
+      "line": 1592,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27187,8 +27366,8 @@
       }
     },
     {
-      "id": "TODO-L1589",
-      "line": 1589,
+      "id": "TODO-L1593",
+      "line": 1593,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27212,8 +27391,8 @@
       }
     },
     {
-      "id": "TODO-L1590",
-      "line": 1590,
+      "id": "TODO-L1594",
+      "line": 1594,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.9 R139：可访问性、响应式、性能与反馈",
       "round": "R139",
       "priority": "G2",
@@ -27237,8 +27416,8 @@
       }
     },
     {
-      "id": "TODO-L1594",
-      "line": 1594,
+      "id": "TODO-L1598",
+      "line": 1598,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27261,8 +27440,8 @@
       }
     },
     {
-      "id": "TODO-L1595",
-      "line": 1595,
+      "id": "TODO-L1599",
+      "line": 1599,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27285,8 +27464,8 @@
       }
     },
     {
-      "id": "TODO-L1596",
-      "line": 1596,
+      "id": "TODO-L1600",
+      "line": 1600,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27309,8 +27488,8 @@
       }
     },
     {
-      "id": "TODO-L1597",
-      "line": 1597,
+      "id": "TODO-L1601",
+      "line": 1601,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27333,8 +27512,8 @@
       }
     },
     {
-      "id": "TODO-L1598",
-      "line": 1598,
+      "id": "TODO-L1602",
+      "line": 1602,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27357,8 +27536,8 @@
       }
     },
     {
-      "id": "TODO-L1599",
-      "line": 1599,
+      "id": "TODO-L1603",
+      "line": 1603,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27381,8 +27560,8 @@
       }
     },
     {
-      "id": "TODO-L1600",
-      "line": 1600,
+      "id": "TODO-L1604",
+      "line": 1604,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27405,8 +27584,8 @@
       }
     },
     {
-      "id": "TODO-L1601",
-      "line": 1601,
+      "id": "TODO-L1605",
+      "line": 1605,
       "section": "待办总清单（TODO） / §19 体验、页面、交互与内容深化（R131~R140） / 19.10 R140：通知、跨设备续接与待处理队列",
       "round": "R140",
       "priority": "G5",
@@ -27429,8 +27608,8 @@
       }
     },
     {
-      "id": "TODO-L1611",
-      "line": 1611,
+      "id": "TODO-L1615",
+      "line": 1615,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G1",
@@ -27453,8 +27632,8 @@
       }
     },
     {
-      "id": "TODO-L1612",
-      "line": 1612,
+      "id": "TODO-L1616",
+      "line": 1616,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27477,8 +27656,8 @@
       }
     },
     {
-      "id": "TODO-L1613",
-      "line": 1613,
+      "id": "TODO-L1617",
+      "line": 1617,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27501,8 +27680,8 @@
       }
     },
     {
-      "id": "TODO-L1614",
-      "line": 1614,
+      "id": "TODO-L1618",
+      "line": 1618,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27525,8 +27704,8 @@
       }
     },
     {
-      "id": "TODO-L1615",
-      "line": 1615,
+      "id": "TODO-L1619",
+      "line": 1619,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27549,8 +27728,8 @@
       }
     },
     {
-      "id": "TODO-L1616",
-      "line": 1616,
+      "id": "TODO-L1620",
+      "line": 1620,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27573,8 +27752,8 @@
       }
     },
     {
-      "id": "TODO-L1617",
-      "line": 1617,
+      "id": "TODO-L1621",
+      "line": 1621,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27598,8 +27777,8 @@
       }
     },
     {
-      "id": "TODO-L1618",
-      "line": 1618,
+      "id": "TODO-L1622",
+      "line": 1622,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27622,8 +27801,8 @@
       }
     },
     {
-      "id": "TODO-L1619",
-      "line": 1619,
+      "id": "TODO-L1623",
+      "line": 1623,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.1 R141：宿主承载、入口与页面生命周期",
       "round": "R141",
       "priority": "G2",
@@ -27646,8 +27825,8 @@
       }
     },
     {
-      "id": "TODO-L1625",
-      "line": 1625,
+      "id": "TODO-L1629",
+      "line": 1629,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G1",
@@ -27671,8 +27850,8 @@
       }
     },
     {
-      "id": "TODO-L1626",
-      "line": 1626,
+      "id": "TODO-L1630",
+      "line": 1630,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G1",
@@ -27696,8 +27875,8 @@
       }
     },
     {
-      "id": "TODO-L1627",
-      "line": 1627,
+      "id": "TODO-L1631",
+      "line": 1631,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G2",
@@ -27721,8 +27900,8 @@
       }
     },
     {
-      "id": "TODO-L1628",
-      "line": 1628,
+      "id": "TODO-L1632",
+      "line": 1632,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G2",
@@ -27746,8 +27925,8 @@
       }
     },
     {
-      "id": "TODO-L1629",
-      "line": 1629,
+      "id": "TODO-L1633",
+      "line": 1633,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G2",
@@ -27771,8 +27950,8 @@
       }
     },
     {
-      "id": "TODO-L1630",
-      "line": 1630,
+      "id": "TODO-L1634",
+      "line": 1634,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G2",
@@ -27796,8 +27975,8 @@
       }
     },
     {
-      "id": "TODO-L1631",
-      "line": 1631,
+      "id": "TODO-L1635",
+      "line": 1635,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G2",
@@ -27821,8 +28000,8 @@
       }
     },
     {
-      "id": "TODO-L1632",
-      "line": 1632,
+      "id": "TODO-L1636",
+      "line": 1636,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G1",
@@ -27846,8 +28025,8 @@
       }
     },
     {
-      "id": "TODO-L1633",
-      "line": 1633,
+      "id": "TODO-L1637",
+      "line": 1637,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G2",
@@ -27871,8 +28050,8 @@
       }
     },
     {
-      "id": "TODO-L1634",
-      "line": 1634,
+      "id": "TODO-L1638",
+      "line": 1638,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.2 R142：任务读模型、聚合与实时一致性",
       "round": "R142",
       "priority": "G2",
@@ -27896,8 +28075,8 @@
       }
     },
     {
-      "id": "TODO-L1640",
-      "line": 1640,
+      "id": "TODO-L1644",
+      "line": 1644,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -27921,8 +28100,8 @@
       }
     },
     {
-      "id": "TODO-L1641",
-      "line": 1641,
+      "id": "TODO-L1645",
+      "line": 1645,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -27946,8 +28125,8 @@
       }
     },
     {
-      "id": "TODO-L1642",
-      "line": 1642,
+      "id": "TODO-L1646",
+      "line": 1646,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -27971,8 +28150,8 @@
       }
     },
     {
-      "id": "TODO-L1643",
-      "line": 1643,
+      "id": "TODO-L1647",
+      "line": 1647,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -27996,8 +28175,8 @@
       }
     },
     {
-      "id": "TODO-L1644",
-      "line": 1644,
+      "id": "TODO-L1648",
+      "line": 1648,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -28021,8 +28200,8 @@
       }
     },
     {
-      "id": "TODO-L1645",
-      "line": 1645,
+      "id": "TODO-L1649",
+      "line": 1649,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -28046,8 +28225,8 @@
       }
     },
     {
-      "id": "TODO-L1646",
-      "line": 1646,
+      "id": "TODO-L1650",
+      "line": 1650,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -28071,8 +28250,8 @@
       }
     },
     {
-      "id": "TODO-L1647",
-      "line": 1647,
+      "id": "TODO-L1651",
+      "line": 1651,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -28096,8 +28275,8 @@
       }
     },
     {
-      "id": "TODO-L1648",
-      "line": 1648,
+      "id": "TODO-L1652",
+      "line": 1652,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.3 R143：视觉系统与公共交互组件",
       "round": "R143",
       "priority": "G2",
@@ -28121,8 +28300,8 @@
       }
     },
     {
-      "id": "TODO-L1654",
-      "line": 1654,
+      "id": "TODO-L1658",
+      "line": 1658,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.4 R144：意图输入、上下文与参数控件",
       "round": "R144",
       "priority": "G2",
@@ -28146,8 +28325,8 @@
       }
     },
     {
-      "id": "TODO-L1655",
-      "line": 1655,
+      "id": "TODO-L1659",
+      "line": 1659,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.4 R144：意图输入、上下文与参数控件",
       "round": "R144",
       "priority": "G2",
@@ -28171,8 +28350,8 @@
       }
     },
     {
-      "id": "TODO-L1656",
-      "line": 1656,
+      "id": "TODO-L1660",
+      "line": 1660,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.4 R144：意图输入、上下文与参数控件",
       "round": "R144",
       "priority": "G2",
@@ -28196,8 +28375,8 @@
       }
     },
     {
-      "id": "TODO-L1657",
-      "line": 1657,
+      "id": "TODO-L1661",
+      "line": 1661,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.4 R144：意图输入、上下文与参数控件",
       "round": "R144",
       "priority": "G2",
@@ -28221,8 +28400,8 @@
       }
     },
     {
-      "id": "TODO-L1658",
-      "line": 1658,
+      "id": "TODO-L1662",
+      "line": 1662,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.4 R144：意图输入、上下文与参数控件",
       "round": "R144",
       "priority": "G2",
@@ -28246,8 +28425,8 @@
       }
     },
     {
-      "id": "TODO-L1659",
-      "line": 1659,
+      "id": "TODO-L1663",
+      "line": 1663,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.4 R144：意图输入、上下文与参数控件",
       "round": "R144",
       "priority": "G2",
@@ -28271,8 +28450,8 @@
       }
     },
     {
-      "id": "TODO-L1665",
-      "line": 1665,
+      "id": "TODO-L1669",
+      "line": 1669,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.5 R145：确认、执行与可用操作",
       "round": "R145",
       "priority": "G1",
@@ -28296,8 +28475,8 @@
       }
     },
     {
-      "id": "TODO-L1666",
-      "line": 1666,
+      "id": "TODO-L1670",
+      "line": 1670,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.5 R145：确认、执行与可用操作",
       "round": "R145",
       "priority": "G2",
@@ -28321,8 +28500,8 @@
       }
     },
     {
-      "id": "TODO-L1667",
-      "line": 1667,
+      "id": "TODO-L1671",
+      "line": 1671,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.5 R145：确认、执行与可用操作",
       "round": "R145",
       "priority": "G2",
@@ -28346,8 +28525,8 @@
       }
     },
     {
-      "id": "TODO-L1668",
-      "line": 1668,
+      "id": "TODO-L1672",
+      "line": 1672,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.5 R145：确认、执行与可用操作",
       "round": "R145",
       "priority": "G1",
@@ -28371,8 +28550,8 @@
       }
     },
     {
-      "id": "TODO-L1674",
-      "line": 1674,
+      "id": "TODO-L1678",
+      "line": 1678,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.6 R146：结果证据与恢复决策",
       "round": "R146",
       "priority": "G1",
@@ -28396,8 +28575,8 @@
       }
     },
     {
-      "id": "TODO-L1675",
-      "line": 1675,
+      "id": "TODO-L1679",
+      "line": 1679,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.6 R146：结果证据与恢复决策",
       "round": "R146",
       "priority": "G2",
@@ -28421,8 +28600,8 @@
       }
     },
     {
-      "id": "TODO-L1676",
-      "line": 1676,
+      "id": "TODO-L1680",
+      "line": 1680,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.6 R146：结果证据与恢复决策",
       "round": "R146",
       "priority": "G2",
@@ -28446,8 +28625,8 @@
       }
     },
     {
-      "id": "TODO-L1682",
-      "line": 1682,
+      "id": "TODO-L1686",
+      "line": 1686,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.7 R147：能力、设置、诊断与通知的数据连接",
       "round": "R147",
       "priority": "G1",
@@ -28471,8 +28650,8 @@
       }
     },
     {
-      "id": "TODO-L1683",
-      "line": 1683,
+      "id": "TODO-L1687",
+      "line": 1687,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.7 R147：能力、设置、诊断与通知的数据连接",
       "round": "R147",
       "priority": "G2",
@@ -28496,8 +28675,8 @@
       }
     },
     {
-      "id": "TODO-L1684",
-      "line": 1684,
+      "id": "TODO-L1688",
+      "line": 1688,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.7 R147：能力、设置、诊断与通知的数据连接",
       "round": "R147",
       "priority": "G2",
@@ -28521,8 +28700,8 @@
       }
     },
     {
-      "id": "TODO-L1685",
-      "line": 1685,
+      "id": "TODO-L1689",
+      "line": 1689,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.7 R147：能力、设置、诊断与通知的数据连接",
       "round": "R147",
       "priority": "G2",
@@ -28546,8 +28725,8 @@
       }
     },
     {
-      "id": "TODO-L1691",
-      "line": 1691,
+      "id": "TODO-L1695",
+      "line": 1695,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.8 R148：AI 会话、模板与可观察结果",
       "round": "R148",
       "priority": "G3",
@@ -28571,8 +28750,8 @@
       }
     },
     {
-      "id": "TODO-L1692",
-      "line": 1692,
+      "id": "TODO-L1696",
+      "line": 1696,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.8 R148：AI 会话、模板与可观察结果",
       "round": "R148",
       "priority": "G3",
@@ -28596,8 +28775,8 @@
       }
     },
     {
-      "id": "TODO-L1693",
-      "line": 1693,
+      "id": "TODO-L1697",
+      "line": 1697,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.8 R148：AI 会话、模板与可观察结果",
       "round": "R148",
       "priority": "G3",
@@ -28621,8 +28800,8 @@
       }
     },
     {
-      "id": "TODO-L1694",
-      "line": 1694,
+      "id": "TODO-L1698",
+      "line": 1698,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.8 R148：AI 会话、模板与可观察结果",
       "round": "R148",
       "priority": "G3",
@@ -28646,8 +28825,8 @@
       }
     },
     {
-      "id": "TODO-L1695",
-      "line": 1695,
+      "id": "TODO-L1699",
+      "line": 1699,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.8 R148：AI 会话、模板与可观察结果",
       "round": "R148",
       "priority": "G3",
@@ -28671,8 +28850,8 @@
       }
     },
     {
-      "id": "TODO-L1696",
-      "line": 1696,
+      "id": "TODO-L1700",
+      "line": 1700,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.8 R148：AI 会话、模板与可观察结果",
       "round": "R148",
       "priority": "G4",
@@ -28696,8 +28875,8 @@
       }
     },
     {
-      "id": "TODO-L1702",
-      "line": 1702,
+      "id": "TODO-L1706",
+      "line": 1706,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.9 R149：Quicker 作者链的真实交接",
       "round": "R149",
       "priority": "G5",
@@ -28721,8 +28900,8 @@
       }
     },
     {
-      "id": "TODO-L1703",
-      "line": 1703,
+      "id": "TODO-L1707",
+      "line": 1707,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.9 R149：Quicker 作者链的真实交接",
       "round": "R149",
       "priority": "G5",
@@ -28746,8 +28925,8 @@
       }
     },
     {
-      "id": "TODO-L1704",
-      "line": 1704,
+      "id": "TODO-L1708",
+      "line": 1708,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.9 R149：Quicker 作者链的真实交接",
       "round": "R149",
       "priority": "G5",
@@ -28771,8 +28950,8 @@
       }
     },
     {
-      "id": "TODO-L1705",
-      "line": 1705,
+      "id": "TODO-L1709",
+      "line": 1709,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.9 R149：Quicker 作者链的真实交接",
       "round": "R149",
       "priority": "G5",
@@ -28796,8 +28975,8 @@
       }
     },
     {
-      "id": "TODO-L1711",
-      "line": 1711,
+      "id": "TODO-L1715",
+      "line": 1715,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.10 R150：原型覆盖、效果验收与增量交付",
       "round": "R150",
       "priority": "G0",
@@ -28820,8 +28999,8 @@
       }
     },
     {
-      "id": "TODO-L1712",
-      "line": 1712,
+      "id": "TODO-L1716",
+      "line": 1716,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.10 R150：原型覆盖、效果验收与增量交付",
       "round": "R150",
       "priority": "G2",
@@ -28844,8 +29023,8 @@
       }
     },
     {
-      "id": "TODO-L1713",
-      "line": 1713,
+      "id": "TODO-L1717",
+      "line": 1717,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.10 R150：原型覆盖、效果验收与增量交付",
       "round": "R150",
       "priority": "G2",
@@ -28868,8 +29047,8 @@
       }
     },
     {
-      "id": "TODO-L1714",
-      "line": 1714,
+      "id": "TODO-L1718",
+      "line": 1718,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.10 R150：原型覆盖、效果验收与增量交付",
       "round": "R150",
       "priority": "G2",
@@ -28892,8 +29071,8 @@
       }
     },
     {
-      "id": "TODO-L1715",
-      "line": 1715,
+      "id": "TODO-L1719",
+      "line": 1719,
       "section": "待办总清单（TODO） / §20 UI 原型落地差距与实现前置（R141~R150） / 20.10 R150：原型覆盖、效果验收与增量交付",
       "round": "R150",
       "priority": "G2",
@@ -28916,8 +29095,8 @@
       }
     },
     {
-      "id": "TODO-L1721",
-      "line": 1721,
+      "id": "TODO-L1725",
+      "line": 1725,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R151",
       "priority": null,
@@ -28939,8 +29118,8 @@
       }
     },
     {
-      "id": "TODO-L1722",
-      "line": 1722,
+      "id": "TODO-L1726",
+      "line": 1726,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R151",
       "priority": null,
@@ -28962,8 +29141,8 @@
       }
     },
     {
-      "id": "TODO-L1723",
-      "line": 1723,
+      "id": "TODO-L1727",
+      "line": 1727,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R151",
       "priority": null,
@@ -28985,8 +29164,8 @@
       }
     },
     {
-      "id": "TODO-L1724",
-      "line": 1724,
+      "id": "TODO-L1728",
+      "line": 1728,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R151",
       "priority": null,
@@ -29008,8 +29187,8 @@
       }
     },
     {
-      "id": "TODO-L1725",
-      "line": 1725,
+      "id": "TODO-L1729",
+      "line": 1729,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R151",
       "priority": null,
@@ -29031,8 +29210,8 @@
       }
     },
     {
-      "id": "TODO-L1726",
-      "line": 1726,
+      "id": "TODO-L1730",
+      "line": 1730,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R151",
       "priority": null,
@@ -29054,102 +29233,6 @@
       }
     },
     {
-      "id": "TODO-L1727",
-      "line": 1727,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R152",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "网页列表入库：将当前网页列表提取为 DataTable，映射去重键、字段类型和思源 AV/Markdown 目标，先逐行预览再写入。验收：显示实际行数、匹配总数、页数和停止原因，局部失败可补做，未确认不写入。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
-      "id": "TODO-L1728",
-      "line": 1728,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R152",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "连续翻页完整性：为最多 100 页、2000 行和约 5 分钟的抓取设计分段、暂停和续跑；截断、缺列、登录失效和虚拟滚动进入报告。验收：用户能区分完整、部分和未知，删除或覆盖默认不执行。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
-      "id": "TODO-L1729",
-      "line": 1729,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R152",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "网页表单草稿：从思源选中块或字段词典生成表单预填草稿，只检查定位和字段缺失，不自动提交。验收：域名约束、逐字段 diff、提交按钮副作用和手动提交步骤可见。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
-      "id": "TODO-L1730",
-      "line": 1730,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R152",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "研究来源卡：把当前标签页的 URL、标题、时间、页面版本、关键摘录和原始字段写入思源来源卡。验收：页面失效后摘录仍可读，正文、摘录和推断分层，重复 URL 提示新版本。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
       "id": "TODO-L1731",
       "line": 1731,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
@@ -29159,7 +29242,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "网页增量对账：保存脱敏快照和主键映射，对比新增、删除、字段变化和无法匹配行，生成变更报告。验收：删除默认只报告不执行，快照绑定 URL/抓取时间，用户可选择局部更新。",
+      "text": "网页列表入库：将当前网页列表提取为 DataTable，映射去重键、字段类型和思源 AV/Markdown 目标，先逐行预览再写入。验收：显示实际行数、匹配总数、页数和停止原因，局部失败可补做，未确认不写入。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29183,6 +29266,102 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
+      "text": "连续翻页完整性：为最多 100 页、2000 行和约 5 分钟的抓取设计分段、暂停和续跑；截断、缺列、登录失效和虚拟滚动进入报告。验收：用户能区分完整、部分和未知，删除或覆盖默认不执行。",
+      "mainline": "C7",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1733",
+      "line": 1733,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R152",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "网页表单草稿：从思源选中块或字段词典生成表单预填草稿，只检查定位和字段缺失，不自动提交。验收：域名约束、逐字段 diff、提交按钮副作用和手动提交步骤可见。",
+      "mainline": "C7",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1734",
+      "line": 1734,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R152",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "研究来源卡：把当前标签页的 URL、标题、时间、页面版本、关键摘录和原始字段写入思源来源卡。验收：页面失效后摘录仍可读，正文、摘录和推断分层，重复 URL 提示新版本。",
+      "mainline": "C7",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1735",
+      "line": 1735,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R152",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "网页增量对账：保存脱敏快照和主键映射，对比新增、删除、字段变化和无法匹配行，生成变更报告。验收：删除默认只报告不执行，快照绑定 URL/抓取时间，用户可选择局部更新。",
+      "mainline": "C7",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1736",
+      "line": 1736,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R152",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
       "text": "多浏览器 Profile 隔离：用浏览器扩展环境名和 Profile 标识选择对应思源工作区，禁止仅凭窗口标题猜账号。验收：Chrome/Edge 多 Profile 交叉测试时错 Profile 明确拒绝，日志显示浏览器、Profile、工作区。",
       "mainline": "C7",
       "evidence": "E3",
@@ -29198,8 +29377,8 @@
       }
     },
     {
-      "id": "TODO-L1733",
-      "line": 1733,
+      "id": "TODO-L1737",
+      "line": 1737,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R153",
       "priority": null,
@@ -29222,8 +29401,8 @@
       }
     },
     {
-      "id": "TODO-L1734",
-      "line": 1734,
+      "id": "TODO-L1738",
+      "line": 1738,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R153",
       "priority": null,
@@ -29246,8 +29425,8 @@
       }
     },
     {
-      "id": "TODO-L1735",
-      "line": 1735,
+      "id": "TODO-L1739",
+      "line": 1739,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R153",
       "priority": null,
@@ -29270,8 +29449,8 @@
       }
     },
     {
-      "id": "TODO-L1736",
-      "line": 1736,
+      "id": "TODO-L1740",
+      "line": 1740,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R153",
       "priority": null,
@@ -29294,8 +29473,8 @@
       }
     },
     {
-      "id": "TODO-L1737",
-      "line": 1737,
+      "id": "TODO-L1741",
+      "line": 1741,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R153",
       "priority": null,
@@ -29318,8 +29497,8 @@
       }
     },
     {
-      "id": "TODO-L1738",
-      "line": 1738,
+      "id": "TODO-L1742",
+      "line": 1742,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R153",
       "priority": null,
@@ -29328,102 +29507,6 @@
       "status": "pending",
       "blockedBy": null,
       "text": "会议前中后资料链：会议前打开资料卡，会中从 Word/Excel/PowerPoint 的用户选区或公开导出、截图和计时记录证据，会后将用户确认的行动项写入思源项目或跟进草稿。验收：会议来源、页码/表格/幻灯片、时间、附件和敏感字段可追溯；不自动发送邀请或邮件。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
-      "id": "TODO-L1739",
-      "line": 1739,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R154",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "文件/文件夹项目索引：资源管理器主动选中文件或目录，写入项目文档的路径、扩展名、大小、修改时间和可选哈希。验收：默认只写引用与元数据，不移动源文件；权限不足进入待归档清单。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
-      "id": "TODO-L1740",
-      "line": 1740,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R154",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "文件夹监控待审草稿：FileSystemWatcher 发现新 Markdown/PDF/图片后等待文件稳定，再生成收件箱草稿。验收：同步盘重复事件、临时文件、停止监控和去重均可解释，确认前不物化内容。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
-      "id": "TODO-L1741",
-      "line": 1741,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R154",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "Everything 结果索引：把用户主动检索的文件结果生成思源索引页，保留查询、路径、快照时间和缺失状态。验收：路径变化、脱机盘和权限错误分开显示，不宣称已同步文件内容。",
-      "mainline": "C7",
-      "evidence": "E0",
-      "refs": {
-        "sections": [
-          "21"
-        ],
-        "rounds": [
-          "R151",
-          "R160"
-        ],
-        "docs": []
-      }
-    },
-    {
-      "id": "TODO-L1742",
-      "line": 1742,
-      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R154",
-      "priority": null,
-      "topic": null,
-      "type": "评估",
-      "status": "pending",
-      "blockedBy": null,
-      "text": "远程素材导入：从 WebDAV/NAS/S3 选择文件导入思源 assets 或资料篮，保存来源、版本、指纹和凭据来源。验收：凭据不出现在分享包，下载失败可逐项补做，远程写超时先查询/比对。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29447,7 +29530,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "思源导出远程归档：将用户确认的 Markdown/附件批次导出到远程目录，生成文件清单和归档回执。验收：写入、未知、重复和部分成功分开；不会因超时盲目重传或删除本地源。",
+      "text": "文件/文件夹项目索引：资源管理器主动选中文件或目录，写入项目文档的路径、扩展名、大小、修改时间和可选哈希。验收：默认只写引用与元数据，不移动源文件；权限不足进入待归档清单。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29471,7 +29554,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "路径与重复处理：对文件移动、重命名、同名、重复 hash 和软链接生成变更报告。验收：用户选择更新引用、保留旧引用或忽略，动作不暗中改变思源资源块和源文件。",
+      "text": "文件夹监控待审草稿：FileSystemWatcher 发现新 Markdown/PDF/图片后等待文件稳定，再生成收件箱草稿。验收：同步盘重复事件、临时文件、停止监控和去重均可解释，确认前不物化内容。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29489,14 +29572,14 @@
       "id": "TODO-L1745",
       "line": 1745,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R155",
+      "round": "R154",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "截图 OCR 审阅块：截取屏幕选区，保留原图并生成可编辑 OCR 文本写入收件箱。验收：原图与文本一一关联，低置信度标记，取消/空图/模型下载失败不丢原图。",
-      "mainline": "C6",
+      "text": "Everything 结果索引：把用户主动检索的文件结果生成思源索引页，保留查询、路径、快照时间和缺失状态。验收：路径变化、脱机盘和权限错误分开显示，不宣称已同步文件内容。",
+      "mainline": "C7",
       "evidence": "E0",
       "refs": {
         "sections": [
@@ -29513,13 +29596,13 @@
       "id": "TODO-L1746",
       "line": 1746,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R155",
+      "round": "R154",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "标注截图证据：对截图添加箭头、遮罩和编号，写入思源资源块及来源窗口/时间。验收：原图、标注图和说明可切换，隐私遮罩在外发前明确显示。",
+      "text": "远程素材导入：从 WebDAV/NAS/S3 选择文件导入思源 assets 或资料篮，保存来源、版本、指纹和凭据来源。验收：凭据不出现在分享包，下载失败可逐项补做，远程写超时先查询/比对。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29537,13 +29620,13 @@
       "id": "TODO-L1747",
       "line": 1747,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R155",
+      "round": "R154",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "长截图资料：将网页或文档长截图拆成可定位页面或一张带目录的资料卡。验收：超长、滚动中断和内容变化有状态，图片和来源 URL 保持关联。",
+      "text": "思源导出远程归档：将用户确认的 Markdown/附件批次导出到远程目录，生成文件清单和归档回执。验收：写入、未知、重复和部分成功分开；不会因超时盲目重传或删除本地源。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29561,13 +29644,13 @@
       "id": "TODO-L1748",
       "line": 1748,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R155",
+      "round": "R154",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "公式识别：对公式截图调用公式识别，预览 LaTeX/Math Markdown 后插入当前光标或指定草稿区。验收：识别费用/外发提示，失败保留原图，不自动替换原文。",
+      "text": "路径与重复处理：对文件移动、重命名、同名、重复 hash 和软链接生成变更报告。验收：用户选择更新引用、保留旧引用或忽略，动作不暗中改变思源资源块和源文件。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29591,8 +29674,8 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "录屏/会议索引：将录屏文件写入会议或教程索引，记录开始结束时间、窗口、文件路径和用户标注时间点。验收：不把录屏转录或业务行动项宣称为已完成，文件权限/体积超限可降级为链接。",
-      "mainline": "C7",
+      "text": "截图 OCR 审阅块：截取屏幕选区，保留原图并生成可编辑 OCR 文本写入收件箱。验收：原图与文本一一关联，低置信度标记，取消/空图/模型下载失败不丢原图。",
+      "mainline": "C6",
       "evidence": "E0",
       "refs": {
         "sections": [
@@ -29615,7 +29698,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "图像质量与隐私门禁：为 OCR 语言、版面、置信度、敏感区域和本地/外部处理建立预览。验收：用户可取消上传、遮挡敏感区和保留原图，质量不足只生成待校对草稿。",
+      "text": "标注截图证据：对截图添加箭头、遮罩和编号，写入思源资源块及来源窗口/时间。验收：原图、标注图和说明可切换，隐私遮罩在外发前明确显示。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29633,13 +29716,13 @@
       "id": "TODO-L1751",
       "line": 1751,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R156",
+      "round": "R155",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "选区格式修复：对当前思源选区做标题、列表、引用、代码、表格或公式格式化，预览差异后写回。验收：只操作用户选区，保留快照和撤销路径，选区失效时停止。",
+      "text": "长截图资料：将网页或文档长截图拆成可定位页面或一张带目录的资料卡。验收：超长、滚动中断和内容变化有状态，图片和来源 URL 保持关联。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29657,13 +29740,13 @@
       "id": "TODO-L1752",
       "line": 1752,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R156",
+      "round": "R155",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "文本规范化：清理空行、中文标点、全角半角、Markdown/JSON/URL 格式，显示原文与新文 diff 后粘回。验收：超长文本不截断，目标窗口/块重新确认，取消不覆盖。",
+      "text": "公式识别：对公式截图调用公式识别，预览 LaTeX/Math Markdown 后插入当前光标或指定草稿区。验收：识别费用/外发提示，失败保留原图，不自动替换原文。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29681,13 +29764,13 @@
       "id": "TODO-L1753",
       "line": 1753,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R156",
+      "round": "R155",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "大纲转草稿：从标题树或外部大纲生成可编辑段落草稿和缺证据清单，写入草稿区或剪贴板。验收：保留大纲节点和素材引用，失败进入本地草稿，不覆盖正文。",
+      "text": "录屏/会议索引：将录屏文件写入会议或教程索引，记录开始结束时间、窗口、文件路径和用户标注时间点。验收：不把录屏转录或业务行动项宣称为已完成，文件权限/体积超限可降级为链接。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29705,13 +29788,13 @@
       "id": "TODO-L1754",
       "line": 1754,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R156",
+      "round": "R155",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "论断找依据：选中论断或光标触发资料篮搜索，生成来源标题、块链、摘录、版本和置信说明，确认后插入引用。验收：无选区/多候选/索引未更新时只给候选列表，不能把推断写成引用。",
+      "text": "图像质量与隐私门禁：为 OCR 语言、版面、置信度、敏感区域和本地/外部处理建立预览。验收：用户可取消上传、遮挡敏感区和保留原图，质量不足只生成待校对草稿。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29735,7 +29818,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "段落事实核验：对选中段落核对已有引用，列出可定位、失效、冲突和无出处项，生成待修改草稿。验收：保留原段落，引用证据缺失时说明原因，不自动重写事实。",
+      "text": "选区格式修复：对当前思源选区做标题、列表、引用、代码、表格或公式格式化，预览差异后写回。验收：只操作用户选区，保留快照和撤销路径，选区失效时停止。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29759,7 +29842,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "术语与格式一致性报告：按用户确认的术语表扫描章节，给出变体位置和逐项替换预览。验收：批量修改前必须确认，规则不适用时只报告，不静默改写正文。",
+      "text": "文本规范化：清理空行、中文标点、全角半角、Markdown/JSON/URL 格式，显示原文与新文 diff 后粘回。验收：超长文本不截断，目标窗口/块重新确认，取消不覆盖。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29777,13 +29860,13 @@
       "id": "TODO-L1757",
       "line": 1757,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R157",
+      "round": "R156",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "思源搜索结果工作台：将全文/SQL 搜索结果带上下文、来源、分页和截断信息送入可筛选的 Quicker 窗口。验收：结果范围、时间和权限可见，无结果不等于查询失败。",
+      "text": "大纲转草稿：从标题树或外部大纲生成可编辑段落草稿和缺证据清单，写入草稿区或剪贴板。验收：保留大纲节点和素材引用，失败进入本地草稿，不覆盖正文。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29801,13 +29884,13 @@
       "id": "TODO-L1758",
       "line": 1758,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R157",
+      "round": "R156",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "文档并排对照：选择两个文档或导出基线，生成段落级 diff、引用增删和未解决 TODO。验收：没有基线时明确无法比较，不假造版本历史；可回到对应块或文件。",
+      "text": "论断找依据：选中论断或光标触发资料篮搜索，生成来源标题、块链、摘录、版本和置信说明，确认后插入引用。验收：无选区/多候选/索引未更新时只给候选列表，不能把推断写成引用。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29825,13 +29908,13 @@
       "id": "TODO-L1759",
       "line": 1759,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R157",
+      "round": "R156",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "多结果证据清单：用户勾选多条结果生成主题、来源、摘录、块 ID 和缺口的证据清单。验收：重复块、已删块和无权块分开显示，清单可导出 Markdown/CSV。",
+      "text": "段落事实核验：对选中段落核对已有引用，列出可定位、失效、冲突和无出处项，生成待修改草稿。验收：保留原段落，引用证据缺失时说明原因，不自动重写事实。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29849,14 +29932,14 @@
       "id": "TODO-L1760",
       "line": 1760,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R157",
+      "round": "R156",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "带引用导出：将研究结果导出 Markdown/CSV，保存 URL、文档、块、页码/时间戳和抓取时间。验收：原始统计、AI 润色和引用列表分层，导出失败不改变源资料。",
-      "mainline": "C6",
+      "text": "术语与格式一致性报告：按用户确认的术语表扫描章节，给出变体位置和逐项替换预览。验收：批量修改前必须确认，规则不适用时只报告，不静默改写正文。",
+      "mainline": "C7",
       "evidence": "E0",
       "refs": {
         "sections": [
@@ -29879,8 +29962,8 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "查询模板与复用：保存用户确认的查询条件、参数和脱敏范围，下一次运行前显示数据截至时间和权限变化。验收：查询语义变化需要重新确认，AI 生成 SQL 只读校验通过才能运行。",
-      "mainline": "C6",
+      "text": "思源搜索结果工作台：将全文/SQL 搜索结果带上下文、来源、分页和截断信息送入可筛选的 Quicker 窗口。验收：结果范围、时间和权限可见，无结果不等于查询失败。",
+      "mainline": "C7",
       "evidence": "E0",
       "refs": {
         "sections": [
@@ -29903,7 +29986,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "来源 URL 回到原网页：从思源来源卡激活已有标签或安全打开新标签，允许按标题/锚点定位。验收：只匹配允许域名；页面改版、登录失效或选择器失效时保留思源摘录并降级为 URL。",
+      "text": "文档并排对照：选择两个文档或导出基线，生成段落级 diff、引用增删和未解决 TODO。验收：没有基线时明确无法比较，不假造版本历史；可回到对应块或文件。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29921,13 +30004,13 @@
       "id": "TODO-L1763",
       "line": 1763,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R158",
+      "round": "R157",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "思源块送外部备注：用户选择思源块，将纯文本、Markdown 或链接复制/写入指定外部应用的备注草稿。验收：外部写入前显示目标窗口和字段，回执记录外部对象标识，失败保留可复制草稿。",
+      "text": "多结果证据清单：用户勾选多条结果生成主题、来源、摘录、块 ID 和缺口的证据清单。验收：重复块、已删块和无权块分开显示，清单可导出 Markdown/CSV。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -29945,15 +30028,15 @@
       "id": "TODO-L1764",
       "line": 1764,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R158",
+      "round": "R157",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "外部对象回写思源：从浏览器、PDF、Zotero 或邮件中由用户提供对象 URL/标识，生成思源来源卡并保存 `siyuan://blocks/...` 回链。验收：外部对象删除或链接失效时不删除思源记录，状态进入待处理。",
-      "mainline": "C7",
-      "evidence": "E1",
+      "text": "带引用导出：将研究结果导出 Markdown/CSV，保存 URL、文档、块、页码/时间戳和抓取时间。验收：原始统计、AI 润色和引用列表分层，导出失败不改变源资料。",
+      "mainline": "C6",
+      "evidence": "E0",
       "refs": {
         "sections": [
           "21"
@@ -29969,14 +30052,14 @@
       "id": "TODO-L1765",
       "line": 1765,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R158",
+      "round": "R157",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "双向关系表：为思源块、外部 URL/文件/消息建立关系表，记录首次关联、最近核对、版本和来源。验收：同一对象多次关联幂等，变更/删除有待核对项，不把链接存在当作内容同步完成。",
-      "mainline": "C7",
+      "text": "查询模板与复用：保存用户确认的查询条件、参数和脱敏范围，下一次运行前显示数据截至时间和权限变化。验收：查询语义变化需要重新确认，AI 生成 SQL 只读校验通过才能运行。",
+      "mainline": "C6",
       "evidence": "E0",
       "refs": {
         "sections": [
@@ -29993,13 +30076,13 @@
       "id": "TODO-L1766",
       "line": 1766,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R158",
+      "round": "R157",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "外部回写确认：把思源字段映射为浏览器表单、邮件回复或应用备注草稿，只做检查和预填，提交仍由用户完成。验收：字段 diff、域名和敏感字段可见，无法公开定位时退回思源草稿。",
+      "text": "来源 URL 回到原网页：从思源来源卡激活已有标签或安全打开新标签，允许按标题/锚点定位。验收：只匹配允许域名；页面改版、登录失效或选择器失效时保留思源摘录并降级为 URL。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -30023,7 +30106,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "回写冲突处理：外部对象和思源块都发生变化时生成并排冲突卡，允许保留思源、保留外部或另存合并草稿。验收：没有明确所有权时不覆盖任一侧，冲突决定有时间和来源记录。",
+      "text": "思源块送外部备注：用户选择思源块，将纯文本、Markdown 或链接复制/写入指定外部应用的备注草稿。验收：外部写入前显示目标窗口和字段，回执记录外部对象标识，失败保留可复制草稿。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -30047,9 +30130,9 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "返回路径与失效治理：统一处理 `siyuan://`、网页 URL、文件路径和外部对象 ID 的打开、失效、权限变化和版本迁移。验收：失效链接仍可读脱敏摘要，打开动作不会因为历史链接自动触发写入。",
+      "text": "外部对象回写思源：从浏览器、PDF、Zotero 或邮件中由用户提供对象 URL/标识，生成思源来源卡并保存 `siyuan://blocks/...` 回链。验收：外部对象删除或链接失效时不删除思源记录，状态进入待处理。",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E1",
       "refs": {
         "sections": [
           "21"
@@ -30065,15 +30148,15 @@
       "id": "TODO-L1769",
       "line": 1769,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R159",
+      "round": "R158",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "VS Code diff 记录：用户选择 diff 或指定 `file:line:character`，生成思源开发记录、变更摘要、测试证据和待验证项。验收：使用公开 `--diff/--goto` 或用户传参，不读取 IDE 私有数据库。",
+      "text": "双向关系表：为思源块、外部 URL/文件/消息建立关系表，记录首次关联、最近核对、版本和来源。验收：同一对象多次关联幂等，变更/删除有待核对项，不把链接存在当作内容同步完成。",
       "mainline": "C7",
-      "evidence": "E3",
+      "evidence": "E0",
       "refs": {
         "sections": [
           "21"
@@ -30089,15 +30172,15 @@
       "id": "TODO-L1770",
       "line": 1770,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R159",
+      "round": "R158",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "Git 提交证据：对用户指定 repo/commit 读取 `git show` 日志和文本 diff，写入项目文档。验收：记录 commit、文件和行号范围；仓库不可达时明确未验证，不把命令成功当测试通过。",
+      "text": "外部回写确认：把思源字段映射为浏览器表单、邮件回复或应用备注草稿，只做检查和预填，提交仍由用户完成。验收：字段 diff、域名和敏感字段可见，无法公开定位时退回思源草稿。",
       "mainline": "C7",
-      "evidence": "E3",
+      "evidence": "E0",
       "refs": {
         "sections": [
           "21"
@@ -30113,13 +30196,13 @@
       "id": "TODO-L1771",
       "line": 1771,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R159",
+      "round": "R158",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "终端命令结果：用户主动选择命令输出或日志文件，解析错误堆栈、模块、行号和复现步骤。验收：只读导入，危险命令不自动执行，Token、路径和个人数据先脱敏。",
+      "text": "回写冲突处理：外部对象和思源块都发生变化时生成并排冲突卡，允许保留思源、保留外部或另存合并草稿。验收：没有明确所有权时不覆盖任一侧，冲突决定有时间和来源记录。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -30137,13 +30220,13 @@
       "id": "TODO-L1772",
       "line": 1772,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
-      "round": "R159",
+      "round": "R158",
       "priority": null,
       "topic": null,
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "Issue/PR 跟进卡：将用户提供的 Issue/PR URL、标题、状态、讨论摘录和下一步写入项目跟进。验收：来源时间和快照可追溯，网络/权限失败不伪造最新状态。",
+      "text": "返回路径与失效治理：统一处理 `siyuan://`、网页 URL、文件路径和外部对象 ID 的打开、失效、权限变化和版本迁移。验收：失效链接仍可读脱敏摘要，打开动作不会因为历史链接自动触发写入。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -30167,7 +30250,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "解决记录回链：把思源问题记录链接回 commit、文件、测试命令或 PR，支持从结果卡回到代码位置。验收：行号变化、分支切换和 commit 重写进入失效/待核对状态。",
+      "text": "VS Code diff 记录：用户选择 diff 或指定 `file:line:character`，生成思源开发记录、变更摘要、测试证据和待验证项。验收：使用公开 `--diff/--goto` 或用户传参，不读取 IDE 私有数据库。",
       "mainline": "C7",
       "evidence": "E3",
       "refs": {
@@ -30191,7 +30274,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "工程证据分级：统一 received/draft/committed/verified/unknown 的开发记录状态，区分“命令执行”“测试通过”“业务修复”。验收：没有测试证据时只能标待验证，记录可导出为 Markdown/JSON。",
+      "text": "Git 提交证据：对用户指定 repo/commit 读取 `git show` 日志和文本 diff，写入项目文档。验收：记录 commit、文件和行号范围；仓库不可达时明确未验证，不把命令成功当测试通过。",
       "mainline": "C7",
       "evidence": "E3",
       "refs": {
@@ -30215,7 +30298,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "用户结果卡：为每个动作写清用户目标、输入、目标 owner、输出、耗时测量、风险、手动替代和恢复入口。验收：动作目录先显示能完成什么，再显示模块和协议。",
+      "text": "终端命令结果：用户主动选择命令输出或日志文件，解析错误堆栈、模块、行号和复现步骤。验收：只读导入，危险命令不自动执行，Token、路径和个人数据先脱敏。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -30239,9 +30322,9 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "统一 manifest 与契约：定义 actionId、revision、入口、参数 schema、依赖、effects、版本门槛、来源、许可和支持责任。验收：Quicker 分享包、快门能力卡、README 和帮助页引用同一事实表。",
+      "text": "Issue/PR 跟进卡：将用户提供的 Issue/PR URL、标题、状态、讨论摘录和下一步写入项目跟进。验收：来源时间和快照可追溯，网络/权限失败不伪造最新状态。",
       "mainline": "C7",
-      "evidence": "E2",
+      "evidence": "E0",
       "refs": {
         "sections": [
           "21"
@@ -30263,9 +30346,9 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "三态运行门禁：把只检查、dry-run/预览和真实执行分开，明确每一步是否联网、写入、模拟输入或产生费用。验收：试运行是真实执行时明确提示，超时不自动重试。",
+      "text": "解决记录回链：把思源问题记录链接回 commit、文件、测试命令或 PR，支持从结果卡回到代码位置。验收：行号变化、分支切换和 commit 重写进入失效/待核对状态。",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E3",
       "refs": {
         "sections": [
           "21"
@@ -30287,8 +30370,8 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "AI 生成与验证夹具：让 AI 只生成 ActionSpec/草稿和测试夹具，显示 diff、步骤引用、敏感字段与版本，之后进入 Quicker 暂存、静态检查和业务回执。验收：生成完成不等于可分享，Quicker 成功不等于业务 verified。",
-      "mainline": "C6",
+      "text": "工程证据分级：统一 received/draft/committed/verified/unknown 的开发记录状态，区分“命令执行”“测试通过”“业务修复”。验收：没有测试证据时只能标待验证，记录可导出为 Markdown/JSON。",
+      "mainline": "C7",
       "evidence": "E3",
       "refs": {
         "sections": [
@@ -30311,7 +30394,7 @@
       "type": "评估",
       "status": "pending",
       "blockedBy": null,
-      "text": "运行反馈与作者支持：采集用户主动提交的成功/失败/未知、动作 revision、环境和最小诊断，形成兼容矩阵和可复现夹具。验收：不上传敏感正文，反馈可撤回，作者能定位入口、步骤和 owner。",
+      "text": "用户结果卡：为每个动作写清用户目标、输入、目标 owner、输出、耗时测量、风险、手动替代和恢复入口。验收：动作目录先显示能完成什么，再显示模块和协议。",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -30328,6 +30411,102 @@
     {
       "id": "TODO-L1780",
       "line": 1780,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R159",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "统一 manifest 与契约：定义 actionId、revision、入口、参数 schema、依赖、effects、版本门槛、来源、许可和支持责任。验收：Quicker 分享包、快门能力卡、README 和帮助页引用同一事实表。",
+      "mainline": "C7",
+      "evidence": "E2",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1781",
+      "line": 1781,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R159",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "三态运行门禁：把只检查、dry-run/预览和真实执行分开，明确每一步是否联网、写入、模拟输入或产生费用。验收：试运行是真实执行时明确提示，超时不自动重试。",
+      "mainline": "C7",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1782",
+      "line": 1782,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R159",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "AI 生成与验证夹具：让 AI 只生成 ActionSpec/草稿和测试夹具，显示 diff、步骤引用、敏感字段与版本，之后进入 Quicker 暂存、静态检查和业务回执。验收：生成完成不等于可分享，Quicker 成功不等于业务 verified。",
+      "mainline": "C6",
+      "evidence": "E3",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1783",
+      "line": 1783,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R159",
+      "priority": null,
+      "topic": null,
+      "type": "评估",
+      "status": "pending",
+      "blockedBy": null,
+      "text": "运行反馈与作者支持：采集用户主动提交的成功/失败/未知、动作 revision、环境和最小诊断，形成兼容矩阵和可复现夹具。验收：不上传敏感正文，反馈可撤回，作者能定位入口、步骤和 owner。",
+      "mainline": "C7",
+      "evidence": "E0",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1784",
+      "line": 1784,
       "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
       "round": "R159",
       "priority": null,
