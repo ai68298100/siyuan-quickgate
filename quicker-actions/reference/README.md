@@ -25,7 +25,7 @@
 
 - **上下文签名以你的 Quicker 为准**：v2 各版本 `Quicker.Public.IStepContext` 的确切命名空间可能微调；若粘贴报签名错误，保留编辑器骨架签名、只换方法体即可。
 - `LV-取回执.cs` 的字段提取是**手写轻量解析**（扁平回执够用）；`data` 原样输出，需要深取时在 Quicker 里接 `jsonextract` 模块。
-- 内核路由快路径（KERNEL_OPS 同步直呼）未包含在这六件里——spike⑩ 校准通过后再加（规范见 docs/02 §6 注记）。
+- 内核路由快路径（KERNEL_OPS 同步直呼）：**无需专用参考件**——`SY·内核请求` 传 `sy_url` 保持不变、端点填 `/plugin/private/siyuan-quickgate/exec`、请求体 `{"op":"…","args":{}}` 即为直呼（3.8.6 真机已验证，spike⑩ ✅ 2026-10-02）；响应 `data` 即回执（与桥回执同形）。前端专属 op 会收到 `unsupported`+中文指引（走 NDJSON 通道）。规范见 docs/02 §6。
 - 这六份是**参考实现**，未在 Quicker 真机编译验证过（本仓库无 GUI 环境）；首次粘贴如遇编译错误，多为变量缺失或签名差异，按提示补齐即可。实测后请反馈，会修正进参考件（TODO §5.8 R16）。
 - **语法级验证已做（2026-10-02，R33）**：用 .NET Framework csc（C#5）+ harness（stub IStepContext + 包 class + 提 using）验证六件——SY 三件 0 错误全净；LV 三件仅 `is T x` 模式匹配与 `out var`（**C# 7 语法**）在 C#5 下报错，属预期——**需 Quicker 普通模式 v2（Roslyn，C#7+），v1 老编译器不兼容**。Quicker 真实 API 成员面仍以真机为准。
 - **文件编码**：含中文注释，均为 UTF-8（带/不带 BOM 不影响 Quicker 粘贴；若用外部编辑器打开请确认以 UTF-8 读取）。
