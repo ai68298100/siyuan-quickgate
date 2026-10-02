@@ -15,10 +15,9 @@ jobs:
         run: |
           docker run -d --name siyuan \
             -p 127.0.0.1:6806:6806 \
-            -v /home/runner/siyuan-workspace:/siyuan/workspace \
-            -e AUTH_CODE='' \
+            -v siyuan-ws:/siyuan/workspace \
             b3log/siyuan:latest \
-            --workspace=/siyuan/workspace/ --accessAuthCode=
+            --workspace=/siyuan/workspace/
           echo "容器已启动，等待内核就绪..."
 
       - name: 等待内核就绪并抓取 Token
@@ -31,6 +30,8 @@ jobs:
             fi
             sleep 2
           done
+          docker inspect siyuan --format 'state={{.State.Status}} exit={{.State.ExitCode}}' || true
+          docker logs siyuan 2>&1 | tail -20 || true
           docker exec siyuan sh -c 'ls /siyuan/workspace/' || true
           TOKEN=$(docker exec siyuan sh -c 'cat /siyuan/workspace/conf/conf.json' | grep -o '"token":"[^"]*"' | cut -d'"' -f4 || true)
           echo "TOKEN=${TOKEN:0:6}...(已截取)" 
