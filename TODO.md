@@ -1817,3 +1817,5 @@
 - [x] 【R110·MCP 真 e2e 全链首次通过】三通道全部经真实前端消费：bridge.ping 广播快路径 recorded + registry.list 内核路由 recorded + editor.context NDJSON 慢路径 recorded + daily.status NDJSON 写路径投递 recorded——R71 开桥+R83 回滚演练+R105 bazaar trust 修复三步铺垫后，MCP 代理的最后缺口（插件消费侧）真机确认闭合。v0.7.2 解除 pre-release 转正式版 Latest
 
 - [x] 【R112·兜底循环 A/B/C】上游零漂移（思源 3.8.6 仍最新正式版/三插件无新版）；npm run accept 99/99 + 直接冒烟 6/6 全绿（npm run 子进程的 5/6 为 PATH 环境差异非代码问题）；两仓库干净。稳定态持续。
+
+- [x] 【R113·MCP NDJSON 慢路径真机验证】四 op 经真实前端消费返回真实数据：daily.status（docId=null 正确——今日日记未创建）/config.discover（diaryNotebookId=DailyNote 正确命中）/events.list（白名单返回）/registry.list（七插件清单返回）——MCP 真 e2e 全链完成（三通道+四 op 全真实数据）
