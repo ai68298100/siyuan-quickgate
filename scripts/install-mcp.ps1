@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
 .SYNOPSIS
     一键安装 Claude Desktop + 配置快门 MCP 服务器
@@ -37,10 +37,17 @@ Write-Host "  ✓ MCP 服务器文件确认" -ForegroundColor Green
 # 2. 检查/安装 Claude Desktop
 $claudeExe = "$env:LOCALAPPDATA\AnthropicClaude\claude.exe"
 if (-not (Test-Path $claudeExe)) {
-    Write-Host "  Claude Desktop 未安装，通过 winget 安装..." -ForegroundColor Yellow
-    winget install Anthropic.Claude --accept-source-agreements --accept-package-agreements
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "  winget 安装失败，请手动从 https://claude.ai/download 下载安装" -ForegroundColor Red
+    Write-Host "  Claude Desktop 未安装，尝试通过 winget 安装..." -ForegroundColor Yellow
+    $wingetPath = "$env:LOCALAPPDATA\Microsoft\WindowsApps\winget.exe"
+    if (Test-Path $wingetPath) {
+        & $wingetPath install Anthropic.Claude --accept-source-agreements --accept-package-agreements
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  winget 安装失败，请手动从 https://claude.ai/download 下载安装" -ForegroundColor Red
+            Write-Host "  安装后重新运行此脚本以完成 MCP 配置" -ForegroundColor Yellow
+            exit 1
+        }
+    } else {
+        Write-Host "  winget 不可用，请手动从 https://claude.ai/download 下载安装 Claude Desktop" -ForegroundColor Red
         Write-Host "  安装后重新运行此脚本以完成 MCP 配置" -ForegroundColor Yellow
         exit 1
     }
