@@ -14,7 +14,9 @@ corepack pnpm check        # tsc + svelte-check（提交前必跑）
 corepack pnpm accept       # 验收门：单测(99) + MCP 协议冒烟(6)——无内核可跑
 corepack pnpm build        # dist/ + package.zip
 corepack pnpm build:mcp    # dist-mcp/（MCP 独立分发物）
-corepack pnpm verify:restart  # 真机七类数据（需思源运行+桥开启；SIYUAN_LOG 可选）
+corepack pnpm verify:restart  # 真机九类数据（需思源运行+桥开启；SIYUAN_LOG 可选）
+# CI 容器化内核侧验收（GitHub Actions 手动触发；ubuntu+siyuan docker，无需本机）
+gh workflow run ci-e2e-experiment.yml && gh run watch
 ```
 
 ## 发版流程（每版必经，缺一即回）
@@ -49,6 +51,8 @@ corepack pnpm verify:restart  # 真机七类数据（需思源运行+桥开启�
 | 修改环境参数（端口/路径）后 | **全仓 grep 两个项目**（quickgate + quicksrer 动作），tools/e2e/docs 各有默认值 |
 | 测试里硬编码日期 × 真实 Date.now() = 定时炸弹 | 一律固定时钟 `now: () => 固定值` |
 | 并行会话可能活跃于共享文件（README/TODO） | 改前 `git status/diff` 核对归属；只追加不重构 |
+| SiYuan 容器化：v3.7.0+ 必须传 `serve` 子命令（缺=打印帮助 exit 0）；Docker 首启 `Conf.Bazaar.Trust` 默认 false → 内核插件禁用（预置 conf 补 `bazaar:{trust:true}`）；容器无 node（conf 解析 docker exec cat+宿主处理）；认证失败触发 429 限速（跨 restart 持久，等冷却或重建容器） | 见 .github/workflows/ci-e2e-experiment.yml（十轮诊断全记录） |
+| SiYuan 容器化：v3.7.0+ 必须传 `serve` 子命令（缺=打印帮助 exit 0）；Docker 容器首启 `Conf.Bazaar.Trust` 默认 false → 内核插件禁用（预置 conf 补 `"bazaar":{"trust":true}`）；容器无 node（conf 解析用 docker exec cat+宿主处理）；认证失败会触发 429 限速（跨 restart 持久，等冷却或重建容器） | 见 .github/workflows/ci-e2e-experiment.yml（十轮诊断全记录） |
 
 ## 证据纪律（R123-G0）
 
