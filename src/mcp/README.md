@@ -42,7 +42,7 @@ Claude Desktop 配置（`claude_desktop_config.json`）：
 
 ## 状态与边界
 
-- ✅ 单测 8+1 组（契约一致性/安全过滤/JSON-RPC 语义/错误分支），98 总全绿
+- ✅ 单测 10 组（契约一致性/安全过滤/JSON-RPC 语义/错误分支/参数 schema 纪律/内核路由三态），98 总全绿
 - ✅ 裸 Node 真机烟测：initialize 握手 / tools/list（默认 13） / 写工具拒绝提示 / required 穿透
 - ✅ **协议级冒烟**（`node tools/mcp-smoke.mjs`，6 断言全过）：完整 stdio 序列 vs 真进程——握手/列表/隐藏/拒绝/写模式/诚实超时
 - ⬜ e2e：真实 AI 客户端完整会话 + 插件侧消费（待思源重启复测批通过）
