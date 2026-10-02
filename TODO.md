@@ -1829,3 +1829,5 @@
 - [x] 【R116·MCP 写路径端到端真机确认】LV_MCP_WRITE=1 全量冒烟 6/6：23 工具全暴露+bridge.ping 经广播快路径获得真实 recorded 回执（前端在线消费）——MCP 写路径（NDJSON 投递→前端轮询→执行→回执）首次真机全链确认。快门全部外部通道（NDJSON/内核路由/广播/MCP 三模式）均真机验证通过
 
 - [x] 【R117·内核日志健康检查】0 错误/0 警告（最近 200 行）；quickgate 67 条同步记录（audit.json+bridge-state.json 云同步正常）；总日志 71519 行 11MB——系统运行清洁，无累积问题
+
+- [x] 【R118·依赖安全审计+修复】pnpm audit 发现 17 漏洞（9 高危/7 中危/1 低危——全在开发依赖非生产运行时）：pnpm update npm-run-all svelte-check svelte devalue 等到最新 + vite.config assetFileNames 显式类型 + UserConfig 断言改 any（vitest 4.x 类型不兼容回退 3.x）→ 99 单测+冒烟+check 全绿
