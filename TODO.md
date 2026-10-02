@@ -1805,3 +1805,6 @@
 
 - [x] 【R100·CI 容器化 e2e 六轮】预置 conf api.token 生效但内核将其重写为 122 字符 JWT（api.token 长度 122/OCI 前缀实测）；探针修正发现=version API 免认证（对照无 token 也 200，假说 A/B 均 200 不能证伪）；⑩ 路由 429=认证失败限速窗口未冷却（restart 不清）
 - [ ] 【R100-G1·下一轮】429 冷却对策（verify 前 sleep 60~120s 或限速窗口实测）+ 用内核重写的 122 JWT 调需认证 API（registry.list）验证 → 内核侧四类转绿后合 main
+
+- [x] 【R101·CI 容器化 e2e 七轮】JWT 认证验证新知：registry.list 经路由 **HTTP 400**（非 401/403/429/404）——**JWT（122 字符）作为 API Token 认证已通过**，400 来自 accessAuthCode 会话层（CI 容器无浏览器会话）；429 限速跨 restart 持久
+- [ ] 【R101·等实验】auth_session.go 全文深挖：accessAuthCode 模式下 API Token 直通的确切条件（本机直通 vs 容器 400 的差异根因）→ 确认后决定容器对策（会话注入/关闭 accessAuthCode/其他）【实验分支自主迭代】
