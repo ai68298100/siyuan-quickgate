@@ -70,6 +70,8 @@
 - [x] 【R64·循环B】**验收流程收敛为一条命令**：package.json 新增 `accept`（=单测+MCP 冒烟，实跑 98/98+6/6 ✓）、`smoke:mcp`、`verify:restart` 三个脚本——重启后验收从记四条命令变成 `npm run accept` 全绿 + `npm run verify:restart` 七类数据
 - [x] 【R65·循环A】**验收入口文档同步三处**：WALKTHROUGH 复测节改 npm run 形式（并补 SIYUAN_LOG 用法与 MCP 项）、双语 README 开发节补 `pnpm accept` 行
 - [x] 【R66·循环A】**设计文档项目建立版本控制（安全措施）**：发现 13 份设计文档+350 项 TODO 账本+参考件（~1MB）60 余轮全部为无撤销覆盖编辑——git init + 初始快照提交（9e03b49，28 文件；已有 .gitignore 覆盖凭据/运行时目录，token/secret 通配在案）。非破坏性（删 .git 即撤销）；后续 R 轮的文档改动可逐轮留痕
+- [x] 【R67·用户指令】**GitHub 发布就绪 + v0.7.0 发版**：①双语 README 面向发布重写——三通道对比表（NDJSON/内核路由/广播）、MCP 独立节（Claude Desktop 配置 JSON）、验收入口、AIA助手定位；②GitHub 仓库设置：description 更新为三通道+MCP 现实、topics 补 siyuan/mcp-server/ai-tools/json-rpc（共 8 个）；③**v0.7.0 发版**（SemVer minor：MCP 新外部面）——accept 98/98+6/6（其间抓到 mcp-smoke 在无 SIYUAN_TOKEN 时假超时 20s 的问题，改为进程秒退明确诊断）→ build → 部署工作空间 0.7.0 → CHANGELOG v0.7.0 节（Unreleased 合并去重）→ GitHub release + CI 绿 + tag 同步；e2e（真 AI 客户端+插件消费）仍待复测批，故保持 pre-release 标记
+- [x] 【R68·用户指令"思源已经重启"】**复测批执行 + bug#9 修复（v0.7.1）+ 内核路由全线打通**：①内核已升 **3.8.6**（兼容性顺带实证）；②accept 全绿后复测批曾仍 404 → **根因=plugin.json 缺 `kernels` 字段**（内核按它判定是否加载 kernel.js；对照 docktomato 有 `"kernels":["all"]` 实证）——内核侧名单 isKernel=true 从不含快门，内核同步路由对全部用户失效；补字段后 **toggle petal 开关即热加载**（无需再重启）；③复测批 **7/8**：⑩路由 ping channel=kernel-sync✓/events.list 白名单=8✓/前端 op 诚实降级✓/**MCP 内核路由 1866ms isError=false✓**/⑩⓪ 401✓/⑤广播✓；唯 ✗=③桥端到端（外部命令桥开关默认关=安全设计，用户在设置开桥后 `npm run verify:restart` 即测）；④v0.7.1 发版（v0.7.0 包受影响故重发）+CI 绿+tag 齐；**MCP 真 e2e 亦顺带完成（registry.list 经路由全链）**——唯剩③/v1.5/⑪三项等开桥与打卡数据
 - [ ] 【实测】思源开启 HTTPS 后 URL 协议变化对动作的影响（配置项兼容 https）
 - [ ] 【实测】Defender/杀软对 Quicker C# 脚本与临时文件的误报
 - [ ] 【实测】勿扰模式下 notify 可见性
@@ -473,7 +475,7 @@
 
 ---
 
-**统计**：12 组 350 项，已完成 188（2026-10-02）。未完成 162 项构成：【等实测/等思源】约 38（**内核重启后一键复测批**（`npm run verify:restart` 已就绪，含 MCP 路由检查+§10-10 日志增长测量；手工单发用 `lv-cli fast` 或 PS `-Fast`；自主层门=`npm run accept`）③⑩功能面/⑪/v1.5/MCP 路由联调/轮询刷屏读数、前端 DevTools 现场（仅剩 ④多窗口/⑦blockId/⑪事件/①可选复核）、AI 写动作实测、C# 参考件真机编译（语法级已过✓，剩 Quicker API 成员面））·【需 Quicker 编辑器】约 38（含分拣收集箱搭建）·【等上游契约/数据源】约 8（含闪念速记文件源条件项）·【暂缓/门槛后】5 · 其余为 Quicker 侧搭建明细与评估项。**可自主完成的开发项持续清零**（v0.1.0→v0.6.6 二十二个版本，2026-10-02）；兜底循环已执行六十五轮（第六十五轮：**循环A 验收入口文档同步三处**）。
+**统计**：12 组 351 项，已完成 191（2026-10-02）。未完成 160 项构成：【等实测/等思源】约 35（**开桥后一键复测**：设置开「外部命令桥」（+广播快路径）→ `npm run verify:restart` 即测③桥端到端/v1.5 延迟；⑪ 需打卡记/删一条；MCP 真 AI 客户端 e2e（Claude Desktop 配置已给全）；前端 DevTools 现场（仅剩 ④多窗口/①可选复核）；AI 写动作实测；C# 参考件真机编译（语法级已过✓，剩 Quicker API 成员面））·【需 Quicker 编辑器】约 38（含分拣收集箱搭建）·【等上游契约/数据源】约 8（含闪念速记文件源条件项）·【暂缓/门槛后】5 · 其余为 Quicker 侧搭建明细与评估项。**可自主完成的开发项持续清零**（v0.1.0→**v0.7.1** 二十四个版本，2026-10-02）；R68=复测批执行 + bug#9 修复（plugin.json 缺 kernels 字段——kernel.js 从未加载的真因）+ **内核同步路由 3.8.6 真机全线打通（spike⑩ 功能面 ✅ 收官，MCP 真 e2e 顺带完成）**。
 **关键路径**：§1 → §2 → §3+§4 = P0 全量（2~3 天）；§5 快门完全并行（M0 半天 → M1 2~3 天 → M2 2 天）。
 **发布节奏**：代码即推 GitHub；集市等 §8 门槛。
 **本轮新增关注点**：系统代理拦 127.0.0.1、多空间端口、storage/local 迁移（spike⑨，可能一举消解多设备+同步流量两问题）、内核日志刷屏、命令执行超时保护、诊断包、契约 JSON、混沌测试。
