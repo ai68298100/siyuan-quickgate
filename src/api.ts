@@ -510,7 +510,7 @@ export async function saveBlob(filePath: string, data: Blob | File | Object | st
         throw new Error('Unsupported data type');
     }
 
-    const fname = filePath.split("/").pop();
+    const fname = filePath.split("/").pop() ?? "file";
 
     const file = new File([dataBlob], fname);
 

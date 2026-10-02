@@ -531,7 +531,7 @@ export class BridgeService {
                 const fn = bridge && typeof (bridge as Record<string, unknown>)[method] === "function" ? (bridge as Record<string, unknown>)[method] as () => unknown : undefined;
                 if (!fn) return { status: "unsupported", data: null, message: "桥方法不存在" };
                 try {
-                    const data = await fn.apply(bridge, Array.isArray(a.args) ? a.args : []);
+                    const data = await fn.apply(bridge, Array.isArray(a.args) ? (a.args as unknown[]) : []);
                     return { status: "recorded", data, message: "已透传" };
                 } catch (e) {
                     return { status: "failed", data: null, message: `透传异常：${e instanceof Error ? e.message : String(e)}` };

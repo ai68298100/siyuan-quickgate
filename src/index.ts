@@ -37,7 +37,7 @@ function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], ser
 }
 
 export default class QuickGatePlugin extends Plugin {
-    private isMobile: boolean;
+    private isMobile: boolean = false;
     private store = new BridgeStore(this.asDataIO());
     private kernelApi = new KernelApi();
     private poller?: SingleFlightPoller;
