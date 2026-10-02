@@ -4,7 +4,7 @@ import { buildToolDefs, filterTools } from "../src/mcp/tools";
 import { createMcpServer, BridgeClient } from "../src/mcp/server";
 
 /** 假桥客户端：send/sendFast 返回固定 id，waitReceipt 回放队列 */
-function fakeClient(receipts: Record<string, unknown>[] = []): BridgeClient & { sent: { via: string; op: string; args: Record<string, unknown> }[] } {
+function fakeClient(receipts: Record<string, unknown>[] = [], opts: { execImpl?: (op: string) => Promise<Record<string, unknown>> } = {}): BridgeClient & { sent: { via: string; op: string; args: Record<string, unknown> }[] } {
     const sent: { via: string; op: string; args: Record<string, unknown> }[] = [];
     return {
         sent,
@@ -17,6 +17,10 @@ function fakeClient(receipts: Record<string, unknown>[] = []): BridgeClient & { 
             sent.push({ via: "fast", op, args });
             return "id-1";
         },
+        callKernelRoute: opts.execImpl ? async (op) => {
+            sent.push({ via: "kernel", op, args: {} });
+            return await opts.execImpl!(op);
+        } : undefined,
         waitReceipt: async (id, _max, op) => receipts.shift() ?? { id, op, status: "timeout", message: "无回执" },
     };
 }
@@ -114,5 +118,28 @@ describe("MCP stdio 服务器核心", () => {
         expect(await s.handleRequest({ jsonrpc: "2.0", method: "notifications/initialized" })).toBeNull();
         const e2 = await s.handleRequest({ jsonrpc: "2.0", id: 6 } as never);
         expect((e2!.error as { code: number }).code).toBe(-32600);
+    });
+
+    it("KERNEL_OPS 优先内核同步路由；路由失败回退快路径（R49）", async () => {
+        // registry.list ∈ KERNEL_OPS：exec 可用 → 走 kernel 通道，同步回执，不落 NDJSON
+        const ok = fakeClient([], { execImpl: async () => ({ status: "recorded", data: { channel: "kernel-sync" }, message: "内核诊断（脱敏）" }) });
+        const s = createMcpServer(ok, { writeEnabled: false, version: "0.6.5" });
+        const r = await s.handleRequest({ jsonrpc: "2.0", id: 7, method: "tools/call", params: { name: "registry.list", arguments: {} } });
+        expect(ok.sent[0].via).toBe("kernel");
+        expect((r!.result as { isError: boolean }).isError).toBe(false);
+
+        // exec 抛错（路由 404 等）→ 回退 fast（registry.list 只读）
+        const fallback = fakeClient([{ id: "id-1", status: "recorded" }], { execImpl: async () => { throw new Error("内核路由 HTTP 404"); } });
+        const s2 = createMcpServer(fallback, { writeEnabled: false, version: "0.6.5" });
+        const r2 = await s2.handleRequest({ jsonrpc: "2.0", id: 8, method: "tools/call", params: { name: "registry.list", arguments: {} } });
+        expect(fallback.sent.map((x) => x.via)).toEqual(["kernel", "fast"]);
+        expect((r2!.result as { isError: boolean }).isError).toBe(false);
+
+        // 无 callKernelRoute 的客户端（旧形态）→ 直接 fast，不受影响
+        const legacy = fakeClient([{ id: "id-1", status: "recorded" }]);
+        delete (legacy as Partial<BridgeClient>).callKernelRoute;
+        const s3 = createMcpServer(legacy, { writeEnabled: false, version: "0.6.5" });
+        await s3.handleRequest({ jsonrpc: "2.0", id: 9, method: "tools/call", params: { name: "registry.list", arguments: {} } });
+        expect(legacy.sent[0].via).toBe("fast");
     });
 });

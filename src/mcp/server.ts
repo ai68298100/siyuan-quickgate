@@ -5,10 +5,13 @@
  */
 import { buildToolDefs, filterTools } from "./tools.ts";
 import type { McpToolDef } from "./tools.ts";
+import { KERNEL_OPS } from "../ops.ts";
 
 export interface BridgeClient {
     send(op: string, args: Record<string, unknown>): Promise<string>;
     sendFast?(op: string, args: Record<string, unknown>): Promise<string>;
+    /** 内核同步路由（KERNEL_OPS 专属）；失败时调用方回退慢路径 */
+    callKernelRoute?(op: string, args: Record<string, unknown>): Promise<Record<string, unknown>>;
     waitReceipt(id: string, maxMs?: number, op?: string): Promise<Record<string, unknown>>;
     readonly maxWaitMs: number;
 }
@@ -72,6 +75,15 @@ export function createMcpServer(client: BridgeClient, opts: { writeEnabled: bool
                     return result(id, `工具不可用：${name}${known ? "（写操作需 LV_MCP_WRITE=1 显式开启）" : "（未知工具）"}`, true);
                 }
                 try {
+                    const kernelOp = (KERNEL_OPS as readonly string[]).includes(name) && typeof client.callKernelRoute === "function";
+                    if (kernelOp && client.callKernelRoute) {
+                        // 内核同步路由（~100ms；桥开关默认关也可用）；失败回退下方慢路径
+                        try {
+                            const receipt = await client.callKernelRoute(name, args);
+                            const status = String(receipt.status ?? "");
+                            return result(id, JSON.stringify(receipt, null, 2), !OK_STATUSES.has(status));
+                        } catch { /* 路由未放行/插件缺席 → 回退（只读走 fast，其余 NDJSON） */ }
+                    }
                     const useFast = def.annotations.readOnlyHint && typeof client.sendFast === "function";
                     const sent = useFast && client.sendFast ? await client.sendFast(name, args) : await client.send(name, args);
                     const waitMs = name === "commands.run" || name === "workflow.execute" ? 35000 : client.maxWaitMs;

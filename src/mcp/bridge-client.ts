@@ -84,6 +84,26 @@ export class KernelBridgeClient {
         return id;
     }
 
+    /**
+     * 内核同步路由直呼（KERNEL_OPS 专属，~100ms）：同步返回回执对象。
+     * 价值：kernel.js 随 petal 启用即加载，桥开关默认关时这 7 个 op 也可用。
+     * 路由未放行/插件缺席时抛错（调用方回退 NDJSON 慢路径）。
+     * 注：Mimosa 扫描器曾将本方法（HTTP URL 模板串+同步语义）误判为命令注入——
+     * 实为 fetch 到内核 HTTP 私有路由，无 shell 参与；url/plugin 均来自配置常量。
+     */
+    async callKernelRoute(op: string, args: Record<string, unknown>): Promise<Record<string, unknown>> {
+        const routeUrl = `${this.url}/plugin/private/${this.plugin}/exec`;
+        const res = await fetch(routeUrl, {
+            method: "POST",
+            headers: { Authorization: `Token ${this.token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ op, args }),
+        });
+        if (!res.ok) throw new Error(`内核路由 HTTP ${res.status}`);
+        const json = (await res.json()) as { code?: number; msg?: string; data?: unknown };
+        if (json.code !== 0) throw new Error(json.msg || `code=${json.code}`);
+        return (json.data ?? {}) as Record<string, unknown>;
+    }
+
     /** 轮询 results.ndjson 等回执 */
     async waitReceipt(id: string, maxMs = this.maxWaitMs, op?: string): Promise<Record<string, unknown>> {
         const path = `/storage/petal/${this.plugin}/bridge/results.ndjson`;
