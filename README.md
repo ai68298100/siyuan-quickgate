@@ -49,7 +49,7 @@ Clients included in [`tools/`](./tools): zero-dependency node CLI (`ping/send/ru
 
 **v0.1.0** bridge core + adapters + settings + unit tests → **v0.2.0** ecosystem hub (manifest/registry/diagnostics) → **v0.3.0** reliability hardening (template.new, 15s cap, device name, diag package) → **v0.4.x** events/workflow + check-in host-event bridging → **v0.5.x** experimental kernel sync route, event-subscription channel fix (window CustomEvent), observability stats, manifest calibrated against remote mains, event-deleted materialization → **v0.6.x** deployed live on a real workspace (3.8.5) and enabled: config.discover calibrated against the live kernel (dailyNoteSavePath camelCase + non-default-template-first), v1.5 broadcast fast path (SSE millisecond-level command channel, default off, reservation semantics against dual-channel replays), frontend assumptions statically verified against the installed app bundle (editor.context docId fix, registry customHotkey effective key).
 
-Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0011).
+Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 
 ## Development
 

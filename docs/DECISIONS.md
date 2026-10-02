@@ -46,3 +46,19 @@ workflow.plan 生命周期 5 分钟 + 一次性语义。持久化的收益（重
 ## D-0011 · analytics-updated 不订阅物化（R7，2026-10-02）
 
 打卡 8 个契约事件中，快门订阅 event-recorded 与 event-deleted；**analytics-updated 不订阅**：它在每次记录/统计重算后高频触发，而 events.ndjson 是 200 行滚动窗口——高频心跳会把有业务价值的 recorded/deleted 行挤掉。数据变化信号由消费方轮询（events.pull / summary.read）承担。重评触发：出现明确的实时统计消费方（如雷切 home-widget 需要推送刷新）时，考虑独立载体文件或消费方侧去重后再接。item-* / suggestion-* 事件保持 observed（暂无消费场景，接入前先立 use case）。
+
+## D-0012 · v1.5 广播快路径：与 NDJSON 共用幂等台账，预留语义（R20-R21，2026-10-02）
+
+新增第三通道（SSE 订阅 + postMessage，毫秒级）时，防双执行不另建机制：广播与 NDJSON 共用 processed-ids 台账，**同步 check+mark 后才 await 执行**（先到者执行、后到者按 id 跳过）。`broadcastEnabled` 独立开关默认关（新外部面红线同 D-0008 精神）；断流指数退避 1s→30s。回执照常写 results.ndjson——消费方对通道无感。
+
+## D-0013 · MCP 经独立 stdio 代理，不经插件内核（R39-R50，2026-10-02）
+
+AI 客户端接入走 `src/mcp/` 独立代理进程（MCP stdio ↔ 内核 HTTP），**不在插件内实现 MCP server**：①Claude Desktop 主流 stdio，内核内实现受制于思源 HTTP 语义；②零插件改动、独立发版；③通道复用既有三通道（KERNEL_OPS→exec→只读 fast→NDJSON 回退链）。安全：**默认只暴露 13 个只读工具**，写工具需 `LV_MCP_WRITE=1`；快门侧防线（确认/黑名单/审计/允许名单）全共用——MCP 只是消费通道，不新增特权。与思源 3.8.6+ 内置 MCP server 并存：内置覆盖内核 CRUD，本代理独有小驴生态面。
+
+## D-0014 · 前端假设用"本机安装 bundle 静态核实"（R26 方法论，2026-10-02）
+
+前端 DOM/宿主 API 假设的实证，**不等 DevTools**：直接 grep 本机安装编译产物（`D:\biji\SiYuan\resources\stage\build\app\*.js`，即实际运行代码）。bug#7（data-doc-id 不存在）与 spike①②⑦ 即此法产出；证据等级高于远端源码（版本一致），低于真机运行时（spike 现场仍保留可选复核）。适用边界：DOM 结构、宿主挂载行为；不适用于交互时序类问题（④多窗口/⑪事件现场仍需真窗口）。
+
+## D-0015 · 审计日志跨重启持久（R47 bug#8，2026-10-02）
+
+audit.json 此前只写不读（重启即丢历史且被覆写）——修正为 onload 加载恢复（逐条形状校验/auditMax 截尾）。原则：**凡是"持久化"命名的数据必须真的跨生命周期可读**；写入无读取路径的持久化是半实现。
