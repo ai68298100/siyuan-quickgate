@@ -1819,3 +1819,5 @@
 - [x] 【R112·兜底循环 A/B/C】上游零漂移（思源 3.8.6 仍最新正式版/三插件无新版）；npm run accept 99/99 + 直接冒烟 6/6 全绿（npm run 子进程的 5/6 为 PATH 环境差异非代码问题）；两仓库干净。稳定态持续。
 
 - [x] 【R113·MCP NDJSON 慢路径真机验证】四 op 经真实前端消费返回真实数据：daily.status（docId=null 正确——今日日记未创建）/config.discover（diaryNotebookId=DailyNote 正确命中）/events.list（白名单返回）/registry.list（七插件清单返回）——MCP 真 e2e 全链完成（三通道+四 op 全真实数据）
+
+- [x] 【R114·MCP 真 e2e 真实数据验证】MCP 代理返回真实工作空间数据（只读 ops）：checkin.items 返回 5 个打卡项目（写日记/每日计划/早起/拉伸/喝水）、contacts.search 返回 40 人脉、commands.list 返回 15 插件命令注册表、registry.list 返回七插件（3 stable+3 design+1 unlocated）、diagnostics.report 返回脱敏诊断——MCP 全链真实数据验证完成，系统从基础设施验证升级为真实数据流通确认
