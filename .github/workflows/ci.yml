@@ -21,6 +21,10 @@ jobs:
       - run: corepack pnpm install --no-frozen-lockfile
       - run: corepack pnpm run check
       - run: corepack pnpm test
+      # MCP 协议冒烟（stdio 会话，无需内核）
+      - run: corepack pnpm run smoke:mcp
+      # MCP bundle 构建（esbuild JS API，pnpm 布局探测）
+      - run: corepack pnpm run build:mcp
       - run: corepack pnpm run build
       - uses: actions/upload-artifact@v4
         with:
