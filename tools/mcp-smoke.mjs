@@ -14,7 +14,7 @@ const check = (name, ok, detail = "") => {
 
 function session(writeMode) {
     return new Promise((resolve, reject) => {
-        const env = { ...process.env, LV_MCP_WRITE: writeMode ? "1" : "0" };
+        const env = { ...process.env, LV_MCP_WRITE: writeMode ? "1" : "0", SIYUAN_TOKEN: process.env.SIYUAN_TOKEN || "ci-dummy-token" };
         // SMOKE_TARGET 可指向打包产物（如 dist-mcp/mcp-quickgate.js）验证 bundle
         const target = process.env.SMOKE_TARGET || "src/mcp/main.ts";
         const child = spawn(process.execPath, [target], { env, stdio: ["pipe", "pipe", "pipe"] });
@@ -74,12 +74,17 @@ try {
     const rw = await session(true);
     const list2 = await rw.call("tools/list", {});
     check("LV_MCP_WRITE=1 时 23 工具全暴露", (list2.result?.tools ?? []).length === 23, `实际 ${(list2.result?.tools ?? []).length}`);
-    // read-only op 走广播快路径：有消费者 → recorded（快路径）；无消费者 → 15s 诚实超时（unknown 语义）
-    const ping = await rw.call("tools/call", { name: "bridge.ping", arguments: {} });
-    const text = ping.result?.content?.[0]?.text ?? "";
-    const consumed = ping.result?.isError === false && text.includes('"recorded"');
-    const honestTimeout = ping.result?.isError === true && text.includes('"timeout"');
-    check("bridge.ping 真实回执（recorded 或诚实超时）", consumed || honestTimeout, consumed ? "recorded（前端在线）" : honestTimeout ? "15s timeout（无消费者）" : text.slice(0, 60));
+    if (process.env.SMOKE_SKIP_LIVE === "1") {
+        // CI 模式：无内核，跳过 live 回执断言（协议层已由前五断言覆盖）
+        console.log("  (SMOKE_SKIP_LIVE=1：跳过 bridge.ping 真实回执断言)");
+    } else {
+        // read-only op 走广播快路径：有消费者 → recorded（快路径）；无消费者 → 15s 诚实超时（unknown 语义）
+        const ping = await rw.call("tools/call", { name: "bridge.ping", arguments: {} });
+        const text = ping.result?.content?.[0]?.text ?? "";
+        const consumed = ping.result?.isError === false && text.includes('"recorded"');
+        const honestTimeout = ping.result?.isError === true && text.includes('"timeout"');
+        check("bridge.ping 真实回执（recorded 或诚实超时）", consumed || honestTimeout, consumed ? "recorded（前端在线）" : honestTimeout ? "15s timeout（无消费者）" : text.slice(0, 60));
+    }
     rw.end();
 } catch (e) {
     check("会话异常", false, e.message);

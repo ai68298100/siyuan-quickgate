@@ -23,6 +23,8 @@ jobs:
       - run: corepack pnpm test
       # MCP 协议冒烟（stdio 会话，无需内核）
       - run: corepack pnpm run smoke:mcp
+        env:
+          SMOKE_SKIP_LIVE: "1"
       # MCP bundle 构建（esbuild JS API，pnpm 布局探测）
       - run: corepack pnpm run build:mcp
       - run: corepack pnpm run build
