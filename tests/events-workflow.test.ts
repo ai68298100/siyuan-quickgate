@@ -50,7 +50,8 @@ describe("workflow plan/execute", () => {
 
     it("execute：总确认拒绝 → denied", async () => {
         const plan = makePlan([{ op: "doc.open", args: { id: "d" } }], { planId: "wf-3", now, whitelistOp: () => true });
-        const r = await executePlan(plan.kind === "plan" ? plan.plan : undefined, { confirmAll: async () => false, runStep: async () => ({ status: "recorded", data: null, message: "ok" }) });
+        // 固定时钟：此前用真实 Date.now()，现实时间越过 expiresAt（2026-10-02T00:05Z）时本测试误爆为 expired（R47 修复）
+        const r = await executePlan(plan.kind === "plan" ? plan.plan : undefined, { confirmAll: async () => false, runStep: async () => ({ status: "recorded", data: null, message: "ok" }), now: () => now });
         expect(r.kind).toBe("denied");
     });
 
@@ -62,6 +63,7 @@ describe("workflow plan/execute", () => {
         const r = await executePlan(plan.kind === "plan" ? plan.plan : undefined, {
             confirmAll: async () => true,
             runStep: async (s) => (s.args.id ? { status: "recorded", data: null, message: "ok" } : { status: "rejected", data: null, message: "id 缺失" }),
+            now: () => now, // 同上：固定时钟
         });
         expect(r.kind).toBe("done");
         if (r.kind === "done") {

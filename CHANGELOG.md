@@ -2,6 +2,15 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.6.6 · 2026-10-02（审计历史跨重启恢复 + 测试定时炸弹拆除）
+
+### Fixed
+- **bug#8：审计历史跨重启静默销毁**——audit.json 一直"只写不读"：onload 从不加载历史，且重启后首次 flushAudit 会用新条目**整个覆写**上次历史。现在 onload 经 store.loadAudit 恢复（逐条形状校验、坏条目跳过、按 auditMax 截尾）
+- **测试定时炸弹**：workflow 两用例（denied/失败停止）用真实 Date.now() 对固定 expiresAt（2026-10-02T00:05Z）断言——现实时间越过该点时集体误爆为 expired；改传固定时钟 now:()=>now，从此确定性
+
+### Verified
+- 存量 bridge-settings.json（v0.5.9 形态，缺 broadcastEnabled）经 normalizeSettings 逐字段校验：缺失字段回落默认（广播=关，红线默认）——重启升级兼容性实证无忧
+
 ## Unreleased（MCP stdio 代理——R39 评估稿落地，两个增量）
 
 ### Added

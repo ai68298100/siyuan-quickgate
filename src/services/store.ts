@@ -2,7 +2,7 @@
  * 持久化处理台账（阻断项4）：处理过的命令 id 跨重启保留；
  * 队列压缩以它为准，外部并发写回造成的"行复活"按 id 跳过。
  */
-import { ProcessedStore, DEFAULT_SETTINGS, QuickGateSettings } from "../types/bridge";
+import { ProcessedStore, DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "../types/bridge";
 
 export const PROCESSED_CAP = 500;
 const PROCESSED_FILE = "bridge-state.json";
@@ -55,6 +55,24 @@ export class BridgeStore {
     async loadAll(): Promise<void> {
         this.processed = normalizeProcessed(await this.io.load(PROCESSED_FILE));
         this.settings = normalizeSettings(await this.io.load(SETTINGS_FILE));
+    }
+
+    /**
+     * 审计历史加载（R47 修复候选 bug#8：此前只写不读——重启后内存清空，
+     * 且首次 flushAudit 会用新条目整个覆写 audit.json，静默销毁上次历史）。
+     * 逐条形状校验；坏条目跳过；按 auditMax 截尾。
+     */
+    async loadAudit(auditMax: number): Promise<AuditEntry[]> {
+        const raw = (await this.io.load("audit.json")) as { entries?: unknown } | null;
+        const entries = Array.isArray(raw?.entries) ? raw!.entries : [];
+        const out: AuditEntry[] = [];
+        for (const e of entries) {
+            if (!e || typeof e !== "object") continue;
+            const o = e as Record<string, unknown>;
+            if (typeof o.time !== "string" || typeof o.plugin !== "string" || typeof o.command !== "string" || typeof o.status !== "string" || typeof o.elapsedMs !== "number") continue;
+            out.push({ time: o.time, plugin: o.plugin, command: o.command, status: o.status, elapsedMs: o.elapsedMs });
+        }
+        return out.slice(-Math.max(0, auditMax));
     }
 
     async saveProcessed(): Promise<void> {

@@ -18,7 +18,7 @@ import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.6.5";
+const PLUGIN_VERSION = "0.6.6";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径） */
@@ -49,6 +49,7 @@ export default class QuickGatePlugin extends Plugin {
         this.isMobile = getFrontend() === "mobile" || getFrontend() === "browser-mobile";
         await this.store.loadAll();
         this.settings = this.store.settings;
+        this.auditLog = await this.store.loadAudit(this.settings.auditMax); // R47 修复：恢复上次审计历史（此前只写不读，重启即静默销毁）
         await this.ensureDeviceName();
 
         this.addCommand({

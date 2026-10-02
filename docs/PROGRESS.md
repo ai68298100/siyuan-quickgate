@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-02 · v0.6.6（审计历史跨重启恢复 + 测试定时炸弹拆除）
+
+- bug#8：audit.json 只写不读 → onload loadAudit 恢复（逐条校验+截尾），消除重启后历史静默销毁
+- workflow 两用例补固定时钟（现实时间越过测试内硬编码 expiresAt 时误爆）
+- 存量 settings 兼容性实证（缺字段回落默认，广播=关）；97 单测全绿；发版同轮 CHANGELOG+PROGRESS
+
 ## 2026-10-02 · MCP stdio 代理两个增量（Unreleased，随仓库分发）
 
 - 第一增量：src/mcp/ 四件（tools/client/server/main）；23 op→tools 契约映射（只读13/写10）；默认只读+LV_MCP_WRITE 门控；8 单测+裸 Node 烟测（握手/写拒绝）
