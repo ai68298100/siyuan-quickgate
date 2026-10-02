@@ -1821,3 +1821,5 @@
 - [x] 【R113·MCP NDJSON 慢路径真机验证】四 op 经真实前端消费返回真实数据：daily.status（docId=null 正确——今日日记未创建）/config.discover（diaryNotebookId=DailyNote 正确命中）/events.list（白名单返回）/registry.list（七插件清单返回）——MCP 真 e2e 全链完成（三通道+四 op 全真实数据）
 
 - [x] 【R114·MCP 真 e2e 真实数据验证】MCP 代理返回真实工作空间数据（只读 ops）：checkin.items 返回 5 个打卡项目（写日记/每日计划/早起/拉伸/喝水）、contacts.search 返回 40 人脉、commands.list 返回 15 插件命令注册表、registry.list 返回七插件（3 stable+3 design+1 unlocated）、diagnostics.report 返回脱敏诊断——MCP 全链真实数据验证完成，系统从基础设施验证升级为真实数据流通确认
+
+- [x] 【R115·MCP 安全门+NDJSON 真机确认】workflow.plan 被安全门正确拦截（LV_MCP_WRITE=1 前不暴露——设计如此）；events.pull 经 NDJSON 真实前端消费返回 recorded（0 事件，正确——用户未操作打卡）。MCP 安全门+NDJSON 通道真机确认工作。
