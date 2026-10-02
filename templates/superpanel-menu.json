@@ -1,0 +1,109 @@
+{
+  "version": 2,
+  "remark": "思源超级面板初始菜单配置（结构规范见 docs/05-超级面板方案.md §4-§5；这是裁剪模板，完整菜单项按 TODO 逐步补齐）。字段：label=显示文本；profile=all|global|siyuan；t=通道(http|url|sql-url|bridge|cmd|act)；v=载荷；thenMenu=把响应数组转二级菜单(bookmarks|tags|recentBlocks)；then=统一使用 {t,v} 结构；占位符字典见 05 §5.1：{日记笔记本ID}{收集箱文档ID}{今天}{时间}{日期时间}{选中文本}{来源窗口}{clipboard}{选中标签}{选中书签块ID}{选中块ID}；{ask:提示语}表示执行前弹输入框（结果在 {ask值}）。groups[i].gate=可用性门（quickgate-or-bridge=需小驴快门或任一插件桥在线），不可用时该组折叠为提示项。v2（R11）：文档组加分拣收集箱（SY·分拣收集箱，Drafts 分拣闭环）；小驴组加打卡概览（checkin.summary）。",
+  "groups": [
+    {
+      "label": "📝 捕获与日记",
+      "profile": "all",
+      "items": [
+        {
+          "label": "记一笔到今日日记",
+          "t": "http",
+          "v": {
+            "endpoint": "/api/block/appendDailyNoteBlock",
+            "ask": "记点什么？",
+            "body": { "notebook": "{日记笔记本ID}", "dataType": "markdown", "data": "- {时间} {ask值}" }
+          }
+        },
+        {
+          "label": "打开今日日记",
+          "t": "sql-url",
+          "v": { "stmt": "SELECT root_id FROM blocks WHERE type='d' AND content LIKE '%{今天}%' LIMIT 1" }
+        },
+        {
+          "label": "划词摘录到收集箱",
+          "t": "http",
+          "v": {
+            "endpoint": "/api/block/appendBlock",
+            "useSelection": true,
+            "body": { "parentID": "{收集箱文档ID}", "dataType": "markdown", "data": "> {选中文本}\n\n-- 摘自 {来源窗口} · {日期时间}" }
+          }
+        },
+        { "label": "汇总近期待办（SY-12）", "t": "act", "v": { "actionName": "SY·汇总日记待办" } },
+        {
+          "label": "剪贴板图片入库",
+          "t": "act",
+          "v": { "actionName": "SY·剪贴板图片入库" }
+        }
+      ]
+    },
+    {
+      "label": "🔍 搜索与导航",
+      "profile": "all",
+      "items": [
+        { "label": "全文搜索…", "t": "act", "v": { "actionName": "SY·思源全局快查" } },
+        {
+          "label": "标签浏览",
+          "t": "http",
+          "v": {
+            "endpoint": "/api/search/searchTag",
+            "body": { "k": "" },
+            "thenMenu": "tags",
+          "then": { "t": "http", "v": { "endpoint": "/api/search/fullTextSearchBlock", "body": { "query": "#{选中标签}", "method": 0, "orderBy": 0, "types": { "document": true } } } }
+          }
+        },
+        {
+          "label": "书签",
+          "t": "http",
+          "v": {
+            "endpoint": "/api/bookmark/getBookmark",
+            "body": {},
+            "thenMenu": "bookmarks",
+            "then": { "t": "url", "v": "siyuan://blocks/{选中书签块ID}" }
+          }
+        }
+      ]
+    },
+    {
+      "label": "📄 文档",
+      "profile": "all",
+      "items": [
+        { "label": "新建文档（选笔记本）", "t": "act", "v": { "actionName": "SY·新建文档" } },
+        { "label": "打开收集箱", "t": "url", "v": "siyuan://blocks/{收集箱文档ID}" },
+        { "label": "分拣收集箱…", "t": "act", "v": { "actionName": "SY·分拣收集箱" } },
+        { "label": "最近改动", "t": "http", "v": { "endpoint": "/api/block/getRecentUpdatedBlocks", "body": {}, "thenMenu": "recentBlocks" } }
+      ]
+    },
+    {
+      "label": "🫏 小驴",
+      "profile": "all",
+      "gate": "quickgate-or-bridge",
+      "items": [
+        { "label": "一键打卡…", "t": "bridge", "gate": "checkin", "v": { "plugin": "siyuan-quickgate", "op": "checkin.items", "args": { "includeArchived": false, "limit": 50 }, "then": { "t": "userselect-record" } } },
+        { "label": "打卡概览（连击/今日）", "t": "bridge", "gate": "checkin", "v": { "plugin": "siyuan-quickgate", "op": "checkin.summary", "args": {}, "then": { "t": "notify-summary" } } },
+        { "label": "记一笔人脉互动…", "t": "act", "gate": "contacts", "v": { "actionName": "LV·记人脉互动" } },
+        {
+          "label": "雷切：打开切换器",
+          "t": "cmd",
+          "v": { "plugin": "siyuan-speed-switch", "command": "<雷切切换器命令ID>" }
+        },
+        {
+          "label": "全部插件命令…",
+          "t": "bridge",
+          "v": { "plugin": "siyuan-quickgate", "op": "commands.search", "args": { "keyword": "{ask:命令关键词}" }, "then": { "t": "userselect-run" } }
+        }
+      ]
+    },
+    {
+      "label": "⚙️ 系统",
+      "profile": "all",
+      "items": [
+        { "label": "诊断（SY·诊断）", "t": "act", "v": { "actionName": "SY·诊断" } },
+        { "label": "立即同步", "t": "http", "v": { "endpoint": "/api/sync/performSync", "body": { "mobileSwitch": false, "upload": true } } },
+        { "label": "数据体检（SY-13）", "t": "act", "v": { "actionName": "SY·数据体检" } },
+        { "label": "思源设置", "t": "bridge", "gate": "quickgate", "v": { "plugin": "siyuan-quickgate", "op": "setting.open", "args": {} } },
+        { "label": "面板设置…", "t": "act", "v": { "actionName": "SY·面板设置" } }
+      ]
+    }
+  ]
+}
