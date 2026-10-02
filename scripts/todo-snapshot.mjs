@@ -50,6 +50,32 @@ function classifyEvidence(text, section) {
 const TYPE_WORDS = ["评估", "实测", "spike", "开发", "契约", "发布", "维护", "实现", "自动化测试", "用户研究", "事实核对", "新", "工具", "账本快照", "规范主线", "重复映射", "状态词典", "类型标签", "证据等级", "依赖字段", "历史归档"];
 const STATUS_SUFFIX = /等实测|等用户|等思源|等内核重启|需思源|需Quicker|等模型|门槛后|暂缓|已一键化/;
 
+/* 状态词典（R123-G0·状态词典：统一语义与归一化目标） */
+const STATUS_LEXICON = {
+    done: { meaning: "已完成且有证据", terminal: true },
+    pending: { meaning: "未完成", terminal: false },
+    "等实测": { meaning: "等用户真机验证（用户侧阻塞）", blockedBy: "user" },
+    "等用户": { meaning: "等用户输入/决策（用户侧阻塞）", blockedBy: "user" },
+    "等思源": { meaning: "等思源侧能力/行为确认（上游阻塞）", blockedBy: "upstream" },
+    "需思源": { meaning: "需思源环境（环境阻塞）", blockedBy: "environment" },
+    "需Quicker": { meaning: "需 Quicker 编辑器（用户侧阻塞）", blockedBy: "user" },
+    "等内核重启": { meaning: "等内核重启（环境阻塞，2026-10-02 已解除）", blockedBy: "resolved" },
+    "等模型": { meaning: "等模型服务可用（上游阻塞）", blockedBy: "upstream" },
+    "门槛后": { meaning: "发布门槛后（主动延后）", blockedBy: "deferred" },
+    "暂缓": { meaning: "主动延后（主动延后）", blockedBy: "deferred" },
+    "已一键化": { meaning: "已封装为一键命令（等用户执行）", blockedBy: "user" },
+};
+
+function normalizeStatus(parsedStatus, done) {
+    if (done) return { status: "done", blockedBy: null };
+    for (const [key, meta] of Object.entries(STATUS_LEXICON)) {
+        if (parsedStatus && parsedStatus.includes(key)) {
+            return { status: key, blockedBy: meta.blockedBy ?? null };
+        }
+    }
+    return { status: "pending", blockedBy: null };
+}
+
 function parseTag(tag) {
     const out = { round: null, priority: null, topic: null, type: null, status: null };
     if (!tag) return out;
@@ -70,7 +96,7 @@ function parseTag(tag) {
     return out;
 }
 
-function parseEntry(line, sectionPath, sectionRound) {
+function parseEntry(line, sectionPath, sectionRound, sectionBlocked) {
     const m = line.match(/^- \[( |x)\][ \t]?(.*)\r?$/);
     if (!m) return null;
     const done = m[1] === "x";
@@ -79,6 +105,21 @@ function parseEntry(line, sectionPath, sectionRound) {
     const tm = rest.match(/^【([^】]+)】\s*(.*)$/);
     if (tm) { tag = tm[1]; rest = tm[2].trim(); }
     const parsed = parseTag(tag);
+    // 状态后缀可能在行首 tag，也可能在文本尾部（...【等实测】）——扫全部【】段
+    const allTags = [tag, ...([...(sectionPath + " " + m[2]).matchAll(/【([^】]+)】/g)].map((x) => x[1]))].filter(Boolean);
+    let parsedStatus = parsed.status;
+    if (!parsedStatus) {
+        for (const t of allTags) {
+            if (STATUS_SUFFIX.test(t)) { parsedStatus = t; break; }
+        }
+    }
+    // 条目自身无状态标记时，继承最近一级带阻塞标记的节
+    if (!parsedStatus) {
+        for (let l = sectionBlocked.length - 1; l >= 0; l--) {
+            if (sectionBlocked[l]) { parsedStatus = sectionBlocked[l]; break; }
+        }
+    }
+    const norm = normalizeStatus(parsedStatus, done);
     return {
         id: null,
         line: null,
@@ -87,7 +128,8 @@ function parseEntry(line, sectionPath, sectionRound) {
         priority: parsed.priority,
         topic: parsed.topic,
         type: parsed.type ?? "unknown",
-        status: done ? "done" : (parsed.status ?? "pending"),
+        status: norm.status,
+        blockedBy: norm.blockedBy,
         text: rest || (tag ?? ""),
         mainline: null,
         evidence: null,
@@ -104,6 +146,7 @@ function main() {
     const lines = raw.split(/\r?\n/);
     const entries = [];
     const sectionStack = [];
+    const sectionBlocked = [];
     let dupCounter = 0;
 
     lines.forEach((line, i) => {
@@ -112,11 +155,14 @@ function main() {
             const level = h[1].length;
             sectionStack.length = level - 1;
             sectionStack[level - 1] = h[2].replace(/【.*$/, "").trim();
+            // 节级阻塞标记（如「## 1. 实测与环境验证【等实测：全部条目待用户…】」）——其下条目继承
+            const sb = h[2].match(/【([^】]*(?:等实测|等用户|等思源|需思源|需Quicker|暂缓|门槛后)[^】]*)】/);
+            sectionBlocked[level - 1] = sb ? sb[1] : null;
             return;
         }
         const sectionPath = sectionStack.filter(Boolean).join(" / ");
         const sectionRound = (sectionPath.match(/R\d{2,3}/) || [])[0] ?? null;
-        const e = parseEntry(line, sectionPath, sectionRound);
+        const e = parseEntry(line, sectionPath, sectionRound, sectionBlocked);
         if (!e) return;
         const lineNo = i + 1;
         e.id = `TODO-L${lineNo}`;
@@ -150,11 +196,17 @@ function main() {
     const byEvidence = {};
     for (const e of entries) byEvidence[e.evidence] = (byEvidence[e.evidence] ?? 0) + 1;
     const byStatus = { done: entries.filter((e) => e.status === "done").length, pending: entries.filter((e) => e.status === "pending").length };
+    const byBlocked = {};
+    for (const e of entries) {
+        if (e.status === "done") continue;
+        byBlocked[e.blockedBy ?? "dev"] = (byBlocked[e.blockedBy ?? "dev"] ?? 0) + 1;
+    }
 
     const snapshot = {
         generatedAt: new Date().toISOString(),
         source: TODO_PATH,
-        counts: { total: entries.length, checkboxes: totalCheckboxes, byStatus, byMainline, byEvidence },
+        counts: { total: entries.length, checkboxes: totalCheckboxes, byStatus, byMainline, byEvidence, byBlocked },
+        statusLexicon: STATUS_LEXICON,
         acceptance: { r123_a_countMatch: entries.length === totalCheckboxes, r123_b_noOrphans: orphans.length === 0, issues },
         entries,
     };
@@ -162,10 +214,31 @@ function main() {
     if (process.argv.includes("--write")) {
         mkdirSync("snapshot", { recursive: true });
         writeFileSync(OUT_PATH, JSON.stringify(snapshot, null, 2) + "\n");
-        console.log(`已写入 ${OUT_PATH}`);
+        const bySection = {};
+        for (const e of entries) {
+            if (e.status === "done") continue;
+            const sec = e.section.split(" / ").slice(0, 2).join(" / ");
+            bySection[sec] = (bySection[sec] ?? 0) + 1;
+        }
+        const report = [
+            "# 账本治理简报（自动生成）", "",
+            `> 生成于 ${snapshot.generatedAt} · 来源 ${TODO_PATH} · 条目 ${entries.length}`,
+            "", "## 阻塞分布", "",
+            ...Object.entries(byBlocked).sort((a, b) => b[1] - a[1]).map(([k, v]) => `- ${k}: ${v}`),
+            "", "## 规范主线分布", "",
+            ...Object.entries(byMainline).sort((a, b) => b[1] - a[1]).map(([k, v]) => `- ${k}: ${v}`),
+            "", "## 证据等级分布", "",
+            ...Object.entries(byEvidence).sort((a, b) => b[1] - a[1]).map(([k, v]) => `- ${k}: ${v}`),
+            "", "## 未完成条目 Top 章节", "",
+            ...Object.entries(bySection).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, v]) => `- ${k}: ${v}`),
+            "",
+        ].join("\n");
+        writeFileSync("snapshot/report.md", report + "\n");
+        console.log(`已写入 snapshot/report.md`);
     }
 
     console.log(`条目 ${entries.length}/${totalCheckboxes}；状态 ${JSON.stringify(byStatus)}`);
+    console.log(`阻塞分布（未完成按 blockedBy） ${JSON.stringify(byBlocked)}`);
     console.log(`主线分布 ${JSON.stringify(byMainline)}`);
     console.log(`证据分布 ${JSON.stringify(byEvidence)}`);
     if (issues.length) {

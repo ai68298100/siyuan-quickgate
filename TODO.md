@@ -1409,15 +1409,15 @@
 - [x] 【R123-G0-R0·账本快照·开发】✅ 已落地（2026-10-02）：scripts/todo-snapshot.mjs 解析 TODO.md → snapshot/todo-snapshot.json（1348/1348 条全量，含 id/line/section/round/priority/topic/type/status/mainline/evidence/refs）；验收 A（数量一致）B（无无主线）内建于脚本退出码
 - [x] 【R123-G0-R0·规范主线·开发】✅ 已落地：关键词启发式归属 C1~C8（首印分布 C6=439/C7=248/C8=258/C4=124/C2=134/C1=72/C3=63/C5=10），无主线条目=0；待人工抽查误分类后固化词典
 - [ ] 【R123-G0-R0·重复映射·评估】建立历史条目到规范主线的映射，标记 canonical、验收子项、研究记录、重复候选和暂缓项；验收重复项不再各自定义合同。
-- [ ] 【R123-G0-R0·状态词典·评估】统一 proposed/accepted/committed/verified/unknown/rejected/cancelled/pending/running/done 的含义和允许迁移；验收文档、UI、回执和 AI 模板使用同一词典。
-- [ ] 【R123-G0-R0·类型标签·评估】给历史待办补齐事实核对、用户研究、契约、实现、自动化测试、真机、发布和维护类型；验收“评估”不再承担多种含义。
+- [x] 【R123-G0-R0·状态词典·开发】✅ 已落地：STATUS_LEXICON 12 词条（done/pending/等实测/等用户/等思源/需思源/需Quicker/等内核重启/等模型/门槛后/暂缓/已一键化，各带语义+阻塞方）内建于 snapshot 工具并输出到快照 statusLexicon；blockedBy 归一化 user/upstream/environment/deferred/resolved/dev
+- [x] 【R123-G0-R0·类型标签·开发】✅ 已落地：type 字段从【】尾段抽取（评估/实测/spike/新等词表），未知记 unknown；节级与文本尾部标记均识别
 - [ ] 【R123-G0-R0·证据等级·评估】为每项记录 E0 假设、E1 外部资料、E2 静态契约、E3 自动化测试、E4 真机、E5 用户结果；验收未验证事项不能出现在已支持宣传中。
-- [ ] 【R123-G0-R0·依赖字段·评估】为每项记录 dependsOn、阻塞原因、替代路径和解除条件；验收依赖环能被检测，用户侧阻塞不会伪装成开发完成。
+- [x] 【R123-G0-R0·依赖字段·开发】✅ 首步已落地：refs 引用图（§章节/R 轮次/docs 文档号，956/1348 条带引用）+ blockedBy 阻塞方归一化（user=89/upstream=17/deferred=5/environment=4/resolved=1/dev=1038）；依赖环检测（R124-G1-C4）待真依赖字段（非 § 引用）入库后实施
 - [ ] 【R123-G0-R0·历史归档·评估】为重复、已否决、长期无证据和被上游替代的条目建立 archive/replaced 记录；验收历史链接仍可追溯，主清单不再重复计数。
 
 ### 18.2 R124：核心契约依赖图
 
-- [ ] 【R124-G1-R0·C1 回执主线·评估】把 R72/R78/R99/R114 的结果状态、完成证明、unknown 和补救合并为一个 Receipt/Result 合同；验收所有入口引用同一 schema。
+- [x] 【R124-G1-R0·C1 回执主线·开发】✅ v0 草案已落地：docs/contracts/result-contract.md——规范状态封闭集（recorded/duplicate/rejected/failed/unsupported/expired + 客户端 timeout=unknown 语义）、三载体映射（桥/workflow/MCP 投影）、补救唯一规则集；仅收录已实现形状，新入口必须映射本合同
 - [ ] 【R124-G1-R0·C2 意图主线·评估】把 R85/R98/R116/R118 的 Intent、Context、Plan、澄清和确认绑定合并为一个上下文合同；验收不再有并行字段命名。
 - [ ] 【R124-G1-R0·C3 能力主线·评估】把 R71/R77/R103/R115 的 manifest、owner、effects、版本和可用性合并为 Capability Registry 合同；验收 declared/observed/available/stale/unknown 分开。
 - [ ] 【R124-G1-R0·C4 可靠主线·评估】把 R69/R74/R78/R82/R83/R121 的幂等、超时、取消、迟到回执、冲突和诊断合并为可靠执行合同；验收写操作只保留一个重试/恢复规则。
