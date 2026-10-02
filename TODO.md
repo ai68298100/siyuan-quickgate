@@ -1406,8 +1406,8 @@
 
 ### 18.1 R123：账本清洗与规范主线
 
-- [ ] 【R123-G0-R0·账本快照·评估】生成带条目 ID、章节、优先级、状态、类型、owner、依赖和最后复核日期的机器可读快照；验收快照与 TODO 数量一致。
-- [ ] 【R123-G0-R0·规范主线·评估】为每条未完成事项归属 C1 结果回执、C2 意图上下文、C3 能力权限、C4 可靠恢复、C5 首个闭环、C6 AI、C7 Quicker、C8 扩展之一；验收不存在无主线条目。
+- [x] 【R123-G0-R0·账本快照·开发】✅ 已落地（2026-10-02）：scripts/todo-snapshot.mjs 解析 TODO.md → snapshot/todo-snapshot.json（1348/1348 条全量，含 id/line/section/round/priority/topic/type/status/mainline/evidence/refs）；验收 A（数量一致）B（无无主线）内建于脚本退出码
+- [x] 【R123-G0-R0·规范主线·开发】✅ 已落地：关键词启发式归属 C1~C8（首印分布 C6=439/C7=248/C8=258/C4=124/C2=134/C1=72/C3=63/C5=10），无主线条目=0；待人工抽查误分类后固化词典
 - [ ] 【R123-G0-R0·重复映射·评估】建立历史条目到规范主线的映射，标记 canonical、验收子项、研究记录、重复候选和暂缓项；验收重复项不再各自定义合同。
 - [ ] 【R123-G0-R0·状态词典·评估】统一 proposed/accepted/committed/verified/unknown/rejected/cancelled/pending/running/done 的含义和允许迁移；验收文档、UI、回执和 AI 模板使用同一词典。
 - [ ] 【R123-G0-R0·类型标签·评估】给历史待办补齐事实核对、用户研究、契约、实现、自动化测试、真机、发布和维护类型；验收“评估”不再承担多种含义。
