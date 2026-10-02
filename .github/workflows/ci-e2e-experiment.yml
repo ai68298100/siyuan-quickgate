@@ -42,9 +42,10 @@ jobs:
           done
           sleep 10
 
-      - name: 抓取内核重写的 Token（JWT，对照预置值）
+      - name: 抓取内核 conf 的 api.token（cat + 宿主解析，容器无 node）
         run: |
-          TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||'')" 2>/dev/null || true)
+          RAW=$(docker exec siyuan cat /siyuan/workspace/conf/conf.json 2>/dev/null || echo '{}')
+          TOKEN=$(printf '%s' "$RAW" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const c=JSON.parse(d);console.log((c.api&&c.api.token)||'')}catch{console.log('')}})")
           echo "内核 api.token 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）"
           echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
@@ -57,6 +58,8 @@ jobs:
           echo "对照：内核 API（非私有路由，需认证）——notebook/lsNotebooks："
           curl -s -X POST http://127.0.0.1:6806/api/notebook/lsNotebooks -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -w "\n[HTTP %{http_code}]" || true
           echo ""
+          echo "内核日志（最近 400 相关）："
+          docker logs siyuan --tail 25 2>&1 | grep -iE "400|bad request|quickgate|plugin" || true
           if [ "$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -d '{"op":"registry.list","args":{}}')" = "429" ]; then echo "  429 限速窗口——冷却 120s"; sleep 120; fi
 
       - name: 部署插件（dist/ → workspace plugins + 启用）
