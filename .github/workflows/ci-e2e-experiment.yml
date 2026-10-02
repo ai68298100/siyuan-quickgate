@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 env:
-  CI_API_TOKEN: ci-fixed-api-token
   CI_ACCESS_CODE: ci-access
 
 jobs:
@@ -17,7 +16,7 @@ jobs:
 
       - name: 预置 conf（api.token=固定值）到 volume
         run: |
-          docker run --rm -v siyuan-ws:/ws -e TK="$CI_API_TOKEN" alpine sh -c \
+          docker run --rm -v siyuan-ws:/ws -e TK="ci-fixed-api-token" alpine sh -c \
             'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"}}" "$TK" > /ws/conf/conf.json && cat /ws/conf/conf.json'
           echo "conf 已预置固定 api.token"
 
@@ -30,31 +29,31 @@ jobs:
             serve \
             --workspace=/siyuan/workspace/ --accessAuthCode=$CI_ACCESS_CODE
 
-      - name: 等待内核就绪 + 双假说 Token 诊断
+      - name: 等待内核就绪
         run: |
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806 || true)
             if [ "$code" = "200" ] || [ "$code" = "401" ] || [ "$code" = "302" ]; then
-              echo "内核响应 HTTP $code（第 $i 次探测）"; break
+              echo "内核响应 HTTP $code（第 $i 次探测）"
+              break
             fi
             sleep 2
           done
-          sleep 5
-          echo "假说 A：预置固定 token 调 version API"
-          echo "  GET  → HTTP $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806/api/system/version -H "Authorization: Token $CI_API_TOKEN")"
-          echo "  POST → HTTP $(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:6806/api/system/version -H "Authorization: Token $CI_API_TOKEN")"
-          echo "假说 B：无 token（对照）"
-          echo "  GET  → HTTP $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806/api/system/version)"
-          # 读回内核实际使用的 conf（是否被覆盖/重写）
-          echo "容器 conf 现值（api 节）："
-          docker exec siyuan sh -c 'cat /siyuan/workspace/conf/conf.json 2>/dev/null | head -c 300' || true
+          sleep 10
 
-      - name: 抓取内核生成的 Token（对照诊断）
+      - name: 抓取内核重写的 Token（JWT，对照预置值）
         run: |
           TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||'')" 2>/dev/null || true)
-          echo "内核 api.token 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）——与预置值对比"
+          echo "内核 api.token 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）"
           echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
+
+      - name: JWT 认证验证（需认证 API 实测）
+        run: |
+          echo "用内核重写的 JWT 调需认证 API（registry.list 经路由）："
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -d '{"op":"registry.list","args":{}}')
+          echo "  registry.list: HTTP $CODE"
+          if [ "$CODE" = "429" ]; then echo "  429 限速窗口——冷却 120s"; sleep 120; fi
 
       - name: 部署插件（dist/ → workspace plugins + 启用）
         run: |
@@ -63,7 +62,7 @@ jobs:
           docker exec siyuan mkdir -p /siyuan/workspace/data/plugins/siyuan-quickgate
           docker cp dist/. siyuan:/siyuan/workspace/data/plugins/siyuan-quickgate/
           curl -s -X POST http://127.0.0.1:6806/api/petal/setPetalEnabled \
-            -H "Authorization: Token $CI_API_TOKEN" -H "Content-Type: application/json" \
+            -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" \
             -d '{"frontend":"all","packageName":"siyuan-quickgate","enabled":true,"isPublish":false}' || true
 
       - name: 预置桥开关并重启容器（加载 kernel.js + 清限速）
