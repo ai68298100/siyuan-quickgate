@@ -7,9 +7,9 @@
 
 | 通道 | 延迟 | 覆盖 | 状态 |
 |---|---|---|---|
-| NDJSON（默认） | ~750ms @500ms 轮询 | 全部 op | ✅ 稳定 |
-| **内核同步路由**（v0.5.0 实验性） | ~100ms | 仅内核可处理子集：`bridge.ping / registry.list / diagnostics.report / events.list·pull / config.discover / template.new` | ⚠️ 实验性，spike 校准前不建议生产依赖 |
-| **广播快路径 v1.5**（v0.6.0） | ~10-100ms | 全部前端 op（confirm/黑名单/审计共用） | ⚠️ 新增；设置 `broadcastEnabled` 默认关。用法：`POST /api/broadcast/postMessage {channel:"qg-cmd", message:"<与 NDJSON 同形的命令信封 JSON>"}`（需 Token）；快门前端 SSE 订阅即时执行，回执照常写 results.ndjson。**幂等与 NDJSON 共用台账**：同一信封两条通道先到者执行，后到者跳过——勿换 id 重试 |
+| NDJSON（默认） | 实测 444~1797ms @500ms 轮询（R70 三轮） | 全部 op | ✅ 稳定 |
+| **内核同步路由**（v0.5.0，v0.7.1 起可用） | 实测 ~100ms 量级（MCP 全链 1.9~6.3s 含 node 启动） | 仅内核可处理子集：`bridge.ping / registry.list / diagnostics.report / events.list·pull / config.discover / template.new` | ✅ 3.8.6 真机全线打通（bug#9 修复后）；前端专属 op 回 unsupported 指引 |
+| **广播快路径 v1.5**（v0.6.0） | 实测 227~319ms（R70/R81） | 全部前端 op（confirm/黑名单/审计共用） | ⚠️ 新增；设置 `broadcastEnabled` 默认关。用法：`POST /api/broadcast/postMessage {channel:"qg-cmd", message:"<与 NDJSON 同形的命令信封 JSON>"}`（需 Token）；快门前端 SSE 订阅即时执行，回执照常写 results.ndjson。**幂等与 NDJSON 共用台账**：同一信封两条通道先到者执行，后到者跳过——勿换 id 重试 |
 
 内核通道用法：`POST {SY_URL}/plugin/private/siyuan-quickgate/exec`，头 `Authorization: Token <思源Token>`，体 `{"op":"…","args":{…}}`，响应 `data.data` 为与 NDJSON 同形状的回执。前端专属 op 回 `unsupported`。**无 Token 请求必须被 401/403 拒绝**（spike⑩⓪ 负向探针；该头是 localhost 通道唯一 CSRF 防线）。
 
