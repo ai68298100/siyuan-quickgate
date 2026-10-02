@@ -29,7 +29,7 @@
 - ⬜ Release 正式版（spike 全绿后 v1.0.0-rc；当前为预发布序列）
 
 ## M3+（评估池，均有前置门槛）
-- MCP 通道（✅已评估 docs 项目 docs/10 §3.14：值得做、列 M3 首项——独立 stdio 代理 @lv/mcp-quickgate ↔ 内核 HTTP，零插件改动，默认只读+写 op 需 mcpWriteEnabled；**执行前置=复测批通过**；对标 Sisyphus，差异化=小驴生态能力面）→ **🚧 已开工（R42/R43/R44 三个增量）**：src/mcp/ 主体+参数 schema+README 落地，95 单测+裸 Node 烟测过；剩 e2e（真 AI 客户端+插件消费，待复测批）与 npm 独立发包评估
+- MCP 通道（✅已评估 docs 项目 docs/10 §3.14：值得做、列 M3 首项——独立 stdio 代理 @lv/mcp-quickgate ↔ 内核 HTTP，零插件改动，默认只读+写 op 需 mcpWriteEnabled；**执行前置=复测批通过**；对标 Sisyphus，差异化=小驴生态能力面）→ **✅ 已完成（R42~R85 五个增量+真机 e2e）**：MCP 真 e2e 全链通过（三通道经真实前端消费，R81）；npm 打包脚手架就绪（build:mcp → dist-mcp/，bundle 冒烟 6/6）；99 单测+CI 护栏（协议冒烟进 CI）。**剩余=①真 AI host 实测（用户贴配置即用）②npm registry 发布（需账号）**
 - 笔记本级写权限分级（第二先例：siyuan-bridge-skill forbidden_notebooks）
 - doc.resolve（hpath 寻址，备选池）
 - OpenAPI 3 文档（集市上架门槛后）
