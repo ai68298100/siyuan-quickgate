@@ -1810,6 +1810,6 @@
 - [ ] 【R101·等实验】auth_session.go 全文深挖：accessAuthCode 模式下 API Token 直通的确切条件（本机直通 vs 容器 400 的差异根因）→ 确认后决定容器对策（会话注入/关闭 accessAuthCode/其他）【实验分支自主迭代】
 
 - [x] 【R104·CI 容器化 e2e 八/九轮】bypass 模式（不设 accessAuthCode+SIYUAN_ACCESS_AUTH_CODE_BYPASS=true）实测：**API 免凭据生效**（lsNotebooks 200 ✓；预置 api.token=ci-fixed-api-token 被内核保留 18 字符 ✓——Token 链路全通）；**剩余唯一阻塞=kernel.js 容器加载机制**（404：isKernel 名单未含快门，容器重启后仍 404；容器启动日志的 isKernel 名单提取受 CI 日志工具间歇干扰未拿到）——纯容器环境问题，与快门代码无关
-- [ ] 【R104·等实验】kernel.js 容器加载机制：容器启动日志 isKernel 名单提取（修复 CI 日志抓取）→ 确认 kernels 字段/enabled 判定在容器环境的差异点【实验分支自主迭代，下轮继续】
+- [x] 【R104·等实验→R105 已解决】kernel.js 容器加载机制：**根因=bazaar trust 未确认**（IsPetalsEnabled：Docker 容器需手动确认集市信任，首启默认禁用）→ 预置 conf 补 bazaar:{trust:true} 后 CI 容器内核侧全线转绿（⑩路由 kernel-sync/events.list/降级/MCP registry.list 301ms 全 recorded，R105 十轮收官）
 
 - [x] 【R105·CI 容器化 e2e 十轮（收官）+合 main】bazaar 节预置（trust=true+petalDisabled=false）=**最后一块拼图**——IsPetalsEnabled 源码（model/plugin.go）：Docker 容器需手动确认集市信任，首启默认禁用内核插件；bazaar trust 预置后 **CI 容器内核侧全线转绿**：⑩路由 ping channel=kernel-sync ✓/events.list 白名单=8 ✓/前端 op 诚实降级 ✓/**MCP registry.list 经 exec 301ms isError=false ✓**；实验 workflow 已合 main（触发=workflow_dispatch 手动）；实验分支删除。**CI 容器化 e2e 内核侧验收从实验转为基础设施**——每次可手动触发全量内核侧回归

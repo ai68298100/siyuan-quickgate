@@ -28,6 +28,7 @@
 - 上一版本 package.zip 永久可下（GitHub releases 不删除）。
 - 用户回滚路径：下载旧 release → 同导入流程覆盖；存储兼容由 normalize 双向保证（新→旧：未知字段被旧 normalize 忽略）。
 - **内核路由前提**：kernel.js 的 kernels 字段类声明错误（bug#9 类）在导入后即可复现 404——发布前 #3 真机数据集是唯一拦截点，不可省。
+- **CI 容器化内核侧验收**（R105）：`gh workflow run ci-e2e-experiment.yml`——ubuntu+siyuan docker 自动跑内核侧六类（路由 ping/events.list/降级/MCP exec），全 recorded 方可发布（前端侧由本机 verify:restart 覆盖）。
 
 ## 4. 追溯
 
