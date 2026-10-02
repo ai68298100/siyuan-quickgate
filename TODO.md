@@ -1831,3 +1831,5 @@
 - [x] 【R117·内核日志健康检查】0 错误/0 警告（最近 200 行）；quickgate 67 条同步记录（audit.json+bridge-state.json 云同步正常）；总日志 71519 行 11MB——系统运行清洁，无累积问题
 
 - [x] 【R118·依赖安全审计+修复】pnpm audit 发现 17 漏洞（9 高危/7 中危/1 低危——全在开发依赖非生产运行时）：pnpm update npm-run-all svelte-check svelte devalue 等到最新 + vite.config assetFileNames 显式类型 + UserConfig 断言改 any（vitest 4.x 类型不兼容回退 3.x）→ 99 单测+冒烟+check 全绿
+
+- [x] 【R121·CI 容器化 e2e 内核侧全线转绿】思源重启后复测批 7/7：③桥 1633ms recorded / ⑩⓪ 401 / ⑩路由 ping channel=kernel-sync / events.list 白名单=8 / 前端 op 降级 / ⑤广播 / MCP registry.list 经 exec 301ms isError=false——kernel.js 在 CI 容器中成功加载（bug#9 kernels 字段+bazaar trust 双修复生效），MCP 经 exec 内核路由真机验证完成。唯余 ⑪（需打卡数据）和 v1.5（需前端广播订阅）。实验 workflow 转 workflow_dispatch 手动触发
