@@ -1808,3 +1808,6 @@
 
 - [x] 【R101·CI 容器化 e2e 七轮】JWT 认证验证新知：registry.list 经路由 **HTTP 400**（非 401/403/429/404）——**JWT（122 字符）作为 API Token 认证已通过**，400 来自 accessAuthCode 会话层（CI 容器无浏览器会话）；429 限速跨 restart 持久
 - [ ] 【R101·等实验】auth_session.go 全文深挖：accessAuthCode 模式下 API Token 直通的确切条件（本机直通 vs 容器 400 的差异根因）→ 确认后决定容器对策（会话注入/关闭 accessAuthCode/其他）【实验分支自主迭代】
+
+- [x] 【R104·CI 容器化 e2e 八/九轮】bypass 模式（不设 accessAuthCode+SIYUAN_ACCESS_AUTH_CODE_BYPASS=true）实测：**API 免凭据生效**（lsNotebooks 200 ✓；预置 api.token=ci-fixed-api-token 被内核保留 18 字符 ✓——Token 链路全通）；**剩余唯一阻塞=kernel.js 容器加载机制**（404：isKernel 名单未含快门，容器重启后仍 404；容器启动日志的 isKernel 名单提取受 CI 日志工具间歇干扰未拿到）——纯容器环境问题，与快门代码无关
+- [ ] 【R104·等实验】kernel.js 容器加载机制：容器启动日志 isKernel 名单提取（修复 CI 日志抓取）→ 确认 kernels 字段/enabled 判定在容器环境的差异点【实验分支自主迭代，下轮继续】
