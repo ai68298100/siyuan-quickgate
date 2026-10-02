@@ -1423,7 +1423,7 @@
 - [x] 【R124-G1-R0·C4 可靠主线·开发】✅ v0 落地：docs/contracts/reliability-contract.md——幂等（D-0002/0003/012+预留语义）/超时四层（TTL 60s/执行 15s/客户端 8s·35s/MCP 同）/取消=planned（workflow.cancel+急停合并设计，已登记）/迟到回执（禁改写）/冲突（台账收敛+WebLock 待多窗口复验）/诊断（diagnostics+审计+verify:restart 七类）；重试唯一规则引用 result-contract §3，不重复定义
 - [x] 【R124-G1-R0·安全门·开发】✅ v0 落地：docs/contracts/safety-gate-contract.md——五条红线（外部面默认关/不读私有存储/无Token 401/四不/未知不成功）+ 入口无关防线矩阵（六列五防线，dispatch 层统一实现）+ MCP 专属门控表 + planned（笔记本分级/急停/effects 下沉）；不变量=MCP 不新增特权、新入口必须走同一 dispatch
 - [x] 【R124-G1-R0·证据上下文·开发】✅ v0 落地：docs/contracts/evidence-envelope-contract.md——目标形状（claims+sources/truncated/sensitivity/generatedBy）+四规则（缺源显式 unknown 禁止美化/截断可见/敏感三级/版本绑定）+现有对应物对照；绑定 R126 只读 AI 闭环首个门实施
-- [ ] 【R124-G1-R0·观测预算·评估】把 R74/R87/R104/R116/R121 的技术 SLO、AI token/费用和用户价值指标拆成三类 ledger；验收成本指标不替代闭环价值。
+- [x] 【R124-G1-R0·观测预算·开发】✅ v0 落地（拆分定义入 docs/contracts/result-contract.md 追溯节+本条）：三类 ledger=①技术 SLO（已有实测：桥 444ms/v1.5 227ms/日志 +254B——verify-restart 每轮产出）②AI token/费用（planned：随 R126 只读 AI 闭环落地，envelope.generatedBy 承载）③用户价值（planned：R87 净节省时间/首成功时间，需用户研究）。验收语义=成本指标永不替代闭环价值（②③缺位时不得宣称收益）
 - [x] 【R124-G1-R0·发布证据·开发】✅ v0 落地：docs/contracts/release-evidence-contract.md——发布前七项（版本一致/验收门/真机数据集/兼容/凭据卫生/包内容/事实表七面，各带证据等级）+pre-release 标记规则（未验证承诺显式化）+已知缺陷并列规则+回滚证据（v0.7.0/0.7.1 实例提炼）
 
 ### 18.3 R125：首个纵向闭环与 WIP 限制
