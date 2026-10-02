@@ -17,8 +17,8 @@ jobs:
 
       - name: 预置 conf（api.token=固定值）到 volume
         run: |
-          docker run --rm -v siyuan-ws:/ws alpine sh -c \
-            'mkdir -p /ws/conf && echo "{\"api\":{\"token\":\"$CI_API_TOKEN\"}}" > /ws/conf/conf.json && cat /ws/conf/conf.json'
+          docker run --rm -v siyuan-ws:/ws -e TK="$CI_API_TOKEN" alpine sh -c \
+            'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"}}" "$TK" > /ws/conf/conf.json && cat /ws/conf/conf.json'
           echo "conf 已预置固定 api.token"
 
       - name: 启动思源容器（serve + 预置 conf）
