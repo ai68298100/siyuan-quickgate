@@ -17,8 +17,8 @@ jobs:
       - name: 预置 conf（api.token=固定值）到 volume
         run: |
           docker run --rm -v siyuan-ws:/ws -e TK="ci-fixed-api-token" alpine sh -c \
-            'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"}}" "$TK" > /ws/conf/conf.json && cat /ws/conf/conf.json'
-          echo "conf 已预置固定 api.token"
+            'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"},\"bazaar\":{\"trust\":true,\"petalDisabled\":false}}" "$TK" > /ws/conf/conf.json && cat /ws/conf/conf.json'
+          echo "conf 已预置：固定 api.token + 集市信任（内核插件启用前提，IsPetalsEnabled）"
 
       - name: 启动思源容器（serve + bypass：localhost API 免凭据）
         run: |
