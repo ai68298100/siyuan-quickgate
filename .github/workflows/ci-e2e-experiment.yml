@@ -1,0 +1,68 @@
+name: CI-E2E Experiment (SiYuan container)
+
+on:
+  push:
+    branches: [ci-e2e-experiment]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 启动思源容器
+        run: |
+          docker run -d --name siyuan \
+            -p 127.0.0.1:6806:6806 \
+            -v /home/runner/siyuan-workspace:/siyuan/workspace \
+            -e AUTH_CODE='' \
+            b3log/siyuan:latest \
+            --workspace=/siyuan/workspace/ --accessAuthCode=
+          echo "容器已启动，等待内核就绪..."
+
+      - name: 等待内核就绪并抓取 Token
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806 || true)
+            if [ "$code" = "200" ] || [ "$code" = "401" ] || [ "$code" = "302" ]; then
+              echo "内核响应 HTTP $code（第 $i 次探测）"
+              break
+            fi
+            sleep 2
+          done
+          docker exec siyuan sh -c 'ls /siyuan/workspace/' || true
+          TOKEN=$(docker exec siyuan sh -c 'cat /siyuan/workspace/conf/conf.json' | grep -o '"token":"[^"]*"' | cut -d'"' -f4 || true)
+          echo "TOKEN=${TOKEN:0:6}...(已截取)" 
+          echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
+          echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
+          docker exec siyuan sh -c 'cat /siyuan/workspace/conf/conf.json' | head -c 300 || true
+
+      - name: 部署插件（dist/ → workspace plugins + 启用）
+        run: |
+          corepack pnpm install --no-frozen-lockfile
+          corepack pnpm run build
+          docker exec siyuan mkdir -p /siyuan/workspace/data/plugins/siyuan-quickgate
+          docker cp dist/. siyuan:/siyuan/workspace/data/plugins/siyuan-quickgate/
+          curl -s -X POST http://127.0.0.1:6806/api/petal/setPetalEnabled \
+            -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" \
+            -d '{"frontend":"all","packageName":"siyuan-quickgate","enabled":true,"isPublish":false}' || true
+          echo "插件已部署并启用（kernel.js 加载需容器重启）"
+
+      - name: 预置桥开关并重启容器（加载 kernel.js）
+        run: |
+          docker exec siyuan sh -c 'mkdir -p /siyuan/workspace/data/storage/petal/siyuan-quickgate'
+          docker exec siyuan sh -c 'echo "{\"schemaVersion\":1,\"bridgeEnabled\":true,\"broadcastEnabled\":true,\"pollMs\":500}" > /siyuan/workspace/data/storage/petal/siyuan-quickgate/bridge-settings.json'
+          docker restart siyuan
+          sleep 15
+          docker logs siyuan --tail 30 2>&1 | grep -iE "kernel|plugin|quickgate" || true
+
+      - name: 跑七类验收（verify-restart）
+        run: |
+          corepack pnpm install --no-frozen-lockfile
+          node tools/verify-restart.mjs || true
+
+      - name: MCP 真 e2e（bundle）
+        run: |
+          corepack pnpm run build:mcp
+          SMOKE_TARGET=dist-mcp/mcp-quickgate.js node tools/mcp-smoke.mjs || true
