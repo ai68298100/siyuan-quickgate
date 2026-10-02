@@ -2,6 +2,10 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-03 · v0.7.2（bug#10：广播订阅断连自愈）
+
+- 退避上限 5s + MCP 快路径 3s 无回执同 id NDJSON 补发（预留语义防双执行）；99 单测
+
 ## 2026-10-02 · v0.7.0（MCP stdio 代理 + 三通道定位，面向发布）
 
 - src/mcp/ 四件（tools/client/server/main）+ 参数 schema + 内核路由通道 + mcp-smoke 冒烟；README 双语三通道重写；repo desc/topics 更新

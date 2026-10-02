@@ -86,7 +86,9 @@ export class BroadcastSubscriber {
                 if (this.stopped || ctrl.signal.aborted) break;
                 this.deps.log?.(`广播订阅断开，${backoff}ms 后重连：${e instanceof Error ? e.message : String(e)}`);
                 await sleep(backoff);
-                backoff = Math.min(backoff * 2, 30000);
+                // 退避上限 5s（bug#10，R81 真机实测：30s 上限时断连窗口内广播命令全部无人消费；
+                // 本地回环重连成本极低，5s 保证订阅缺口快速愈合）
+                backoff = Math.min(backoff * 2, 5000);
             } finally {
                 if (this.currentCtrl === ctrl) this.currentCtrl = null;
             }

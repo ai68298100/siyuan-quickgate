@@ -120,6 +120,15 @@ describe("MCP stdio 服务器核心", () => {
         expect((e2!.error as { code: number }).code).toBe(-32600);
     });
 
+    it("快路径 3s 无回执 → 同 id NDJSON 补发（bug#10 自愈，预留语义防双执行）", async () => {
+        const c = fakeClient([]); // 永无回执
+        const s = createMcpServer(c, { writeEnabled: false, version: "0.6.5" });
+        const r = await s.handleRequest({ jsonrpc: "2.0", id: 10, method: "tools/call", params: { name: "bridge.ping", arguments: {} } });
+        // fast 推过一次、NDJSON 补发过一次（同 id），最终诚实 timeout
+        expect(c.sent.map((x) => x.via)).toEqual(["fast", "ndjson"]);
+        expect((r!.result as { isError: boolean }).isError).toBe(true);
+    });
+
     it("KERNEL_OPS 优先内核同步路由；路由失败回退快路径（R49）", async () => {
         // registry.list ∈ KERNEL_OPS：exec 可用 → 走 kernel 通道，同步回执，不落 NDJSON
         const ok = fakeClient([], { execImpl: async () => ({ status: "recorded", data: { channel: "kernel-sync" }, message: "内核诊断（脱敏）" }) });

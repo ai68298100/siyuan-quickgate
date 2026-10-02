@@ -14,9 +14,7 @@ export interface BridgeClient {
     callKernelRoute?(op: string, args: Record<string, unknown>): Promise<Record<string, unknown>>;
     waitReceipt(id: string, maxMs?: number, op?: string): Promise<Record<string, unknown>>;
     readonly maxWaitMs: number;
-}
-
-export interface JsonRpcRequest {
+}export interface JsonRpcRequest {
     jsonrpc?: string;
     id?: string | number | null;
     method: string;
@@ -85,8 +83,22 @@ export function createMcpServer(client: BridgeClient, opts: { writeEnabled: bool
                         } catch { /* 路由未放行/插件缺席 → 回退（只读走 fast，其余 NDJSON） */ }
                     }
                     const useFast = def.annotations.readOnlyHint && typeof client.sendFast === "function";
-                    const sent = useFast && client.sendFast ? await client.sendFast(name, args) : await client.send(name, args);
-                    const waitMs = name === "commands.run" || name === "workflow.execute" ? 35000 : client.maxWaitMs;
+                    let sent: string;
+                    let waitMs = name === "commands.run" || name === "workflow.execute" ? 35000 : client.maxWaitMs;
+                    if (useFast && client.sendFast) {
+                        sent = await client.sendFast(name, args);
+                        // bug#10（R81）：SSE 订阅断连退避窗口内快路径无人消费——3s 无回执即
+                        // **同 id** 走 NDJSON 补发（D-0012 预留语义：先到者执行、后到者 duplicate，
+                        // 不会双执行），订阅缺口自愈且毫秒级场景不受影响
+                        const early = await client.waitReceipt(sent, 3000, name);
+                        if (early.status !== "timeout") {
+                            const st = String(early.status ?? "");
+                            return result(id, JSON.stringify(early, null, 2), !OK_STATUSES.has(st));
+                        }
+                        sent = await client.send(name, args);
+                    } else {
+                        sent = await client.send(name, args);
+                    }
                     const receipt = await client.waitReceipt(sent, waitMs, name);
                     const status = String(receipt.status ?? "");
                     return result(id, JSON.stringify(receipt, null, 2), !OK_STATUSES.has(status));
