@@ -5,46 +5,54 @@ on:
     branches: [ci-e2e-experiment]
   workflow_dispatch:
 
+env:
+  CI_API_TOKEN: ci-fixed-api-token
+  CI_ACCESS_CODE: ci-access
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: 启动思源容器（v3.7.0+ 必须 serve 子命令）
+      - name: 预置 conf（api.token=固定值）到 volume
+        run: |
+          docker run --rm -v siyuan-ws:/ws alpine sh -c \
+            'mkdir -p /ws/conf && echo "{\"api\":{\"token\":\"$CI_API_TOKEN\"}}" > /ws/conf/conf.json && cat /ws/conf/conf.json'
+          echo "conf 已预置固定 api.token"
+
+      - name: 启动思源容器（serve + 预置 conf）
         run: |
           docker run -d --name siyuan \
             -p 127.0.0.1:6806:6806 \
             -v siyuan-ws:/siyuan/workspace \
             b3log/siyuan:latest \
             serve \
-            --workspace=/siyuan/workspace/ --accessAuthCode=ci-access
+            --workspace=/siyuan/workspace/ --accessAuthCode=$CI_ACCESS_CODE
 
-      - name: 等待内核就绪
+      - name: 等待内核就绪 + 双假说 Token 诊断
         run: |
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806 || true)
             if [ "$code" = "200" ] || [ "$code" = "401" ] || [ "$code" = "302" ]; then
-              echo "内核响应 HTTP $code（第 $i 次探测）"
-              break
+              echo "内核响应 HTTP $code（第 $i 次探测）"; break
             fi
             sleep 2
           done
-          sleep 10  # 等 conf.json 的 api.token 生成
+          sleep 5
+          echo "假说 A：预置固定 token 调 version API"
+          echo "  GET  → HTTP $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806/api/system/version -H "Authorization: Token $CI_API_TOKEN")"
+          echo "  POST → HTTP $(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:6806/api/system/version -H "Authorization: Token $CI_API_TOKEN")"
+          echo "假说 B：无 token（对照）"
+          echo "  GET  → HTTP $(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806/api/system/version)"
+          # 读回内核实际使用的 conf（是否被覆盖/重写）
+          echo "容器 conf 现值（api 节）："
+          docker exec siyuan sh -c 'cat /siyuan/workspace/conf/conf.json 2>/dev/null | head -c 300' || true
 
-      - name: 抓取 Token（等 api.token 生成，拒绝顶层 token/授权码派生值）
+      - name: 抓取内核生成的 Token（对照诊断）
         run: |
-          TOKEN=""
-          for i in $(seq 1 30); do
-            TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||'')" 2>/dev/null || true)
-            if [ -n "$TOKEN" ]; then echo "api.token 已生成（第 $i 次探测）"; break; fi
-            sleep 2
-          done
-          echo "TOKEN 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）"
-          if [ -z "$TOKEN" ]; then
-            echo "60s 后 api.token 仍为空——conf.json 结构诊断："
-            docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(JSON.stringify({topKeys:Object.keys(c),apiKeys:Object.keys(c.api||{})}))" || true
-          fi
+          TOKEN=$(docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log((c.api&&c.api.token)||'')" 2>/dev/null || true)
+          echo "内核 api.token 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）——与预置值对比"
           echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
           echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
 
@@ -55,11 +63,10 @@ jobs:
           docker exec siyuan mkdir -p /siyuan/workspace/data/plugins/siyuan-quickgate
           docker cp dist/. siyuan:/siyuan/workspace/data/plugins/siyuan-quickgate/
           curl -s -X POST http://127.0.0.1:6806/api/petal/setPetalEnabled \
-            -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" \
+            -H "Authorization: Token $CI_API_TOKEN" -H "Content-Type: application/json" \
             -d '{"frontend":"all","packageName":"siyuan-quickgate","enabled":true,"isPublish":false}' || true
-          echo "插件已部署并启用（kernel.js 加载需容器重启）"
 
-      - name: 预置桥开关并重启容器（加载 kernel.js + 清认证限速）
+      - name: 预置桥开关并重启容器（加载 kernel.js + 清限速）
         run: |
           docker exec siyuan sh -c 'mkdir -p /siyuan/workspace/data/storage/petal/siyuan-quickgate'
           docker exec siyuan sh -c 'echo "{\"schemaVersion\":1,\"bridgeEnabled\":true,\"broadcastEnabled\":true,\"pollMs\":500}" > /siyuan/workspace/data/storage/petal/siyuan-quickgate/bridge-settings.json'
@@ -67,17 +74,7 @@ jobs:
           sleep 25
           docker logs siyuan --tail 40 2>&1 | grep -iE "kernel|petals|quickgate" || true
 
-      - name: Token 预热验证（version API 200 确认）
-        run: |
-          sleep 10
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806/api/system/version -H "Authorization: Token $SIYUAN_TOKEN")
-          echo "预热 version API: HTTP $CODE"
-          if [ "$CODE" != "200" ]; then
-            echo "Token 预热失败——诊断 api.token 状态："
-            docker exec siyuan node -e "const c=JSON.parse(require('fs').readFileSync('/siyuan/workspace/conf/conf.json','utf8'));console.log(JSON.stringify({apiTokenLen:((c.api&&c.api.token)||'').length,topTokenLen:(c.token||'').length}))" || true
-          fi
-
-      - name: 跑七类验收（verify-restart；容器=纯内核，③⑤v1.5 预期失败属正常）
+      - name: 内核侧验收（verify-restart；③⑤v1.5 需前端，预期失败属正常）
         run: |
           corepack pnpm install --no-frozen-lockfile
           node tools/verify-restart.mjs || true
