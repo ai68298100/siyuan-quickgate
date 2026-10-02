@@ -1418,13 +1418,13 @@
 ### 18.2 R124：核心契约依赖图
 
 - [x] 【R124-G1-R0·C1 回执主线·开发】✅ v0 草案已落地：docs/contracts/result-contract.md——规范状态封闭集（recorded/duplicate/rejected/failed/unsupported/expired + 客户端 timeout=unknown 语义）、三载体映射（桥/workflow/MCP 投影）、补救唯一规则集；仅收录已实现形状，新入口必须映射本合同
-- [ ] 【R124-G1-R0·C2 意图主线·评估】把 R85/R98/R116/R118 的 Intent、Context、Plan、澄清和确认绑定合并为一个上下文合同；验收不再有并行字段命名。
+- [x] 【R124-G1-R0·C2 意图主线·开发】✅ v0 落地：docs/contracts/intent-context-contract.md——上下文四要素（意图=信封 op+args/环境=editor.context+Quicker 配置九变量/权限=Token+门控/确认绑定=信封 id 与 planId 一次性）+两不变量（确认不可转移/上下文缺失要显式）+四入口形状对照；Intent 中枢标 planned（R126-G3 顺序门：schema/安全先行）
 - [x] 【R124-G1-R0·C3 能力主线·开发】✅ v0 落地：docs/contracts/capability-registry-contract.md——条目 schema（manifests 实际字段）/可用性五态（declared/observed/available/stale/unknown；后三态 planned 已登记）/owner 唯一+写入必枚举不变量/消费面五处对照/已知差距（effects 未下沉 manifest）
 - [x] 【R124-G1-R0·C4 可靠主线·开发】✅ v0 落地：docs/contracts/reliability-contract.md——幂等（D-0002/0003/012+预留语义）/超时四层（TTL 60s/执行 15s/客户端 8s·35s/MCP 同）/取消=planned（workflow.cancel+急停合并设计，已登记）/迟到回执（禁改写）/冲突（台账收敛+WebLock 待多窗口复验）/诊断（diagnostics+审计+verify:restart 七类）；重试唯一规则引用 result-contract §3，不重复定义
 - [x] 【R124-G1-R0·安全门·开发】✅ v0 落地：docs/contracts/safety-gate-contract.md——五条红线（外部面默认关/不读私有存储/无Token 401/四不/未知不成功）+ 入口无关防线矩阵（六列五防线，dispatch 层统一实现）+ MCP 专属门控表 + planned（笔记本分级/急停/effects 下沉）；不变量=MCP 不新增特权、新入口必须走同一 dispatch
-- [ ] 【R124-G1-R0·证据上下文·评估】把 R80/R85/R98/R99/R116/R119 的来源、引用、版本、截断、敏感等级和缺源合并为 Context & Evidence Envelope。
+- [x] 【R124-G1-R0·证据上下文·开发】✅ v0 落地：docs/contracts/evidence-envelope-contract.md——目标形状（claims+sources/truncated/sensitivity/generatedBy）+四规则（缺源显式 unknown 禁止美化/截断可见/敏感三级/版本绑定）+现有对应物对照；绑定 R126 只读 AI 闭环首个门实施
 - [ ] 【R124-G1-R0·观测预算·评估】把 R74/R87/R104/R116/R121 的技术 SLO、AI token/费用和用户价值指标拆成三类 ledger；验收成本指标不替代闭环价值。
-- [ ] 【R124-G1-R0·发布证据·评估】把 R69/R70/R78/R88/§8/§9 的版本、事实、兼容、脱敏、包内容和回滚合并为 Release Evidence 清单。
+- [x] 【R124-G1-R0·发布证据·开发】✅ v0 落地：docs/contracts/release-evidence-contract.md——发布前七项（版本一致/验收门/真机数据集/兼容/凭据卫生/包内容/事实表七面，各带证据等级）+pre-release 标记规则（未验证承诺显式化）+已知缺陷并列规则+回滚证据（v0.7.0/0.7.1 实例提炼）
 
 ### 18.3 R125：首个纵向闭环与 WIP 限制
 
