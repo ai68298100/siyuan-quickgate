@@ -11,6 +11,17 @@ describe("events 白名单与拉取", () => {
         expect(wl.has("lv-cards:reviewed")).toBe(false); // design 态
     });
 
+    it("observed 事件不进白名单——stable 插件不旁路（R77-P0 事件治理回归）", () => {
+        // 修复前 `|| maturity==="stable"` 使 checkin 的 6 个 observed 事件全部混入（白名单 8→2）
+        expect(wl.has("checkin:analytics-updated")).toBe(false); // D-0011 高频明确排除
+        expect(wl.has("checkin:item-created")).toBe(false);
+        expect(wl.has("checkin:item-updated")).toBe(false);
+        expect(wl.has("checkin:item-deleted")).toBe(false);
+        expect(wl.has("checkin:item-archived")).toBe(false);
+        expect(wl.has("checkin:suggestion-workflow-updated")).toBe(false);
+        expect(wl.size).toBe(2);
+    });
+
     it("pull：白名单过滤 + since + limit + 坏行跳过", () => {
         const text = [
             JSON.stringify({ name: "checkin:event-recorded", source: "siyuan-checkin", emittedAt: "2026-10-01T10:00:00Z", payload: { itemId: "i" }, idempotencyKey: "k1" }),
@@ -62,6 +73,27 @@ describe("workflow plan/execute", () => {
             expect(ok.plan.steps[0].confirm).toBe(true); // 写操作
             expect(ok.plan.steps[1].confirm).toBe(false);
         }
+    });
+
+    it("plan：必填参数校验早失败（R69-P1 回归）——缺 itemId 的 checkin.record 在 plan 阶段拒绝", () => {
+        const bad = makePlan(
+            [{ op: "checkin.record", args: {} }, { op: "doc.open", args: { id: "d" } }],
+            { planId: "wf-arg1", now, whitelistOp: () => true }
+        );
+        expect(bad.kind).toBe("rejected");
+        if (bad.kind === "rejected") expect(bad.message).toContain("第 1 步 checkin.record 缺 itemId");
+        const bad2 = makePlan(
+            [{ op: "doc.open", args: {} }, { op: "contacts.interaction", args: { note: "x" } }],
+            { planId: "wf-arg2", now, whitelistOp: () => true }
+        );
+        expect(bad2.kind).toBe("rejected");
+        if (bad2.kind === "rejected") expect(bad2.message).toContain("contacts.interaction 缺 names/docIds");
+        // 合法参数照常通过
+        const good = makePlan(
+            [{ op: "contacts.interaction", args: { names: ["张三"] } }],
+            { planId: "wf-arg3", now, whitelistOp: () => true }
+        );
+        expect(good.kind).toBe("plan");
     });
 
     it("execute：总确认拒绝 → denied", async () => {

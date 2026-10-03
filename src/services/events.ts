@@ -14,12 +14,13 @@ export interface HubEvent {
     idempotencyKey: string;
 }
 
-/** manifest → 白名单（source=available 的事件） */
+/** manifest → 白名单（仅 status=available 的事件——R77-P0 事件治理：observed 只观察不消费，
+ *  不因插件 stable 而旁路（v0.7.3 前的 `|| maturity==="stable"` 曾把 6 个 observed 事件混进白名单）） */
 export function eventWhitelist(manifest: EcosystemManifest): Map<string, { source: string; idempotency: string }> {
     const map = new Map<string, { source: string; idempotency: string }>();
     for (const p of manifest.plugins) {
         for (const e of (p as unknown as { events?: Array<{ name: string; idempotency?: string; status?: string }> }).events ?? []) {
-            if (e.status === "available" || p.maturity === "stable") {
+            if (e.status === "available") {
                 map.set(e.name, { source: p.pluginId, idempotency: e.idempotency ?? "idempotencyKey" });
             }
         }

@@ -64,12 +64,13 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
         expect((r2.data as { plugins: unknown[] }).plugins.length).toBe(3);
     });
 
-    it("events.list：白名单目录（stable 插件全部事件，含 observed）", async () => {
+    it("events.list：白名单目录（仅 available；observed 不因 stable 旁路——R77-P0 治理）", async () => {
         const { deps } = makeDeps();
         const r = await createKernelOpHandler(deps)("events.list", {});
         const events = (r.data as { events: Array<{ name: string }> }).events;
         expect(events.map((e) => e.name)).toContain("checkin:event-recorded");
-        expect(events.map((e) => e.name)).toContain("checkin:analytics-updated"); // stable 插件全量白名单
+        expect(events.map((e) => e.name)).toContain("checkin:event-deleted");
+        expect(events.map((e) => e.name)).not.toContain("checkin:analytics-updated"); // observed：只观察不消费（D-0011）
     });
 
     it("events.pull：白名单过滤 + names/since/limit + idempotencyKey 去重（与前端同契约）", async () => {
@@ -78,7 +79,7 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
             evLine("k1"),
             evLine("k1"), // 跨行重复 → 去重
             evLine("k2", "checkin:event-deleted", "2026-10-02T11:00:00Z"),
-            evLine("k3", "checkin:analytics-updated"), // 不在白名单？stable 插件全量在 → 会进
+            evLine("k3", "checkin:analytics-updated"), // observed → 白名单外，过滤（R77-P0）
             "not-json", // 坏行跳过
             JSON.stringify({ name: "checkin:event-recorded", emittedAt: "t" }), // 缺 idempotencyKey → 跳过
         ].join("\n"));
@@ -87,7 +88,7 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
 
         const r1 = await handle("events.pull", {});
         const ev1 = (r1.data as { events: Array<{ idempotencyKey: string }> }).events;
-        expect(ev1.map((e) => e.idempotencyKey)).toEqual(["k1", "k2", "k3"]);
+        expect(ev1.map((e) => e.idempotencyKey)).toEqual(["k1", "k2"]);
 
         const r2 = await handle("events.pull", { names: ["checkin:event-deleted"] });
         expect((r2.data as { events: unknown[] }).events.length).toBe(1);

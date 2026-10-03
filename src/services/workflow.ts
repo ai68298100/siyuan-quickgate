@@ -30,6 +30,29 @@ export const WORKFLOW_ALLOWED_OPS = new Set([
 /** 写影响面（需要确认标记） */
 export const WRITE_OPS = new Set(["checkin.record", "contacts.ensure", "contacts.interaction", "template.new"]);
 
+/**
+ * plan 期必填参数校验（R69-P1 早失败：坏计划在 plan 阶段拒绝，而非 execute 中途失败停止）。
+ * 只校验"缺了必然 rejected"的硬字段（与 adapters/dispatch 的运行时校验同口径），不做深 schema。
+ */
+export function validateStepArgs(op: string, args: Record<string, unknown>): string | null {
+    const hasNonEmpty = (k: string) => typeof args[k] === "string" && (args[k] as string).trim().length > 0;
+    const hasArr = (k: string) => Array.isArray(args[k]) && (args[k] as unknown[]).length > 0;
+    switch (op) {
+        case "checkin.record":
+            if (!hasNonEmpty("itemId")) return "checkin.record 缺 itemId";
+            return null;
+        case "template.new":
+            if (!hasNonEmpty("notebook") || !hasNonEmpty("hpath")) return "template.new 缺 notebook/hpath";
+            return null;
+        case "contacts.ensure":
+        case "contacts.interaction":
+            if (!hasArr("names") && !hasArr("docIds")) return op + " 缺 names/docIds";
+            return null;
+        default:
+            return null;
+    }
+}
+
 export type PlanResult =
     | { kind: "plan"; plan: WorkflowPlan }
     | { kind: "rejected"; message: string };
@@ -47,11 +70,14 @@ export function makePlan(
         const args = (s as { args?: unknown })?.args;
         if (typeof op !== "string") return { kind: "rejected", message: `第 ${index + 1} 步缺 op` };
         if (!deps.whitelistOp(op)) return { kind: "rejected", message: `第 ${index + 1} 步 op 不在受控白名单：${op}` };
+        const stepArgs = (args && typeof args === "object" ? args : {}) as Record<string, unknown>;
+        const argErr = validateStepArgs(op, stepArgs);
+        if (argErr) return { kind: "rejected", message: `第 ${index + 1} 步 ${argErr}` };
         list.push({
             index,
             op,
             confirm: WRITE_OPS.has(op),
-            args: (args && typeof args === "object" ? args : {}) as Record<string, unknown>,
+            args: stepArgs,
         });
     }
     return {
