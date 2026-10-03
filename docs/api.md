@@ -50,7 +50,7 @@
 | `config.discover` | `{}` | `{diaryNotebookId, inboxDocId, notes[]}` | 自动发现（spike⑧ 校准前 best-effort；失败回 null + notes 说明） |
 | `template.new` | `{notebook, hpath, template?\|templatePath?}` | `{docId}` | 内核 renderSprig 渲染（支持 `{{}}` 语法）后 createDocWithMd；templatePath 相对 `/templates/`（v0.3.0） |
 | `events.*` / `workflow.*` | 见 docs/api.md 各行 | — | v0.7.x 已实现（events.list/pull 物化读取、workflow.plan/execute 计划池 5 分钟过期）；早期"设计态"表述作废 |
-| `plugin.api` | `{plugin, method, args}` | 桥返回 | 高级透传：默认关 + 允许名单；args 形状：数组=位置参数原样、对象=作为唯一 options 实参、其他类型 `rejected`（v0.7.3 钉死） |
+| `plugin.api` | `{plugin, method, args}` | 桥返回 | 高级透传：默认关 + 允许名单；args 形状：数组=位置参数原样、对象=作为唯一 options 实参、其他类型 `rejected`（v0.7.3 钉死）。**允许名单策略（§11）**：默认仅含已完成公开契约审计的适配器（siyuan-checkin/siyuan-contacts/siyuan-speed-switch）；新插件须逐个完成契约审计后由用户手动加入，快门不自动扩名单 |
 
 ## 错误语义
 
