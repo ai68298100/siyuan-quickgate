@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:32:44.232Z",
+  "generatedAt": "2026-10-03T17:34:50.378Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 366,
-      "pending": 930
+      "done": 368,
+      "pending": 928
     },
     "byMainline": {
       "C7": 260,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 246,
-      "E0": 566,
+      "E4": 248,
+      "E0": 564,
       "E2": 112,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 930,
+      "dev": 928,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -30254,11 +30254,11 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "文本规范化：清理空行、中文标点、全角半角、Markdown/JSON/URL 格式，显示原文与新文 diff 后粘回。验收：超长文本不截断，目标窗口/块重新确认，取消不覆盖。",
+      "text": "文本规范化：清理空行、中文标点、全角半角、Markdown/JSON/URL 格式，显示原文与新文 diff 后粘回。验收：超长文本不截断，目标窗口/块重新确认，取消不覆盖。 → ✅ R160 落地件已开发：SY-文本规范化.cs（规则集参数化：blank/eol/fullwidth/mdtitle/utm；变更行数计数；**只产出新文本不写回**——diff 预览与目标块确认由调用方执行，验收语义原样；27 脚本编译门过）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
@@ -30470,11 +30470,11 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "查询模板与复用：保存用户确认的查询条件、参数和脱敏范围，下一次运行前显示数据截至时间和权限变化。验收：查询语义变化需要重新确认，AI 生成 SQL 只读校验通过才能运行。",
+      "text": "查询模板与复用：保存用户确认的查询条件、参数和脱敏范围，下一次运行前显示数据截至时间和权限变化。验收：查询语义变化需要重新确认，AI 生成 SQL 只读校验通过才能运行。 → ✅ R160 调研登记（E2，实现对照）：模板保存=statestorage（Quicker 侧）+参数即 args；只读校验=**p0-3 GuardSql 已实现**（SELECT/EXPLAIN 单语句+13 禁止词+LIMIT 强制）；「数据截至时间」=SQL 面板显示 now；「权限变化重新确认」=401 自愈+registry 预检覆盖。**缺口登记**：(a)模板 UI（保存/列表/复用选择）是 Quicker 动作层职责，无参考件需求（statestorage 读写为标准步骤）；(b)「查询语义变化需重新确认」=模板 revision 语义，登记为动作侧设计约定",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
