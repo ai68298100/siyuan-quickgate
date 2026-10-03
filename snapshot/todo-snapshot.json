@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-02T21:50:07.632Z",
+  "generatedAt": "2026-10-03T12:02:00.915Z",
   "source": "TODO.md",
   "counts": {
-    "total": 1374,
-    "checkboxes": 1374,
+    "total": 1375,
+    "checkboxes": 1375,
     "byStatus": {
-      "done": 268,
-      "pending": 991
+      "done": 274,
+      "pending": 986
     },
     "byMainline": {
       "C7": 261,
-      "C8": 263,
-      "C4": 128,
-      "C6": 445,
+      "C8": 262,
+      "C4": 129,
+      "C6": 446,
       "C2": 134,
       "C3": 62,
       "C1": 71,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 172,
-      "E0": 616,
-      "E2": 119,
-      "E3": 51,
+      "E4": 177,
+      "E0": 615,
+      "E2": 118,
+      "E3": 49,
       "E1": 414,
       "E5": 2
     },
     "byBlocked": {
       "user": 88,
-      "dev": 991,
+      "dev": 986,
       "environment": 4,
       "resolved": 1,
       "upstream": 17,
@@ -6870,11 +6870,11 @@
       "priority": "P0",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "修复 `dispatchWithTimeout` 超时后的重复派发：超时只观测原 Promise 的迟到结果，不能再次调用同一写操作；补副作用命令超时回归测试。",
+      "text": "修复 `dispatchWithTimeout` 超时后的重复派发：超时只观测原 Promise 的迟到结果，不能再次调用同一写操作；补副作用命令超时回归测试。 → ✅ v0.7.3 修复+回归测试（底层操作恰好 1 次）",
       "mainline": "C4",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
@@ -6892,11 +6892,11 @@
       "priority": "P0",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "修复 MCP 只读工具的快路径策略：广播关闭、桥关闭或 SSE 断线时不能固定等待 15s；需要能力探测或同一 id 的 fast→NDJSON 回退，并验证迟到广播不会双执行。",
+      "text": "修复 MCP 只读工具的快路径策略：广播关闭、桥关闭或 SSE 断线时不能固定等待 15s；需要能力探测或同一 id 的 fast→NDJSON 回退，并验证迟到广播不会双执行。 → ✅ v0.7.2 bug#10 已修（3s 无回执同 id NDJSON 补发）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
@@ -7002,11 +7002,11 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一 `plugin.api` 的 `args` 形状：实现当前只接受数组，而 MCP schema/契约存在对象声明；先定契约再补对象/数组/非法值测试。",
+      "text": "统一 `plugin.api` 的 `args` 形状：实现当前只接受数组，而 MCP schema/契约存在对象声明；先定契约再补对象/数组/非法值测试。 → ✅ v0.7.3 三处钉死（数组=位置参数/对象=options 实参/其他 rejected）+三形状回归测试",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
@@ -7024,11 +7024,11 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "修复设置页开启广播时 `startBridge()` 的早退路径，确保已运行桥随后打开广播也会创建 `BroadcastSubscriber`，并补设置页集成测试。",
-      "mainline": "C8",
-      "evidence": "E3",
+      "text": "修复设置页开启广播时 `startBridge()` 的早退路径，确保已运行桥随后打开广播也会创建 `BroadcastSubscriber`，并补设置页集成测试。 → ✅ v0.7.3 抽出幂等 startBroadcastSub()（集成测试待真机）",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
@@ -7046,11 +7046,11 @@
       "priority": "P0",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "核对桥开关与事件订阅生命周期：设置页打开桥后必须调用 `startEventBridge`，关闭桥必须退订；覆盖首次开启、重复开关、重载和关闭后不再物化事件。",
+      "text": "核对桥开关与事件订阅生命周期：设置页打开桥后必须调用 `startEventBridge`，关闭桥必须退订；覆盖首次开启、重复开关、重载和关闭后不再物化事件。 → ✅ v0.7.3 与 onload 配对（开桥即接上/关桥即退订；真机验证待 ⑪ 收官）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
@@ -31053,6 +31053,30 @@
       "text": "pnpm audit 发现 17 漏洞（9 高危/7 中危/1 低危——全在开发依赖非生产运行时）：pnpm update npm-run-all svelte-check svelte devalue 等到最新 + vite.config assetFileNames 显式类型 + UserConfig 断言改 any（vitest 4.x 类型不兼容回退 3.x）→ 99 单测+冒烟+check 全绿",
       "mainline": "C7",
       "evidence": "E3",
+      "refs": {
+        "sections": [
+          "21"
+        ],
+        "rounds": [
+          "R151",
+          "R160"
+        ],
+        "docs": []
+      }
+    },
+    {
+      "id": "TODO-L1835",
+      "line": 1835,
+      "section": "待办总清单（TODO） / §21 Quicker 增强思源动作场景（R151~R160）",
+      "round": "R121",
+      "priority": null,
+      "topic": "CI 容器化 e2e 内核侧全线转绿",
+      "type": "unknown",
+      "status": "done",
+      "blockedBy": null,
+      "text": "思源重启后复测批 7/7：③桥 1633ms recorded / ⑩⓪ 401 / ⑩路由 ping channel=kernel-sync / events.list 白名单=8 / 前端 op 降级 / ⑤广播 / MCP registry.list 经 exec 301ms isError=false——kernel.js 在 CI 容器中成功加载（bug#9 kernels 字段+bazaar trust 双修复生效），MCP 经 exec 内核路由真机验证完成。唯余 ⑪（需打卡数据）和 v1.5（需前端广播订阅）。实验 workflow 转 workflow_dispatch 手动触发",
+      "mainline": "C6",
+      "evidence": "E0",
       "refs": {
         "sections": [
           "21"
