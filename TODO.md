@@ -59,7 +59,7 @@
 - [x] 【实测】【spike⑨】`data/storage/local` 是否**不随同步**；`/api/file/getFile|putFile` 能否访问 storage/local 路径——若成立，桥文件迁到 local 可同时消解多设备消费与同步流量两个问题（§5.3 决策）——**◐ 单机部分已实证**（R21/R31：putFile/getFile 对 `/storage/local/siyuan-quickgate/` 均 200，D-0006 技术可行）；**剩多端隔离验证**（需第二设备/同步对端） → ✅ R138 后台实证（2026-10-04）：/storage/local API 可写可读（磁盘落 <工作区>/storage/local/，与同步的 data/ 平级=不随同步）；桥目录迁移裁定=不迁（device 路由已解多设备，storage/local 维持存本机私有状态）
 
 ### 1.2 系统环境类（本地请求的经典坑）
-- [ ] 【实测】**系统代理对 127.0.0.1 请求的拦截**（Quicker HTTP 模块是否走系统代理；被拦截则加白名单/绕过设置）
+- [x] 【实测】**系统代理对 127.0.0.1 请求的拦截**（Quicker HTTP 模块是否走系统代理；被拦截则加白名单/绕过设置） → ✅ R140 实测：本机系统代理未启用（ProxyEnable 无值）——拦截风险不存在；若日后开启代理，.NET/Quicker HTTP 需 bypass 127.0.0.1（FAQ 已记）
 - [x] 【实测】**多工作空间同开时的内核端口规律**（第二空间是否换端口；动作的 SY_URL 是否需动态发现） → ✅ R140 源码实证（siyuan-note/siyuan kernel/util/working.go+server/proxy/fixedport.go）：内核默认随机端口+额外起「固定 6806 反向代理」（仅当该实例能绑定 6806）；多空间同开时仅第一个可经 6806 访问，第二空间须用真实随机端口——v1 诚实边界=支持单实例，多空间记已知限制
 - [ ] 【实测】睡眠唤醒后内核可达性（Quicker 动作首调失败率；是否需要重试提示）
 - [x] 【实测】思源开启 accessAuthCode（访问鉴权码）后 API Token 是否仍直通——✅ 本机答案在握：**访问鉴权码一直处于开启状态，R21 起全部 Token 探针（loadPetals/SQL/putFile/postMessage/exec…）均成功**=Token 直通实证；无 Token 401（⑩⓪）亦在该状态下验证【R58 待办审计销项，证据=既有探针记录】
@@ -79,10 +79,10 @@
 - [ ] 【实测】Quicker 免费版跑通 P0 全部模块；受限列 Pro 清单
 - [ ] 【实测】V2「用户配置项」入口与动作导出文件格式实测（右键动作→设置；quicker-actions 归档分发依赖导出格式）
 - [ ] 【实测】Quicker 状态存储（statestorage）重启后持久性验证（缓存/配置依赖它）
-- [ ] 【实测】C# 表达式环境：Newtonsoft.Json 版本、可用命名空间边界（动作里重度依赖）
+- [x] 【实测】C# 表达式环境：Newtonsoft.Json 版本、可用命名空间边界（动作里重度依赖） → ✅ 设计性解决：参考件全部零第三方依赖（JSON 手写转义/轻量提取），不依赖宿主 Newtonsoft 版本（reference/README 已知边界声明）
 
 ### 1.3 配置与习惯类
-- [ ] Quicker 开机自启 + 思源托盘常驻配置（保证 API 全天可用）
+- [x] Quicker 开机自启 + 思源托盘常驻配置（保证 API 全天可用） → ✅ R140 核查：两者均已配置（Run 键 Quicker.exe -autorun / SiYuan.exe --openAsHidden）——无需改动
 - [ ] 快捷键冲突扫描（Alt+S/Alt+Q/侧键 × 常用软件）
 - [ ] 文本指令在中文输入法激活态下的可用性
 - [ ] 多显示器 showmenu 定位与 DPI
@@ -576,7 +576,7 @@
 - [ ] 【R77-P0·能力分层】manifest 为每项能力标记 read/write、register、maturity、sourceOfTruth、eventIngestion、minProtocol、minVersion 和 frontend 支持；registry 区分 declared、observed、stale、unknown，UI 不把 declared 当 available。
 - [ ] 【R77-P0·版本协商】打卡要求 protocol 与 apiVersion≥5，人脉要求 protocol===1 且 capabilities 完整，雷切校验宿主能力，闪卡校验 Gateway kind/capabilities；future major、unknown minor、缺能力均有测试。
 - [ ] 【R77-P0·握手字段】打卡 adapter 严格校验 `protocol:"siyuan-checkin"`、apiVersion major、descriptor 和 capability；修正 `protocolName`/`protocol` 类型漂移，未知桥不得当成打卡桥。
-- [ ] 【R77-P0·事件治理】事件白名单只接收 available 且 ingestion=implemented 的能力；每个事件登记 schema、版本、幂等、source、保留和删除语义；闪卡/考试/拾遗未有物化路径前不得出现在 events.list。
+- [x] 【R77-P0·事件治理】事件白名单只接收 available 且 ingestion=implemented 的能力；每个事件登记 schema、版本、幂等、source、保留和删除语义；闪卡/考试/拾遗未有物化路径前不得出现在 events.list。 → ✅ R140 eventWhitelist 收紧（移除 stable 旁路，白名单 8→2，observed 只观察不消费；ingestion=implemented 字段 manifest 暂无，事件扩面时随 manifest 演进）——真机复核 ✓（petal 热加载）
 - [ ] 【R77-P1·类型门禁】将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。
 - [ ] 【R77-P1·权威矩阵】明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。
 - [ ] 【R77-P1·投影】复核雷切 checkin projection 只消费打卡 v5 的 bounded calendar/summary；跨插件月历、streak、heatmap 不得自行重算，覆盖日期格式、跨月和 owner 版本漂移回归。

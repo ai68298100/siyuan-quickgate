@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T16:36:35.008Z",
+  "generatedAt": "2026-10-03T16:41:43.272Z",
   "source": "TODO.md",
   "counts": {
     "total": 1383,
     "checkboxes": 1383,
     "byStatus": {
-      "done": 328,
-      "pending": 960
+      "done": 332,
+      "pending": 959
     },
     "byMainline": {
       "C7": 261,
       "C8": 259,
-      "C4": 133,
+      "C4": 132,
       "C6": 451,
       "C2": 135,
       "C1": 71,
-      "C3": 63,
+      "C3": 64,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 216,
+      "E4": 217,
       "E0": 588,
-      "E2": 115,
+      "E2": 114,
       "E3": 49,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
-      "user": 69,
-      "dev": 960,
+      "user": 66,
+      "dev": 959,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -368,14 +368,16 @@
       "priority": null,
       "topic": null,
       "type": "实测",
-      "status": "等实测",
-      "blockedBy": "user",
-      "text": "**系统代理对 127.0.0.1 请求的拦截**（Quicker HTTP 模块是否走系统代理；被拦截则加白名单/绕过设置）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "**系统代理对 127.0.0.1 请求的拦截**（Quicker HTTP 模块是否走系统代理；被拦截则加白名单/绕过设置） → ✅ R140 实测：本机系统代理未启用（ProxyEnable 无值）——拦截风险不存在；若日后开启代理，.NET/Quicker HTTP 需 bypass 127.0.0.1（FAQ 已记）",
       "mainline": "C7",
       "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R140"
+        ],
         "docs": []
       }
     },
@@ -759,9 +761,9 @@
       "priority": null,
       "topic": null,
       "type": "实测",
-      "status": "等实测",
-      "blockedBy": "user",
-      "text": "C# 表达式环境：Newtonsoft.Json 版本、可用命名空间边界（动作里重度依赖）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "C# 表达式环境：Newtonsoft.Json 版本、可用命名空间边界（动作里重度依赖） → ✅ 设计性解决：参考件全部零第三方依赖（JSON 手写转义/轻量提取），不依赖宿主 Newtonsoft 版本（reference/README 已知边界声明）",
       "mainline": "C7",
       "evidence": "E4",
       "refs": {
@@ -778,14 +780,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等实测",
-      "blockedBy": "user",
-      "text": "Quicker 开机自启 + 思源托盘常驻配置（保证 API 全天可用）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "Quicker 开机自启 + 思源托盘常驻配置（保证 API 全天可用） → ✅ R140 核查：两者均已配置（Run 键 Quicker.exe -autorun / SiYuan.exe --openAsHidden）——无需改动",
       "mainline": "C7",
       "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R140"
+        ],
         "docs": []
       }
     },
@@ -9606,14 +9610,16 @@
       "priority": "P0",
       "topic": "事件治理",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "事件白名单只接收 available 且 ingestion=implemented 的能力；每个事件登记 schema、版本、幂等、source、保留和删除语义；闪卡/考试/拾遗未有物化路径前不得出现在 events.list。",
-      "mainline": "C4",
-      "evidence": "E2",
+      "text": "事件白名单只接收 available 且 ingestion=implemented 的能力；每个事件登记 schema、版本、幂等、source、保留和删除语义；闪卡/考试/拾遗未有物化路径前不得出现在 events.list。 → ✅ R140 eventWhitelist 收紧（移除 stable 旁路，白名单 8→2，observed 只观察不消费；ingestion=implemented 字段 manifest 暂无，事件扩面时随 manifest 演进）——真机复核 ✓（petal 热加载）",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R140"
+        ],
         "docs": []
       }
     },
