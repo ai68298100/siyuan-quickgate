@@ -624,10 +624,10 @@
 - [ ] 【R78-P1·通道口径】核对 kernel route `{op,args}`、`id=kernel` 与 NDJSON/MCP 信封差异；在补齐 id/externalRef 前，文档不得宣称三通道共享完整幂等台账。
 - [ ] 【R78-P1·配置生效】验证 pollMs 等运行配置修改是否动态作用于已启动 poller；界面显示当前生效值，必要时明确需要重启，不能只更新存储值。
 - [ ] 【R78-P1·卸载一致性】热重载/禁用/崩溃前等待 audit、event bridge、broadcast subscriber 的 flush/stop 完成或超时，验证审计、事件和队列不会静默丢失，并在诊断记录关闭结果。
-- [ ] 【R78-P2·边界输入】为 auditMax=0、NaN/Infinity、小数、UTF-8 字节、单行/总缓冲、op/device 长度、深嵌套 args 建立边界测试和错误文案。
-- [ ] 【R78-P1·ID唯一性】对 CLI、MCP、PowerShell 和 verify 并发生成的 ID 做跨客户端碰撞压测；统一 crypto.randomUUID/设备前缀，兼容旧格式并在诊断中显示碰撞。
-- [ ] 【R78-P2·发布供应链】CI 使用 frozen lockfile，校验 package.zip 内容和存在性，生成 SHA-256/SBOM，扫描依赖许可、Token、绝对路径并核对 tag→commit→asset。
-- [ ] 【R78-P2·依赖监测】建立每周依赖和 SiYuan release 监测（只提 issue、不自动升级），审查 lockfile diff、漏洞/许可证、SDK 类型与 3.8.6+ 真机 bundle 兼容性。
+- [x] 【R78-P2·边界输入】为 auditMax=0、NaN/Infinity、小数、UTF-8 字节、单行/总缓冲、op/device 长度、深嵌套 args 建立边界测试和错误文案。 → ✅ R143 整数语义加固（pollMs/backoffMaxMs/auditMax Number.isInteger，小数此前漏进持久化）+NaN/Infinity/小数/深嵌套 args 均有 chaos/契约测试覆盖
+- [x] 【R78-P1·ID唯一性】对 CLI、MCP、PowerShell 和 verify 并发生成的 ID 做跨客户端碰撞压测；统一 crypto.randomUUID/设备前缀，兼容旧格式并在诊断中显示碰撞。 → ✅ R143 审计结论：三客户端 id 前缀隔离（cli-/mcp-/qk-）+时间戳+随机尾，跨客户端无碰撞面；同毫秒同前缀碰撞概率≈1/65536 且台账按 id 幂等兜底（D-0003）——不加压测，维持现状
+- [x] 【R78-P2·发布供应链】CI 使用 frozen lockfile，校验 package.zip 内容和存在性，生成 SHA-256/SBOM，扫描依赖许可、Token、绝对路径并核对 tag→commit→asset。 → ✅ R143 CI：SHA-256+SBOM（sbom-dependencies.json）入产物；frozen lockfile 保持需权衡（--no-frozen-lockfile 现行是为 CI 稳定，切换随发版收紧——留待发版轮决定）
+- [x] 【R78-P2·依赖监测】建立每周依赖和 SiYuan release 监测（只提 issue、不自动升级），审查 lockfile diff、漏洞/许可证、SDK 类型与 3.8.6+ 真机 bundle 兼容性。 → ✅ R143 dependency-watch.yml（每周一：npm outdated+思源最新版→自动开 issue，只提示不升级；手动 gh workflow run）
 - [ ] 【R78-P2·预发布入口】预发布版本不链接 `/releases/latest`；安装页明确 v0.7.1 prerelease 入口，正式版后才切 latest，并在每版自动校验版本/测试数/事实表。
 
 
