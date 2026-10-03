@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-10-03T12:25:27.702Z",
+  "generatedAt": "2026-10-03T12:27:19.315Z",
   "source": "TODO.md",
   "counts": {
     "total": 1375,
     "checkboxes": 1375,
     "byStatus": {
-      "done": 279,
-      "pending": 981
+      "done": 280,
+      "pending": 980
     },
     "byMainline": {
       "C7": 261,
-      "C8": 261,
+      "C8": 260,
       "C4": 130,
       "C6": 447,
-      "C2": 134,
+      "C2": 135,
       "C3": 62,
       "C1": 70,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 182,
-      "E0": 611,
+      "E4": 183,
+      "E0": 610,
       "E2": 117,
       "E3": 49,
       "E1": 414,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 88,
-      "dev": 981,
+      "dev": 980,
       "environment": 4,
       "resolved": 1,
       "upstream": 17,
@@ -7222,11 +7222,11 @@
       "priority": "P2",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "审查未使用的 `src/api.ts` 与 `services/kernelApi.ts` 重复实现，移除或隔离其中的 SQL 字符串插值路径，避免死代码和注入维护债。",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "审查未使用的 `src/api.ts` 与 `services/kernelApi.ts` 重复实现，移除或隔离其中的 SQL 字符串插值路径，避免死代码和注入维护债。 → ✅ v0.7.3 续5（整文件删除：全仓零引用+SQL 插值面清除，113 单测/构建全过）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [

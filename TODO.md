@@ -429,7 +429,7 @@
 - [ ] 【R69-P1】对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。
 - [ ] 【R69-P1】把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。
 - [ ] 【R69-P2】补 `config.discover` 的收集箱文档发现、自动创建和手填兜底；当前 `inboxDocId:null` 不能与“配置发现”承诺并列。
-- [ ] 【R69-P2】审查未使用的 `src/api.ts` 与 `services/kernelApi.ts` 重复实现，移除或隔离其中的 SQL 字符串插值路径，避免死代码和注入维护债。
+- [x] 【R69-P2】审查未使用的 `src/api.ts` 与 `services/kernelApi.ts` 重复实现，移除或隔离其中的 SQL 字符串插值路径，避免死代码和注入维护债。 → ✅ v0.7.3 续5（整文件删除：全仓零引用+SQL 插值面清除，113 单测/构建全过）
 - [ ] 【R69-P2】核对设置页实际可配置项与文档承诺（bridgeBasePath、backoffMaxMs、auditMax、deviceName、rawApiAllowlist），决定补 UI、迁移 schema 或明确“代码默认不可配置”。
 
 ### 5.10 R71：产品定位、能力发现与命令入口（本轮只登记，不开发）
