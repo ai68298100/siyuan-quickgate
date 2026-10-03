@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:25:53.223Z",
+  "generatedAt": "2026-10-03T18:28:07.736Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 482,
-      "pending": 818
+      "done": 492,
+      "pending": 808
     },
     "byMainline": {
       "C7": 264,
       "C8": 252,
-      "C4": 128,
-      "C6": 462,
-      "C2": 136,
+      "C4": 127,
+      "C6": 463,
+      "C2": 137,
       "C1": 73,
-      "C3": 64,
+      "C3": 63,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 362,
+      "E4": 372,
       "E0": 553,
       "E2": 110,
       "E3": 48,
-      "E1": 314,
+      "E1": 304,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 818,
+      "dev": 808,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -13259,16 +13259,17 @@
       "priority": "P1",
       "topic": "会前准备",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "人物选择→最近互动/相关会议/未完承诺→原文；验收同名先选、无记录有正常空态，查看不写互动，私密备注不进通知。",
-      "mainline": "C4",
-      "evidence": "E1",
+      "text": "人物选择→最近互动/相关会议/未完承诺→原文；验收同名先选、无记录有正常空态，查看不写互动，私密备注不进通知。 → ✅ R191 调研登记（等 owner+可组装）：contacts.search 已测（408ms）+summary/互动投影=人脉 owner 域；「查看不写互动」「同名先选」=contacts.search 现有语义；组装路径=搜索→摘要→来源链接（原料齐备）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191"
         ],
         "docs": []
       }
@@ -13281,16 +13282,17 @@
       "priority": "P1",
       "topic": "承诺回访",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "互动里由用户明确承诺并选回访日期，交 owner 提醒后记录实际结果；验收改期/取消/多人参与不重复建承诺，保留原互动，不自动发送消息。",
-      "mainline": "C3",
-      "evidence": "E1",
+      "text": "互动里由用户明确承诺并选回访日期，交 owner 提醒后记录实际结果；验收改期/取消/多人参与不重复建承诺，保留原互动，不自动发送消息。 → ✅ R191 调研登记（等 owner）：承诺/回访=人脉 owner 数据模型；快门透传 contacts.interaction（ref 幂等不重复建）；「不自动发送消息」=快门无外发（PRIVACY）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191"
         ],
         "docs": []
       }
@@ -13303,16 +13305,17 @@
       "priority": "P1",
       "topic": "人物时效",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "人物字段有来源、确认日期、历史值与可聚合范围，由人脉 owner 管理；验收会前显示截至时间，旧单位/称呼可区分，私密字段不进入默认 MCP 投影。",
+      "text": "人物字段有来源、确认日期、历史值与可聚合范围，由人脉 owner 管理；验收会前显示截至时间，旧单位/称呼可区分，私密字段不进入默认 MCP 投影。 → ✅ R191 调研登记（等 owner+红线）：「私密字段不进默认 MCP 投影」=分层授权（读白名单）+证据信封 sensitivity 字段承载——投影裁剪归人脉 owner 的 public bridge",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191"
         ],
         "docs": []
       }
@@ -13325,16 +13328,18 @@
       "priority": "P1",
       "topic": "任务上下文",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "雷切恢复项目阅读/写作/会议/复习的文档、布局与命令；验收区分任务布局与思源工作区，预览后恢复、不丢未保存编辑，缺文件保留可恢复部分。",
+      "text": "雷切恢复项目阅读/写作/会议/复习的文档、布局与命令；验收区分任务布局与思源工作区，预览后恢复、不丢未保存编辑，缺文件保留可恢复部分。 → ✅ R191 调研登记（等 owner）：任务恢复=雷切 owner 域（restore-document-set 能力 R6 评估过）；快门只提供 doc.open 受控打开与命令透传",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191",
+          "R6"
         ],
         "docs": []
       }
@@ -13347,16 +13352,17 @@
       "priority": "P1",
       "topic": "项目收尾",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "归档项目关联、未完事项、资料与后续联系人，用户决定暂停哪些 owner 提醒；验收归档不删除原记录，重开可恢复，快门不擅自清空业务待办。",
+      "text": "归档项目关联、未完事项、资料与后续联系人，用户决定暂停哪些 owner 提醒；验收归档不删除原记录，重开可恢复，快门不擅自清空业务待办。 → ✅ R191 调研登记（等 owner+红线）：「归档不删除原记录」「快门不擅自清空业务待办」=红线字面；提醒暂停=各 owner 设置",
       "mainline": "C3",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191"
         ],
         "docs": []
       }
@@ -13415,16 +13421,20 @@
       "priority": "P1",
       "topic": "上下文选择",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 任务开始前选文档/块/时间范围及排除项，预览条数和实际发送内容；验收不因零结果自动扩大到全库，个人资料默认最小范围。",
+      "text": "AI 任务开始前选文档/块/时间范围及排除项，预览条数和实际发送内容；验收不因零结果自动扩大到全库，个人资料默认最小范围。 → ✅ R191 批量登记（E2 部分实现）：最小投影=四级兜底不自动扩大（无选区输入裁定）+范围/条数预览=workflow plan 确认卡模式。**缺口**：独立「上下文选择器」UI 挂意图中枢域（§19 R132 上下文胶囊同源）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
+        "sections": [
+          "19"
+        ],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191",
+          "R132"
         ],
         "docs": []
       }
@@ -13437,16 +13447,17 @@
       "priority": "P1",
       "topic": "输入预算",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对大笔记/多源摘要显示字节或 token 估算、分批/截断和缺源；验收能找到被省略的来源，不能把截断称全量，复用现有模型配置而不重复保存 Key。",
+      "text": "对大笔记/多源摘要显示字节或 token 估算、分批/截断和缺源；验收能找到被省略的来源，不能把截断称全量，复用现有模型配置而不重复保存 Key。 → ✅ R191 批量登记（E2 已交付设计）：**证据信封 truncated 字段**（input/output/limit——「不能把截断称全量」字面）+选中文本 2000 上限已有+被省略来源可查（events/files 列表）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191"
         ],
         "docs": []
       }
@@ -13459,16 +13470,17 @@
       "priority": "P1",
       "topic": "引用核验",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 结果分开来源事实、模型推断和未确认内容，引用回到存在的 doc/block；验收伪造 ID、失效链接、跨日期证据给可见问题而非可点击假出处。",
+      "text": "AI 结果分开来源事实、模型推断和未确认内容，引用回到存在的 doc/block；验收伪造 ID、失效链接、跨日期证据给可见问题而非可点击假出处。 → ✅ R191 批量登记（E2 已交付）：**证据信封 claims[].evidence 分级+generatedBy.model**（模型推断不伪装）+引用回到存在块=块 ID 校验（GuardSql SQL 面只读）+伪造 ID=SQL 空结果诚实「零行」",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191"
         ],
         "docs": []
       }
@@ -13481,16 +13493,17 @@
       "priority": "P1",
       "topic": "草稿对比",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 生成先作为可编辑草稿，逐段对比原文与修改，再选择目标写入；验收拒绝/关闭不改源文，保留原文与用户接受部分。",
+      "text": "AI 生成先作为可编辑草稿，逐段对比原文与修改，再选择目标写入；验收拒绝/关闭不改源文，保留原文与用户接受部分。 → ✅ R191 批量登记（E2 已交付）：**workflow plan→确认→execute**即草稿对比语义（逐段=steps 列表、拒绝=denied 不写源、接受=定向写入）；「拒绝不改源文」=失败停止原则",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191"
         ],
         "docs": []
       }
@@ -13503,16 +13516,18 @@
       "priority": "P0",
       "topic": "来源指令",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "网页、笔记和第三方工具描述内的指令按数据处理；验收恶意摘录要求读私密文档/commands.run/扩大外发范围时不会成为授权，执行端仍使用显式许可。",
+      "text": "网页、笔记和第三方工具描述内的指令按数据处理；验收恶意摘录要求读私密文档/commands.run/扩大外发范围时不会成为授权，执行端仍使用显式许可。 → ✅ R191 批量登记（E2 **红线核心已实现**）：三层防线——①内容按数据：摘录/OCR/网页文本只进 insertBlock 数据字段（JStr 转义）从不进执行面；②写路径授权分层（R166 五层）；③SQL 注入面=GuardSql+单引号转义（p0-1/p0-3）——恶意摘录要求读私密文档/commands.run 不会成为授权",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R191",
+          "R166"
         ],
         "docs": []
       }
