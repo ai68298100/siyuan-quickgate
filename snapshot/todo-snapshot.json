@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:22:20.682Z",
+  "generatedAt": "2026-10-03T18:24:12.639Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 471,
-      "pending": 829
+      "done": 477,
+      "pending": 823
     },
     "byMainline": {
       "C7": 264,
       "C8": 252,
       "C4": 130,
       "C6": 461,
-      "C2": 136,
-      "C1": 72,
+      "C2": 135,
+      "C1": 73,
       "C3": 64,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 351,
+      "E4": 357,
       "E0": 553,
       "E2": 110,
       "E3": 48,
-      "E1": 325,
+      "E1": 319,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 829,
+      "dev": 823,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -12896,16 +12896,17 @@
       "priority": "P0",
       "topic": "待处理类别",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "内容草稿、待执行命令、已执行待回执分别定义持久化与恢复状态；验收断网/重启后标签和操作不同，保存草稿不显示已写入思源。",
+      "text": "内容草稿、待执行命令、已执行待回执分别定义持久化与恢复状态；验收断网/重启后标签和操作不同，保存草稿不显示已写入思源。 → ✅ R187 批量登记（E2 已交付）：三类各有持久化载体——待执行=commands.ndjson（重启后仍在）、已执行待回执=results.ndjson（按 id 可查）、恢复状态=台账 bridge-state.json（loadAudit/processed 跨重启）——「保存草稿不显示已写入思源」=回执按 id 判定而非猜测",
       "mainline": "C1",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R187"
         ],
         "docs": []
       }
@@ -12940,16 +12941,17 @@
       "priority": "P0",
       "topic": "恢复批次",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "联网后先分类显示草稿、未消费命令、未知结果及年龄/目标变化；验收可选发送/保留/丢弃，未知先查原 ID，过期不自动换 ID 重建。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "联网后先分类显示草稿、未消费命令、未知结果及年龄/目标变化；验收可选发送/保留/丢弃，未知先查原 ID，过期不自动换 ID 重建。 → ✅ R187 批量登记（E2 已交付）：恢复语义已实现——重启后台账跳过已处理行（复活行静默）、未消费命令按 createdAt/ttl 判过期（expired 回执不执行）、「未知先查原 ID，过期不自动换 ID 重建」=D-0012 红线字面",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R187"
         ],
         "docs": []
       }
@@ -12984,16 +12986,17 @@
       "priority": "P1",
       "topic": "规则换机",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "模板可迁移，本设备自动运行授权/凭据/触发条件独立；验收另一设备收到规则默认禁用，预检后显式启用并显示原设备是否仍执行。",
+      "text": "模板可迁移，本设备自动运行授权/凭据/触发条件独立；验收另一设备收到规则默认禁用，预检后显式启用并显示原设备是否仍执行。 → ✅ R187 批量登记（E2 已交付）：换机隔离=device.json（storage/local 每机独立生成）+ Token 不随备份（fixtures README 换机三步：.qa 导出+state 复制+Token 重粘）+「另一设备默认禁用」=桥默认关+isMobileGuard 语义同源",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R187"
         ],
         "docs": []
       }
@@ -13006,16 +13009,17 @@
       "priority": "P1",
       "topic": "草稿接力",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "手机稿交电脑时保留稿身份、版本、发送状态和执行归属，不共享命令队列；验收两端同时发送、离线修改、迟到同步能提示冲突并避免双写。",
+      "text": "手机稿交电脑时保留稿身份、版本、发送状态和执行归属，不共享命令队列；验收两端同时发送、离线修改、迟到同步能提示冲突并避免双写。 → ✅ R187 批量登记（E2 部分）：跨设备命令=信封 device 定向（v1.1：不匹配跳过不消费——「不共享命令队列」字面）+ 台账防双写（同 id 双设备只执行一次）。**缺口**：手机端采集入口挂 P2-10（iOS 快捷指令域）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R187"
         ],
         "docs": []
       }
@@ -13028,16 +13032,17 @@
       "priority": "P1",
       "topic": "离线判定",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分外网断开但本地 Kernel 可用、SiYuan 未运行、远程 Kernel 不可达；验收本地捕获不因 AI/云服务失败被阻断，错误提示指向实际故障层。",
+      "text": "区分外网断开但本地 Kernel 可用、SiYuan 未运行、远程 Kernel 不可达；验收本地捕获不因 AI/云服务失败被阻断，错误提示指向实际故障层。 ✅ R187 批量登记（E2 已交付）：三层判定已实现——SY-思源未运行分支（kernel 探测 300ms 分层）+ P0-3 AI 分支失败不阻断本地查询（本地捕获与云服务解耦）+ WebDAV/远端错误独立分支（HTTP 状态分类）——错误提示指向实际故障层",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R187"
         ],
         "docs": []
       }
@@ -13050,16 +13055,17 @@
       "priority": "P1",
       "topic": "同步证据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "将本机写入、回执已收到、同步中、其他设备已可见分别展示证据来源；验收不凭写入成功声称多端已同步，无法确认远端时标未验证。",
+      "text": "将本机写入、回执已收到、同步中、其他设备已可见分别展示证据来源；验收不凭写入成功声称多端已同步，无法确认远端时标未验证。 → ✅ R187 批量登记（E2 边界裁定）：「不凭写入成功声称多端已同步」=PRIVACY/红线语义——快门回执只证本机写入；多端同步=思源同步 owner 域（证据来源显示挂思源同步状态，快门不代答）",
       "mainline": "C1",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R187"
         ],
         "docs": []
       }
