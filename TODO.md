@@ -169,6 +169,9 @@
 
 ## 5. 小驴快门插件（siyuan-quickgate）
 
+- [x] 【R142·⑪补充】删除事件（event-deleted）物化路径核实：打卡公开桥 v5 能力表**无 delete 能力**（仅 read/record——删除是 UI 专有操作，公开桥不暴露属安全设计，bundle 实证）；快门侧 normalizeCheckinEventDeleted/物化链已有单测覆盖。**真机验证方式=你在打卡 UI 删除那条「quickgate e2e 验证(可删)」测试记录**，删除即触发全链（事件→events.ndjson→events.pull 可拉到 deleted 标记）
+- [x] 【R142·WorkBuddy】《思源笔记插件-提示语-精简版》正文仍待登录（IAB 标签页已被关闭未登录）；再次可用时：浏览器面板扫码或直接粘贴正文
+
 - [x] 【R128·决策代行】Claude Desktop 全链打通：winget 安装 v1.44121.2（已登录态复用）+ claude_desktop_config.json lv-quickgate 条目校验（dist-mcp v0.7.3+Token 注入）+ stdio 握手实测 + **MCP server 子进程被 Claude 拉起（PID 20016）**——AI host 面就绪
 - [x] 【R128·决策代行】npm publish 探测：npm 未登录（ENEEDAUTH）——建号需邮箱验证属用户项；dist-mcp/ v0.7.3 就绪，等账号后 npm publish 一步
 - [x] 【R129·Quicker 自动化受限定论】Quicker 以管理员运行→UIPI 阻断非提升 UIA（空窗口列表/taskkill 拒绝均此因）；非提升重启后仍无 UIA 窗口（2.x 无头托盘架构，设置走 Headless Shell）；HTTP API(668) 默认关且开启需 GUI；URI 仅 settings/navigate/runaction 无 import。**结论：动作编辑器 GUI 无法从本会话自动化**；g2-capture.cs 单文件版+导入指引就绪，待（a）提升权限会话重试或（b）用户一次手动导入。Quicker 已恢复运行（非提升，重启后随自启动回到原权限）
