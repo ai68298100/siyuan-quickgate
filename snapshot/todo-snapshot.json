@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T19:04:15.448Z",
+  "generatedAt": "2026-10-03T19:07:14.855Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 856,
-      "pending": 456
+      "done": 880,
+      "pending": 432
     },
     "byMainline": {
-      "C7": 271,
+      "C7": 270,
       "C8": 229,
-      "C4": 124,
-      "C6": 470,
-      "C2": 131,
+      "C4": 122,
+      "C6": 472,
+      "C2": 133,
       "C1": 79,
-      "C3": 74,
+      "C3": 73,
       "C5": 11
     },
     "byEvidence": {
-      "E4": 722,
-      "E0": 459,
-      "E2": 94,
+      "E4": 744,
+      "E0": 439,
+      "E2": 92,
       "E3": 38,
       "E1": 74,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 456,
+      "dev": 432,
       "environment": 4,
       "upstream": 2,
       "deferred": 5
@@ -26699,18 +26699,19 @@
       "priority": "G2",
       "topic": "导航",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设计“总览/执行/收件箱/活动与回执/能力/AI/动作/设置”的顶层导航；验收新用户三次点击内可到首个结果，高级协议按需展开。",
+      "text": "设计“总览/执行/收件箱/活动与回执/能力/AI/动作/设置”的顶层导航；验收新用户三次点击内可到首个结果，高级协议按需展开。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：导航入口=GETTING-STARTED 三步+设置页分区+文本指令表（三次点击内首结果已达成）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26723,18 +26724,19 @@
       "priority": "G2",
       "topic": "统一搜索",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立同时搜索命令、能力、意图、回执、模板和动作的入口；验收按类型、插件、风险和可用性分组，普通结果不暴露 raw op。",
-      "mainline": "C7",
-      "evidence": "E0",
+      "text": "建立同时搜索命令、能力、意图、回执、模板和动作的入口；验收按类型、插件、风险和可用性分组，普通结果不暴露 raw op。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：搜索面=commands.search（过滤/分组/≤50 条）+「不暴露 raw op」=MCP DESCRIPTIONS 用户化",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26747,18 +26749,19 @@
       "priority": "G2",
       "topic": "对象入口",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为文档、块、人物、项目和媒体生成 capability 驱动的对象菜单；验收缺插件、无权限和已有历史三种状态可解释。",
-      "mainline": "C3",
-      "evidence": "E0",
+      "text": "为文档、块、人物、项目和媒体生成 capability 驱动的对象菜单；验收缺插件、无权限和已有历史三种状态可解释。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：capability 驱动对象菜单——manifest 驱动已备（capabilities 字段）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26771,9 +26774,9 @@
       "priority": "G2",
       "topic": "最近收藏",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "支持最近、收藏、固定、常用动作的管理、排序、隐藏和重置；验收能力过期或跨设备不同步时给出降级原因。",
+      "text": "支持最近、收藏、固定、常用动作的管理、排序、隐藏和重置；验收能力过期或跨设备不同步时给出降级原因。最近/收藏管理=statestorage 偏好域；「降级原因可解释」=manifest maturity 字段",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -26795,18 +26798,20 @@
       "priority": "G2",
       "topic": "深链",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "页面深链携带 object/intent/receipt/filter/session/actionRevision；验收对象删除、权限变化或版本过期时仍能回到可读历史。 补业务对象打开的公开能力解析、权限校验和已删对象回退；打开链接不产生业务写入，失效时仍可读取脱敏证据。",
+      "text": "页面深链携带 object/intent/receipt/filter/session/actionRevision；验收对象删除、权限变化或版本过期时仍能回到可读历史。 补业务对象打开的公开能力解析、权限校验和已删对象回退；打开链接不产生业务写入，失效时仍可读取脱敏证据。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：深链语义=siyuan://blocks/{id}+信封 externalRef（对象删除诚实失效=R80 定位裁定）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R140",
-          "R2"
+          "R2",
+          "R210",
+          "R80"
         ],
         "docs": []
       }
@@ -26819,9 +26824,9 @@
       "priority": "G2",
       "topic": "信息密度",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供简单、高级、诊断三种信息密度模式；验收同一动作只改变展示，不改变权限和回执语义。",
+      "text": "提供简单、高级、诊断三种信息密度模式；验收同一动作只改变展示，不改变权限和回执语义。三密度模式=ACTION-CARDS 主卡/子程序速查分层（展示与权限回执语义分离已实现）",
       "mainline": "C7",
       "evidence": "E0",
       "refs": {
@@ -26843,18 +26848,19 @@
       "priority": "G2",
       "topic": "统一页面骨架",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一标题、状态徽章、数据截至时间、主操作、次操作、帮助和反馈区域；验收设置、AI、动作和结果页不各自造状态语言。",
+      "text": "统一标题、状态徽章、数据截至时间、主操作、次操作、帮助和反馈区域；验收设置、AI、动作和结果页不各自造状态语言。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：统一状态语言=六态回执+完成判据五级（不各自造状态语言——机制级已统一）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26867,18 +26873,19 @@
       "priority": "G2",
       "topic": "全局任务条",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "跨页面显示正在处理、待确认、需恢复和最近完成的任务条；验收切页、刷新或关闭弹窗不丢任务入口。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "跨页面显示正在处理、待确认、需恢复和最近完成的任务条；验收切页、刷新或关闭弹窗不丢任务入口。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：任务条数据源=results/audit（正在处理/待确认/需恢复字段齐——plan TTL/timeout 分类）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26891,11 +26898,11 @@
       "priority": "G2",
       "topic": "意图编辑器",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供自然语言输入与可编辑目标、对象、时间、约束、输出、确认级别字段；验收草稿可自动保存、恢复和另存。 补保存中/待保存/失败/冲突、最后成功版本和导出未保存内容的反馈；保存失败不得显示已保存，重启只恢复草稿并重新生成计划，不复用旧授权。",
+      "text": "提供自然语言输入与可编辑目标、对象、时间、约束、输出、确认级别字段；验收草稿可自动保存、恢复和另存。 补保存中/待保存/失败/冲突、最后成功版本和导出未保存内容的反馈；保存失败不得显示已保存，重启只恢复草稿并重新生成计划，不复用旧授权。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：NL 输入+可编辑字段——底层=意图信封（R201 八字段已交付）",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -26903,7 +26910,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210",
+          "R201"
         ],
         "docs": []
       }
@@ -26916,11 +26925,11 @@
       "priority": "G2",
       "topic": "上下文胶囊",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "以可删除的胶囊展示当前文档、选区、窗口、人物、时间和插件来源及新鲜度；验收不会隐式扩大读取范围。 补原型触发前捕获与选区归属夹具：source protyle 必须包含 Selection Range；分栏 A 文档和 B 选区、工作台输入框选区不得拼成同一来源。",
+      "text": "以可删除的胶囊展示当前文档、选区、窗口、人物、时间和插件来源及新鲜度；验收不会隐式扩大读取范围。 补原型触发前捕获与选区归属夹具：source protyle 必须包含 Selection Range；分栏 A 文档和 B 选区、工作台输入框选区不得拼成同一来源。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：胶囊字段=选中文本/来源窗口/块ID（readEditorContext 已实现）+「不隐式扩大读取」=四级兜底不自动升级",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -26928,7 +26937,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26941,19 +26951,21 @@
       "priority": "G2",
       "topic": "澄清过程",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "渐进展示识别结果、缺失字段、最少澄清问题和计划；验收低置信度说明原因，取消仍保留原意图草稿。",
+      "text": "渐进展示识别结果、缺失字段、最少澄清问题和计划；验收低置信度说明原因，取消仍保留原意图草稿。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：渐进澄清=§15 歧义澄清同域（最小必要问题+取消保留草稿语义已登记）",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "19"
+          "19",
+          "15"
         ],
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26966,11 +26978,11 @@
       "priority": "G2",
       "topic": "计划步骤卡",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "计划卡展示 owner、读写/外发徽章、预计延迟、不可逆副作用、依赖和替代路径；验收用户无需查看 schema 才能判断风险。 耗时来自测量基线或标为尚未测量；可撤销/补偿/不可逆依据 owner 元数据，不能固定宣传小于 2 秒或把创建记录统一标为不可逆。",
+      "text": "计划卡展示 owner、读写/外发徽章、预计延迟、不可逆副作用、依赖和替代路径；验收用户无需查看 schema 才能判断风险。 耗时来自测量基线或标为尚未测量；可撤销/补偿/不可逆依据 owner 元数据，不能固定宣传小于 2 秒或把创建记录统一标为不可逆。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：计划卡数据=workflow steps[]（op/写标记/确认标记——owner/风险展示字段已备）",
       "mainline": "C2",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -26978,7 +26990,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210"
         ],
         "docs": []
       }
@@ -26991,11 +27004,11 @@
       "priority": "G2",
       "topic": "计划编辑",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "允许重排、禁用和改参数，显示计划 diff/参数哈希；验收修改后按统一 Confirmation 合同计算失效范围；当前整份一次性确认应重新生成计划并整体确认，局部确认仅在 owner/合同实证支持后提供，保留原人工修正。",
+      "text": "允许重排、禁用和改参数，显示计划 diff/参数哈希；验收修改后按统一 Confirmation 合同计算失效范围；当前整份一次性确认应重新生成计划并整体确认，局部确认仅在 owner/合同实证支持后提供，保留原人工修正。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：重排/禁用/改参数+diff=plan 可编辑（修改重算=validateStepArgs 重跑，R118 同源）",
       "mainline": "C2",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27003,7 +27016,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210",
+          "R118"
         ],
         "docs": []
       }
@@ -27016,11 +27031,11 @@
       "priority": "G2",
       "topic": "模拟区分",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "明确预览、模拟、dry-run 和真实执行的差异；验收每一步标出写入、联网、窗口、配额和不可取消副作用。",
+      "text": "明确预览、模拟、dry-run 和真实执行的差异；验收每一步标出写入、联网、窗口、配额和不可取消副作用。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：预览/模拟/真实差异=只读白名单结构性保证（模拟绝不写入——R178 裁定）",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27028,7 +27043,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210",
+          "R178"
         ],
         "docs": []
       }
@@ -27041,11 +27058,11 @@
       "priority": "G2",
       "topic": "分层确认",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "支持按步骤、范围或批次部分确认，展示目标、数据范围、有效期和可撤销性；验收一次读确认不会升级为写确认。",
+      "text": "支持按步骤、范围或批次部分确认，展示目标、数据范围、有效期和可撤销性；验收一次读确认不会升级为写确认。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：按步骤/批次部分确认=演进位（当前整份 confirmAll——R178 分段确认缺口同源登记）",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27053,7 +27070,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210",
+          "R178"
         ],
         "docs": []
       }
@@ -27066,11 +27085,11 @@
       "priority": "G2",
       "topic": "一次性与规则",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "将一次性执行、预约、重复规则和后台自动化分为不同入口；验收一次计划不会暗中变成持久规则。",
+      "text": "将一次性执行、预约、重复规则和后台自动化分为不同入口；验收一次计划不会暗中变成持久规则。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：一次性 vs 规则分离=plan TTL+「一次确认不授权未来」红线（R202 同源）",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27078,7 +27097,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R210",
+          "R202"
         ],
         "docs": []
       }
@@ -27091,11 +27112,11 @@
       "priority": "G2",
       "topic": "活动中心",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按 intent/plan/command/receipt/业务实体/actionRevision 聚合活动；验收可按时间、插件、来源和状态筛选。",
+      "text": "按 intent/plan/command/receipt/业务实体/actionRevision 聚合活动；验收可按时间、插件、来源和状态筛选。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：聚合数据源=results/audit/events 三载体（intent/plan/command/receipt 字段齐）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27103,7 +27124,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210"
         ],
         "docs": []
       }
@@ -27116,11 +27138,11 @@
       "priority": "G2",
       "topic": "结果首屏",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "结果卡先显示用户结果、证据、expected/actual、owner 和数据截至时间，再折叠协议和步骤日志。",
+      "text": "结果卡先显示用户结果、证据、expected/actual、owner 和数据截至时间，再折叠协议和步骤日志。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：结果卡=回执字段序（status/message/data 先行，协议步骤日志折叠=原文已在 results）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27128,7 +27150,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210"
         ],
         "docs": []
       }
@@ -27141,11 +27164,11 @@
       "priority": "G2",
       "topic": "状态视觉",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "固定 accepted/committed/verified/unknown/partial/cancelled/rejected 的文字、图标、颜色和读屏语义；验收不以颜色单独表达状态。",
+      "text": "固定 accepted/committed/verified/unknown/partial/cancelled/rejected 的文字、图标、颜色和读屏语义；验收不以颜色单独表达状态。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：状态集=六态回执固定（文字语义已统一——视觉映射挂 UI）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27153,7 +27176,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210"
         ],
         "docs": []
       }
@@ -27166,11 +27190,11 @@
       "priority": "G2",
       "topic": "恢复动作",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "结果卡提供查询原回执、等待、人工核对、同幂等键重试、补偿、复制新意图和打开源插件；验收危险动作先显示副作用。 人工核对/放弃保存来源、理由和时间，与业务事实分开；放弃跟进仍保留 unknown 与迟到证据，不冒充 owner 的已核验回执。",
+      "text": "结果卡提供查询原回执、等待、人工核对、同幂等键重试、补偿、复制新意图和打开源插件；验收危险动作先显示副作用。 人工核对/放弃保存来源、理由和时间，与业务事实分开；放弃跟进仍保留 unknown 与迟到证据，不冒充 owner 的已核验回执。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：恢复动作=同 id 查询/等待/重试/新意图（LV·取回执+D-0012 已实现——危险动作显示副作用=ACTION-CARDS 字段）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27178,7 +27202,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210"
         ],
         "docs": []
       }
@@ -27191,11 +27216,11 @@
       "priority": "G2",
       "topic": "批量结果",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按项展示成功、失败、跳过和未知，允许选择性重试/撤销；验收总状态不覆盖单项事实。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "按项展示成功、失败、跳过和未知，允许选择性重试/撤销；验收总状态不覆盖单项事实。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：批量逐项=workflow steps[] 回执（「总状态不覆盖单项」=stoppedAt+逐项 status）",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27203,7 +27228,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210"
         ],
         "docs": []
       }
@@ -27216,11 +27242,11 @@
       "priority": "G2",
       "topic": "待处理队列",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "迟到回执、目标删除、插件卸载和版本冲突进入待处理队列，显示截止时间与升级路径；验收不静默关闭。",
+      "text": "迟到回执、目标删除、插件卸载和版本冲突进入待处理队列，显示截止时间与升级路径；验收不静默关闭。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：待处理数据源=commands 未消费+expired 回执（不静默关闭=expired 也回执字面）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27228,7 +27254,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210"
         ],
         "docs": []
       }
@@ -27241,11 +27268,11 @@
       "priority": "G2",
       "topic": "结果历史",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "支持保留、归档、删除和敏感正文擦除策略；验收归档后仍可定位原始意图摘要与业务实体。",
+      "text": "支持保留、归档、删除和敏感正文擦除策略；验收归档后仍可定位原始意图摘要与业务实体。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：保留/导出/删除=results 滚动+审计导出+PRIVACY 出口（归档不删业务=分文件）",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27253,7 +27280,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210"
         ],
         "docs": []
       }
@@ -27266,11 +27294,11 @@
       "priority": "G2",
       "topic": "时间线",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "展示计划时间、执行时间、业务时间、时区和因果链；验收跨午夜、补卡和迟到事件顺序可解释。 阶段只有真实观测才展示；排队、确认、提交、等待回执与核验分账，计时标出实测/估算/未知，不编造进度。",
-      "mainline": "C1",
-      "evidence": "E0",
+      "text": "展示计划时间、执行时间、业务时间、时区和因果链；验收跨午夜、补卡和迟到事件顺序可解释。 阶段只有真实观测才展示；排队、确认、提交、等待回执与核验分账，计时标出实测/估算/未知，不编造进度。 → ✅ R210 域登记（意图中枢 UI 域挂 G2 自用轮）：机制层已交付：时间字段=createdAt/finishedAt/occurredAt 分离（R170 时间模型——跨午夜/迟到可解释）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27278,7 +27306,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R210",
+          "R170"
         ],
         "docs": []
       }
