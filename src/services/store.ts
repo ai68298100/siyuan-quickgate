@@ -30,12 +30,14 @@ export function normalizeSettings(raw: unknown): QuickGateSettings {
     if (!raw || typeof raw !== "object") return { ...DEFAULT_SETTINGS };
     const obj = raw as Record<string, unknown>;
     const s: QuickGateSettings = { ...DEFAULT_SETTINGS };
+    // 边界加固（R78）：整数语义字段（pollMs/backoffMaxMs/auditMax）要求 Number.isInteger——
+    // 小数/NaN/Infinity 一律回默认（NaN/Infinity 被范围比较自然拒绝，小数此前会漏进持久化）
     if (typeof obj.bridgeEnabled === "boolean") s.bridgeEnabled = obj.bridgeEnabled;
-    if (typeof obj.pollMs === "number" && obj.pollMs >= 200 && obj.pollMs <= 60000) s.pollMs = obj.pollMs;
-    if (typeof obj.backoffMaxMs === "number" && obj.backoffMaxMs >= 1000 && obj.backoffMaxMs <= 300000) s.backoffMaxMs = obj.backoffMaxMs;
+    if (typeof obj.pollMs === "number" && Number.isInteger(obj.pollMs) && obj.pollMs >= 200 && obj.pollMs <= 60000) s.pollMs = obj.pollMs;
+    if (typeof obj.backoffMaxMs === "number" && Number.isInteger(obj.backoffMaxMs) && obj.backoffMaxMs >= 1000 && obj.backoffMaxMs <= 300000) s.backoffMaxMs = obj.backoffMaxMs;
     if (typeof obj.confirmExec === "boolean") s.confirmExec = obj.confirmExec;
     if (Array.isArray(obj.blacklist)) s.blacklist = obj.blacklist.filter((x): x is string => typeof x === "string");
-    if (typeof obj.auditMax === "number" && obj.auditMax >= 0 && obj.auditMax <= 2000) s.auditMax = obj.auditMax;
+    if (typeof obj.auditMax === "number" && Number.isInteger(obj.auditMax) && obj.auditMax >= 0 && obj.auditMax <= 2000) s.auditMax = obj.auditMax;
     if (typeof obj.rawApiEnabled === "boolean") s.rawApiEnabled = obj.rawApiEnabled;
     if (Array.isArray(obj.rawApiAllowlist)) s.rawApiAllowlist = obj.rawApiAllowlist.filter((x): x is string => typeof x === "string");
     if (typeof obj.bridgeBasePath === "string" && obj.bridgeBasePath.startsWith("/") && !obj.bridgeBasePath.includes("..")) {

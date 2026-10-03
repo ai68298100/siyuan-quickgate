@@ -30,8 +30,20 @@ jobs:
       - run: corepack pnpm run build
       # 发布自查：Token/个人路径/内网地址泄露扫描（§11 红线，命中即红）
       - run: corepack pnpm run check:release
+      # 发布供应链（R78）：SHA-256 校验 + SBOM（依赖清单）
+      - name: Generate SHA-256 + SBOM
+        run: |
+          if [ -f package.zip ]; then
+            sha256sum package.zip > package.zip.sha256
+            echo "package.zip.sha256 generated"
+          fi
+          corepack pnpm list --depth 0 --json > sbom-dependencies.json || true
+          echo "sbom-dependencies.json generated"
       - uses: actions/upload-artifact@v4
         with:
           name: package
-          path: package.zip
+          path: |
+            package.zip
+            package.zip.sha256
+            sbom-dependencies.json
           if-no-files-found: ignore

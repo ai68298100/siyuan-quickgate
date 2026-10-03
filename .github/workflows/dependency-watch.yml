@@ -1,0 +1,58 @@
+# 依赖与上游监测（R78·依赖监测）：每周检查 npm 依赖更新与思源新版本，只开 issue 不自动升级。
+# 手动触发：gh workflow run dependency-watch.yml
+name: dependency-watch
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # 每周一 03:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: corepack pnpm install --no-frozen-lockfile
+      - name: Collect outdated deps
+        run: corepack pnpm outdated --format list > outdated.txt || true
+      - name: Fetch latest SiYuan release
+        run: |
+          curl -s https://api.github.com/repos/siyuan-note/siyuan/releases/latest \
+            | grep -o '"tag_name": *"[^"]*"' | head -1 > siyuan-latest.txt || true
+          cat siyuan-latest.txt
+      - name: Build report
+        run: |
+          {
+            echo "## 每周依赖/上游监测（$(date -u +%F)）"
+            echo
+            echo "### 思源最新版本"
+            echo '```'
+            cat siyuan-latest.txt 2>/dev/null || echo "(获取失败)"
+            echo '```'
+            echo "### npm 依赖更新（只提示，不自动升级）"
+            echo '```'
+            cat outdated.txt 2>/dev/null || echo "(无输出)"
+            echo '```'
+            echo
+            echo "处理原则（R78）：审查 lockfile diff、漏洞/许可证、SiYuan API 变更面后再手动升级；"
+            echo "内核行为变化先跑容器化 e2e（ci-e2e-experiment.yml）。"
+          } > report.md
+      - name: Create or update weekly issue
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "依赖/上游监测 · ${{ github.event.schedule || 'manual' }}"
+          content-filepath: report.md
+          labels: |
+            dependencies
+            maintenance

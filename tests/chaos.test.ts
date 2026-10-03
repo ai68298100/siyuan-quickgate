@@ -20,6 +20,18 @@ describe("混沌工程：设置归一化恶劣场景", () => {
         expect(s.deviceName.length).toBe(64);
     });
 
+    it("边界输入加固（R78）：小数/Infinity/NaN 整数语义字段 → 回默认", () => {
+        const s = normalizeSettings({ pollMs: 500.5, backoffMaxMs: Number.POSITIVE_INFINITY, auditMax: 0.5 });
+        expect(s.pollMs).toBe(500); // 小数拒绝
+        expect(s.backoffMaxMs).toBe(10000); // Infinity 被范围比较拒绝
+        expect(s.auditMax).toBe(200); // 小数拒绝（此前会漏进持久化）
+        // 合法整数仍保留
+        const ok = normalizeSettings({ pollMs: 750, backoffMaxMs: 20000, auditMax: 100 });
+        expect(ok.pollMs).toBe(750);
+        expect(ok.backoffMaxMs).toBe(20000);
+        expect(ok.auditMax).toBe(100);
+    });
+
     it("normalizeSettings 正常值 → 保留", () => {
         const s = normalizeSettings({ bridgeEnabled: true, pollMs: 1000, confirmExec: false });
         expect(s.bridgeEnabled).toBe(true);
