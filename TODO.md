@@ -415,7 +415,7 @@
 
 - [x] 【R69-P0】修复 `dispatchWithTimeout` 超时后的重复派发：超时只观测原 Promise 的迟到结果，不能再次调用同一写操作；补副作用命令超时回归测试。 → ✅ v0.7.3 修复+回归测试（底层操作恰好 1 次）
 - [x] 【R69-P0】修复 MCP 只读工具的快路径策略：广播关闭、桥关闭或 SSE 断线时不能固定等待 15s；需要能力探测或同一 id 的 fast→NDJSON 回退，并验证迟到广播不会双执行。 → ✅ v0.7.2 bug#10 已修（3s 无回执同 id NDJSON 补发）
-- [ ] 【R69-P1】统一广播过期命令的 processed 台账语义，验证同一过期信封重放时不会重复产生 expired 回执或改变统计。
+- [x] 【R69-P1】统一广播过期命令的 processed 台账语义，验证同一过期信封重放时不会重复产生 expired 回执或改变统计。 → ✅ v0.7.3 续（过期补 markProcessed + 重放回归测试）
 - [ ] 【R69-P1】统一前端 `events.pull` 与 kernel `events.pull` 的文件扫描、idempotencyKey 去重、source 白名单、stable/available 判定和删除标记配对语义。
 - [ ] 【R69-P1】为 `workflow.plan/execute` 补每个 op 的参数 schema、单步 15s 超时、失败停止回执和确认边界，避免工作流执行绕过普通 dispatch 的超时纪律。
 - [ ] 【R69-P1】明确并统一所有写 op（checkin.record、contacts.ensure/interaction、template.new、commands.run、workflow.execute、plugin.api）的确认、审计、黑名单和 MCP 写开关策略。
@@ -424,7 +424,7 @@
 - [x] 【R69-P0】核对桥开关与事件订阅生命周期：设置页打开桥后必须调用 `startEventBridge`，关闭桥必须退订；覆盖首次开启、重复开关、重载和关闭后不再物化事件。 → ✅ v0.7.3 与 onload 配对（开桥即接上/关桥即退订；真机验证待 ⑪ 收官）
 - [ ] 【R69-P1】为多窗口桥增加真实互斥/命令认领机制（Web Lock、独立锁文件或等价方案）；当前单飞只保证单个 frontend 实例，不能证明两个窗口不会重复消费。
 - [ ] 【R69-P1】验证 CLI、PowerShell、MCP 多生产者同时 `getFile→append→putFile` 时不会互相覆盖命令；若无法保证，明确串行化或改为独立命令文件/内核追加服务。
-- [ ] 【R69-P1】诊断包使用当前活动 `BridgeService` 的统计或持久化统计；禁止每次导出新建服务导致计数归零。
+- [x] 【R69-P1】诊断包使用当前活动 `BridgeService` 的统计或持久化统计；禁止每次导出新建服务导致计数归零。 → ✅ v0.7.3 续（activeService 优先，桥关才回落新实例）
 - [ ] 【R69-P1】为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。
 - [ ] 【R69-P1】对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。
 - [ ] 【R69-P1】把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T12:02:00.915Z",
+  "generatedAt": "2026-10-03T12:05:58.732Z",
   "source": "TODO.md",
   "counts": {
     "total": 1375,
     "checkboxes": 1375,
     "byStatus": {
-      "done": 274,
-      "pending": 986
+      "done": 276,
+      "pending": 984
     },
     "byMainline": {
       "C7": 261,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 177,
-      "E0": 615,
+      "E4": 179,
+      "E0": 613,
       "E2": 118,
       "E3": 49,
       "E1": 414,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 88,
-      "dev": 986,
+      "dev": 984,
       "environment": 4,
       "resolved": 1,
       "upstream": 17,
@@ -6914,11 +6914,11 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一广播过期命令的 processed 台账语义，验证同一过期信封重放时不会重复产生 expired 回执或改变统计。",
+      "text": "统一广播过期命令的 processed 台账语义，验证同一过期信封重放时不会重复产生 expired 回执或改变统计。 → ✅ v0.7.3 续（过期补 markProcessed + 重放回归测试）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
@@ -7112,11 +7112,11 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "诊断包使用当前活动 `BridgeService` 的统计或持久化统计；禁止每次导出新建服务导致计数归零。",
+      "text": "诊断包使用当前活动 `BridgeService` 的统计或持久化统计；禁止每次导出新建服务导致计数归零。 → ✅ v0.7.3 续（activeService 优先，桥关才回落新实例）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
