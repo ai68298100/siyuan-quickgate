@@ -436,8 +436,8 @@
 - [ ] 【R69-P1】验证 CLI、PowerShell、MCP 多生产者同时 `getFile→append→putFile` 时不会互相覆盖命令；若无法保证，明确串行化或改为独立命令文件/内核追加服务。
 - [x] 【R69-P1】诊断包使用当前活动 `BridgeService` 的统计或持久化统计；禁止每次导出新建服务导致计数归零。 → ✅ v0.7.3 续（activeService 优先，桥关才回落新实例）
 - [x] 【R69-P1】为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。 → ✅ v0.7.3 续4（createSingleFlight 串行队列+20 并发/失败不阻塞回归）
-- [ ] 【R69-P1】对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。
-- [ ] 【R69-P1】把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。
+- [x] 【R69-P1】对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。 → ✅ R134 确定性混沌 3 测：丢行窗口实证/同 id 重发台账去重恢复/压缩不吞并发追加（单写者约定+补发=系统性恢复，结论入测试头注）
+- [x] 【R69-P1】把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。 → ✅ R134 mobileBridgeEnabled 显式字段（默认关+设置页开关+旧后缀加载迁移显式优先+守卫双保险）；移动端真机行为待 M1.5
 - [ ] 【R69-P2】补 `config.discover` 的收集箱文档发现、自动创建和手填兜底；当前 `inboxDocId:null` 不能与“配置发现”承诺并列。
 - [x] 【R69-P2】审查未使用的 `src/api.ts` 与 `services/kernelApi.ts` 重复实现，移除或隔离其中的 SQL 字符串插值路径，避免死代码和注入维护债。 → ✅ v0.7.3 续5（整文件删除：全仓零引用+SQL 插值面清除，113 单测/构建全过）
 - [ ] 【R69-P2】核对设置页实际可配置项与文档承诺（bridgeBasePath、backoffMaxMs、auditMax、deviceName、rawApiAllowlist），决定补 UI、迁移 schema 或明确“代码默认不可配置”。

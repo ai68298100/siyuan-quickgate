@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-03T15:58:15.512Z",
+  "generatedAt": "2026-10-03T16:11:06.749Z",
   "source": "TODO.md",
   "counts": {
     "total": 1383,
     "checkboxes": 1383,
     "byStatus": {
-      "done": 304,
-      "pending": 979
+      "done": 306,
+      "pending": 977
     },
     "byMainline": {
       "C7": 261,
-      "C8": 262,
-      "C4": 131,
+      "C8": 261,
+      "C4": 132,
       "C6": 450,
       "C2": 135,
       "C1": 71,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 198,
-      "E0": 603,
+      "E4": 200,
+      "E0": 602,
       "E2": 117,
-      "E3": 50,
+      "E3": 49,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
       "user": 74,
-      "dev": 979,
+      "dev": 977,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -7343,16 +7343,17 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。",
+      "text": "对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。 → ✅ R134 确定性混沌 3 测：丢行窗口实证/同 id 重发台账去重恢复/压缩不吞并发追加（单写者约定+补发=系统性恢复，结论入测试头注）",
       "mainline": "C4",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R134"
         ],
         "docs": []
       }
@@ -7365,16 +7366,17 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。 → ✅ R134 mobileBridgeEnabled 显式字段（默认关+设置页开关+旧后缀加载迁移显式优先+守卫双保险）；移动端真机行为待 M1.5",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R134"
         ],
         "docs": []
       }
