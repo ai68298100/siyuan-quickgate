@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-03T18:19:25.188Z",
+  "generatedAt": "2026-10-03T18:20:46.412Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 464,
+      "done": 467,
       "pending": 833
     },
     "byMainline": {
@@ -19,10 +19,10 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 344,
-      "E0": 558,
-      "E2": 111,
-      "E3": 49,
+      "E4": 347,
+      "E0": 557,
+      "E2": 110,
+      "E3": 48,
       "E1": 325,
       "E5": 2
     },
@@ -30,7 +30,7 @@
       "user": 66,
       "dev": 833,
       "environment": 4,
-      "upstream": 17,
+      "upstream": 14,
       "deferred": 5
     }
   },
@@ -21493,18 +21493,19 @@
       "priority": "P0",
       "topic": "能力发现",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "设计快门 manifest，使思源 Agent 能发现能力名、描述、输入输出 schema、owner、读写级别和兼容版本；验收不靠自然语言猜工具。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "设计快门 manifest，使思源 Agent 能发现能力名、描述、输入输出 schema、owner、读写级别和兼容版本；验收不靠自然语言猜工具。 → ✅ R184 调研登记（E2 已交付设计）：**capability manifest 就是发现层**——pluginId/描述/协议/能力/读写（read/write 分级）/maturity/版本全字段已定义（contract+27 件实测）；Agent 接入时按 manifest 枚举即免自然语言猜工具；待思源 Agent 技能目录落地后接 pipeline",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R184"
         ],
         "docs": [
           "15-"
@@ -21597,18 +21598,20 @@
       "priority": "P0",
       "topic": "写入握手",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对思源 Agent 发起写操作时能否显示快门计划、字段级数据流和确认按钮；验收自然语言肯定不能绕过确认。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对思源 Agent 发起写操作时能否显示快门计划、字段级数据流和确认按钮；验收自然语言肯定不能绕过确认。 → ✅ R184 调研登记（E2 已交付设计）：**workflow plan/execute 分离即写入握手**——写操作先出 plan（字段级 steps+写标记确认卡）→ 用户确认 → execute；「自然语言肯定不能绕过确认」=confirmExec+授权分层（R166 五层）——Agent 接入走同链路",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R184",
+          "R166"
         ],
         "docs": [
           "15-"
@@ -21753,18 +21756,19 @@
       "priority": "P1",
       "topic": "真机 smoke",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "建立思源 Agent 最小真机测试：发现、只读调用、低风险写入、取消、恢复和诊断；验收证据可回放。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "建立思源 Agent 最小真机测试：发现、只读调用、低风险写入、取消、恢复和诊断；验收证据可回放。 → ✅ R184 调研登记（等思源 Agent 上线，真实 gate）：测试脚本骨架已有先例（verify:restart 十项+mcp-smoke 七断言模式可复制）；Agent 入口/技能目录实测挂思源官方发布——登记为首批真机项",
       "mainline": "C6",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R184"
         ],
         "docs": [
           "15-"
