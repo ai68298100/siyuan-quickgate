@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:54:42.889Z",
+  "generatedAt": "2026-10-03T17:56:11.859Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 412,
-      "pending": 884
+      "done": 417,
+      "pending": 879
     },
     "byMainline": {
       "C7": 260,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 292,
+      "E4": 297,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 369,
+      "E1": 364,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 884,
+      "dev": 879,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -14187,15 +14187,16 @@
       "priority": "P0",
       "topic": "时间模型",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分日期、日期时间、时区瞬间、业务归属日、提醒时刻和实际执行时刻；验收同一任务显示各字段含义，不能用一个 timestamp 代替全部语义。",
+      "text": "区分日期、日期时间、时区瞬间、业务归属日、提醒时刻和实际执行时刻；验收同一任务显示各字段含义，不能用一个 timestamp 代替全部语义。 → ✅ R170 批量登记（E2 实现对照）：快门时间语义已分层——信封 createdAt=UTC 瞬间（ISO Z）；打卡 occurredAt=业务归属时刻（ISO，localDate 分离——eventbridge normalize 实证）；日记=业务归属日（config.discover 按 dailyNoteSavePath 模板判「哪天」）；执行时刻=receivedAt/receipt finishedAt。「不能用一个 timestamp 代替全部」=字段分离已实现",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R96"
+          "R96",
+          "R170"
         ],
         "docs": []
       }
@@ -14271,15 +14272,16 @@
       "priority": "P1",
       "topic": "时区迁移",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设备、工作区、事件和用户偏好各有时区来源；验收旅行/换设备时显示原时区与当前显示时区，不静默移动绝对时刻。",
+      "text": "设备、工作区、事件和用户偏好各有时区来源；验收旅行/换设备时显示原时区与当前显示时区，不静默移动绝对时刻。 → ✅ R170 批量登记（E2 实现对照）：设备隔离=device.json（storage/local 每机独立）；事件时区=occurredAt 保留原始输入（normalize 不做时区换算，emittedAt 单独记录）——「不静默移动绝对时刻」已实现。**缺口**：跨时区显示（原时区 vs 当前）是展示层职责，挂 UI 域",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R96"
+          "R96",
+          "R170"
         ],
         "docs": []
       }
@@ -20608,16 +20610,17 @@
       "priority": "P0",
       "topic": "同动作多触发",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "面板、快捷键、鼠标手势、轮盘、文本指令、选中文本和 HTTP 入口都映射同一结果合同；验收入口不同不改变权限/回执。",
+      "text": "面板、快捷键、鼠标手势、轮盘、文本指令、选中文本和 HTTP 入口都映射同一结果合同；验收入口不同不改变权限/回执。 → ✅ R170 批量登记（E2 已交付）：**入口不同不改回执**=结果合同由快门侧保证（同 op 同回执语义，D-0012 幂等不因入口变化）；入口登记=registry.json entryPoints 提案 + ACTION-CARDS 触发字段（七种入口已列）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R170"
         ],
         "docs": [
           "12-"
@@ -20632,16 +20635,17 @@
       "priority": "P1",
       "topic": "当前程序",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作需要前台程序/网址时将其作为上下文输入并显示；验收切换窗口、浏览器标签和失焦后停止或重新确认，不发送到错误目标。",
+      "text": "动作需要前台程序/网址时将其作为上下文输入并显示；验收切换窗口、浏览器标签和失焦后停止或重新确认，不发送到错误目标。 → ✅ R170 批量登记（E2 已交付）：来源窗口=getwindowtitle 采集入卡（g2-capture「摘自窗口」）；需前台的动作=SY-粘贴守卫/Office选区 进程校验，不匹配即拒——「不发送到错误目标」已实现",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R170"
         ],
         "docs": [
           "12-"
@@ -20680,19 +20684,23 @@
       "priority": "P0",
       "topic": "无选区输入",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "文本处理动作对无选区、旧剪贴板、多选区和空文本给明确选项；验收不静默读取旧剪贴板造成误写。",
+      "text": "文本处理动作对无选区、旧剪贴板、多选区和空文本给明确选项；验收不静默读取旧剪贴板造成误写。 → ✅ R170 批量登记（E2 已交付）：**四级兜底**（docs/03 §0：动作传参→思源前台选区→剪贴板→userinput）即本项实现——每级有值即用且可解释，全空=userinput 明确弹窗，不静默读旧剪贴板（剪贴板是第三级非默认）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
+        "sections": [
+          "0"
+        ],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R170"
         ],
         "docs": [
-          "12-"
+          "12-",
+          "docs/03"
         ]
       }
     },
