@@ -2,6 +2,7 @@
 // ============================================================================
 // LV·摘要格式化 —— 打卡概览（checkin.summary 回执 data → 一行中文通知）
 // 参考实现，Quicker C# 模块「普通模式v2」；对应 docs/05 §5.2 then.t=notify-summary
+// @version 1.0.1 · 2026-10-03 out var 降 C#5，csc v4 编译验证通过；首版 1.0.0
 // data 形状（v0.5.6 契约）：{today:{range,startDate,endDate,items[],totalEvents,completedItems,scheduledItems},
 //                          streaks:{itemId:连击天数}}
 //
@@ -76,5 +77,6 @@ private static int GetIntField(string json, string field, int fallback)
     while (i < json.Length && (json[i] == ' ')) i++;
     var j = i;
     while (j < json.Length && (char.IsDigit(json[j]) || json[j] == '-')) j++;
-    return j > i && int.TryParse(json.Substring(i, j - i), out var v) ? v : fallback;
+    var v = 0;
+    return j > i && int.TryParse(json.Substring(i, j - i), out v) ? v : fallback;
 }

@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-03T15:35:02.240Z",
+  "generatedAt": "2026-10-03T15:52:07.220Z",
   "source": "TODO.md",
   "counts": {
     "total": 1383,
     "checkboxes": 1383,
     "byStatus": {
-      "done": 290,
+      "done": 297,
       "pending": 979
     },
     "byMainline": {
@@ -19,15 +19,15 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 184,
-      "E0": 617,
+      "E4": 191,
+      "E0": 610,
       "E2": 117,
       "E3": 50,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
-      "user": 88,
+      "user": 81,
       "dev": 979,
       "environment": 4,
       "upstream": 17,
@@ -941,16 +941,18 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "`SY·路由`：六分支分发 + 占位符解析器全实现（05 §5.1）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "`SY·路由`：六分支分发 + 占位符解析器全实现（05 §5.1） → ✅ R132 SY-路由.cs 总装件（含 §5.1 占位符）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "5.1"
         ],
-        "rounds": [],
+        "rounds": [
+          "R132"
+        ],
         "docs": []
       }
     },
@@ -981,14 +983,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "OCR 清理子程序（去汉字间空格换行）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "OCR 清理子程序（去汉字间空格换行） → ✅ R132 SY-OCR清理.cs v1.0（汉字间删/西文保留/断行缝合/句号段落）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R132"
+        ],
         "docs": []
       }
     },
@@ -1000,14 +1004,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "「思源未运行」分支子程序（探测→询问→启动→重探→toggle）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "「思源未运行」分支子程序（探测→询问→启动→重探→toggle） → ✅ R132 SY-思源未运行分支.cs v1.0（300ms 探测→询问→exe/siyuan://启动→重探 15s）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R132"
+        ],
         "docs": []
       }
     },
@@ -1019,14 +1025,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "子程序版本注释头 + 变更记录",
+      "status": "done",
+      "blockedBy": null,
+      "text": "子程序版本注释头 + 变更记录 → ✅ R132 全 12 件 @version 头齐",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R132"
+        ],
         "docs": []
       }
     },
@@ -1038,14 +1046,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "日志轮转（sy-quicker.log 超 1MB 滚动）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "日志轮转（sy-quicker.log 超 1MB 滚动） → ✅ R132 SY-日志轮转.cs v1.0（跨进程 Mutex+滚动 .old）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R132"
+        ],
         "docs": []
       }
     },
@@ -1057,14 +1067,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "每个子程序外层兜底 try/catch（未预期异常也出中文 notify）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "每个子程序外层兜底 try/catch（未预期异常也出中文 notify） → ✅ R132 编译门复核：全部 12 件顶层 try/catch 齐备（新件即含；存量件经 csc 全量重验）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R132"
+        ],
         "docs": []
       }
     },
@@ -1116,14 +1128,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "令牌自愈增强：401 时除引导手填外，先自动重读 `%APPDATA%\\siyuan\\env`（思源重置令牌场景）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "令牌自愈增强：401 时除引导手填外，先自动重读 `%APPDATA%\\siyuan\\env`（思源重置令牌场景） → ✅ R132 SY-内核请求 v1.1（401→强制重读 env→重试一次→仍失败才引导）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R132"
+        ],
         "docs": []
       }
     },

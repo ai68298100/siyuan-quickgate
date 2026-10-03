@@ -2,6 +2,7 @@
 // ============================================================================
 // LV·发命令 —— 向快门桥 commands.ndjson 追加一行信封（参考实现，Quicker C# 模块「普通模式v2」）
 // 规范：docs/02 §2/§6 · 协议 v1.1
+// @version 1.0.1 · 2026-10-03 404 分支降 C#5（is-pattern→as+null 检查），csc v4 编译验证通过；首版 1.0.0
 //
 // 【模块设置】后台线程（MTA）。
 // 【输入变量】桥插件(文本，默认 siyuan-quickgate) 命令op(文本) 命令参数(文本，JSON 对象字面量，如 {"keyword":"x"})
@@ -84,7 +85,8 @@ private static string GetFileText(string syUrl, string token, string path)
     }
     catch (WebException we)
     {
-        if (we.Response is HttpWebResponse r && (int)r.StatusCode == 404) return null;
+        var r404 = we.Response as HttpWebResponse;
+        if (r404 != null && (int)r404.StatusCode == 404) return null;
         throw;   // 非 404（内核没开等）让上层走统一错误分支
     }
 }
