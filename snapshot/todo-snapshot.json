@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T17:56:11.859Z",
+  "generatedAt": "2026-10-03T17:56:36.554Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 417,
-      "pending": 879
+      "done": 418,
+      "pending": 878
     },
     "byMainline": {
       "C7": 260,
-      "C8": 259,
+      "C8": 258,
       "C4": 131,
-      "C6": 457,
+      "C6": 458,
       "C2": 135,
       "C1": 72,
       "C3": 64,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 297,
+      "E4": 298,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 364,
+      "E1": 363,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 879,
+      "dev": 878,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -14209,15 +14209,16 @@
       "priority": "P0",
       "topic": "自然语言",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对“今天/明早/下周一/月底”等输入给解析预览、locale、时区和歧义提示；验收用户确认前不创建或修改业务任务，无法解析保留原文。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "对“今天/明早/下周一/月底”等输入给解析预览、locale、时区和歧义提示；验收用户确认前不创建或修改业务任务，无法解析保留原文。 → ✅ R170 批量登记（E2 边界裁定）：快门不做 NL 时间解析（最小路径——属业务 owner 域，快门只透传 occurredAt）；无法解析保留原文天然满足；NL 解析若引入属 AI 分支（P0-3 同源），确认前不创建语义一致",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R96"
+          "R96",
+          "R170"
         ],
         "docs": []
       }
