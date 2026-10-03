@@ -1,33 +1,33 @@
 {
-  "generatedAt": "2026-10-03T15:52:07.220Z",
+  "generatedAt": "2026-10-03T15:58:15.512Z",
   "source": "TODO.md",
   "counts": {
     "total": 1383,
     "checkboxes": 1383,
     "byStatus": {
-      "done": 297,
+      "done": 304,
       "pending": 979
     },
     "byMainline": {
-      "C7": 262,
+      "C7": 261,
       "C8": 262,
       "C4": 131,
-      "C6": 449,
+      "C6": 450,
       "C2": 135,
       "C1": 71,
       "C3": 63,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 191,
-      "E0": 610,
+      "E4": 198,
+      "E0": 603,
       "E2": 117,
       "E3": 50,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
-      "user": 81,
+      "user": 74,
       "dev": 979,
       "environment": 4,
       "upstream": 17,
@@ -1149,14 +1149,18 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "P0-1 快速捕获到今日日记（判型 T5；笔记本自动发现+手填兜底；`HH:mm` 前缀右键可配）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "P0-1 快速捕获到今日日记（判型 T5；笔记本自动发现+手填兜底；`HH:mm` 前缀右键可配） → ✅ R133 p0-1-快速捕获.cs 单文件版（HH:mm 前缀+R6 标题落点+R3 路由；Quicker 真机接线待）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R133",
+          "R6",
+          "R3"
+        ],
         "docs": []
       }
     },
@@ -1187,14 +1191,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "P0-3 全局快查（`sql:` 前缀→`/api/ai/chatGPT` 生成只读 SQL）",
-      "mainline": "C7",
-      "evidence": "E0",
+      "status": "done",
+      "blockedBy": null,
+      "text": "P0-3 全局快查（`sql:` 前缀→`/api/ai/chatGPT` 生成只读 SQL） → ✅ R133 p0-3-全局快查.cs（三级 fallback+sql: 安全过滤：只读单语句/禁止词/强制 LIMIT；AI 分支留开关位）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R133"
+        ],
         "docs": []
       }
     },
@@ -1206,14 +1212,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "P0-3 AI 生成 SQL 的安全过滤：含 UPDATE/DELETE/INSERT/DROP/ATTACH 等写/危险关键词直接拒绝",
+      "status": "done",
+      "blockedBy": null,
+      "text": "P0-3 AI 生成 SQL 的安全过滤：含 UPDATE/DELETE/INSERT/DROP/ATTACH 等写/危险关键词直接拒绝 → ✅ R133 GuardSql（UPDATE/DELETE/INSERT/DROP/ATTACH/PRAGMA/INTO 等 13 词拒+分号拒+LIMIT 强制）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R133"
+        ],
         "docs": []
       }
     },
@@ -1225,14 +1233,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "P0-4 打开今日日记/收集箱",
+      "status": "done",
+      "blockedBy": null,
+      "text": "P0-4 打开今日日记/收集箱 → ✅ R133 p0-4-打开今日日记.cs（today 精确匹配+自动创建+收集箱发现）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R133"
+        ],
         "docs": []
       }
     },
@@ -1244,14 +1254,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "P0-5 剪贴板图片入库（Multipart + OCR 写 alt）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "P0-5 剪贴板图片入库（Multipart + OCR 写 alt） → ✅ R133 p0-5-剪贴板图片入库.cs（PNG multipart 上传+OCR alt 写入）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R133"
+        ],
         "docs": []
       }
     },
@@ -1282,14 +1294,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "SY-12 汇总日记待办（SQL 转义；天数右键记忆）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "SY-12 汇总日记待办（SQL 转义；天数右键记忆） → ✅ R133 sy-12（日期白名单谓词拒宽匹配+转义+回链汇总块）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R133"
+        ],
         "docs": []
       }
     },
@@ -1301,14 +1315,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "SY-13 数据体检（只读报表+误判提示）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "SY-13 数据体检（只读报表+误判提示） → ✅ R133 sy-13（只读报表+可能误判提示+只读不删铁律）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R133"
+        ],
         "docs": []
       }
     },

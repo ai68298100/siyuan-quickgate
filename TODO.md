@@ -107,15 +107,15 @@
 
 ## 3. P0 通用动作【需 Quicker 编辑器：动作为 GUI 搭建，蓝图齐备（docs/03），等用户操作；或后续评估用 Quicker 导入文件】
 
-- [ ] P0-1 快速捕获到今日日记（判型 T5；笔记本自动发现+手填兜底；`HH:mm` 前缀右键可配）
+- [x] P0-1 快速捕获到今日日记（判型 T5；笔记本自动发现+手填兜底；`HH:mm` 前缀右键可配） → ✅ R133 p0-1-快速捕获.cs 单文件版（HH:mm 前缀+R6 标题落点+R3 路由；Quicker 真机接线待）
 - [ ] P0-2 划词摘录到收集箱（四级兜底；判型；浏览器 URL；可选复制块链）
-- [ ] P0-3 全局快查（`sql:` 前缀→`/api/ai/chatGPT` 生成只读 SQL）
-- [ ] P0-3 AI 生成 SQL 的安全过滤：含 UPDATE/DELETE/INSERT/DROP/ATTACH 等写/危险关键词直接拒绝
-- [ ] P0-4 打开今日日记/收集箱
-- [ ] P0-5 剪贴板图片入库（Multipart + OCR 写 alt）
+- [x] P0-3 全局快查（`sql:` 前缀→`/api/ai/chatGPT` 生成只读 SQL） → ✅ R133 p0-3-全局快查.cs（三级 fallback+sql: 安全过滤：只读单语句/禁止词/强制 LIMIT；AI 分支留开关位）
+- [x] P0-3 AI 生成 SQL 的安全过滤：含 UPDATE/DELETE/INSERT/DROP/ATTACH 等写/危险关键词直接拒绝 → ✅ R133 GuardSql（UPDATE/DELETE/INSERT/DROP/ATTACH/PRAGMA/INTO 等 13 词拒+分号拒+LIMIT 强制）
+- [x] P0-4 打开今日日记/收集箱 → ✅ R133 p0-4-打开今日日记.cs（today 精确匹配+自动创建+收集箱发现）
+- [x] P0-5 剪贴板图片入库（Multipart + OCR 写 alt） → ✅ R133 p0-5-剪贴板图片入库.cs（PNG multipart 上传+OCR alt 写入）
 - [ ] P0-6 SiYuan 场景页
-- [ ] SY-12 汇总日记待办（SQL 转义；天数右键记忆）
-- [ ] SY-13 数据体检（只读报表+误判提示）
+- [x] SY-12 汇总日记待办（SQL 转义；天数右键记忆） → ✅ R133 sy-12（日期白名单谓词拒宽匹配+转义+回链汇总块）
+- [x] SY-13 数据体检（只读报表+误判提示） → ✅ R133 sy-13（只读报表+可能误判提示+只读不删铁律）
 - [ ] SY·诊断 一键体检（九项检查+报告+修复指引）
 - [ ] 每动作「右键菜单=设置」（07-T8）
 - [ ] 每动作首跑向导（自动发现→确认→完成）

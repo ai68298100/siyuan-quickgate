@@ -25,7 +25,13 @@
 | `SY-反向触发.cs` | Quicker 668 `/api/exec` 封装（operation=action，wait/maxWaitMs）；外部面联动入口 | docs/05 §7-F |
 | `SY-OCR清理.cs` | OCR 后处理：汉字间空格删/西文间保留/断行缝合/句号段落，纯文本零依赖 | docs/03 P0-5 |
 | `SY-日志轮转.cs` | sy-quicker.log 追加（跨进程 Mutex）+ 超 1MB 滚动保留 .old；日志失败静默 | §2 日志轮转项 |
-| `g2-capture.cs` | **G2 样板单文件**：划词摘录→收集箱（收集箱兜底链+insertBlock+错误分支） | docs/25 · docs/03 P0-2 |
+| `g2-capture.cs` | **G2 样板单文件**：划词摘录→收集箱（收集箱兜底链+insertBlock+错误分支）= P0-2 | docs/25 · docs/03 P0-2 |
+| `p0-1-快速捕获.cs` | 快速捕获到今日日记：HH:mm 前缀 + R6 标题落点变体（SQL 定位→回退文末）+ R3 `#前缀` 路由 | docs/03 P0-1 |
+| `p0-3-全局快查.cs` | 全局快查：全文搜索→同名 SQL→提示 sql: 三级 fallback；`sql:` 安全过滤（只读单语句+禁止词+强制 LIMIT） | docs/03 P0-3 |
+| `p0-4-打开今日日记.cs` | 打开日记/收集箱：today 精确匹配 SQL→无则 appendDailyNoteBlock 建后重取；输出 openurl 指令 | docs/03 P0-4 |
+| `p0-5-剪贴板图片入库.cs` | 图片 PNG 字节 multipart `/api/asset/upload` → OCR 文本写 alt → 入今日日记（图片可全文检索） | docs/03 P0-5 |
+| `sy-12-汇总日记待办.cs` | 近 N 天日记未勾选待办聚合（日期白名单谓词，拒绝宽匹配）→ 汇总块写今日日记带回链 | docs/03 SY-12 |
+| `sy-13-数据体检.cs` | 只读体检报表（空文档/重复标题/最早文档）+「可能误判」提示；只读不删，清理引原作动作 | docs/03 SY-13 |
 
 ## 已知边界（诚实声明）
 

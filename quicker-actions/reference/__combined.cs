@@ -2,10 +2,12 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
-using System.Collections.Generic;
 
 // ==== g2-capture.cs ====
 public class __Snippet0 {
@@ -545,8 +547,1169 @@ private static int GetIntField(string json, string field, int fallback)
 
 }
 
-// ==== SY-OCR清理.cs ====
+// ==== p0-1-快速捕获.cs ====
 public class __Snippet4 {
+//.cs 文件类型，便于外部编辑时使用
+// ============================================================================
+// P0-1 快速捕获到今日日记（单文件版）—— Quicker C# 模块「普通模式v2」，后台线程（MTA）
+// 蓝图：docs/03 P0-1（含 R6 标题落点变体 + R3 多目标路由）· 共享规范 docs/03 §0
+// @version 1.0.0 · 2026-10-03 首版（csc C#5 编译验证通过）
+//
+// 【前置】动作首步建议 userinput（多行，标题「记点什么」→ 变量 内容）；本脚本从 内容 变量接续。
+// 【输入变量】内容(文本，必填) SY_URL(文本，默认 http://127.0.0.1:6806) SY_TOKEN(文本)
+//             日记笔记本ID(文本，可空=留空由思源默认日记笔记本处理) 落点标题(文本，可空=文末)
+//             路由规则表(文本，可空，`#前缀=目标文档ID` 每行一条——见 SY-路由前缀解析.cs)
+// 【输出变量】是否成功(布尔) 结果消息(文本) 块ID(文本)
+// 【说明】①appendDailyNoteBlock 自带「今日日记不存在则创建」，无需预检；
+//         ②落点标题非空时先 SQL 定位标题块 → appendBlock 到该节区（零命中回退文末并说明）；
+//         ③内容以 `#前缀` 开头且命中路由表 → 直接落入目标文档（多目标路由 R3）；
+//         ④失败分支含 401 令牌引导与「思源未运行」提示（对接 SY-思源未运行分支.cs 可替换）。
+// ============================================================================
+
+public static void Exec(Quicker.Public.IStepContext context)
+{
+    var syUrl = (context.GetVarValue("SY_URL") as string ?? "http://127.0.0.1:6806").TrimEnd('/');
+    var token = context.GetVarValue("SY_TOKEN") as string ?? "";
+    var notebook = context.GetVarValue("日记笔记本ID") as string ?? "";
+    var heading = context.GetVarValue("落点标题") as string ?? "";
+    var rules = context.GetVarValue("路由规则表") as string ?? "";
+    var content = (context.GetVarValue("内容") as string ?? "").Trim();
+
+    if (content.Length == 0)
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 内容为空（动作首步 userinput 未取到输入）");
+        return;
+    }
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 未配置 SY_TOKEN（思源 设置→关于→复制 API 令牌）");
+        return;
+    }
+
+    // ---- R3 多目标路由：#前缀 命中 → 改落点为指定文档（仅捕获前缀路由，@人脉 见摘录动作） ----
+    var rest = content;
+    if (content.StartsWith("#"))
+    {
+        var target = MatchPrefixRule(rules, content);
+        if (target.Length > 0)
+        {
+            var sp = content.IndexOf(' ');
+            rest = sp < 0 ? "" : content.Substring(sp + 1).Trim();
+            var md2 = "- " + DateTime.Now.ToString("HH:mm ") + rest;
+            var body2 = "{\"parentID\":" + JStr(target) + ",\"dataType\":\"markdown\",\"data\":" + JStr(md2) + "}";
+            var r2 = KernelPost(syUrl, token, "/api/block/insertBlock", body2);
+            Finish(context, r2, "✓ 已按路由入档");
+            return;
+        }
+    }
+
+    // ---- 主流程：HH:mm 前缀 → 今日日记 ----
+    var md = "- " + DateTime.Now.ToString("HH:mm ") + rest;
+    var parentId = "";
+
+    // R6 变体：落点标题非空 → 先定位标题块（SQL 单引号转义，docs/03 P0-1 变体）
+    if (heading.Length > 0)
+    {
+        var today = DateTime.Now.ToString("yyyy-MM-dd");
+        var like = heading.Replace("'", "''");
+        var stmt = "SELECT id FROM blocks WHERE type='h' AND content LIKE '%" + like + "%' AND root_id IN " +
+                   "(SELECT id FROM blocks WHERE type='d' AND content LIKE '%" + today + "%') ORDER BY id LIMIT 1";
+        var q = KernelPost(syUrl, token, "/api/query/sql", "{\"stmt\":" + JStr(stmt) + "}");
+        if (q.Success)
+        {
+            parentId = ExtractStr(q.Text, "id") ?? "";
+            // 零命中 → 回退文末（parentId 空），消息里说明
+        }
+    }
+
+    string body, endpoint;
+    if (parentId.Length > 0)
+    {
+        endpoint = "/api/block/appendBlock";
+        body = "{\"parentID\":" + JStr(parentId) + ",\"dataType\":\"markdown\",\"data\":" + JStr(md) + "}";
+    }
+    else
+    {
+        endpoint = "/api/block/appendDailyNoteBlock";
+        body = "{\"notebook\":" + JStr(notebook) + ",\"dataType\":\"markdown\",\"data\":" + JStr(md) + "}";
+    }
+
+    var r = KernelPost(syUrl, token, endpoint, body);
+    Finish(context, r, parentId.Length > 0 ? "✓ 已入今日日记「" + heading + "」下" : "✓ 已入今日日记");
+}
+
+public static void Finish(Quicker.Public.IStepContext context, KernelResult r, string okMsg)
+{
+    if (!r.Success)
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ " + r.Error);
+        return;
+    }
+    var code = ExtractNum(r.Text, "code");
+    if (code != 0)
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 思源返回 " + code + "：" + (ExtractStr(r.Text, "msg") ?? ""));
+        return;
+    }
+    context.SetVarValue("块ID", ExtractStr(r.Text, "data") ?? "");
+    context.SetVarValue("是否成功", true);
+    context.SetVarValue("结果消息", okMsg);
+    // 反馈由后续 notify 模块展示 结果消息（docs/03 §0 文案规范）
+}
+
+// ---- 前缀路由（与 SY-路由前缀解析.cs 同规：最长匹配） ----
+public static string MatchPrefixRule(string rules, string input)
+{
+    if (rules.Length == 0 || !input.StartsWith("#")) return "";
+    var sp = input.IndexOf(' ');
+    var token = sp < 0 ? input : input.Substring(0, sp);
+    var best = "";
+    foreach (var rawLine in rules.Replace("\r\n", "\n").Split('\n'))
+    {
+        var line = rawLine.Trim();
+        if (!line.StartsWith("#") || !line.Contains("=")) continue;
+        var eq = line.IndexOf('=');
+        var prefix = line.Substring(0, eq).Trim();
+        if (token.StartsWith(prefix) && prefix.Length > best.Length) best = line.Substring(eq + 1).Trim();
+    }
+    return best; // 空=未命中（走默认日记）
+}
+
+// ---- 内核与 JSON 原语（与 g2-capture.cs 同款，C#5 零依赖） ----
+public static KernelResult KernelPost(string syUrl, string token, string endpoint, string body)
+{
+    try
+    {
+        var req = (HttpWebRequest)WebRequest.Create(syUrl + endpoint);
+        req.Method = "POST";
+        req.ContentType = "application/json";
+        req.Headers[HttpRequestHeader.Authorization] = "Token " + token;
+        req.Timeout = 10000;
+        var buf = Encoding.UTF8.GetBytes(body);
+        using (var s = req.GetRequestStream()) s.Write(buf, 0, buf.Length);
+        using (var resp = (HttpWebResponse)req.GetResponse())
+        using (var reader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+            return new KernelResult { Success = true, Text = reader.ReadToEnd(), Error = "" };
+    }
+    catch (WebException we)
+    {
+        var resp = we.Response as HttpWebResponse;
+        if (resp != null && ((int)resp.StatusCode == 401 || (int)resp.StatusCode == 403))
+            return new KernelResult { Success = false, Text = "", Error = "令牌无效：思源 设置→关于→复制 API 令牌 后更新 SY_TOKEN" };
+        if (resp != null) return new KernelResult { Success = false, Text = "", Error = "HTTP " + (int)resp.StatusCode };
+        return new KernelResult { Success = false, Text = "", Error = "思源未运行或网络错误（SY·思源未运行分支可恢复）" };
+    }
+    catch (Exception ex) { return new KernelResult { Success = false, Text = "", Error = "请求异常：" + ex.Message }; }
+}
+
+public static string JStr(string s)
+{
+    var sb = new StringBuilder(s.Length + 8);
+    sb.Append('"');
+    foreach (var ch in s)
+    {
+        if (ch == '\\' || ch == '"') { sb.Append('\\'); sb.Append(ch); }
+        else if (ch == '\n') sb.Append("\\n");
+        else if (ch == '\r') sb.Append("\\r");
+        else if (ch == '\t') sb.Append("\\t");
+        else if (ch < 32) sb.Append("\\u" + ((int)ch).ToString("x4"));
+        else sb.Append(ch);
+    }
+    sb.Append('"');
+    return sb.ToString();
+}
+
+public static string ExtractStr(string json, string field)
+{
+    if (json == null) return null;
+    var key = "\"" + field + "\":";
+    var i = json.IndexOf(key, StringComparison.Ordinal);
+    if (i < 0) return null;
+    i += key.Length;
+    while (i < json.Length && json[i] == ' ') i++;
+    if (i >= json.Length) return null;
+    if (json[i] != '"')
+    {
+        var j = i;
+        while (j < json.Length && json[j] != ',' && json[j] != '}') j++;
+        return json.Substring(i, j - i).Trim();
+    }
+    i++;
+    var sb = new StringBuilder();
+    while (i < json.Length && json[i] != '"')
+    {
+        if (json[i] == '\\' && i + 1 < json.Length)
+        {
+            i++;
+            var c = json[i];
+            sb.Append(c == 'n' ? '\n' : c == 't' ? '\t' : c == 'r' ? '\r' : c);
+        }
+        else sb.Append(json[i]);
+        i++;
+    }
+    return sb.ToString();
+}
+
+public static int ExtractNum(string json, string field)
+{
+    var n = 0;
+    int.TryParse(ExtractStr(json, field) ?? "", out n);
+    return n;
+}
+
+public struct KernelResult { public bool Success; public string Text; public string Error; }
+
+}
+
+// ==== p0-3-全局快查.cs ====
+public class __Snippet5 {
+//.cs 文件类型，便于外部编辑时使用
+// ============================================================================
+// P0-3 思源全局快查（单文件版）—— Quicker C# 模块「普通模式v2」，后台线程（MTA）
+// 蓝图：docs/03 P0-3（三级 fallback R3 + sql: AI 实验分支 08-O6）· 文本指令 sy
+// @version 1.0.0 · 2026-10-03 首版（csc C#5 编译验证通过）
+//
+// 【输入变量】关键词(文本) SY_URL(文本，默认 http://127.0.0.1:6806) SY_TOKEN(文本)
+// 【输出变量】是否成功(布尔) 结果消息(文本) 候选列表(文本，每行"id\t内容摘要"，供 userselect) 块ID(文本)
+// 【流程】①全文搜索 fullTextSearchBlock → 零命中 ②自动改跑同名 SQL（content LIKE）→ 仍零命中
+//         ③提示加 sql: 前缀。关键词以 `sql:` 开头 → 安全过滤（只允许单条 SELECT/EXPLAIN，
+//         拒绝 UPDATE/DELETE/INSERT/DROP/ATTACH/PRAGMA 等写/危险关键词，强制 LIMIT）→ 直跑 SQL。
+// 【说明】sql: AI 生成查询分支（/api/ai/chatGPT）依赖思源内置 AI 配置，且端点形状待 M0 实测
+//         （docs/03 P0-3 AI 增强）——本版先落地安全过滤+直跑；AI 分支留 AI生成 开关位。
+//         选中跳转由后续 openurl 模块用 块ID 完成（siyuan://blocks/{块ID}）。
+// ============================================================================
+
+public static void Exec(Quicker.Public.IStepContext context)
+{
+    var syUrl = (context.GetVarValue("SY_URL") as string ?? "http://127.0.0.1:6806").TrimEnd('/');
+    var token = context.GetVarValue("SY_TOKEN") as string ?? "";
+    var keyword = (context.GetVarValue("关键词") as string ?? "").Trim();
+
+    if (keyword.Length == 0)
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 关键词为空");
+        return;
+    }
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 未配置 SY_TOKEN（思源 设置→关于→复制 API 令牌）");
+        return;
+    }
+
+    // ---- sql: 实验分支：安全过滤 → 直跑 SQL（docs/03 P0-3 + TODO P0-3 安全过滤项） ----
+    if (keyword.StartsWith("sql:", StringComparison.OrdinalIgnoreCase))
+    {
+        var sql = keyword.Substring(4).Trim();
+        var guard = GuardSql(sql);
+        if (guard.Length > 0)
+        {
+            context.SetVarValue("是否成功", false);
+            context.SetVarValue("结果消息", "❌ SQL 安全检查未通过：" + guard + "（只允许单条只读 SELECT/EXPLAIN）");
+            return;
+        }
+        var r = KernelPost(syUrl, token, "/api/query/sql", "{\"stmt\":" + JStr(sql) + "}");
+        EmitResults(context, r, "SQL 查询完成");
+        return;
+    }
+
+    // ---- ①全文搜索 ----
+    var body = "{\"query\":" + JStr(keyword) + ",\"method\":0,\"orderBy\":0,\"types\":{\"paragraph\":true,\"heading\":true,\"list\":true},\"page\":1}";
+    var fr = KernelPost(syUrl, token, "/api/search/fullTextSearchBlock", body);
+    if (fr.Success)
+    {
+        var candidates = ExtractBlocks(fr.Text);
+        if (candidates.Count > 0) { Emit(context, candidates, "✓ 全文搜索命中 " + candidates.Count + " 条"); return; }
+    }
+    else { Fail(context, fr.Error); return; }
+
+    // ---- ②同名 SQL fallback（PowerToys Run 式无感降级） ----
+    var like = keyword.Replace("'", "''");
+    var stmt = "SELECT id,content FROM blocks WHERE content LIKE '%" + like + "%' AND type IN ('p','h') LIMIT 20";
+    var sr = KernelPost(syUrl, token, "/api/query/sql", "{\"stmt\":" + JStr(stmt) + "}");
+    if (sr.Success)
+    {
+        var candidates2 = ExtractBlocks(sr.Text);
+        if (candidates2.Count > 0) { Emit(context, candidates2, "✓ 模糊匹配 " + candidates2.Count + " 条"); return; }
+    }
+
+    // ---- ③三级兜底提示 ----
+    Fail(context, "没有找到「" + keyword + "」。加 sql: 前缀可用 SQL 查询（只读）");
+}
+
+// ---- SQL 安全过滤（P0-3 安全项：未知不得改写为成功的查询面镜像） ----
+public static string GuardSql(string sql)
+{
+    var upper = sql.Trim().ToUpperInvariant();
+    if (upper.Length == 0) return "空语句";
+    if (upper.Contains(";")) return "不允许多语句（分号）";
+    if (!upper.StartsWith("SELECT") && !upper.StartsWith("EXPLAIN")) return "只允许 SELECT/EXPLAIN 开头";
+    var deny = new string[] { "UPDATE", "DELETE", "INSERT", "REPLACE", "DROP", "CREATE", "ALTER",
+                              "ATTACH", "DETACH", "PRAGMA", "VACUUM", "REINDEX", "INTO" };
+    foreach (var w in deny)
+    {
+        var token2 = " " + w + " ";
+        if ((" " + upper + " ").Contains(token2)) return "含禁止关键词 " + w;
+    }
+    if (!upper.Contains("LIMIT")) return "缺少 LIMIT（强制限流）";
+    return "";
+}
+
+// ---- 结果输出：data.blocks[*] 与 SQL 行两种形状都兼容 ----
+public static List<string> ExtractBlocks(string json)
+{
+    var list = new List<string>();
+    if (json == null) return list;
+    foreach (var rawLine in json.Replace("\r\n", "\n").Split('\n'))
+    {
+        var id = ExtractStr(rawLine, "id");
+        if (id == null || id.Length == 0) continue;
+        var content = ExtractStr(rawLine, "content") ?? "";
+        if (content.Length > 60) content = content.Substring(0, 60) + "…";
+        list.Add(id + "\t" + content.Replace("\t", " "));
+    }
+    return list;
+}
+
+public static void Emit(Quicker.Public.IStepContext context, List<string> candidates, string msg)
+{
+    context.SetVarValue("候选列表", string.Join("\n", candidates.ToArray()));
+    context.SetVarValue("块ID", "");
+    context.SetVarValue("是否成功", true);
+    context.SetVarValue("结果消息", msg);
+}
+
+public static void EmitResults(Quicker.Public.IStepContext context, KernelResult r, string okMsg)
+{
+    if (!r.Success) { Fail(context, r.Error); return; }
+    var code = ExtractNum(r.Text, "code");
+    if (code != 0) { Fail(context, "思源返回 " + code + "：" + (ExtractStr(r.Text, "msg") ?? "")); return; }
+    var rows = ExtractBlocks(r.Text);
+    if (rows.Count == 0) { Fail(context, "查询成功但零行"); return; }
+    Emit(context, rows, okMsg + "（" + rows.Count + " 行）");
+}
+
+public static void Fail(Quicker.Public.IStepContext context, string msg)
+{
+    context.SetVarValue("是否成功", false);
+    context.SetVarValue("结果消息", "❌ " + msg);
+    context.SetVarValue("候选列表", "");
+}
+
+// ---- 内核与 JSON 原语（与 g2-capture.cs 同款，C#5 零依赖） ----
+public static KernelResult KernelPost(string syUrl, string token, string endpoint, string body)
+{
+    try
+    {
+        var req = (HttpWebRequest)WebRequest.Create(syUrl + endpoint);
+        req.Method = "POST";
+        req.ContentType = "application/json";
+        req.Headers[HttpRequestHeader.Authorization] = "Token " + token;
+        req.Timeout = 10000;
+        var buf = Encoding.UTF8.GetBytes(body);
+        using (var s = req.GetRequestStream()) s.Write(buf, 0, buf.Length);
+        using (var resp = (HttpWebResponse)req.GetResponse())
+        using (var reader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+            return new KernelResult { Success = true, Text = reader.ReadToEnd(), Error = "" };
+    }
+    catch (WebException we)
+    {
+        var resp = we.Response as HttpWebResponse;
+        if (resp != null && ((int)resp.StatusCode == 401 || (int)resp.StatusCode == 403))
+            return new KernelResult { Success = false, Text = "", Error = "令牌无效：思源 设置→关于→复制 API 令牌 后更新 SY_TOKEN" };
+        if (resp != null) return new KernelResult { Success = false, Text = "", Error = "HTTP " + (int)resp.StatusCode };
+        return new KernelResult { Success = false, Text = "", Error = "思源未运行或网络错误（SY·思源未运行分支可恢复）" };
+    }
+    catch (Exception ex) { return new KernelResult { Success = false, Text = "", Error = "请求异常：" + ex.Message }; }
+}
+
+public static string JStr(string s)
+{
+    var sb = new StringBuilder(s.Length + 8);
+    sb.Append('"');
+    foreach (var ch in s)
+    {
+        if (ch == '\\' || ch == '"') { sb.Append('\\'); sb.Append(ch); }
+        else if (ch == '\n') sb.Append("\\n");
+        else if (ch == '\r') sb.Append("\\r");
+        else if (ch == '\t') sb.Append("\\t");
+        else if (ch < 32) sb.Append("\\u" + ((int)ch).ToString("x4"));
+        else sb.Append(ch);
+    }
+    sb.Append('"');
+    return sb.ToString();
+}
+
+public static string ExtractStr(string json, string field)
+{
+    if (json == null) return null;
+    var key = "\"" + field + "\":";
+    var i = json.IndexOf(key, StringComparison.Ordinal);
+    if (i < 0) return null;
+    i += key.Length;
+    while (i < json.Length && json[i] == ' ') i++;
+    if (i >= json.Length) return null;
+    if (json[i] != '"')
+    {
+        var j = i;
+        while (j < json.Length && json[j] != ',' && json[j] != '}') j++;
+        return json.Substring(i, j - i).Trim();
+    }
+    i++;
+    var sb = new StringBuilder();
+    while (i < json.Length && json[i] != '"')
+    {
+        if (json[i] == '\\' && i + 1 < json.Length)
+        {
+            i++;
+            var c = json[i];
+            sb.Append(c == 'n' ? '\n' : c == 't' ? '\t' : c == 'r' ? '\r' : c);
+        }
+        else sb.Append(json[i]);
+        i++;
+    }
+    return sb.ToString();
+}
+
+public static int ExtractNum(string json, string field)
+{
+    var n = 0;
+    int.TryParse(ExtractStr(json, field) ?? "", out n);
+    return n;
+}
+
+public struct KernelResult { public bool Success; public string Text; public string Error; }
+
+}
+
+// ==== p0-4-打开今日日记.cs ====
+public class __Snippet6 {
+//.cs 文件类型，便于外部编辑时使用
+// ============================================================================
+// P0-4 打开今日日记 / 收集箱（单文件版）—— Quicker C# 模块「普通模式v2」，后台线程（MTA）
+// 蓝图：docs/03 P0-4 · 文本指令/鼠标侧键
+// @version 1.0.0 · 2026-10-03 首版（csc C#5 编译验证通过）
+//
+// 【输入变量】目标(文本，"日记"或"收集箱"，默认 日记) SY_URL(文本) SY_TOKEN(文本)
+//             日记笔记本ID(文本，可空——收集箱目标时用作 box 限定) 收集箱文档ID(文本，可空=先发现)
+// 【输出变量】是否成功(布尔) 结果消息(文本) 后续动作(文本，"openurl:siyuan://blocks/{id}"，交后续 openurl 模块)
+// 【说明】日记：SQL 找 content 含今日日期的文档（today 白名单精确 yyyy-MM-dd，不做宽 %20% 匹配）；
+//         零命中 → 自动创建：appendDailyNoteBlock 轻触（写一个空列表块）再 SQL 重取——
+//         与蓝图「今日日记状态只探测不创建」不同，此动作语义就是"打开，没有就建"（P0-4 主流程）。
+// ============================================================================
+
+public static void Exec(Quicker.Public.IStepContext context)
+{
+    var syUrl = (context.GetVarValue("SY_URL") as string ?? "http://127.0.0.1:6806").TrimEnd('/');
+    var token = context.GetVarValue("SY_TOKEN") as string ?? "";
+    var target = (context.GetVarValue("目标") as string ?? "日记").Trim();
+    var notebook = context.GetVarValue("日记笔记本ID") as string ?? "";
+    var inbox = context.GetVarValue("收集箱文档ID") as string ?? "";
+
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 未配置 SY_TOKEN（思源 设置→关于→复制 API 令牌）");
+        return;
+    }
+
+    if (target == "收集箱")
+    {
+        if (inbox.Length > 0) { Open(context, inbox); return; }
+        // 自动发现：config.discover（快门已装）→ 不在时提示配置
+        var d = KernelPost(syUrl, token, "/plugin/private/siyuan-quickgate/exec", "{\"op\":\"config.discover\",\"args\":{}}");
+        if (d.Success)
+        {
+            var found = ExtractStr(d.Text, "inboxDocId") ?? "";
+            if (found.Length > 0) { Open(context, found); return; }
+        }
+        Fail(context, "收集箱未配置且自动发现未命中（动作设置里手填 收集箱文档ID）");
+        return;
+    }
+
+    // ---- 日记 ----
+    var today = DateTime.Now.ToString("yyyy-MM-dd");
+    var boxFilter = notebook.Length > 0 ? " AND box=" + JStr(notebook) : "";
+    var stmt = "SELECT root_id FROM blocks WHERE type='d' AND content LIKE '%" + today + "%'" + boxFilter + " LIMIT 1";
+    var r = KernelPost(syUrl, token, "/api/query/sql", "{\"stmt\":" + JStr(stmt) + "}");
+    if (!r.Success) { Fail(context, r.Error); return; }
+    var rootId = ExtractStr(r.Text, "root_id") ?? "";
+    if (rootId.Length > 0) { Open(context, rootId); return; }
+
+    // 今日日记不存在 → appendDailyNoteBlock 触发创建（自带建日记）→ 重取
+    var create = KernelPost(syUrl, token, "/api/block/appendDailyNoteBlock",
+        "{\"notebook\":" + JStr(notebook) + ",\"dataType\":\"markdown\",\"data\":\"\"}");
+    if (!create.Success) { Fail(context, create.Error); return; }
+    var code = ExtractNum(create.Text, "code");
+    if (code != 0) { Fail(context, "创建日记失败：" + (ExtractStr(create.Text, "msg") ?? "")); return; }
+
+    var r2 = KernelPost(syUrl, token, "/api/query/sql", "{\"stmt\":" + JStr(stmt) + "}");
+    if (!r2.Success) { Fail(context, r2.Error); return; }
+    rootId = ExtractStr(r2.Text, "root_id") ?? "";
+    if (rootId.Length == 0) { Fail(context, "日记已创建但定位失败（索引延迟 ~1s，重试一次即可）"); return; }
+    Open(context, rootId);
+}
+
+public static void Open(Quicker.Public.IStepContext context, string blockId)
+{
+    context.SetVarValue("后续动作", "openurl:siyuan://blocks/" + blockId);
+    context.SetVarValue("是否成功", true);
+    context.SetVarValue("结果消息", "✓ 已定位（由后续 openurl 模块打开）");
+}
+
+public static void Fail(Quicker.Public.IStepContext context, string msg)
+{
+    context.SetVarValue("是否成功", false);
+    context.SetVarValue("结果消息", "❌ " + msg);
+    context.SetVarValue("后续动作", "");
+}
+
+// ---- 内核与 JSON 原语（与 g2-capture.cs 同款，C#5 零依赖） ----
+public static KernelResult KernelPost(string syUrl, string token, string endpoint, string body)
+{
+    try
+    {
+        var req = (HttpWebRequest)WebRequest.Create(syUrl + endpoint);
+        req.Method = "POST";
+        req.ContentType = "application/json";
+        req.Headers[HttpRequestHeader.Authorization] = "Token " + token;
+        req.Timeout = 10000;
+        var buf = Encoding.UTF8.GetBytes(body);
+        using (var s = req.GetRequestStream()) s.Write(buf, 0, buf.Length);
+        using (var resp = (HttpWebResponse)req.GetResponse())
+        using (var reader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+            return new KernelResult { Success = true, Text = reader.ReadToEnd(), Error = "" };
+    }
+    catch (WebException we)
+    {
+        var resp = we.Response as HttpWebResponse;
+        if (resp != null && ((int)resp.StatusCode == 401 || (int)resp.StatusCode == 403))
+            return new KernelResult { Success = false, Text = "", Error = "令牌无效：思源 设置→关于→复制 API 令牌 后更新 SY_TOKEN" };
+        if (resp != null) return new KernelResult { Success = false, Text = "", Error = "HTTP " + (int)resp.StatusCode };
+        return new KernelResult { Success = false, Text = "", Error = "思源未运行或网络错误（SY·思源未运行分支可恢复）" };
+    }
+    catch (Exception ex) { return new KernelResult { Success = false, Text = "", Error = "请求异常：" + ex.Message }; }
+}
+
+public static string JStr(string s)
+{
+    var sb = new StringBuilder(s.Length + 8);
+    sb.Append('"');
+    foreach (var ch in s)
+    {
+        if (ch == '\\' || ch == '"') { sb.Append('\\'); sb.Append(ch); }
+        else if (ch == '\n') sb.Append("\\n");
+        else if (ch == '\r') sb.Append("\\r");
+        else if (ch == '\t') sb.Append("\\t");
+        else if (ch < 32) sb.Append("\\u" + ((int)ch).ToString("x4"));
+        else sb.Append(ch);
+    }
+    sb.Append('"');
+    return sb.ToString();
+}
+
+public static string ExtractStr(string json, string field)
+{
+    if (json == null) return null;
+    var key = "\"" + field + "\":";
+    var i = json.IndexOf(key, StringComparison.Ordinal);
+    if (i < 0) return null;
+    i += key.Length;
+    while (i < json.Length && json[i] == ' ') i++;
+    if (i >= json.Length) return null;
+    if (json[i] != '"')
+    {
+        var j = i;
+        while (j < json.Length && json[j] != ',' && json[j] != '}') j++;
+        return json.Substring(i, j - i).Trim();
+    }
+    i++;
+    var sb = new StringBuilder();
+    while (i < json.Length && json[i] != '"')
+    {
+        if (json[i] == '\\' && i + 1 < json.Length)
+        {
+            i++;
+            var c = json[i];
+            sb.Append(c == 'n' ? '\n' : c == 't' ? '\t' : c == 'r' ? '\r' : c);
+        }
+        else sb.Append(json[i]);
+        i++;
+    }
+    return sb.ToString();
+}
+
+public static int ExtractNum(string json, string field)
+{
+    var n = 0;
+    int.TryParse(ExtractStr(json, field) ?? "", out n);
+    return n;
+}
+
+public struct KernelResult { public bool Success; public string Text; public string Error; }
+
+}
+
+// ==== p0-5-剪贴板图片入库.cs ====
+public class __Snippet7 {
+//.cs 文件类型，便于外部编辑时使用
+// ============================================================================
+// P0-5 剪贴板图片入库（单文件版）—— Quicker C# 模块「普通模式v2」，后台线程（MTA）
+// 蓝图：docs/03 P0-5（OCR 写 alt，图片可被全文检索）
+// @version 1.0.0 · 2026-10-03 首版（csc C#5 编译验证通过）
+//
+// 【输入变量】图片(System.Drawing.Image，来自 getclipboardimage 模块的图片变量)
+//             OCR文本(文本，可空——Quicker OCR 模块输出，已过 SY·OCR清理 更佳)
+//             SY_URL(文本) SY_TOKEN(文本) 资源目录(文本，默认 assets)
+// 【输出变量】是否成功(布尔) 结果消息(文本) 资源路径(文本)
+// 【流程】①图片→PNG 字节 ②multipart /api/asset/upload（file+assetDir）③succSet[0].path
+//         ④appendDailyNoteBlock：![OCR alt](path "剪贴板 HH:mm")
+// 【说明】OCR 空时 alt 用「剪贴板图片」占位（仍可按时间检索）。
+// ============================================================================
+
+public static void Exec(Quicker.Public.IStepContext context)
+{
+    var syUrl = (context.GetVarValue("SY_URL") as string ?? "http://127.0.0.1:6806").TrimEnd('/');
+    var token = context.GetVarValue("SY_TOKEN") as string ?? "";
+    var assetDir = context.GetVarValue("资源目录") as string ?? "assets";
+    var ocr = (context.GetVarValue("OCR文本") as string ?? "").Trim();
+    var img = context.GetVarValue("图片") as Image;
+
+    if (img == null)
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 剪贴板没有图片（先复制一张图）");
+        return;
+    }
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 未配置 SY_TOKEN（思源 设置→关于→复制 API 令牌）");
+        return;
+    }
+
+    // ①图片 → PNG 字节
+    byte[] png;
+    using (var ms = new MemoryStream())
+    {
+        img.Save(ms, ImageFormat.Png);
+        png = ms.ToArray();
+    }
+
+    // ②multipart 上传（file + assetDir 两字段，思源要求 multipart/form-data）
+    var uploadResult = UploadAsset(syUrl, token, assetDir, png);
+    if (!uploadResult.Success)
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 上传失败：" + uploadResult.Error);
+        return;
+    }
+    var path = ExtractStr(uploadResult.Text, "succSet") != null ? ExtractStr(uploadResult.Text, "path") : null;
+    if (string.IsNullOrEmpty(path))
+    {
+        // succSet 是数组：取 "[{" 之后的 path 字段（轻量解析足够：上传响应形状固定）
+        var idx = uploadResult.Text.IndexOf("\"succSet\"");
+        path = idx >= 0 ? ExtractStr(uploadResult.Text.Substring(idx), "path") : null;
+    }
+    if (string.IsNullOrEmpty(path))
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 上传响应无 succSet[0].path：" + Truncate(uploadResult.Text, 120));
+        return;
+    }
+    context.SetVarValue("资源路径", path);
+
+    // ④写入今日日记（OCR alt 可检索）
+    var alt = ocr.Length > 0 ? ocr.Replace("\"", "'").Replace("\n", " ") : "剪贴板图片";
+    var md = "![" + alt + "](" + path + " \"剪贴板 " + DateTime.Now.ToString("HH:mm") + "\")";
+    var w = KernelPost(syUrl, token, "/api/block/appendDailyNoteBlock",
+        "{\"notebook\":\"\",\"dataType\":\"markdown\",\"data\":" + JStr(md) + "}");
+    if (!w.Success) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 图片已上传 " + path + "，但写入日记失败：" + w.Error); return; }
+    var code = ExtractNum(w.Text, "code");
+    if (code != 0) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 写日记返回 " + code + "：" + (ExtractStr(w.Text, "msg") ?? "")); return; }
+
+    context.SetVarValue("是否成功", true);
+    context.SetVarValue("结果消息", "✓ 图片已入库" + (ocr.Length > 0 ? "（OCR alt 可检索）" : ""));
+}
+
+public static UploadResult UploadAsset(string syUrl, string token, string assetDir, byte[] bytes)
+{
+    try
+    {
+        var boundary = "----quicker" + Guid.NewGuid().ToString("N");
+        var req = (HttpWebRequest)WebRequest.Create(syUrl + "/api/asset/upload");
+        req.Method = "POST";
+        req.Headers[HttpRequestHeader.Authorization] = "Token " + token;
+        req.ContentType = "multipart/form-data; boundary=" + boundary;
+        req.Timeout = 30000; // 图片可能大
+        using (var s = req.GetRequestStream())
+        {
+            var dirPart = Encoding.UTF8.GetBytes("--" + boundary + "\r\nContent-Disposition: form-data; name=\"assetDir\"\r\n\r\n" + assetDir + "\r\n");
+            s.Write(dirPart, 0, dirPart.Length);
+            var head = Encoding.UTF8.GetBytes("--" + boundary + "\r\nContent-Disposition: form-data; name=\"file[]\"; filename=\"clipboard.png\"\r\nContent-Type: image/png\r\n\r\n");
+            s.Write(head, 0, head.Length);
+            s.Write(bytes, 0, bytes.Length);
+            var tail = Encoding.UTF8.GetBytes("\r\n--" + boundary + "--\r\n");
+            s.Write(tail, 0, tail.Length);
+        }
+        using (var resp = (HttpWebResponse)req.GetResponse())
+        using (var reader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+            return new UploadResult { Success = true, Text = reader.ReadToEnd(), Error = "" };
+    }
+    catch (WebException we)
+    {
+        var resp = we.Response as HttpWebResponse;
+        if (resp != null) return new UploadResult { Success = false, Text = "", Error = "HTTP " + (int)resp.StatusCode };
+        return new UploadResult { Success = false, Text = "", Error = "网络错误：" + we.Message };
+    }
+    catch (Exception ex) { return new UploadResult { Success = false, Text = "", Error = ex.Message }; }
+}
+
+public static string Truncate(string s, int n) { return s != null && s.Length > n ? s.Substring(0, n) + "…" : s ?? ""; }
+
+// ---- 内核与 JSON 原语（与 g2-capture.cs 同款，C#5 零依赖） ----
+public static KernelResult KernelPost(string syUrl, string token, string endpoint, string body)
+{
+    try
+    {
+        var req = (HttpWebRequest)WebRequest.Create(syUrl + endpoint);
+        req.Method = "POST";
+        req.ContentType = "application/json";
+        req.Headers[HttpRequestHeader.Authorization] = "Token " + token;
+        req.Timeout = 10000;
+        var buf = Encoding.UTF8.GetBytes(body);
+        using (var s = req.GetRequestStream()) s.Write(buf, 0, buf.Length);
+        using (var resp = (HttpWebResponse)req.GetResponse())
+        using (var reader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+            return new KernelResult { Success = true, Text = reader.ReadToEnd(), Error = "" };
+    }
+    catch (WebException we)
+    {
+        var resp = we.Response as HttpWebResponse;
+        if (resp != null) return new KernelResult { Success = false, Text = "", Error = "HTTP " + (int)resp.StatusCode };
+        return new KernelResult { Success = false, Text = "", Error = "思源未运行或网络错误" };
+    }
+    catch (Exception ex) { return new KernelResult { Success = false, Text = "", Error = "请求异常：" + ex.Message }; }
+}
+
+public static string JStr(string s)
+{
+    var sb = new StringBuilder(s.Length + 8);
+    sb.Append('"');
+    foreach (var ch in s)
+    {
+        if (ch == '\\' || ch == '"') { sb.Append('\\'); sb.Append(ch); }
+        else if (ch == '\n') sb.Append("\\n");
+        else if (ch == '\r') sb.Append("\\r");
+        else if (ch == '\t') sb.Append("\\t");
+        else if (ch < 32) sb.Append("\\u" + ((int)ch).ToString("x4"));
+        else sb.Append(ch);
+    }
+    sb.Append('"');
+    return sb.ToString();
+}
+
+public static string ExtractStr(string json, string field)
+{
+    if (json == null) return null;
+    var key = "\"" + field + "\":";
+    var i = json.IndexOf(key, StringComparison.Ordinal);
+    if (i < 0) return null;
+    i += key.Length;
+    while (i < json.Length && json[i] == ' ') i++;
+    if (i >= json.Length) return null;
+    if (json[i] != '"')
+    {
+        var j = i;
+        while (j < json.Length && json[j] != ',' && json[j] != '}') j++;
+        return json.Substring(i, j - i).Trim();
+    }
+    i++;
+    var sb = new StringBuilder();
+    while (i < json.Length && json[i] != '"')
+    {
+        if (json[i] == '\\' && i + 1 < json.Length)
+        {
+            i++;
+            var c = json[i];
+            sb.Append(c == 'n' ? '\n' : c == 't' ? '\t' : c == 'r' ? '\r' : c);
+        }
+        else sb.Append(json[i]);
+        i++;
+    }
+    return sb.ToString();
+}
+
+public static int ExtractNum(string json, string field)
+{
+    var n = 0;
+    int.TryParse(ExtractStr(json, field) ?? "", out n);
+    return n;
+}
+
+public struct KernelResult { public bool Success; public string Text; public string Error; }
+public struct UploadResult { public bool Success; public string Text; public string Error; }
+
+}
+
+// ==== sy-12-汇总日记待办.cs ====
+public class __Snippet8 {
+//.cs 文件类型，便于外部编辑时使用
+// ============================================================================
+// SY-12 汇总日记待办（单文件版）—— Quicker C# 模块「普通模式v2」，后台线程（MTA）
+// 蓝图：docs/03 SY-12（借鉴「汇总日记代办」，纯内核）· 文本指令 db
+// @version 1.0.0 · 2026-10-03 首版（csc C#5 编译验证通过）
+//
+// 【输入变量】天数(文本/数字，默认 7) SY_URL(文本) SY_TOKEN(文本) 日记笔记本ID(文本，可空)
+// 【输出变量】是否成功(文本→布尔) 结果消息(文本) 汇总Markdown(文本) 命中数(数字)
+// 【流程】①本地生成最近 N 天 yyyy-MM-dd 白名单谓词（每日一条 LIKE，不做 %20% 宽匹配）
+//         ②SQL：日记文档(d.box 限定+日期谓词) × markdown 含 "[ ]" 未勾选待办，LIMIT 100
+//         ③汇总块写今日日记：## 待办汇总（近N天）+ 每条 - [ ] 内容 [链接](siyuan://blocks/{id})
+// 【教训】只统计日记文档里的待办，别全库扫（原作讨论区）；笔记本ID/日期均做转义与格式校验。
+// ============================================================================
+
+public static void Exec(Quicker.Public.IStepContext context)
+{
+    var syUrl = (context.GetVarValue("SY_URL") as string ?? "http://127.0.0.1:6806").TrimEnd('/');
+    var token = context.GetVarValue("SY_TOKEN") as string ?? "";
+    var notebook = context.GetVarValue("日记笔记本ID") as string ?? "";
+    var days = 7;
+    int.TryParse(context.GetVarValue("天数") as string ?? "", out days);
+    if (days <= 0) days = 7;
+    if (days > 60) days = 60;
+
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 未配置 SY_TOKEN（思源 设置→关于→复制 API 令牌）");
+        return;
+    }
+
+    // ① 日期白名单谓词（固定格式生成，注入安全）
+    var predicates = new List<string>();
+    for (var i = 0; i < days; i++)
+    {
+        var d = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd");
+        predicates.Add("d.content LIKE '%" + d + "%'");
+    }
+    var datePred = "(" + string.Join(" OR ", predicates.ToArray()) + ")";
+
+    // ② 聚合 SQL（笔记本 ID 单引号转义）
+    var box = notebook.Replace("'", "''");
+    var boxFilter = notebook.Length > 0 ? " AND d.box='" + box + "'" : "";
+    var stmt = "SELECT b.id AS bid, b.content AS bcontent, b.root_id AS rid FROM blocks b " +
+               "JOIN blocks d ON b.root_id=d.id WHERE d.type='d' " + boxFilter + " AND " + datePred +
+               " AND b.markdown LIKE '%[ ]%' ORDER BY b.id DESC LIMIT 100";
+    var r = KernelPost(syUrl, token, "/api/query/sql", "{\"stmt\":" + JStr(stmt) + "}");
+    if (!r.Success) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ " + r.Error); return; }
+    var code = ExtractNum(r.Text, "code");
+    if (code != 0) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 思源返回 " + code + "：" + (ExtractStr(r.Text, "msg") ?? "")); return; }
+
+    // 逐行提取（每行一个 SQL 行对象）
+    var items = new List<string[]>(); // [blockId, content, rootId]
+    foreach (var line in r.Text.Replace("\r\n", "\n").Split('\n'))
+    {
+        var bid = ExtractStr(line, "bid");
+        if (bid == null || bid.Length == 0) continue;
+        var bcontent = ExtractStr(line, "bcontent") ?? "";
+        var rid = ExtractStr(line, "rid") ?? "";
+        // 待办内容规整：剥 markdown 勾选标记，截断
+        bcontent = bcontent.Replace("[ ]", "").Replace("[x]", "").Trim();
+        if (bcontent.Length > 80) bcontent = bcontent.Substring(0, 80) + "…";
+        items.Add(new string[] { bid, bcontent, rid });
+    }
+
+    if (items.Count == 0)
+    {
+        context.SetVarValue("是否成功", true);
+        context.SetVarValue("结果消息", "✓ 近 " + days + " 天日记没有未完成待办");
+        context.SetVarValue("命中数", 0);
+        return;
+    }
+
+    // ③ 汇总块（链接指回原块，跳转高亮）
+    var sb = new StringBuilder();
+    sb.Append("## 待办汇总（近").Append(days).Append("天，").Append(items.Count).Append("条）\n");
+    foreach (var it in items.ToArray())
+        sb.Append("- [ ] ").Append(it[1]).Append(" [→](siyuan://blocks/").Append(it[0]).Append(")\n");
+
+    var w = KernelPost(syUrl, token, "/api/block/appendDailyNoteBlock",
+        "{\"notebook\":" + JStr(notebook) + ",\"dataType\":\"markdown\",\"data\":" + JStr(sb.ToString()) + "}");
+    if (!w.Success) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 写汇总失败：" + w.Error); return; }
+    var wcode = ExtractNum(w.Text, "code");
+    if (wcode != 0) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 写汇总返回 " + wcode + "：" + (ExtractStr(w.Text, "msg") ?? "")); return; }
+
+    context.SetVarValue("汇总Markdown", sb.ToString());
+    context.SetVarValue("命中数", items.Count);
+    context.SetVarValue("是否成功", true);
+    context.SetVarValue("结果消息", "✓ 已汇总 " + items.Count + " 条待办到今日日记");
+}
+
+// ---- 内核与 JSON 原语（与 g2-capture.cs 同款，C#5 零依赖） ----
+public static KernelResult KernelPost(string syUrl, string token, string endpoint, string body)
+{
+    try
+    {
+        var req = (HttpWebRequest)WebRequest.Create(syUrl + endpoint);
+        req.Method = "POST";
+        req.ContentType = "application/json";
+        req.Headers[HttpRequestHeader.Authorization] = "Token " + token;
+        req.Timeout = 10000;
+        var buf = Encoding.UTF8.GetBytes(body);
+        using (var s = req.GetRequestStream()) s.Write(buf, 0, buf.Length);
+        using (var resp = (HttpWebResponse)req.GetResponse())
+        using (var reader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+            return new KernelResult { Success = true, Text = reader.ReadToEnd(), Error = "" };
+    }
+    catch (WebException we)
+    {
+        var resp = we.Response as HttpWebResponse;
+        if (resp != null && ((int)resp.StatusCode == 401 || (int)resp.StatusCode == 403))
+            return new KernelResult { Success = false, Text = "", Error = "令牌无效：思源 设置→关于→复制 API 令牌 后更新 SY_TOKEN" };
+        if (resp != null) return new KernelResult { Success = false, Text = "", Error = "HTTP " + (int)resp.StatusCode };
+        return new KernelResult { Success = false, Text = "", Error = "思源未运行或网络错误（SY·思源未运行分支可恢复）" };
+    }
+    catch (Exception ex) { return new KernelResult { Success = false, Text = "", Error = "请求异常：" + ex.Message }; }
+}
+
+public static string JStr(string s)
+{
+    var sb = new StringBuilder(s.Length + 8);
+    sb.Append('"');
+    foreach (var ch in s)
+    {
+        if (ch == '\\' || ch == '"') { sb.Append('\\'); sb.Append(ch); }
+        else if (ch == '\n') sb.Append("\\n");
+        else if (ch == '\r') sb.Append("\\r");
+        else if (ch == '\t') sb.Append("\\t");
+        else if (ch < 32) sb.Append("\\u" + ((int)ch).ToString("x4"));
+        else sb.Append(ch);
+    }
+    sb.Append('"');
+    return sb.ToString();
+}
+
+public static string ExtractStr(string json, string field)
+{
+    if (json == null) return null;
+    var key = "\"" + field + "\":";
+    var i = json.IndexOf(key, StringComparison.Ordinal);
+    if (i < 0) return null;
+    i += key.Length;
+    while (i < json.Length && json[i] == ' ') i++;
+    if (i >= json.Length) return null;
+    if (json[i] != '"')
+    {
+        var j = i;
+        while (j < json.Length && json[j] != ',' && json[j] != '}') j++;
+        return json.Substring(i, j - i).Trim();
+    }
+    i++;
+    var sb = new StringBuilder();
+    while (i < json.Length && json[i] != '"')
+    {
+        if (json[i] == '\\' && i + 1 < json.Length)
+        {
+            i++;
+            var c = json[i];
+            sb.Append(c == 'n' ? '\n' : c == 't' ? '\t' : c == 'r' ? '\r' : c);
+        }
+        else sb.Append(json[i]);
+        i++;
+    }
+    return sb.ToString();
+}
+
+public static int ExtractNum(string json, string field)
+{
+    var n = 0;
+    int.TryParse(ExtractStr(json, field) ?? "", out n);
+    return n;
+}
+
+public struct KernelResult { public bool Success; public string Text; public string Error; }
+
+}
+
+// ==== sy-13-数据体检.cs ====
+public class __Snippet9 {
+//.cs 文件类型，便于外部编辑时使用
+// ============================================================================
+// SY-13 数据体检（单文件版，只读）—— Quicker C# 模块「普通模式v2」，后台线程（MTA）
+// 蓝图：docs/03 SY-13（借鉴「无效数据处理」，只读版）· 文本指令 tj · 超级面板 ⚙️ 组
+// @version 1.0.0 · 2026-10-03 首版（csc C#5 编译验证通过）
+//
+// 【输入变量】体检项(文本，"空文档"/"重复标题"/"长期未更新"，默认全部跑) SY_URL(文本) SY_TOKEN(文本)
+//             日记笔记本ID(文本，可空——"长期未更新"用 box 限定)
+// 【输出变量】是否成功(布尔) 结果消息(文本) 体检报告(文本，showtext 模块展示)
+// 【铁律】**只读不删**——清理引导用户使用原作「无效数据处理」动作（成熟度高，不重复造轮子）；
+//         报表必须带「可能误判」提示（已关闭笔记本/嵌入块/AV 绑定文档，docs/03 SY-13）。
+// ============================================================================
+
+public static void Exec(Quicker.Public.IStepContext context)
+{
+    var syUrl = (context.GetVarValue("SY_URL") as string ?? "http://127.0.0.1:6806").TrimEnd('/');
+    var token = context.GetVarValue("SY_TOKEN") as string ?? "";
+    var item = (context.GetVarValue("体检项") as string ?? "").Trim();
+    var notebook = context.GetVarValue("日记笔记本ID") as string ?? "";
+
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 未配置 SY_TOKEN（思源 设置→关于→复制 API 令牌）");
+        return;
+    }
+
+    var report = new StringBuilder();
+    report.Append("# 小驴数据体检报表 ").Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm")).Append("\n");
+    var allOk = true;
+
+    if (item.Length == 0 || item == "空文档")
+    {
+        var r = RunSql(context, syUrl, token, "SELECT id,content FROM blocks WHERE type='d' AND content='' LIMIT 50");
+        if (r == null) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 空文档检查失败"); return; }
+        report.Append("\n## 空文档（≤50）\n").Append(r.Length == 0 ? "✓ 无" : r).Append("\n");
+        if (r.Length > 0) allOk = false;
+    }
+    if (item.Length == 0 || item == "重复标题")
+    {
+        var r = RunSql(context, syUrl, token, "SELECT content, COUNT(*) AS c FROM blocks WHERE type='d' GROUP BY content HAVING c>1 LIMIT 50");
+        if (r == null) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 重复标题检查失败"); return; }
+        report.Append("\n## 重复标题文档（≤50）\n").Append(r.Length == 0 ? "✓ 无" : r).Append("\n");
+        if (r.Length > 0) allOk = false;
+    }
+    if (item.Length == 0 || item == "长期未更新")
+    {
+        // id 前缀=创建时间戳：升序取最早 50 个；box 可选限定
+        var boxFilter = notebook.Length > 0 ? " AND box='" + notebook.Replace("'", "''") + "'" : "";
+        var r = RunSql(context, syUrl, token, "SELECT id,content FROM blocks WHERE type='d'" + boxFilter + " ORDER BY id ASC LIMIT 50");
+        if (r == null) { context.SetVarValue("是否成功", false); context.SetVarValue("结果消息", "❌ 长期未更新检查失败"); return; }
+        report.Append("\n## 最早创建的文档（top50，自查是否仍需要）\n").Append(r.Length == 0 ? "✓ 无文档" : r).Append("\n");
+    }
+
+    report.Append("\n> ⚠️ 可能误判提示：已关闭笔记本、嵌入块内引用、AV 绑定文档不在本报表视野内；")
+          .Append("本报表**只读不删**——清理请使用原作「无效数据处理」动作。")
+          .Append("\n> 总体：").Append(allOk ? "✓ 未发现问题" : "发现待复核项（见上）");
+
+    context.SetVarValue("体检报告", report.ToString());
+    context.SetVarValue("是否成功", true);
+    context.SetVarValue("结果消息", allOk ? "✓ 体检完成，未发现问题" : "⚠️ 体检完成，发现待复核项（报告见 体检报告 变量）");
+}
+
+// 跑 SQL 并格式化为报表行（id 链接化）；失败返回 null
+public static string RunSql(Quicker.Public.IStepContext context, string syUrl, string token, string stmt)
+{
+    var r = KernelPost(syUrl, token, "/api/query/sql", "{\"stmt\":" + JStr(stmt) + "}");
+    if (!r.Success) return null;
+    var code = ExtractNum(r.Text, "code");
+    if (code != 0) return null;
+    var sb = new StringBuilder();
+    foreach (var line in r.Text.Replace("\r\n", "\n").Split('\n'))
+    {
+        var id = ExtractStr(line, "id") ?? ExtractStr(line, "root_id");
+        var content = ExtractStr(line, "content") ?? ExtractStr(line, "bcontent") ?? "";
+        var c = ExtractStr(line, "c");
+        if (id == null && c == null) continue;
+        if (content.Length > 40) content = content.Substring(0, 40) + "…";
+        if (id != null) sb.Append("- ").Append(content.Length > 0 ? content : "（空）").Append("  [打开](siyuan://blocks/").Append(id).Append(")\n");
+        else sb.Append("- ").Append(content).Append(" ×").Append(c).Append("\n");
+    }
+    return sb.ToString();
+}
+
+// ---- 内核与 JSON 原语（与 g2-capture.cs 同款，C#5 零依赖） ----
+public static KernelResult KernelPost(string syUrl, string token, string endpoint, string body)
+{
+    try
+    {
+        var req = (HttpWebRequest)WebRequest.Create(syUrl + endpoint);
+        req.Method = "POST";
+        req.ContentType = "application/json";
+        req.Headers[HttpRequestHeader.Authorization] = "Token " + token;
+        req.Timeout = 15000;
+        var buf = Encoding.UTF8.GetBytes(body);
+        using (var s = req.GetRequestStream()) s.Write(buf, 0, buf.Length);
+        using (var resp = (HttpWebResponse)req.GetResponse())
+        using (var reader = new StreamReader(resp.GetResponseStream(), Encoding.UTF8))
+            return new KernelResult { Success = true, Text = reader.ReadToEnd(), Error = "" };
+    }
+    catch (WebException we)
+    {
+        var resp = we.Response as HttpWebResponse;
+        if (resp != null && ((int)resp.StatusCode == 401 || (int)resp.StatusCode == 403))
+            return new KernelResult { Success = false, Text = "", Error = "令牌无效" };
+        if (resp != null) return new KernelResult { Success = false, Text = "", Error = "HTTP " + (int)resp.StatusCode };
+        return new KernelResult { Success = false, Text = "", Error = "思源未运行或网络错误" };
+    }
+    catch (Exception ex) { return new KernelResult { Success = false, Text = "", Error = "请求异常：" + ex.Message }; }
+}
+
+public static string JStr(string s)
+{
+    var sb = new StringBuilder(s.Length + 8);
+    sb.Append('"');
+    foreach (var ch in s)
+    {
+        if (ch == '\\' || ch == '"') { sb.Append('\\'); sb.Append(ch); }
+        else if (ch == '\n') sb.Append("\\n");
+        else if (ch == '\r') sb.Append("\\r");
+        else if (ch == '\t') sb.Append("\\t");
+        else if (ch < 32) sb.Append("\\u" + ((int)ch).ToString("x4"));
+        else sb.Append(ch);
+    }
+    sb.Append('"');
+    return sb.ToString();
+}
+
+public static string ExtractStr(string json, string field)
+{
+    if (json == null) return null;
+    var key = "\"" + field + "\":";
+    var i = json.IndexOf(key, StringComparison.Ordinal);
+    if (i < 0) return null;
+    i += key.Length;
+    while (i < json.Length && json[i] == ' ') i++;
+    if (i >= json.Length) return null;
+    if (json[i] != '"')
+    {
+        var j = i;
+        while (j < json.Length && json[j] != ',' && json[j] != '}') j++;
+        return json.Substring(i, j - i).Trim();
+    }
+    i++;
+    var sb = new StringBuilder();
+    while (i < json.Length && json[i] != '"')
+    {
+        if (json[i] == '\\' && i + 1 < json.Length)
+        {
+            i++;
+            var c = json[i];
+            sb.Append(c == 'n' ? '\n' : c == 't' ? '\t' : c == 'r' ? '\r' : c);
+        }
+        else sb.Append(json[i]);
+        i++;
+    }
+    return sb.ToString();
+}
+
+public static int ExtractNum(string json, string field)
+{
+    var n = 0;
+    int.TryParse(ExtractStr(json, field) ?? "", out n);
+    return n;
+}
+
+public struct KernelResult { public bool Success; public string Text; public string Error; }
+
+}
+
+// ==== SY-OCR清理.cs ====
+public class __Snippet10 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·OCR清理 —— OCR 结果后处理：去除汉字之间被误插的空格/换行（参考实现，Quicker C# 模块「普通模式v2」）
@@ -613,7 +1776,7 @@ public static bool IsCjk(char c)
 }
 
 // ==== SY-内核请求.cs ====
-public class __Snippet5 {
+public class __Snippet11 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·内核请求 —— 所有思源内核调用的唯一入口（参考实现，Quicker C# 模块「普通模式v2」）
@@ -721,7 +1884,7 @@ public struct KernelResult { public int Status; public string Text; public bool 
 }
 
 // ==== SY-占位符解析.cs ====
-public class __Snippet6 {
+public class __Snippet12 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·占位符解析 —— 面板/动作载荷里的占位符统一替换（参考实现，Quicker C# 模块「普通模式v2」）
@@ -776,7 +1939,7 @@ private static void ReplaceVar(StringBuilder sb, Quicker.Public.IStepContext con
 }
 
 // ==== SY-反向触发.cs ====
-public class __Snippet7 {
+public class __Snippet13 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·反向触发 —— Quicker 668 /api/exec 本机 HTTP API 封装（参考实现，Quicker C# 模块「普通模式v2」）
@@ -864,7 +2027,7 @@ public static void Exec(Quicker.Public.IStepContext context)
 }
 
 // ==== SY-思源未运行分支.cs ====
-public class __Snippet8 {
+public class __Snippet14 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·思源未运行分支 —— 内核不可达时的标准分支（docs/05 §6.1 toggle 语义）
@@ -964,7 +2127,7 @@ public static bool ProbeKernel(string syUrl, int timeoutMs)
 }
 
 // ==== SY-日志轮转.cs ====
-public class __Snippet9 {
+public class __Snippet15 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·日志轮转 —— 动作本地日志追加（sy-quicker.log 超 1MB 滚动保留 1 份 .old）
@@ -1021,7 +2184,7 @@ public static void Exec(Quicker.Public.IStepContext context)
 }
 
 // ==== SY-路由.cs ====
-public class __Snippet10 {
+public class __Snippet16 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·路由 —— 超级面板分发器总装（六分支 http/sql-url/url/bridge/cmd/act + 占位符 §5.1）
@@ -1334,7 +2497,7 @@ public struct KernelResult { public bool Success; public string Text; public str
 }
 
 // ==== SY-路由前缀解析.cs ====
-public class __Snippet11 {
+public class __Snippet17 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·路由前缀解析 —— 捕获多目标路由的解析层（参考实现，Quicker C# 模块「普通模式v2」）
