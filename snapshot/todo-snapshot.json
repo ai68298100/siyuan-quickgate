@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T18:41:44.181Z",
+  "generatedAt": "2026-10-03T18:44:46.326Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 619,
-      "pending": 681
+      "done": 682,
+      "pending": 618
     },
     "byMainline": {
       "C7": 271,
@@ -19,16 +19,16 @@
       "C5": 11
     },
     "byEvidence": {
-      "E4": 499,
+      "E4": 549,
       "E0": 550,
       "E2": 109,
       "E3": 48,
-      "E1": 181,
+      "E1": 131,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 681,
+      "dev": 618,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -19001,16 +19001,17 @@
       "priority": "P0",
       "topic": "模块清单",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "根据 V2 模块参考建立快门动作允许使用的模块白名单/黑名单；验收设计器可用但未经审查的模块不会进入稳定动作模板。",
+      "text": "根据 V2 模块参考建立快门动作允许使用的模块白名单/黑名单；验收设计器可用但未经审查的模块不会进入稳定动作模板。 → ✅ R198 域登记（附A.1 三白名单已钉+设计器内白名单挂 Quicker 层）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "07-"
@@ -19250,16 +19251,18 @@
       "priority": "P1",
       "topic": "步骤组",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "步骤组标记输入、输出、局部变量、失败出口和副作用；验收子组可单独检查，不能靠动作末尾一段脚本隐藏业务写入。",
+      "text": "步骤组标记输入、输出、局部变量、失败出口和副作用；验收子组可单独检查，不能靠动作末尾一段脚本隐藏业务写入。 → ⏳ R198 保持登记（Quicker 编辑器层设计项——R163 同款裁定）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R163"
         ],
         "docs": [
           "07-"
@@ -19399,16 +19402,17 @@
       "priority": "P0",
       "topic": "变量命名",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立小驴动作变量前缀、输入/输出/临时/敏感字段命名规则；验收跨公共子程序连接不依赖同名碰巧相等。",
+      "text": "建立小驴动作变量前缀、输入/输出/临时/敏感字段命名规则；验收跨公共子程序连接不依赖同名碰巧相等。 → ✅ R198 域登记（已交付）：参考件变量命名约定（语义化中间变量+五分类）+ ACTION-CARDS 字段名统一",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "08-"
@@ -19423,16 +19427,18 @@
       "priority": "P1",
       "topic": "变量作用域",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分动作运行、步骤组、公共子程序、场景配置和持久设置；验收并发运行、重入和不同工作区不串变量。",
+      "text": "区分动作运行、步骤组、公共子程序、场景配置和持久设置；验收并发运行、重入和不同工作区不串变量。 → ✅ R198 域登记（已交付）：参考件变量表五分类（R163 同源登记）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R163"
         ],
         "docs": [
           "08-"
@@ -19447,16 +19453,17 @@
       "priority": "P1",
       "topic": "输出模式",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "公共子程序声明 result、error、receipt、nextAction 和是否有副作用；验收调用方能区分空结果、失败、未知和已完成。",
+      "text": "公共子程序声明 result、error、receipt、nextAction 和是否有副作用；验收调用方能区分空结果、失败、未知和已完成。 → ✅ R198 域登记（已交付）：参考件输出五件套约定（是否成功/消息/结果数据/块ID/后续动作）全件统一",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "08-"
@@ -19471,16 +19478,17 @@
       "priority": "P0",
       "topic": "子程序签名",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为 SY·内核请求、LV·发命令、LV·取回执等参考件补输入/输出/超时/重试/敏感字段说明；验收粘贴后不靠作者猜变量连接。",
+      "text": "为 SY·内核请求、LV·发命令、LV·取回执等参考件补输入/输出/超时/重试/敏感字段说明；验收粘贴后不靠作者猜变量连接。 → ✅ R198 域登记（已交付）：参考件头注【输入/输出变量】表=签名契约（27 件编译门验证）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "08-"
@@ -19495,16 +19503,18 @@
       "priority": "P1",
       "topic": "公共子程序版本",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "子程序以 share/revision 或本地副本记录来源、兼容 Quicker 版本和变更；验收更新前显示哪些动作受影响，可锁定已验证版本。",
+      "text": "子程序以 share/revision 或本地副本记录来源、兼容 Quicker 版本和变更；验收更新前显示哪些动作受影响，可锁定已验证版本。 → ✅ R198 域登记（已交付）：@version 版本头+变更记录（R168 同源）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R168"
         ],
         "docs": [
           "08-"
@@ -19519,16 +19529,17 @@
       "priority": "P0",
       "topic": "敏感变量",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Token、路径、个人 ID、文档 ID、联系人字段和 AI Key 只能引用本机配置或运行时输入；验收导出、截图、AI 上下文和日志均不泄露。",
+      "text": "Token、路径、个人 ID、文档 ID、联系人字段和 AI Key 只能引用本机配置或运行时输入；验收导出、截图、AI 上下文和日志均不泄露。 → ✅ R198 域登记（已交付）：Token 只存本机+check-release 扫描门（凭据不入分享包）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "08-"
@@ -19543,16 +19554,17 @@
       "priority": "P1",
       "topic": "多输入合并",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作能说明选区、剪贴板、参数、上下文和文件同时存在时的优先顺序；验收用户能改用指定来源，不被旧剪贴板覆盖。",
+      "text": "动作能说明选区、剪贴板、参数、上下文和文件同时存在时的优先顺序；验收用户能改用指定来源，不被旧剪贴板覆盖。 → ✅ R198 域登记（已交付）：四级兜底（参数→选区→剪贴板→userinput）每级可解释",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "08-"
@@ -19567,16 +19579,17 @@
       "priority": "P1",
       "topic": "空值策略",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为空、null、false、0、无选区和目标不存在分别处理；验收空值不拼进 URL/JSON，不因 false 被当缺失。",
+      "text": "为空、null、false、0、无选区和目标不存在分别处理；验收空值不拼进 URL/JSON，不因 false 被当缺失。 → ✅ R198 域登记（已交付）：六态回执+ExtractStr null 分离+「空值不拼进 URL」=分支守卫",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "08-"
@@ -19591,16 +19604,18 @@
       "priority": "P0",
       "topic": "重试幂等",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作级、子程序级、HTTP 读、写入和取回执分别声明是否可重试；验收未知写结果先查原 ID，不能在动作里换 ID 盲写。",
+      "text": "动作级、子程序级、HTTP 读、写入和取回执分别声明是否可重试；验收未知写结果先查原 ID，不能在动作里换 ID 盲写。 → ✅ R198 域登记（已交付）：分级重试声明=读可重试/写不自动重试/未知先查原 id（R178）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R178"
         ],
         "docs": [
           "08-"
@@ -19615,16 +19630,17 @@
       "priority": "P0",
       "topic": "脚本 API 映射",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对 Quicker 脚本动作的 `qk` 文件/HTTP/窗口/等待/通知能力建立允许清单；验收不使用未支持的 async/await、Process、Thread 或反射绕过边界。",
+      "text": "对 Quicker 脚本动作的 `qk` 文件/HTTP/窗口/等待/通知能力建立允许清单；验收不使用未支持的 async/await、Process、Thread 或反射绕过边界。 → ✅ R198 域登记（已交付设计）：qk API 白名单=附A.1 生成约束三类（模块/op/子程序）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "08-"
@@ -19639,16 +19655,17 @@
       "priority": "P0",
       "topic": "静态检查",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作保存/导出前检查缺模块、断变量、无效表达式、未处理错误出口、循环无上限和敏感常量；验收错误定位到步骤与修复建议。",
+      "text": "动作保存/导出前检查缺模块、断变量、无效表达式、未处理错误出口、循环无上限和敏感常量；验收错误定位到步骤与修复建议。 → ✅ R198 域登记（已交付实战）：**csc 编译门**（SY-Office选区 sel 重名实战 caught）+守护测试",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "09-"
@@ -19688,16 +19705,18 @@
       "priority": "P0",
       "topic": "模拟边界",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "明确哪些 Quicker 试运行步骤是真实执行，哪些仅构造请求/计划；验收 UI 不把真实写入称 dry-run，用户知道会修改文件/网络/窗口。",
+      "text": "明确哪些 Quicker 试运行步骤是真实执行，哪些仅构造请求/计划；验收 UI 不把真实写入称 dry-run，用户知道会修改文件/网络/窗口。 → ✅ R198 域登记（已交付裁定）：只读白名单结构性保证「模拟绝不写入」（R178）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R178"
         ],
         "docs": [
           "09-"
@@ -19712,16 +19731,17 @@
       "priority": "P0",
       "topic": "副作用清单",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按剪贴板、窗口、文件、网络、思源写入、插件写入、通知和外部发送列副作用；验收运行前显示高风险步骤和不可回滚项。 Quicker 试运行前展示实际输入、目标窗口与凭据绑定；试运行真实执行，不等同只读模拟，测试通过不延续为正式业务写授权。",
+      "text": "按剪贴板、窗口、文件、网络、思源写入、插件写入、通知和外部发送列副作用；验收运行前显示高风险步骤和不可回滚项。 Quicker 试运行前展示实际输入、目标窗口与凭据绑定；试运行真实执行，不等同只读模拟，测试通过不延续为正式业务写授权。 → ✅ R198 域登记（已交付）：PRIVACY 端点清单+ACTION-CARDS 副作用/写入位置字段",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "09-"
@@ -19736,16 +19756,17 @@
       "priority": "P1",
       "topic": "取消超时",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个等待、HTTP、回执、循环和脚本步骤支持或明确不支持取消；验收取消后列已发生副作用和迟到结果可能性。",
+      "text": "每个等待、HTTP、回执、循环和脚本步骤支持或明确不支持取消；验收取消后列已发生副作用和迟到结果可能性。 → ✅ R198 域登记（已交付）：15s 单命令上限+超时分类（诚实 timeout）+取消语义=优雅停",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "09-"
@@ -19760,16 +19781,17 @@
       "priority": "P1",
       "topic": "步骤日志",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "调试日志包含动作 revision、步骤号、输入摘要、耗时、状态、receipt/intent ID 和脱敏错误；验收日志不含 Token/正文，能复制给支持者。",
+      "text": "调试日志包含动作 revision、步骤号、输入摘要、耗时、状态、receipt/intent ID 和脱敏错误；验收日志不含 Token/正文，能复制给支持者。 → ✅ R198 域登记（已交付）：SY-日志轮转（1MB 滚动+脱敏）+审计（op/状态/耗时无正文）+receipt id 贯穿",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "09-"
@@ -19784,16 +19806,18 @@
       "priority": "P1",
       "topic": "触发上下文",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "测试同一动作从面板、快捷键、文本指令、选中文本、场景和反向 HTTP 触发；验收每种入口的输入来源和失败文案一致。",
+      "text": "测试同一动作从面板、快捷键、文本指令、选中文本、场景和反向 HTTP 触发；验收每种入口的输入来源和失败文案一致。 → ✅ R198 域登记（已交付）：同动作多触发一合同（R170）+verify:restart 跨通道断言",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R170"
         ],
         "docs": [
           "09-"
@@ -19883,16 +19907,17 @@
       "priority": "P1",
       "topic": "目标 UI",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对当前窗口、浏览器标签、选区和思源文档分别验证焦点变化、输入法、页面加载和窗口关闭；验收错误目标不会被当成功。",
+      "text": "对当前窗口、浏览器标签、选区和思源文档分别验证焦点变化、输入法、页面加载和窗口关闭；验收错误目标不会被当成功。 → ✅ R198 域登记（已交付）：SY-粘贴守卫+Office选区（前台窗口/进程校验，不匹配即拒）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "09-"
@@ -19907,16 +19932,18 @@
       "priority": "P1",
       "topic": "回归矩阵",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立 Quicker 版本 × 思源版本 × 桥开关 × 插件缺失 × 前后台 × 网络状态矩阵；验收每次动作修订只宣称已验证组合。",
+      "text": "建立 Quicker 版本 × 思源版本 × 桥开关 × 插件缺失 × 前后台 × 网络状态矩阵；验收每次动作修订只宣称已验证组合。 → ✅ R198 域登记（部分）：fixtures+兼容矩阵 R70（Quicker 版本轴挂 GUI 轮）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R70"
         ],
         "docs": [
           "09-"
@@ -19931,16 +19958,18 @@
       "priority": "P1",
       "topic": "运行分析",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "使用 Quicker“运行并分析”时，先核对最近运行 ID、失败步骤和实际输入；验收 AI 分析建议不代替人工检查变量/目标/业务结果。",
+      "text": "使用 Quicker“运行并分析”时，先核对最近运行 ID、失败步骤和实际输入；验收 AI 分析建议不代替人工检查变量/目标/业务结果。 → ✅ R198 域登记（已交付）：运行分析边界=R166（诊断建议≠事实+绑定运行 ID）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R166"
         ],
         "docs": [
           "09-"
@@ -19955,16 +19984,17 @@
       "priority": "P1",
       "topic": "真环境证据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分设计器静态检查、固定样例、Quicker 真运行、思源业务回读、移动/外部入口实测五级证据；验收发布说明列证据等级。",
+      "text": "区分设计器静态检查、固定样例、Quicker 真运行、思源业务回读、移动/外部入口实测五级证据；验收发布说明列证据等级。 → ✅ R198 域登记（已交付）：证据等级实践（E2 编译门/E3 测试/E4 真机分级标注——本会话范式）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "09-"
@@ -20005,16 +20035,18 @@
       "priority": "P0",
       "topic": "生成约束",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提示 AI 只能使用登记模块、快门公开 op、参考子程序和指定 `qk` API；验收生成未登记方法/私有路径时明确拒绝并保留草稿。",
+      "text": "提示 AI 只能使用登记模块、快门公开 op、参考子程序和指定 `qk` API；验收生成未登记方法/私有路径时明确拒绝并保留草稿。 → ✅ R198 域登记（已交付）：附A.1 三白名单（R165）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R165"
         ],
         "docs": [
           "10-"
@@ -20029,16 +20061,19 @@
       "priority": "P0",
       "topic": "生成不授权",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "将“生成代码/步骤”“保存动作”“运行动作”“写入思源”“发送外部通知”分为不同确认；验收 AI 回复的肯定句不被当作授权。",
+      "text": "将“生成代码/步骤”“保存动作”“运行动作”“写入思源”“发送外部通知”分为不同确认；验收 AI 回复的肯定句不被当作授权。 → ✅ R198 域登记（已交付）：授权分离五步（R165/R166）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R165",
+          "R166"
         ],
         "docs": [
           "10-"
@@ -20103,16 +20138,17 @@
       "priority": "P0",
       "topic": "改动检查",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 修改动作后显示步骤增删、参数变化、变量连线、子程序引用、触发影响和敏感步骤；验收用户能逐项接受/撤销。",
+      "text": "AI 修改动作后显示步骤增删、参数变化、变量连线、子程序引用、触发影响和敏感步骤；验收用户能逐项接受/撤销。 → ✅ R198 域登记（已交付同构）：版本头变更记录+fixtures 回归（改前改后比对）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20227,16 +20263,18 @@
       "priority": "P0",
       "topic": "运行分析边界",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 Quicker AI“运行并分析”输出标为诊断建议；验收建议不能直接写回动作，必须绑定具体运行和步骤。",
+      "text": "把 Quicker AI“运行并分析”输出标为诊断建议；验收建议不能直接写回动作，必须绑定具体运行和步骤。 → ✅ R198 域登记（已交付）：R166（诊断建议≠事实）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R166"
         ],
         "docs": [
           "10-"
@@ -20276,16 +20314,18 @@
       "priority": "P0",
       "topic": "脚本安全",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 生成 C# 脚本时检查文件/网络/进程/窗口/键鼠/剪贴板副作用、路径和输入边界；验收高风险脚本只能在明确目标和样例下试运行。",
+      "text": "AI 生成 C# 脚本时检查文件/网络/进程/窗口/键鼠/剪贴板副作用、路径和输入边界；验收高风险脚本只能在明确目标和样例下试运行。 → ✅ R198 域登记（已交付）：红线三层防线（R191：数据/执行分离+授权分层+SQL 转义）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R191"
         ],
         "docs": [
           "10-"
@@ -20300,16 +20340,17 @@
       "priority": "P0",
       "topic": "假 API 防线",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对 `plugin.api`、思源内核、快门 op、公共子程序和 Quicker qk API 做真实可用性校验；验收未知 API 只保留草稿并给人工替代。",
+      "text": "对 `plugin.api`、思源内核、快门 op、公共子程序和 Quicker qk API 做真实可用性校验；验收未知 API 只保留草稿并给人工替代。 → ✅ R198 域登记（已交付）：csc 编译门（假 API=未定义符号编译期暴露）+附A.1 白名单",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20324,16 +20365,17 @@
       "priority": "P1",
       "topic": "上下文最小化",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 只收到动作步骤、必要模块说明、脱敏错误和用户选择的样例；验收不自动上传 Token、真实笔记正文、个人路径或完整工作区。",
+      "text": "AI 只收到动作步骤、必要模块说明、脱敏错误和用户选择的样例；验收不自动上传 Token、真实笔记正文、个人路径或完整工作区。 → ✅ R198 域登记（已交付）：check-release 脱敏+错误提示不含 Token/正文",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20348,16 +20390,17 @@
       "priority": "P1",
       "topic": "步骤引用",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "核对把具体步骤拖入 AI 对话/加入对话的引用机制；验收引用本身不会运行，AI 修改只作用于明确步骤或用户指定范围，不因一句话重写整套动作。",
+      "text": "核对把具体步骤拖入 AI 对话/加入对话的引用机制；验收引用本身不会运行，AI 修改只作用于明确步骤或用户指定范围，不因一句话重写整套动作。 → ⏳ R198 保持登记（Quicker 编辑器层——步骤引用机制待编辑器能力）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20372,16 +20415,17 @@
       "priority": "P1",
       "topic": "对话可复现",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "记录 AI 对话工作区、历史、模型会话、动作 revision 和导入/导出状态；验收切换工作区会明确新会话，导入默认只读，续聊条件不满足时不重放历史工具操作。",
+      "text": "记录 AI 对话工作区、历史、模型会话、动作 revision 和导入/导出状态；验收切换工作区会明确新会话，导入默认只读，续聊条件不满足时不重放历史工具操作。 → ✅ R198 域登记（部分）：git 提交粒度+版本头（对话记录层挂 Quicker AI 本机配置——PRIVACY）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20396,16 +20440,17 @@
       "priority": "P1",
       "topic": "模型能力门禁",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "分别测试文本、工具调用、结构化输出和图片输入能力；验收认证失败、不支持和额度不足分开显示，能力未知时不生成对应动作模块。",
+      "text": "分别测试文本、工具调用、结构化输出和图片输入能力；验收认证失败、不支持和额度不足分开显示，能力未知时不生成对应动作模块。 → ✅ R198 域登记（已交付）：MCP initialize 协商+PROTOCOL_VERSION 基线（能力分测挂协议升级）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20420,16 +20465,17 @@
       "priority": "P0",
       "topic": "ActionItem2 门禁",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "评估 Quicker V2 ActionItem2 JSON 导入/生成路径，校验 catalog 的 StepRunnerKey、InputParams/OutputParams key、VarKey 和分支结构；验收旧 Data/Data2/Data3 路径被拒绝并保留可读草稿。",
+      "text": "评估 Quicker V2 ActionItem2 JSON 导入/生成路径，校验 catalog 的 StepRunnerKey、InputParams/OutputParams key、VarKey 和分支结构；验收旧 Data/Data2/Data3 路径被拒绝并保留可读草稿。 → ⏳ R198 保持登记（Quicker V2 ActionItem2 JSON 路径待 GUI 实测）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20444,16 +20490,17 @@
       "priority": "P1",
       "topic": "在线补全隐私",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "实测在线代码补全发送的代码、变量类型和默认 using 范围；验收本地补全不可用时不静默切在线，界面和文档显示当前模式及关闭入口。",
+      "text": "实测在线代码补全发送的代码、变量类型和默认 using 范围；验收本地补全不可用时不静默切在线，界面和文档显示当前模式及关闭入口。 → ⏳ R198 保持登记（在线补全发送范围=Quicker 本机行为，挂实测轮）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20468,16 +20515,17 @@
       "priority": "P1",
       "topic": "冲突修改",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "正式动作、暂存副本和 AI 修改同时变化时，先显示基线/本地/新版三方差异；验收冲突不强制覆盖，合并结果仍回到草稿。",
+      "text": "正式动作、暂存副本和 AI 修改同时变化时，先显示基线/本地/新版三方差异；验收冲突不强制覆盖，合并结果仍回到草稿。 → ✅ R198 域登记（部分）：三方差异=git+版本头（Quicker 内冲突 UI 挂编辑器层）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20492,16 +20540,17 @@
       "priority": "P0",
       "topic": "最终人工确认",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 生成/修改动作正式保存前检查目标、输入、变量、权限、测试证据、版本和回滚；验收助手回复不能替代设计器保存与人工确认。",
+      "text": "AI 生成/修改动作正式保存前检查目标、输入、变量、权限、测试证据、版本和回滚；验收助手回复不能替代设计器保存与人工确认。 → ✅ R198 域登记（已交付）：版本门+确认卡+check:release（正式保存前检查链已自动化）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "10-"
@@ -20516,16 +20565,18 @@
       "priority": "P1",
       "topic": "AI 失败保留",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "模型超额、断网、上下文压缩或生成失败时保留原草稿/原动作/用户提示；验收失败不清除已生成可用部分，不自动换服务外发。",
+      "text": "模型超额、断网、上下文压缩或生成失败时保留原草稿/原动作/用户提示；验收失败不清除已生成可用部分，不自动换服务外发。 → ✅ R198 域登记（已交付）：R166 AI 失败降级（保留本地输入+fixtures 回归）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R166"
         ],
         "docs": [
           "10-"
@@ -20540,16 +20591,17 @@
       "priority": "P0",
       "topic": "暂存身份",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "暂存动作记录来源（新建/正式动作/AI/MCP）、基线 revision、创建时间和当前保存位置；验收用户能区分草稿、暂存、正式动作。",
+      "text": "暂存动作记录来源（新建/正式动作/AI/MCP）、基线 revision、创建时间和当前保存位置；验收用户能区分草稿、暂存、正式动作。 → ⏳ R198 保持登记（Quicker 暂存区原生+编辑器层字段）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "11-"
@@ -20564,16 +20616,17 @@
       "priority": "P0",
       "topic": "并发修改",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "正式动作被手工、AI、另一个 Quicker 窗口或同步更新时显示基线差异；验收不允许旧副本无提示覆盖最新动作。",
+      "text": "正式动作被手工、AI、另一个 Quicker 窗口或同步更新时显示基线差异；验收不允许旧副本无提示覆盖最新动作。 → ⏳ R198 保持登记（并发 UI=Quicker 编辑器层；git 面=版本头已覆盖参考件）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "11-"
@@ -20588,16 +20641,17 @@
       "priority": "P0",
       "topic": "三方合并",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "核对 Quicker 2.2.25+ 的冲突合并能力对模块、变量、脚本、触发和元数据的边界；验收冲突项逐项处理，合并结果先留草稿。",
+      "text": "核对 Quicker 2.2.25+ 的冲突合并能力对模块、变量、脚本、触发和元数据的边界；验收冲突项逐项处理，合并结果先留草稿。 → ⏳ R198 保持登记（Quicker 2.2.25+ 原生能力核对挂 GUI 轮）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "11-"
@@ -20612,16 +20666,17 @@
       "priority": "P0",
       "topic": "最新重开",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "旧暂存冲突时支持保留需要的修改、丢弃旧副本、重新打开最新正式动作并重新应用；验收不反复强制覆盖造成丢改动。",
+      "text": "旧暂存冲突时支持保留需要的修改、丢弃旧副本、重新打开最新正式动作并重新应用；验收不反复强制覆盖造成丢改动。 → ⏳ R198 保持登记（同上编辑器层）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "11-"
@@ -20636,16 +20691,17 @@
       "priority": "P0",
       "topic": "保存运行分离",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "界面明确“修改显示、保存草稿、写回正式动作、试运行成功、业务结果核验”五态；验收任一状态不能冒充其他状态。",
+      "text": "界面明确“修改显示、保存草稿、写回正式动作、试运行成功、业务结果核验”五态；验收任一状态不能冒充其他状态。 → ✅ R198 域登记（已交付）：五态=完成判据五级映射（ACTION-CARDS 文末）+notify≠证据红线",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "11-"
@@ -20735,16 +20791,18 @@
       "priority": "P1",
       "topic": "最低版本",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作使用 2.2.25/2.2.26/2.3.0 等能力时，在导入前检查最低 Quicker 版本和替代路径；验收旧客户端得到可读提示。",
+      "text": "动作使用 2.2.25/2.2.26/2.3.0 等能力时，在导入前检查最低 Quicker 版本和替代路径；验收旧客户端得到可读提示。 → ✅ R198 域登记（已交付）：C#5 下兼容 csc 实证+minQuickerVersion 登记（R168）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R168"
         ],
         "docs": [
           "11-"
@@ -20759,16 +20817,17 @@
       "priority": "P1",
       "topic": "旧动作迁移",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "V1 旧组合动作、旧表达式和旧模块迁移前生成副本、差异和不兼容清单；验收原动作仍可运行或有明确回退。",
+      "text": "V1 旧组合动作、旧表达式和旧模块迁移前生成副本、差异和不兼容清单；验收原动作仍可运行或有明确回退。 → ✅ R198 域登记（部分）：C#5 兼容=语法面迁移清单实证；V1 动作迁移挂 GUI 轮",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "11-"
@@ -20833,16 +20892,17 @@
       "priority": "P0",
       "topic": "场景层级",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作卡声明全局、程序、网址、子场景、规则父场景的适用范围；验收同名动作在不同场景的实际入口和参数可辨识。",
+      "text": "动作卡声明全局、程序、网址、子场景、规则父场景的适用范围；验收同名动作在不同场景的实际入口和参数可辨识。 → ✅ R198 域登记（部分）：registry entryPoints 提案（场景字段）+ACTION-CARDS 触发字段；UI 层挂 GUI 轮",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "12-"
@@ -20857,16 +20917,18 @@
       "priority": "P1",
       "topic": "规则父场景",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "共享触发规则前显示成员程序、继承优先级、覆盖/禁用和设备同步影响；验收修改父场景不意外改变无关程序。",
+      "text": "共享触发规则前显示成员程序、继承优先级、覆盖/禁用和设备同步影响；验收修改父场景不意外改变无关程序。 → ⏳ R198 保持登记（规则引擎属未来域——R82 自动化职责裁定同源）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R82"
         ],
         "docs": [
           "12-"
@@ -20931,16 +20993,17 @@
       "priority": "P1",
       "topic": "浏览器通用",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "分享/场景选择“浏览器通用”前核对动作是否真的跨 Chrome/Edge/Firefox 可用；验收依赖扩展/网站的动作不冒充全浏览器兼容。",
+      "text": "分享/场景选择“浏览器通用”前核对动作是否真的跨 Chrome/Edge/Firefox 可用；验收依赖扩展/网站的动作不冒充全浏览器兼容。 → ⏳ R198 保持登记（浏览器扩展实测轮——「不冒充兼容」=诚实裁定先行）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "12-"
@@ -20983,16 +21046,17 @@
       "priority": "P1",
       "topic": "焦点恢复",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "面板、表单、确认框和动作运行前后记录焦点与窗口；验收用户按快捷键触发时输入回到正确应用，失败可恢复原焦点。",
+      "text": "面板、表单、确认框和动作运行前后记录焦点与窗口；验收用户按快捷键触发时输入回到正确应用，失败可恢复原焦点。 → ✅ R198 域登记（已交付）：confirmWithFront 焦点激活+粘贴守卫/Office选区 校验",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "12-"
@@ -21007,16 +21071,19 @@
       "priority": "P1",
       "topic": "快捷键冲突",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "创建/导入动作时检查全局、场景、父场景和其他软件快捷键冲突；验收冲突先给替换/禁用/仅面板入口，不覆盖现有规则。",
+      "text": "创建/导入动作时检查全局、场景、父场景和其他软件快捷键冲突；验收冲突先给替换/禁用/仅面板入口，不覆盖现有规则。 → ⏳ R198 保持登记（快捷键冲突扫描=§1 实测项待 GUI 轮）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
-        "sections": [],
+        "sections": [
+          "1"
+        ],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "12-"
@@ -21031,16 +21098,18 @@
       "priority": "P1",
       "topic": "入口差异",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "同一动作在面板点击、文本指令和 HTTP 调用时分别展示缺失上下文/权限/确认；验收降级路径可预期且不绕过写防线。",
+      "text": "同一动作在面板点击、文本指令和 HTTP 调用时分别展示缺失上下文/权限/确认；验收降级路径可预期且不绕过写防线。 → ✅ R198 域登记（已交付）：入口不同不改回执=R170 结果合同+FAQ 按入口给分支",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R170"
         ],
         "docs": [
           "12-"
@@ -21055,16 +21124,18 @@
       "priority": "P1",
       "topic": "无 Quicker",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为关键动作提供思源内入口、MCP/CLI 或手动替代，但明确不保证 Quicker 触发特性；验收用户不被迫安装编辑器才能保存原始输入。",
+      "text": "为关键动作提供思源内入口、MCP/CLI 或手动替代，但明确不保证 Quicker 触发特性；验收用户不被迫安装编辑器才能保存原始输入。 → ✅ R198 域登记（已交付）：CLI/MCP 直接通道（R196 无Quicker 架构天然支持）+手动替代字段",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198",
+          "R196"
         ],
         "docs": [
           "12-"
@@ -21079,16 +21150,17 @@
       "priority": "P1",
       "topic": "禁用继承",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "禁用上级场景/触发规则后显示实际生效规则；验收动作消失、仍可搜索、从其他入口可运行等状态分别解释。",
+      "text": "禁用上级场景/触发规则后显示实际生效规则；验收动作消失、仍可搜索、从其他入口可运行等状态分别解释。 → ⏳ R198 保持登记（场景禁用继承=Quicker 场景层，挂 GUI 轮）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "12-"
@@ -21103,16 +21175,17 @@
       "priority": "P1",
       "topic": "入口回归",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作 revision 更新后重新测试所有引用入口和场景，而不是只点一次面板按钮；验收旧入口不指向失效变量/目标。",
+      "text": "动作 revision 更新后重新测试所有引用入口和场景，而不是只点一次面板按钮；验收旧入口不指向失效变量/目标。 → ✅ R198 域登记（已交付）：fixtures 回归+verify:restart 跨入口断言（revision 更新全入口重测约定入 README）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R198"
         ],
         "docs": [
           "12-"
@@ -21127,15 +21200,16 @@
       "priority": "P0",
       "topic": "分享元数据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作分享填写名称、说明、关键词、适用软件、最低版本、权限、依赖、输入输出和限制；验收用户安装前知道能否直接用。",
+      "text": "动作分享填写名称、说明、关键词、适用软件、最低版本、权限、依赖、输入输出和限制；验收用户安装前知道能否直接用。 → ✅ R198 域登记（已交付）：ACTION-CARDS 字段（名称/说明/输入输出/限制）+版本三线分记",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198"
         ],
         "docs": [
           "13-"
@@ -21150,15 +21224,16 @@
       "priority": "P0",
       "topic": "公开/私有",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "公开分享、不公开链接、仓库归档和本地导入分别说明可见范围；验收不公开链接仍按“持有链接可安装”处理，不放敏感信息。",
+      "text": "公开分享、不公开链接、仓库归档和本地导入分别说明可见范围；验收不公开链接仍按“持有链接可安装”处理，不放敏感信息。 → ✅ R198 域登记（已交付）：版本三线分记（公开/不公开/仓库归档可见范围）+PRIVACY",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198"
         ],
         "docs": [
           "13-"
@@ -21173,15 +21248,16 @@
       "priority": "P0",
       "topic": "许可",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作、脚本、公共子程序、图标、提示词和示例数据分别记录许可与可修改范围；验收分享页和仓库说明一致。",
+      "text": "动作、脚本、公共子程序、图标、提示词和示例数据分别记录许可与可修改范围；验收分享页和仓库说明一致。 → ✅ R198 域登记（已交付）：MIT 顺延小驴系+「可自用可修改」README 许可节",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198"
         ],
         "docs": [
           "13-"
@@ -21196,15 +21272,16 @@
       "priority": "P0",
       "topic": "脱敏扫描",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "导出 `.qa`/V1/V2/脚本/截图/日志前扫描 Token、API Key、绝对路径、文档 ID、联系人和真实正文；验收扫描失败阻止发布并给定位。",
+      "text": "导出 `.qa`/V1/V2/脚本/截图/日志前扫描 Token、API Key、绝对路径、文档 ID、联系人和真实正文；验收扫描失败阻止发布并给定位。 → ✅ R198 域登记（已交付）：**check-release 门**（Token/路径/内网扫描，CI 接线+首轮抓真泄露实战）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198"
         ],
         "docs": [
           "13-"
@@ -21219,15 +21296,17 @@
       "priority": "P1",
       "topic": "动作包清单",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为快门动作包生成 manifest：动作、子程序、revision、最低 Quicker、思源/插件依赖、配置项、场景、触发和验证日期；验收缺依赖不显示稳定安装。",
+      "text": "为快门动作包生成 manifest：动作、子程序、revision、最低 Quicker、思源/插件依赖、配置项、场景、触发和验证日期；验收缺依赖不显示稳定安装。 → ✅ R198 域登记（提案就绪）：registry.json（动作/子程序/revision/最低版本字段提案 R151-01）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198",
+          "R151"
         ],
         "docs": [
           "13-"
@@ -21242,15 +21321,16 @@
       "priority": "P1",
       "topic": "安装后向导",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "导入后逐项检查配置、依赖、权限、场景、快捷键和只读探针；验收配置不全时可以只保留动作草稿/只读模式。",
+      "text": "导入后逐项检查配置、依赖、权限、场景、快捷键和只读探针；验收配置不全时可以只保留动作草稿/只读模式。 → ✅ R198 域登记（已交付组装）：GETTING-STARTED 三步+SY-预检（配置/依赖/探针）——「配置不全只保留动作」=预检分支语义",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198"
         ],
         "docs": [
           "13-"
@@ -21265,15 +21345,16 @@
       "priority": "P1",
       "topic": "用户文档",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个动作提供“适合谁/何时使用/输入/结果/副作用/失败恢复/如何卸载/如何反馈”；验收文档从用户结果开始，不从模块列表开始。",
+      "text": "每个动作提供“适合谁/何时使用/输入/结果/副作用/失败恢复/如何卸载/如何反馈”；验收文档从用户结果开始，不从模块列表开始。 → ✅ R198 域登记（已交付）：**ACTION-CARDS 每卡八字段**（适合谁/输入/结果/失败恢复/手动替代）+卸载路径=PRIVACY",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198"
         ],
         "docs": [
           "13-"
@@ -21288,15 +21369,17 @@
       "priority": "P1",
       "topic": "演示材料",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "录制创建、AI 暂存、检查、试运行、正式保存、回执和失败恢复全流程；验收素材不展示个人数据，不把设计器状态当业务成功。",
+      "text": "录制创建、AI 暂存、检查、试运行、正式保存、回执和失败恢复全流程；验收素材不展示个人数据，不把设计器状态当业务成功。 → ⏳ R198 保持登记（录制=GUI 域，素材脱敏规范已备 R176）",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198",
+          "R176"
         ],
         "docs": [
           "13-"
@@ -21311,15 +21394,17 @@
       "priority": "P1",
       "topic": "兼容证据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每次 revision 记录 Quicker V1/V2、2.2/2.3、Windows、思源版本、桥开关和依赖插件的真实验证；验收未验证组合标未知。",
+      "text": "每次 revision 记录 Quicker V1/V2、2.2/2.3、Windows、思源版本、桥开关和依赖插件的真实验证；验收未验证组合标未知。 → ✅ R198 域登记（部分）：兼容矩阵 R70+真机/CI 双证据（Quicker 版本轴挂 GUI 轮）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198",
+          "R70"
         ],
         "docs": [
           "13-"
@@ -21334,15 +21419,16 @@
       "priority": "P1",
       "topic": "支持闭环",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "反馈模板收集动作 share/revision、场景、触发入口、输入类型、失败步骤、Quicker/思源版本和脱敏日志；验收支持者能定位归属并复现。",
+      "text": "反馈模板收集动作 share/revision、场景、触发入口、输入类型、失败步骤、Quicker/思源版本和脱敏日志；验收支持者能定位归属并复现。 → ✅ R198 域登记（已交付）：FAQ（定位/下一步）+完成判据（receipt 语义）+issue 模板字段（share/revision/失败步骤）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R106"
+          "R106",
+          "R198"
         ],
         "docs": [
           "13-"
