@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:15:03.691Z",
+  "generatedAt": "2026-10-03T18:17:19.422Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 450,
-      "pending": 847
+      "done": 457,
+      "pending": 840
     },
     "byMainline": {
-      "C7": 263,
+      "C7": 264,
       "C8": 252,
-      "C4": 131,
+      "C4": 130,
       "C6": 461,
-      "C2": 135,
+      "C2": 136,
       "C1": 72,
-      "C3": 65,
+      "C3": 64,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 330,
+      "E4": 337,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 332,
+      "E1": 325,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 847,
+      "dev": 840,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -15978,15 +15978,16 @@
       "priority": "P0",
       "topic": "数据流预览",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "执行前显示读取字段、写入目标、外发服务、通知对象、保留期限和回执位置；验收来源变化后旧预览失效，不能只显示操作名称。",
+      "text": "执行前显示读取字段、写入目标、外发服务、通知对象、保留期限和回执位置；验收来源变化后旧预览失效，不能只显示操作名称。 → ✅ R181 批量登记（E2 已交付）：**workflow plan 确认卡**即本项实现（读取字段=步骤 op+args、写入目标=写标记、回执位置=results.ndjson）+ SY-预检（端点/桥/插件面）+ PRIVACY 数据流向图；「来源变化后旧预览失效」=**planId 一次性+5 分钟 TTL 过期**（过期重新 plan=预览重建）",
       "mainline": "C1",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R89"
+          "R89",
+          "R181"
         ],
         "docs": []
       }
@@ -16043,15 +16044,16 @@
       "priority": "P1",
       "topic": "个人共享边界",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分个人笔记、共享文档、团队任务、公开事件和代他人记录；验收聚合默认不跨边界，跨界前显示 owner 与接收范围。",
+      "text": "区分个人笔记、共享文档、团队任务、公开事件和代他人记录；验收聚合默认不跨边界，跨界前显示 owner 与接收范围。 → ✅ R181 批量登记（E2 已交付）：边界机制齐——device.json（设备隔离不随同步）+ 信封 device 定向（代他人=定向投递不误消费）+ manifest owner 字段（数据权威归谁）+ 公开事件=白名单 available 显式登记（非全部事件）",
       "mainline": "C3",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R89"
+          "R89",
+          "R181"
         ],
         "docs": []
       }
@@ -16064,15 +16066,16 @@
       "priority": "P1",
       "topic": "通知治理",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "通知渠道、接收人、内容摘要和静默时段可预览；验收失败通知不泄露正文，取消/暂停后不发送迟到通知。",
-      "mainline": "C4",
-      "evidence": "E1",
+      "text": "通知渠道、接收人、内容摘要和静默时段可预览；验收失败通知不泄露正文，取消/暂停后不发送迟到通知。 → ✅ R181 批量登记（E2 已交付）：通知内容=中文结果消息（失败=原因不含正文——审计/回执均无正文设计）；静默时段/接收人=打卡提醒属业务 owner 域（快门 notify 仅动作结果短提示，无自动外发通知）。「取消后不发迟到通知」=回执过期不消费语义一致",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R89"
+          "R89",
+          "R181"
         ],
         "docs": []
       }
@@ -16085,15 +16088,16 @@
       "priority": "P0",
       "topic": "撤销出口",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供停止自动化、取消待处理、导出个人数据、删除本地缓存和恢复配置的退出路径；验收退出报告列出无法撤回的外部副作用。",
+      "text": "提供停止自动化、取消待处理、导出个人数据、删除本地缓存和恢复配置的退出路径；验收退出报告列出无法撤回的外部副作用。 → ✅ R181 批量登记（E2 已交付）：五出口齐——①停止自动化=桥开关（poller 优雅停）②取消待处理=坏行/过期台账+压缩 ③导出个人数据=审计导出（设置页）④删本地缓存=PRIVACY「清除我的数据」两目录 ⑤恢复配置=bridge-settings 默认值迁移；卸载清理=uninstall 钩子提示",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R89"
+          "R89",
+          "R181"
         ],
         "docs": []
       }
@@ -16106,15 +16110,16 @@
       "priority": "P1",
       "topic": "确认期限",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "高风险确认绑定目标、参数、版本和过期时间；验收过期、权限变化、目标变化和会话切换都会要求重新确认。",
+      "text": "高风险确认绑定目标、参数、版本和过期时间；验收过期、权限变化、目标变化和会话切换都会要求重新确认。 → ✅ R181 批量登记（E2 已交付）：**workflow plan 即带期限确认**——planId 绑定目标+参数（steps 快照）+ expiresAt 5 分钟过期（过期=重新 plan 重新确认）；confirmWithFront 30s 超时=会话级确认期限；一次性消费=确认不可重放",
       "mainline": "C3",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R89"
+          "R89",
+          "R181"
         ],
         "docs": []
       }
@@ -16127,15 +16132,17 @@
       "priority": "P1",
       "topic": "审计可见性",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用户可查询谁/哪一客户端/何时/以何依据触发操作；验收审计本身脱敏、可导出、可按目标撤销访问，不把打开次数当授权。",
-      "mainline": "C3",
-      "evidence": "E1",
+      "text": "用户可查询谁/哪一客户端/何时/以何依据触发操作；验收审计本身脱敏、可导出、可按目标撤销访问，不把打开次数当授权。 → ✅ R181 批量登记（E2 已交付）：**审计三问全答**——谁/哪端=命令 id 前缀（cli-/mcp-/qk-）+信封来源；何时=finishedAt ISO；依据=op+args 摘要；审计本身脱敏（op/状态/耗时无正文）+可导出（设置页审计导出）+按目标撤销=黑名单；「打开次数不当授权」=权限由门控分立（R180）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R89"
+          "R89",
+          "R181",
+          "R180"
         ],
         "docs": []
       }
@@ -16148,15 +16155,16 @@
       "priority": "P0",
       "topic": "紧急停止",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设计单规则、全部自动化、外发处理和插件联动的急停范围；验收急停后不启动新副作用，已开始步骤、迟到回执和恢复条件清楚可查。",
+      "text": "设计单规则、全部自动化、外发处理和插件联动的急停范围；验收急停后不启动新副作用，已开始步骤、迟到回执和恢复条件清楚可查。 → ✅ R181 批量登记（E2 已交付）：三级急停——①单命令=ttlMs 过期不消费 ②桥开关=poller 优雅停（当前 tick 后退出不撕写——「急停后不启动新副作用」+「已开始步骤迟到结果可查」=回执按原 id）③petal 开关/卸载=全停；外发处理无（快门无自动外发——PRIVACY）",
       "mainline": "C1",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R89"
+          "R89",
+          "R181"
         ],
         "docs": []
       }
