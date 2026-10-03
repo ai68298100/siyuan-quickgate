@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:36:50.566Z",
+  "generatedAt": "2026-10-03T17:38:08.523Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 370,
-      "pending": 926
+      "done": 380,
+      "pending": 916
     },
     "byMainline": {
       "C7": 260,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 250,
+      "E4": 260,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 411,
+      "E1": 401,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 926,
+      "dev": 916,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -18457,15 +18457,17 @@
       "priority": "P0",
       "topic": "本体入口分离",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "登记动作本体、面板位置、场景、快捷键、文本指令和其他触发的引用关系；验收整理入口不会误删被多处引用的动作本体。",
+      "text": "登记动作本体、面板位置、场景、快捷键、文本指令和其他触发的引用关系；验收整理入口不会误删被多处引用的动作本体。 → ✅ R162 批量登记（E2 草案）：registry.json 提案（R151-01）actionId 与 entryPoints 数组分离——本体一处、入口多处引用；ACTION-CARDS 触发字段即入口登记的雏形",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162",
+          "R151"
         ],
         "docs": [
           "06-"
@@ -18480,15 +18482,16 @@
       "priority": "P1",
       "topic": "影响引用",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "编辑动作前显示受影响场景、动作单、公共子程序和外部调用；验收高影响修改先复制或进入暂存，不能静默改变所有入口。",
+      "text": "编辑动作前显示受影响场景、动作单、公共子程序和外部调用；验收高影响修改先复制或进入暂存，不能静默改变所有入口。 → ✅ R162 批量登记（E2 草案）：引用关系数据源=registry.json entryPoints（提案）；编辑影响提示是 Quicker 编辑器层能力（挂 GUI 轮）；当前缓解=子程序「一处维护处处生效」+参考件版本头变更记录",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162"
         ],
         "docs": [
           "06-"
@@ -18503,15 +18506,17 @@
       "priority": "P0",
       "topic": "动作类型",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为组合动作、脚本动作、公共子程序和场景配置定义选型条件；验收需要真实 C# 能力时不让用户误用普通模块，简单流程不因 AI 生成脚本增加维护成本。",
+      "text": "为组合动作、脚本动作、公共子程序和场景配置定义选型条件；验收需要真实 C# 能力时不让用户误用普通模块，简单流程不因 AI 生成脚本增加维护成本。 → ✅ R162 批量登记（E2 已交付）：reference README 边界声明——参考件=组合动作内 C# 模块（普通模式 v2/Roslyn）；脚本动作限制（无 async/await/lock）R70 待 GUI 实测；公共子程序=六件基础件+新件均可粘贴或建子程序；选型条件=有真实 C# 能力需求才用 C# 模块，纯流程用 Quicker 原生模块",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162",
+          "R70"
         ],
         "docs": [
           "06-"
@@ -18526,15 +18531,16 @@
       "priority": "P1",
       "topic": "版本目标",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作卡记录目标 Quicker 版本、V1/V2 制品、思源版本、脚本模式和必需模块；验收客户端不满足时在安装/运行前说明而非运行中报错。",
+      "text": "动作卡记录目标 Quicker 版本、V1/V2 制品、思源版本、脚本模式和必需模块；验收客户端不满足时在安装/运行前说明而非运行中报错。 → ✅ R162 批量登记（E2 已交付）：参考件=普通模式 v2（Roslyn）+语法 C#5 下兼容（csc 门实证）；思源版本=3.8.4+（kernels 字段/202 信封差异已记）；minQuickerVersion 2.2.0+（暂存区 AI 写/等待窗口步骤）——ACTION-CARDS/README 已记，registry.json 提案 minQuickerVersion 字段承载",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162"
         ],
         "docs": [
           "06-"
@@ -18549,15 +18555,16 @@
       "priority": "P0",
       "topic": "前置清单",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "创建前检查思源、快门、Quicker、Token、桥、AI 服务、工作区、插件和目标文档；验收分为可继续、缺配置、仅只读和不可用四类。",
+      "text": "创建前检查思源、快门、Quicker、Token、桥、AI 服务、工作区、插件和目标文档；验收分为可继续、缺配置、仅只读和不可用四类。 → ✅ R162 批量登记（E2 已交付）：**SY·预检件**即本项实现（内核可达/令牌/桥/插件四检+失败项清单）；四分类映射=全部通过(可继续)/令牌无效(缺配置)/只读 ops(仅只读)/内核不可达(不可用)；GETTING-STARTED 三步=首跑路径",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162"
         ],
         "docs": [
           "06-"
@@ -18572,15 +18579,16 @@
       "priority": "P0",
       "topic": "输入输出表",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每个动作列输入来源（选区/剪贴板/参数/上下文/文件）、类型、大小和输出去向；验收没有输入、空输入、多输入和超限各有路径。",
+      "text": "为每个动作列输入来源（选区/剪贴板/参数/上下文/文件）、类型、大小和输出去向；验收没有输入、空输入、多输入和超限各有路径。 → ✅ R162 批量登记（E2 已交付）：参考件头注【输入/输出变量】表 27 件全量（含大小限制如 args≤32KB/选区截断/图片 PNG）；ACTION-CARDS 输入输出字段用户化转写",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162"
         ],
         "docs": [
           "06-"
@@ -18595,15 +18603,16 @@
       "priority": "P1",
       "topic": "错误合同",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作卡把网络、鉴权、目标缺失、插件未就绪、业务拒绝、超时和未知结果映射为用户下一步；验收不以通用“失败”覆盖不同恢复方式。",
+      "text": "动作卡把网络、鉴权、目标缺失、插件未就绪、业务拒绝、超时和未知结果映射为用户下一步；验收不以通用“失败”覆盖不同恢复方式。 → ✅ R162 批量登记（E2 已交付）：**docs/FAQ.md 七类 30+ 条**即错误合同（网络→未运行分支/鉴权→401 自愈+令牌引导/目标缺失→config.discover/插件未就绪→registry 预检/业务拒绝→rejected 中文/超时→不换 id 重试/未知→诚实 timeout）；参考件错误分支全按此实现",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162"
         ],
         "docs": [
           "06-"
@@ -18618,15 +18627,16 @@
       "priority": "P1",
       "topic": "业务 owner",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作元数据标记思源、快门、打卡、人脉、拾遗、闪卡、考试或雷切的权威 owner；验收动作不在 Quicker 内复制业务判断和统计。",
+      "text": "动作元数据标记思源、快门、打卡、人脉、拾遗、闪卡、考试或雷切的权威 owner；验收动作不在 Quicker 内复制业务判断和统计。 → ✅ R162 批量登记（E2 已交付）：api.md op 表 owner 列+capability-registry（manifest per-plugin）+红线「动作不复制业务判断」——打卡数据归打卡、人脉归人脉，快门只透传；登记为元数据约定（registry.json 提案 effects 字段承载）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162"
         ],
         "docs": [
           "06-"
@@ -18641,15 +18651,18 @@
       "priority": "P1",
       "topic": "环境差异",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "创建前确认桌面/移动/浏览器、前台窗口、管理员权限、代理、端口和工作区；验收动作卡明确哪些环境只能保存草稿/只读。",
+      "text": "创建前确认桌面/移动/浏览器、前台窗口、管理员权限、代理、端口和工作区；验收动作卡明确哪些环境只能保存草稿/只读。 → ✅ R162 批量登记（E2 实证）：桌面/移动=isMobileGuard（R140）；前台窗口=SY-粘贴守卫/Office选区 进程校验；管理员=Quicker 提升运行实况（UIPI 边界已知）；代理=系统代理未启用实测（R160 前轮）；端口=6806 单实例（R140 源码实证）；工作区=SY_URL 绑定",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162",
+          "R140",
+          "R160"
         ],
         "docs": [
           "06-"
@@ -18664,15 +18677,18 @@
       "priority": "P0",
       "topic": "最小路径",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个新动作先设计一条最短成功路径，再列增强分支和失败分支；验收新手可先完成结果，不必先配置所有高级能力。",
+      "text": "每个新动作先设计一条最短成功路径，再列增强分支和失败分支；验收新手可先完成结果，不必先配置所有高级能力。 → ✅ R162 批量登记（E2 已交付）：参考件设计原则即此——p0-1 主流程=appendDailyNoteBlock 一发即成，R6 标题落点/R3 路由为增强分支；g2-capture 主流程=insertBlock，发现链为前置增强；蓝图步骤表「失败分支」列齐备",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R162",
+          "R6",
+          "R3"
         ],
         "docs": [
           "06-"
