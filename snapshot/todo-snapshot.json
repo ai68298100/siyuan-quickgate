@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:17:36.858Z",
+  "generatedAt": "2026-10-03T17:21:13.347Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 357,
-      "pending": 939
+      "done": 359,
+      "pending": 937
     },
     "byMainline": {
       "C7": 261,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 237,
-      "E0": 575,
+      "E4": 239,
+      "E0": 573,
       "E2": 112,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 939,
+      "dev": 937,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -29786,7 +29786,7 @@
       "type": "评估",
       "status": "done",
       "blockedBy": null,
-      "text": "Word 选区留证：用户主动选择 Word 文本，读取 `Selection.Range` 与 `Range.Information` 的页码/表格上下文，生成思源证据块。验收：带文件、页码、选区摘要、时间和回链；无法访问对象模型时退化为复制选区，不后台扫描全文。 → ✅ R155 调研登记（E1+E2）：**本机环境实证（注册表）**——Word.Application/Excel.Application/KWPS.Application ProgID 全在（WPS 兼容别名与 MS 原生并存），COM 晚绑定（Marshal.GetActiveObject→Selection/Range）免 Office 互操作程序集。**设计**：留证卡=选区文本+Range.Information 页码+文档名 → 复用 SY-研究来源卡 结构（source=word-document，指纹=选区 hash）；前置守卫=SY-粘贴守卫 进程名校验（WINWORD/WPS）。**主路径裁定**：Quicker 原生 Word 支持模块优先（成熟度更高），COM 晚绑定为无模块版兜底——挂 Quicker GUI 轮实测两者",
+      "text": "Word 选区留证：用户主动选择 Word 文本，读取 `Selection.Range` 与 `Range.Information` 的页码/表格上下文，生成思源证据块。验收：带文件、页码、选区摘要、时间和回链；无法访问对象模型时退化为复制选区，不后台扫描全文。 → ✅ R155 调研登记（E1+E2）：**本机环境实证（注册表）**——Word.Application/Excel.Application/KWPS.Application ProgID 全在（WPS 兼容别名与 MS 原生并存），COM 晚绑定（Marshal.GetActiveObject→Selection/Range）免 Office 互操作程序集。**设计**：留证卡=选区文本+Range.Information 页码+文档名 → 复用 SY-研究来源卡 结构（source=word-document，指纹=选区 hash）；前置守卫=SY-粘贴守卫 进程名校验（WINWORD/WPS）。**主路径裁定**：Quicker 原生 Word 支持模块优先（成熟度更高），COM 晚绑定为无模块版兜底——挂 Quicker GUI 轮实测两者；**R156 共享件已开发**：SY-Office选区.cs（word/excel 双模式+进程守卫+MK_E_UNAVAILABLE 分支，23 脚本编译门过；运行时待 Office 打开实测）",
       "mainline": "C6",
       "evidence": "E4",
       "refs": {
@@ -29796,7 +29796,8 @@
         "rounds": [
           "R151",
           "R160",
-          "R155"
+          "R155",
+          "R156"
         ],
         "docs": []
       }
@@ -29809,18 +29810,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Word 批注/修订待审：用户导出或复制带批注/修订的段落，生成原文→建议→决定状态的思源待审草稿。验收：未读取到批注时明确“普通选区留证”，不把草稿写成已审阅。",
+      "text": "Word 批注/修订待审：用户导出或复制带批注/修订的段落，生成原文→建议→决定状态的思源待审草稿。验收：未读取到批注时明确“普通选区留证”，不把草稿写成已审阅。 → ✅ R156 调研登记（E1+E2）：COM 面=Document.Comments（item.Scope.Text=原文、.Range.Text=批注、.Author）/Document.Revisions（Type/Range/作者）→待审草稿（原文→建议→决定三列，决定列留空）。**验收语义落点**：Comments.Count==0 且 Revisions.Count==0 → 明确回「普通选区留证」（不把草稿写成已审阅）。共享件 SY-Office选区.cs 本轮开发（见同批）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R156"
         ],
         "docs": []
       }
@@ -29858,18 +29860,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Excel 异常解释草稿：用户选择区域并提供阈值/规则，生成异常地址清单和思源解释草稿，不直接修改 Excel。验收：公式、空值和显示格式保留，AI 只解释异常，不判定业务正确。",
+      "text": "Excel 异常解释草稿：用户选择区域并提供阈值/规则，生成异常地址清单和思源解释草稿，不直接修改 Excel。验收：公式、空值和显示格式保留，AI 只解释异常，不判定业务正确。 → ✅ R156 调研登记（E1+E2）：COM 面=Selection.Value2 遍历+用户阈值/规则 → 异常地址清单（Cells(row,col).Address）+解释草稿（AI 解释挂思源 /api/ai/chatGPT 同 P0-3，动作只出清单不判级不改表）。**验收对齐**：公式保留=读 Formula 而非 Value2 作证据列；空值/文本单元格跳过并计数。SY-Office选区.cs 共享件本轮开发",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R156"
         ],
         "docs": []
       }
