@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:30:41.498Z",
+  "generatedAt": "2026-10-03T17:32:44.232Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 363,
-      "pending": 933
+      "done": 366,
+      "pending": 930
     },
     "byMainline": {
       "C7": 260,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 243,
-      "E0": 569,
+      "E4": 246,
+      "E0": 566,
       "E2": 112,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 933,
+      "dev": 930,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -30058,18 +30058,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "路径与重复处理：对文件移动、重命名、同名、重复 hash 和软链接生成变更报告。验收：用户选择更新引用、保留旧引用或忽略，动作不暗中改变思源资源块和源文件。",
+      "text": "路径与重复处理：对文件移动、重命名、同名、重复 hash 和软链接生成变更报告。验收：用户选择更新引用、保留旧引用或忽略，动作不暗中改变思源资源块和源文件。 → ✅ R159 落地件已开发：SY-变更报告.cs（新旧清单 JSON diff：新增/删除/移动（同 md5 消失重定位）/重复组四分类报告；只读不改引用——引用更新由用户决定；26 脚本编译门过）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R159"
         ],
         "docs": []
       }
@@ -30107,18 +30108,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "标注截图证据：对截图添加箭头、遮罩和编号，写入思源资源块及来源窗口/时间。验收：原图、标注图和说明可切换，隐私遮罩在外发前明确显示。",
+      "text": "标注截图证据：对截图添加箭头、遮罩和编号，写入思源资源块及来源窗口/时间。验收：原图、标注图和说明可切换，隐私遮罩在外发前明确显示。 → ✅ R159 调研登记（E1 环境实证）：本机 **PixPin 在跑**（标注/长截图能力自带）——主路径=PixPin 截图标注 → 图片走 p0-5 入库（原图+标注图两张，alt 分别标 origin/annotated + 来源窗口/时间尾注）；隐私遮罩外发确认=PixPin 标注步骤内完成（人审环节天然存在）。**验收对齐**：原图/标注图/说明三件均入块；无新代码需求",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R159"
         ],
         "docs": []
       }
@@ -30131,18 +30133,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "长截图资料：将网页或文档长截图拆成可定位页面或一张带目录的资料卡。验收：超长、滚动中断和内容变化有状态，图片和来源 URL 保持关联。",
+      "text": "长截图资料：将网页或文档长截图拆成可定位页面或一张带目录的资料卡。验收：超长、滚动中断和内容变化有状态，图片和来源 URL 保持关联。 → ✅ R159 调研登记（E1）：长截图主路径=**PixPin 长截图**（本机在跑，滚动拼接自带）；入思源=大图资产上传（p0-5）+「可定位拆页」裁定：>10000px 才拆（思源图片渲染可滚动，拆页反而丢上下文——登记为反过度工程裁定）；来源 URL 关联=来源层同来源卡。挂 Quicker GUI 轮实测 PixPin→Quicker 图片变量链",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R159"
         ],
         "docs": []
       }
