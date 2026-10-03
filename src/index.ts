@@ -10,6 +10,7 @@ import "./index.scss";
 import { KernelApi } from "./services/kernelApi";
 import { BridgeStore, DataIO } from "./services/store";
 import { BridgeService, EditorContextResult, EcosystemManifest } from "./services/bridge-service";
+import manifestJson from "./assets/ecosystem-manifests.json";
 import { SingleFlightPoller } from "./services/poller";
 import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
@@ -649,7 +650,7 @@ export default class QuickGatePlugin extends Plugin {
         ecoBtn.textContent = "生态清单版本";
         ecoBtn.onclick = async () => {
             try {
-                const manifest = (await import("./assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest & { updatedAt?: string };
+                const manifest = manifestJson as unknown as EcosystemManifest & { updatedAt?: string };
                 let installed: Array<Record<string, unknown>> = [];
                 try {
                     installed = await this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() });

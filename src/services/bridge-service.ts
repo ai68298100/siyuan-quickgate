@@ -3,6 +3,7 @@
  * 依赖全部注入，便于单测；DOM/思源仅经由注入的桥实例与 kernelApi 触达。
  */
 import { BridgeCommand, BridgeReceipt, QuickGateSettings, AuditEntry } from "../types/bridge";
+import manifestJson from "../assets/ecosystem-manifests.json";
 import { parseLine, splitLines, isExpired } from "./envelope";
 import { compactCommands } from "./queue";
 import { appendReceipt } from "./results";
@@ -391,7 +392,7 @@ export class BridgeService {
                 try {
                     petals = await this.deps.loadPetals();
                 } catch { /* 内核不可达时也返回 manifest 口径 */ }
-                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const manifest = manifestJson as unknown as EcosystemManifest;
                 const enabledMap = new Map<string, unknown>();
                 for (const p of petals) {
                     const name = (p as { name?: unknown }).name;
@@ -462,13 +463,13 @@ export class BridgeService {
 
             // ---- 设计态契约（M2 实现：events 文件载体 + workflow 受控编排）----
             case "events.list": {
-                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const manifest = manifestJson as unknown as EcosystemManifest;
                 const wl = eventWhitelist(manifest);
                 const events = [...wl.entries()].map(([name, meta]) => ({ name, ...meta }));
                 return { status: "recorded", data: { events }, message: `白名单事件 ${events.length} 个` };
             }
             case "events.pull": {
-                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const manifest = manifestJson as unknown as EcosystemManifest;
                 const wl = eventWhitelist(manifest);
                 const files: string[] = [];
                 for (const source of new Set([...wl.values()].map((v) => v.source))) {
@@ -531,7 +532,7 @@ export class BridgeService {
                 const method = typeof a.method === "string" ? a.method : "";
                 if (!plugin || !method) return this.reject("plugin/method 缺失");
                 if (!s.rawApiAllowlist.includes(plugin)) return this.reject(`插件 ${plugin} 不在 plugin.api 允许名单`);
-                const manifest = (await import("../assets/ecosystem-manifests.json")).default as unknown as EcosystemManifest;
+                const manifest = manifestJson as unknown as EcosystemManifest;
                 const globalName = manifest.plugins.find((m) => m.pluginId === plugin)?.windowBridge ?? "";
                 const w = globalThis as unknown as { window?: { [k: string]: unknown } };
                 const bridge = (globalName ? w.window?.[globalName] : null) as Record<string, unknown> | null | undefined;

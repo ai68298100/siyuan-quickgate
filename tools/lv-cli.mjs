@@ -82,7 +82,8 @@ async function receipt(plugin, id, maxWaitMs) {
 async function main() {
     const [command] = process.argv.slice(2);
     const plugin = arg("--plugin", PLUGIN);
-    const wait = parseInt(arg("--wait", "8000"), 10);
+    const waitRaw = arg("--wait", "8000");
+    const wait = /^\d+$/.test(waitRaw) ? parseInt(waitRaw, 10) : 8000; // 裸 --wait 无值时回落默认（此前出 NaN）
     switch (command) {
         case "ping": {
             const id = await send(plugin, "bridge.ping", {});
