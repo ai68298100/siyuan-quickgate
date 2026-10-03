@@ -2,7 +2,7 @@
 
 [中文文档](./README.zh-CN.md)
 
-[![Version](https://img.shields.io/badge/version-0.7.2-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.7.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (23 ops):
 
@@ -69,7 +69,7 @@ Clients included in [`tools/`](./tools): zero-dependency node CLI (`ping/send/ru
 
 ## Status & roadmap
 
-**v0.1.0** bridge core + adapters + settings + unit tests → **v0.2.0** ecosystem hub (manifest/registry/diagnostics) → **v0.3.0** reliability hardening (template.new, 15s cap, device name, diag package) → **v0.4.x** events/workflow + check-in host-event bridging → **v0.5.x** experimental kernel sync route, event-subscription channel fix (window CustomEvent), observability stats, manifest calibrated against remote mains, event-deleted materialization → **v0.6.x** deployed live on a real workspace (3.8.5) and enabled: config.discover calibrated against the live kernel (dailyNoteSavePath camelCase + non-default-template-first), v1.5 broadcast fast path (SSE millisecond-level command channel, default off, reservation semantics against dual-channel replays), frontend assumptions statically verified against the installed app bundle (editor.context docId fix, registry customHotkey effective key). → **v0.7.x** MCP stdio server for AI assistants (23 ops as tools, 13 read-only by default, subscription self-healing), kernel sync route live-verified on 3.8.6 (bug#9 kernels-field fix), acceptance entry points (npm run accept / verify:restart).
+**v0.1.0** bridge core + adapters + settings + unit tests → **v0.2.0** ecosystem hub (manifest/registry/diagnostics) → **v0.3.0** reliability hardening (template.new, 15s cap, device name, diag package) → **v0.4.x** events/workflow + check-in host-event bridging → **v0.5.x** experimental kernel sync route, event-subscription channel fix (window CustomEvent), observability stats, manifest calibrated against remote mains, event-deleted materialization → **v0.6.x** deployed live on a real workspace (3.8.5) and enabled: config.discover calibrated against the live kernel (dailyNoteSavePath camelCase + non-default-template-first), v1.5 broadcast fast path (SSE millisecond-level command channel, default off, reservation semantics against dual-channel replays), frontend assumptions statically verified against the installed app bundle (editor.context docId fix, registry customHotkey effective key). → **v0.7.x** MCP stdio server for AI assistants (23 ops as tools, 13 read-only by default, subscription self-healing), kernel sync route live-verified on 3.8.6 (bug#9 kernels-field fix), acceptance entry points (npm run accept / verify:restart). → **v0.7.3** backlog cleanup (eight correctness fixes + version/release gates), real-device acceptance 10/10 (event materialization loop, v1.5 fast path 146ms), bug#11/12/13 (compaction escape / 202 error envelope / dynamic-import renderer crash), event governance tightening (whitelist 8→2)
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 
@@ -78,7 +78,7 @@ Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # acceptance gate: unit tests (98) + MCP protocol smoke (6)
+corepack pnpm accept  # acceptance gate: unit tests (124) + MCP protocol smoke (7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # symlink into your workspace for dev
 ```

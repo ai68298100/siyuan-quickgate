@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-[![Version](https://img.shields.io/badge/version-0.7.2-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.7.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（23 个 op）——
 
@@ -69,7 +69,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 ## 状态与路线
 
-- **v0.1.0** 桥核心 + 适配器 + 设置页 + 单测 → **v0.2.0** 生态中枢（manifest/registry/diagnostics）→ **v0.3.0** 可靠性收尾（template.new/15s 上限/设备名/诊断包）→ **v0.4.x** events/workflow 实现 + 打卡宿主事件桥接 → **v0.5.x** 内核同步通道（实验性）、事件订阅通道修正（window CustomEvent）、可观测性统计、生态清单按远端 main 校准、event-deleted 物化 → **v0.6.x** 已部署真机（3.8.5）并启用：config.discover 真机校准（dailyNoteSavePath 驼峰+非默认模板优先）、v1.5 广播快路径（SSE 毫秒级命令通道，默认关，双通道预留语义防重放）、前端假设 bundle 静态核实（editor.context docId 修复、registry customHotkey 生效键）→ **v0.7.x** 面向 AI 助手的 MCP stdio 服务器（23 op 即 tools，默认 13 只读，订阅断连自愈）、内核同步路由 3.8.6 真机全线打通（bug#9 kernels 字段修复）、验收入口收敛（npm run accept / verify:restart）。
+- **v0.1.0** 桥核心 + 适配器 + 设置页 + 单测 → **v0.2.0** 生态中枢（manifest/registry/diagnostics）→ **v0.3.0** 可靠性收尾（template.new/15s 上限/设备名/诊断包）→ **v0.4.x** events/workflow 实现 + 打卡宿主事件桥接 → **v0.5.x** 内核同步通道（实验性）、事件订阅通道修正（window CustomEvent）、可观测性统计、生态清单按远端 main 校准、event-deleted 物化 → **v0.6.x** 已部署真机（3.8.5）并启用：config.discover 真机校准（dailyNoteSavePath 驼峰+非默认模板优先）、v1.5 广播快路径（SSE 毫秒级命令通道，默认关，双通道预留语义防重放）、前端假设 bundle 静态核实（editor.context docId 修复、registry customHotkey 生效键）→ **v0.7.x** 面向 AI 助手的 MCP stdio 服务器（23 op 即 tools，默认 13 只读，订阅断连自愈）、内核同步路由 3.8.6 真机全线打通（bug#9 kernels 字段修复）、验收入口收敛（npm run accept / verify:restart）。 → **v0.7.3** R69/R70 池清账（八处正确性修复+版本/发布双门禁）、真机验收 10/10 全绿（⑪事件物化闭环/v1.5 快路径 146ms）、bug#11/12/13（压缩逃逸/202 错误信封/动态 import 渲染进程炸）、事件治理收紧（白名单 8→2）
 - 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)（内核侧+①②⑦ 已坐实），路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 
 ## 开发
@@ -77,7 +77,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # 验收门：单测(98) + MCP 协议冒烟(6)
+corepack pnpm accept  # 验收门：单测(124) + MCP 协议冒烟(7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # 软链进工作空间联调
 ```
