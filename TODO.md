@@ -169,6 +169,11 @@
 
 ## 5. 小驴快门插件（siyuan-quickgate）
 
+- [x] 【R128·决策代行】Claude Desktop 全链打通：winget 安装 v1.44121.2（已登录态复用）+ claude_desktop_config.json lv-quickgate 条目校验（dist-mcp v0.7.3+Token 注入）+ stdio 握手实测 + **MCP server 子进程被 Claude 拉起（PID 20016）**——AI host 面就绪
+- [x] 【R128·决策代行】npm publish 探测：npm 未登录（ENEEDAUTH）——建号需邮箱验证属用户项；dist-mcp/ v0.7.3 就绪，等账号后 npm publish 一步
+- [x] 【R129·Quicker 自动化受限定论】Quicker 以管理员运行→UIPI 阻断非提升 UIA（空窗口列表/taskkill 拒绝均此因）；非提升重启后仍无 UIA 窗口（2.x 无头托盘架构，设置走 Headless Shell）；HTTP API(668) 默认关且开启需 GUI；URI 仅 settings/navigate/runaction 无 import。**结论：动作编辑器 GUI 无法从本会话自动化**；g2-capture.cs 单文件版+导入指引就绪，待（a）提升权限会话重试或（b）用户一次手动导入。Quicker 已恢复运行（非提升，重启后随自启动回到原权限）
+- [x] 【R130·文档】PROGRESS.md 同步 v0.7.3 真机批；R69·文档组的过期待办在下次发版轮统一清（R69 文档组保留）
+
 - [x] 【R127·真机批】**思源全自动重启×4 + v0.7.3 部署 + 真机验收 10/10 全绿**：③桥 289ms / ⑩路由+MCP 路由 621ms / ⑪事件物化闭环（recorded=1→events.pull 11ms）/ v1.5 广播快路径 146ms / MCP 冒烟 6/6（LV_MCP_WRITE 23 工具）——此前 ⑪/v1.5/MCP 三项跳过全部转绿
 - [x] 【R127·bug#11】信封不完整行（op 缺失）凭合法 id 字段逃过压缩——真机实测 33 条重复指纹回执（多消费者窗口期）；修复 compactCommands 按信封完整性分类（回归测试+真机复验坏行首 tick 即压缩）
 - [x] 【R127·bug#12】3.8.6 内核缺失文件返回 HTTP 202+application/json 错误信封——getFileText 误当文件内容，实测 404 JSON 混入 events.ndjson 首行；修复按正文识别（R78-P1 错误分类清账）
