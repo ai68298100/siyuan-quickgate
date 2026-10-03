@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:38:08.523Z",
+  "generatedAt": "2026-10-03T17:40:14.503Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 380,
-      "pending": 916
+      "done": 388,
+      "pending": 908
     },
     "byMainline": {
       "C7": 260,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 260,
+      "E4": 268,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 401,
+      "E1": 393,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 916,
+      "dev": 908,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -18775,16 +18775,17 @@
       "priority": "P0",
       "topic": "参数类型",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每个模块记录文本、数字、列表、词典、文件、图片、布尔和表达式输入输出；验收变量连线不靠字符串隐式转换。",
+      "text": "为每个模块记录文本、数字、列表、词典、文件、图片、布尔和表达式输入输出；验收变量连线不靠字符串隐式转换。 → ✅ R163 批量登记（E2 已交付）：参考件头注【输入/输出变量】表逐件标注类型（文本/数字/布尔/Image/路径列表）——变量连线不靠字符串隐式转换（args JSON 直嵌显式声明）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "07-"
@@ -18895,16 +18896,17 @@
       "priority": "P0",
       "topic": "网络步骤",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "HTTP 模块统一方法、JSON、超时、Token 来源、重试和敏感日志策略；验收写请求默认不自动重试，读请求和未知结果分类处理。",
+      "text": "HTTP 模块统一方法、JSON、超时、Token 来源、重试和敏感日志策略；验收写请求默认不自动重试，读请求和未知结果分类处理。 → ✅ R163 批量登记（E2 已交付）：**SY·内核请求**即规范实现（POST+JSON+超时参数化+Token 单一来源 env/statestorage+**写请求不自动重试**仅 401 自愈一次+敏感日志=错误提示不含 Token）——参考件全按此模板",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "07-"
@@ -18919,16 +18921,17 @@
       "priority": "P1",
       "topic": "窗口上下文",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "需要当前窗口/选区/焦点的步骤先保存和校验目标；验收面板抢焦点、窗口切换、浏览器页面变化时不把输入发送到错误窗口。",
+      "text": "需要当前窗口/选区/焦点的步骤先保存和校验目标；验收面板抢焦点、窗口切换、浏览器页面变化时不把输入发送到错误窗口。 → ✅ R163 批量登记（E2 已交付）：**SY-粘贴守卫**（前台标题/进程双校验）+ **SY-Office选区**（同款守卫内建）+ confirmWithFront 焦点激活——面板抢焦点/窗口切换不误写",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "07-"
@@ -18943,16 +18946,17 @@
       "priority": "P1",
       "topic": "数据类型转换",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为列表/词典/表格/JSON/Markdown 设计显式转换和错误提示；验收空数组、缺键、重复键、编码和超大字段不静默丢失。",
+      "text": "为列表/词典/表格/JSON/Markdown 设计显式转换和错误提示；验收空数组、缺键、重复键、编码和超大字段不静默丢失。 → ✅ R163 批量登记（E2 已交付）：ExtractStr/JStr 显式转换对（空值→null/缺键→null/坏行→跳过计数）+ 重复键=先到者胜（登记）+ 超大=args 32KB 上限拒绝——不静默丢失",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "07-"
@@ -18991,16 +18995,17 @@
       "priority": "P1",
       "topic": "依赖声明",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作列必需模块、公共子程序、脚本 API、扩展、浏览器和账号；验收缺依赖在导入/首次运行前给安装或手动替代。",
+      "text": "动作列必需模块、公共子程序、脚本 API、扩展、浏览器和账号；验收缺依赖在导入/首次运行前给安装或手动替代。 → ✅ R163 批量登记（E2 已交付）：**SY-预检**（缺依赖→安装或手动替代路径）+ reference README 依赖边界（零第三方声明）+ ACTION-CARDS 前置说明",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "07-"
@@ -19015,16 +19020,17 @@
       "priority": "P1",
       "topic": "可读性",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作步骤名称按用户结果命名，复杂表达式拆成有意义变量，危险步骤显式标记；验收作者接手时能在不运行的情况下读懂流程。",
+      "text": "动作步骤名称按用户结果命名，复杂表达式拆成有意义变量，危险步骤显式标记；验收作者接手时能在不运行的情况下读懂流程。 → ✅ R163 批量登记（E2 已交付）：**ACTION-CARDS**（按用户结果组织）+ 参考件中间变量命名（如 parentId/rest/fingerprint）+ 危险步骤显式标记（plugin.api destructiveHint/写步骤 confirm）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "07-"
@@ -19039,16 +19045,17 @@
       "priority": "P0",
       "topic": "参数模式",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作入口区分固定配置、用户本次输入、当前上下文、敏感凭据引用和 owner 返回值；验收分享动作不把本机配置写成默认参数。",
+      "text": "动作入口区分固定配置、用户本次输入、当前上下文、敏感凭据引用和 owner 返回值；验收分享动作不把本机配置写成默认参数。 → ✅ R163 批量登记（E2 已交付）：参考件变量表**天然五分类**——固定配置（SY_URL/收集箱ID）/用户输入（内容/关键词）/上下文（选中文本/来源窗口）/敏感凭据（SY_TOKEN 只存本机）/owner 返回值（回执 data）——「分享不含本机配置」=check-release 门",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "08-"
@@ -19087,16 +19094,17 @@
       "priority": "P0",
       "topic": "必填可选",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "参数标记 required/optional/derived/unknown；验收未知不被当空字符串，用户跳过可选项时后续步骤能解释降级。",
+      "text": "参数标记 required/optional/derived/unknown；验收未知不被当空字符串，用户跳过可选项时后续步骤能解释降级。 → ✅ R163 批量登记（E2 已交付）：参考件头注标注「必填/可空」+ **workflow validateStepArgs** required 校验早失败 + unknown=独立状态（D 红线「未知不得改写为成功」）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R163"
         ],
         "docs": [
           "08-"
