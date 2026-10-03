@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-10-03T17:10:29.056Z",
+  "generatedAt": "2026-10-03T17:12:27.848Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 351,
-      "pending": 945
+      "done": 353,
+      "pending": 943
     },
     "byMainline": {
-      "C7": 260,
-      "C8": 260,
+      "C7": 261,
+      "C8": 259,
       "C4": 132,
       "C6": 455,
       "C2": 135,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 231,
-      "E0": 580,
-      "E2": 113,
+      "E4": 233,
+      "E0": 579,
+      "E2": 112,
       "E3": 49,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 945,
+      "dev": 943,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -28066,18 +28066,20 @@
       "priority": "G2",
       "topic": "视图与任务生命周期",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "定义视图挂载、关闭、重新打开、宿主热重载与插件禁用的订阅/定时器/请求释放合同；验收关闭页面仅销毁视图，任务是否停止由 C4 决定，反复打开不增加重复订阅。 挂载、路由恢复和主题切换仅渲染，不派发业务命令。",
+      "text": "定义视图挂载、关闭、重新打开、宿主热重载与插件禁用的订阅/定时器/请求释放合同；验收关闭页面仅销毁视图，任务是否停止由 C4 决定，反复打开不增加重复订阅。 挂载、路由恢复和主题切换仅渲染，不派发业务命令。 → ✅ R153 调研登记（E2，实现对照）：生命周期合同以快门为样板固化——**挂载序**：loadAll→settings→audit 恢复→deviceName→startBridge→startEventBridge（每步幂等）；**关闭序**：先停输入源（poller 当前 tick 后退出→广播订阅→事件退订）再 flush 状态（audit）——「先停源再落盘」防写撕；**热重载**：petal toggle 全链验证 ✓（R137 起为标准部署通道）；**任务语义**：桥任务=消费队列，关闭只停止消费不撤销已执行（C4 口径一致）；**定时器/订阅释放**：eventBridge removeEventListener/broadcastSub.stop/poller.stop 全有配对（checkin 侧 disposeDockTomatoBridge 同模式互证）。**缺口**：崩溃时 audit 窗口丢失（auditMax 滚动可接受，已登记）；「重新打开」幂等已由 onload 幂等化覆盖",
       "mainline": "C4",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "20"
         ],
         "rounds": [
           "R150",
-          "R1"
+          "R1",
+          "R153",
+          "R137"
         ],
         "docs": []
       }
@@ -28090,18 +28092,20 @@
       "priority": "G2",
       "topic": "路由目标绑定",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为页面、草稿和弹窗绑定稳定工作区/设备/任务身份，切换目标时显示原目标并使旧执行入口失效；验收相同文档标题或同名设备不能导致写入另一工作区。",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "为页面、草稿和弹窗绑定稳定工作区/设备/任务身份，切换目标时显示原目标并使旧执行入口失效；验收相同文档标题或同名设备不能导致写入另一工作区。 → ✅ R153 调研登记（E2，实现对照）：目标身份二元组=(工作区,设备)——设备=device.json（storage/local 不随同步每机独立）+信封 device 定向字段；工作区=SY_URL（多空间端口规律 R140 源码实证：6806 只保证第一实例）。**绑定设计**：动作缓存 SY_URL 即绑定工作区，变更即旧入口失效；同文档标题跨工作区=靠 URL 绑定天然消歧。**缺口登记**：(a)思源无 workspace-id 前端 API（窗口标题含空间名是唯一线索——R140-B 实证）；(b)任务身份（跨页面续跑同一批次）尚无载体，挂 workflow planId 演进",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "20"
         ],
         "rounds": [
           "R150",
-          "R1"
+          "R1",
+          "R153",
+          "R140"
         ],
         "docs": []
       }
