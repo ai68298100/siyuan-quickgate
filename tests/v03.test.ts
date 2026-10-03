@@ -126,4 +126,28 @@ describe("v0.3.0 新增", () => {
         expect(rs.find((r) => r.id === "p2").data).toEqual([7, "x"]); // 数组=位置参数原样
         expect(rs.find((r) => r.id === "p3").status).toBe("rejected"); // 其他形状显式拒绝
     }, 10000);
+
+    it("workflow.execute 单步超时：挂起步回 failed 并停止，不迟到执行后续步（R69-P1 回归）", async () => {
+        const mem = new MemKernel();
+        const line = (id: string, op: string, args: unknown) => {
+            const prev = mem.files.get("/bridge/commands.ndjson") ?? "";
+            mem.files.set("/bridge/commands.ndjson", prev + JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString() }) + "\n");
+        };
+        line("w1", "workflow.plan", { steps: [{ op: "contacts.search", args: { keyword: "x" } }] });
+        const svc = make(mem, {
+            getContacts: () => ({ protocol: 1, searchPeople: () => new Promise(() => {}) }), // 桥在、但 searchPeople 挂起
+            execTimeoutMs: () => 50,
+        });
+        await svc.tick();
+        const planReceipt = receipts(mem).find((r) => r.id === "w1");
+        expect(planReceipt.status).toBe("recorded");
+        const planId = planReceipt.data.plan.planId;
+        line("w2", "workflow.execute", { planId });
+        await svc.tick();
+        const execReceipt = receipts(mem).find((r) => r.id === "w2");
+        expect(execReceipt.status).toBe("recorded"); // workflow op 本身完成；步级失败在 data 内
+        expect(execReceipt.data.steps[0].status).toBe("failed"); // 挂起步按单步上限回 failed
+        expect(execReceipt.data.stoppedAt).toBe(0); // 该步失败即停止
+        expect(execReceipt.message).toContain("失败停止");
+    }, 10000);
 });

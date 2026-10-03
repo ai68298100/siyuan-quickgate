@@ -272,7 +272,9 @@ export class BridgeService {
     lateCompletions = 0;
 
     private dispatchWithTimeout(cmd: BridgeCommand): Promise<BridgeResult> {
-        if (cmd.op === "commands.run") return this.dispatch(cmd); // 确认窗口语义自行管理
+        // commands.run（确认窗口自管）/ workflow.execute（单步上限自管）：内部已有界，
+        // 外层不再叠加同额超时——否则外层先到会把整个 envelope 判 failed 而工作流仍在底层迟到执行
+        if (cmd.op === "commands.run" || cmd.op === "workflow.execute") return this.dispatch(cmd);
         const EXEC_TIMEOUT_MS = this.deps.execTimeoutMs?.() ?? 15000;
         return new Promise<BridgeResult>((resolve) => {
             let settled = false;
@@ -508,7 +510,10 @@ export class BridgeService {
                             v: 1, id: `${planId}-${step.index}`, op: step.op, args: step.args,
                             createdAt: new Date().toISOString(),
                         };
-                        return await this.dispatch(cmd);
+                        // 单步 15s 可观测上限（R69-P1）：挂起步在该步停止并回执 failed，
+                        // 不让后续步骤在调用方收到失败后迟到执行；复用 dispatchWithTimeout
+                        // 的单次派发保证（超时只观测迟到结果，不二次调用写操作）
+                        return await this.dispatchWithTimeout(cmd);
                     },
                 });
                 if (r.kind !== "done") return this.reject(r.message);
