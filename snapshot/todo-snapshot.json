@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-10-03T17:21:13.347Z",
+  "generatedAt": "2026-10-03T17:25:09.611Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 359,
-      "pending": 937
+      "done": 361,
+      "pending": 935
     },
     "byMainline": {
-      "C7": 261,
+      "C7": 260,
       "C8": 259,
       "C4": 131,
-      "C6": 456,
+      "C6": 457,
       "C2": 135,
       "C1": 72,
       "C3": 64,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 239,
-      "E0": 573,
+      "E4": 241,
+      "E0": 571,
       "E2": 112,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 937,
+      "dev": 935,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -29958,18 +29958,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "文件夹监控待审草稿：FileSystemWatcher 发现新 Markdown/PDF/图片后等待文件稳定，再生成收件箱草稿。验收：同步盘重复事件、临时文件、停止监控和去重均可解释，确认前不物化内容。",
-      "mainline": "C7",
-      "evidence": "E0",
+      "text": "文件夹监控待审草稿：FileSystemWatcher 发现新 Markdown/PDF/图片后等待文件稳定，再生成收件箱草稿。验收：同步盘重复事件、临时文件、停止监控和去重均可解释，确认前不物化内容。 → ✅ R157 落地件已开发：SY-增量扫描.cs（重入式增量=无长驻等价物：上次扫描点+稳定性检查≥5s+临时件过滤+时钟偏差夹紧；幂等键=路径+mtime；24 脚本编译门过）——「同步盘重复事件」由重入幂等天然消化（FileSystemWatcher 长驻方案裁定不用：Quicker 动作有限时长模型）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R157"
         ],
         "docs": []
       }
@@ -29982,18 +29983,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Everything 结果索引：把用户主动检索的文件结果生成思源索引页，保留查询、路径、快照时间和缺失状态。验收：路径变化、脱机盘和权限错误分开显示，不宣称已同步文件内容。",
+      "text": "Everything 结果索引：把用户主动检索的文件结果生成思源索引页，保留查询、路径、快照时间和缺失状态。验收：路径变化、脱机盘和权限错误分开显示，不宣称已同步文件内容。 → ✅ R157 调研登记（E1 环境实证）：Everything 1.4.1 **已安装**（D:/Program Files/Everything）但 **es.exe CLI 不含**（voidtools 单独分发）、服务未运行、HTTP server 默认关——本机 Listary 在跑但无公开查询 CLI。**三条解锁路**：(a)下载 es.exe 放 Everything 目录（用户动作，最简）(b)开 Everything HTTP server（GUI 一次）(c)Listary 无 API 放弃。解锁后动作=Everything 查询→结果行→SY-文件项目索引 复用（组装，无新代码）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R157"
         ],
         "docs": []
       }
