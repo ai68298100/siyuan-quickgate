@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T16:11:06.749Z",
+  "generatedAt": "2026-10-03T16:29:35.346Z",
   "source": "TODO.md",
   "counts": {
     "total": 1383,
     "checkboxes": 1383,
     "byStatus": {
-      "done": 306,
-      "pending": 977
+      "done": 320,
+      "pending": 963
     },
     "byMainline": {
       "C7": 261,
-      "C8": 261,
+      "C8": 260,
       "C4": 132,
-      "C6": 450,
+      "C6": 451,
       "C2": 135,
       "C1": 71,
       "C3": 63,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 200,
-      "E0": 602,
-      "E2": 117,
+      "E4": 213,
+      "E0": 590,
+      "E2": 116,
       "E3": 49,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
       "user": 74,
-      "dev": 977,
+      "dev": 963,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -10514,15 +10514,19 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每季度 02 协议与快门实现一致性检查",
+      "text": "每季度 02 协议与快门实现一致性检查 → ✅ R137 首轮完成（docs/protocol-consistency-2026Q4.md：九项对齐+D-0012-A 裁定+规范侧待补 2 条；下轮 2027-01）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
-        "docs": []
+        "rounds": [
+          "R137"
+        ],
+        "docs": [
+          "12-"
+        ]
       }
     },
     {
@@ -11058,14 +11062,16 @@
       "priority": null,
       "topic": "GH",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "CI 全绿确认 + 后续版本 tag 发版流水线",
+      "text": "CI 全绿确认 + 后续版本 tag 发版流水线 → ✅ R137 CI 三连绿确认；v0.7.3 tag 补发推送；check:release 门进 CI",
       "mainline": "C8",
       "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11096,14 +11102,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "隐私说明文档：数据流向图（本机→思源同步→AI 端点；快门不外传任何数据）",
+      "text": "隐私说明文档：数据流向图（本机→思源同步→AI 端点；快门不外传任何数据） → ✅ R137 docs/PRIVACY.md（流向图+数据位置表+外部端点清单+清理路径）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11115,14 +11123,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "LICENSE 最终确认（MIT，顺延小驴系）",
+      "text": "LICENSE 最终确认（MIT，顺延小驴系） → ✅ R137 MIT 版权行改项目方（移除模板残留「2023 SiYuan 思源笔记」）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11134,14 +11144,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Quicker 动作许可选项设置（暂缓分享，导出文件内注明「可自用可修改」）",
+      "text": "Quicker 动作许可选项设置（暂缓分享，导出文件内注明「可自用可修改」） → ✅ R137 quicker-actions/README 许可节：可自用可修改（MIT 顺延小驴系）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11229,11 +11241,11 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "快门 WALKTHROUGH.md（M0 九项实证全记录）",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "快门 WALKTHROUGH.md（M0 九项实证全记录） → ✅ 已在位（多轮回填：M0 收官/MCP 真 e2e/CI 容器化均入记录；本轮机器路径占位化）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [],
@@ -11286,14 +11298,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "故障排查 FAQ（错误码/症状→原因→解法表：401、not exist、busy、timeout、桥积压…）",
+      "text": "故障排查 FAQ（错误码/症状→原因→解法表：401、not exist、busy、timeout、桥积压…） → ✅ R137 quickgate docs/FAQ.md（七类 30+ 条，bug#1~13 全沉淀+自检工具速查）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11345,14 +11359,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "版本三线分记（menu schema / 桥协议 / 动作包）",
+      "text": "版本三线分记（menu schema / 桥协议 / 动作包） → ✅ R137 quicker-actions/README「版本三线分记」节（桥协议/菜单模板/动作包三线独立演进规则）",
       "mainline": "C7",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11364,16 +11380,18 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "实测结论回写 05 §7",
+      "text": "实测结论回写 05 §7 → ✅ R137 B/D/F 三项回写（B 部分实证/D 裁定/F 官方文档钉死）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "7"
         ],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11385,14 +11403,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "快门「使用说明」入插件设置页关于区（思源内自助排障）",
+      "text": "快门「使用说明」入插件设置页关于区（思源内自助排障） → ✅ R137 关于区指向 GETTING-STARTED/FAQ/PRIVACY（petal 热加载部署，无需重启）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11577,14 +11597,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "分享/截图前 Token、个人 ID、工作空间/用户目录绝对路径泄露自查",
+      "text": "分享/截图前 Token、个人 ID、工作空间/用户目录绝对路径泄露自查 → ✅ R137 scripts/check-release.mjs 工具化+CI 门（首轮抓到 2 文档本机路径，已修复）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11615,14 +11637,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作不执行外部传入代码；自由文本不进 SQL",
+      "text": "动作不执行外部传入代码；自由文本不进 SQL → ✅ R137 复核：参考件全部 JStr 转义/无 eval/SQL 拼接均过转义；红线复测清单固化",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11634,14 +11658,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "快门确认开关/黑名单默认值不被后续版本关闭",
+      "text": "快门确认开关/黑名单默认值不被后续版本关闭 → ✅ R137 安全默认守护测试（chaos.test.ts：五开关默认+坏值回默认）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
@@ -11691,14 +11717,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 生成 SQL 的只读强制（P0-3 白名单）复测纳入每次动作更新",
+      "text": "AI 生成 SQL 的只读强制（P0-3 白名单）复测纳入每次动作更新 → ✅ R137 quicker-actions README 红线复测清单首项",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R137"
+        ],
         "docs": []
       }
     },
