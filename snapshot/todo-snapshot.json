@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T18:17:19.422Z",
+  "generatedAt": "2026-10-03T18:19:06.632Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 457,
-      "pending": 840
+      "done": 464,
+      "pending": 833
     },
     "byMainline": {
       "C7": 264,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 337,
-      "E0": 564,
-      "E2": 112,
+      "E4": 344,
+      "E0": 558,
+      "E2": 111,
       "E3": 49,
       "E1": 325,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 840,
+      "dev": 833,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -21184,17 +21184,18 @@
       "priority": "P0",
       "topic": "结果优先",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为 AI 任务建立用户结果卡（目标、输入、输出、证据、失败恢复、下一步）；验收不以生成文本或调用次数作为完成。",
+      "text": "为 AI 任务建立用户结果卡（目标、输入、输出、证据、失败恢复、下一步）；验收不以生成文本或调用次数作为完成。 → ✅ R182 批量登记（E2 已交付）：**ACTION-CARDS 七卡+完成判据五级**即用户结果卡本体——「不以生成文本或调用次数作为完成」=notify≠证据红线",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R182"
         ],
         "docs": [
           "14-"
@@ -21209,17 +21210,18 @@
       "priority": "P0",
       "topic": "职责矩阵",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "绘制思源 Agent、快门、小驴插件、Quicker AI、外部 MCP host 和模型服务的责任/禁止事项矩阵；验收每个写入都有唯一 owner。",
+      "text": "绘制思源 Agent、快门、小驴插件、Quicker AI、外部 MCP host 和模型服务的责任/禁止事项矩阵；验收每个写入都有唯一 owner。 → ✅ R182 批量登记（E2 已交付）：**capability-registry owner 字段+api.md op 表 owner 列+红线（快门不复制业务判断/不自带模型服务）**——每个写入有唯一 owner（打卡归打卡/人脉归人脉），矩阵即 registry 本体",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R182"
         ],
         "docs": [
           "14-"
@@ -21234,17 +21236,18 @@
       "priority": "P0",
       "topic": "事实边界",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "要求模型区分事实、引用、推断、建议和未知；验收回执未知时不得用自然语言改写为成功。",
+      "text": "要求模型区分事实、引用、推断、建议和未知；验收回执未知时不得用自然语言改写为成功。 → ✅ R182 批量登记（E2 已交付）：**六态回执+红线「未知不得改写为成功」**——unsupported/timeout 诚实返回不粉饰；证据信封 claims[].evidence 分级管内容侧事实边界",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R182"
         ],
         "docs": [
           "14-"
@@ -21259,17 +21262,19 @@
       "priority": "P0",
       "topic": "授权边界",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把模型回复、客户端同意、工具授权、业务写确认和动作正式化确认拆开；验收任一同意不能隐式授予其他层权限。",
+      "text": "把模型回复、客户端同意、工具授权、业务写确认和动作正式化确认拆开；验收任一同意不能隐式授予其他层权限。 → ✅ R182 批量登记（E2 已交付）：**五层分立已实现**（R166）——模型回复（无授权力）/客户端同意（配置文件）/工具授权（LV_MCP_WRITE）/业务写确认（confirmExec+确认卡）/正式化（.qa 导出+版本门）——任一同意不隐式授予他层",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R182",
+          "R166"
         ],
         "docs": [
           "14-"
@@ -21284,17 +21289,18 @@
       "priority": "P1",
       "topic": "入口统一",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "面板、快捷键、思源 Agent、Quicker AI、MCP 和脚本均映射到统一 intent/plan/receipt 合同；验收入口差异不改变安全门槛。",
+      "text": "面板、快捷键、思源 Agent、Quicker AI、MCP 和脚本均映射到统一 intent/plan/receipt 合同；验收入口差异不改变安全门槛。 → ✅ R182 批量登记（E2 已交付）：**三通道一合同**——NDJSON/内核路由/广播快路径三通道+MCP/CLI/面板多入口，同 op 同回执结构（D-0012 幂等不因入口变化）；验收入口差异不改回执=verify:restart 十项跨通道断言",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R182"
         ],
         "docs": [
           "14-"
@@ -21309,17 +21315,18 @@
       "priority": "P1",
       "topic": "降级路径",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Agent、模型、工具或插件缺失时提供只读解释、手动步骤或 Quicker 入口；验收用户能知道降级损失。",
+      "text": "Agent、模型、工具或插件缺失时提供只读解释、手动步骤或 Quicker 入口；验收用户能知道降级损失。 → ✅ R182 批量登记（E2 已交付）：**三级降级已实现**——Agent 缺失=内核路由 FRONTEND_ONLY 诚实降级（提示走 NDJSON）；模型缺失=GuardSql 本地校验不依赖 AI；插件缺失=SY-预检+手动替代路径（ACTION-CARDS 每卡有手动替代字段）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R182"
         ],
         "docs": [
           "14-"
@@ -21334,17 +21341,18 @@
       "priority": "P1",
       "topic": "生命周期",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "定义 proposed/accepted/committed/verified/unknown/rejected/cancelled 状态及合法迁移；验收状态不能跳过确认或核验。",
+      "text": "定义 proposed/accepted/committed/verified/unknown/rejected/cancelled 状态及合法迁移；验收状态不能跳过确认或核验。 → ✅ R182 批量登记（E2 已交付）：回执六状态（recorded/duplicate/rejected/failed/unsupported/expired）+ plan 生命周期（plan→confirmed→done/denied/expired）+ 合法迁移由代码强制（失败停止/一次性消费/TTL 过期）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R182"
         ],
         "docs": [
           "14-"
