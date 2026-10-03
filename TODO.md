@@ -169,6 +169,11 @@
 
 ## 5. 小驴快门插件（siyuan-quickgate）
 
+- [x] 【R127·真机批】**思源全自动重启×4 + v0.7.3 部署 + 真机验收 10/10 全绿**：③桥 289ms / ⑩路由+MCP 路由 621ms / ⑪事件物化闭环（recorded=1→events.pull 11ms）/ v1.5 广播快路径 146ms / MCP 冒烟 6/6（LV_MCP_WRITE 23 工具）——此前 ⑪/v1.5/MCP 三项跳过全部转绿
+- [x] 【R127·bug#11】信封不完整行（op 缺失）凭合法 id 字段逃过压缩——真机实测 33 条重复指纹回执（多消费者窗口期）；修复 compactCommands 按信封完整性分类（回归测试+真机复验坏行首 tick 即压缩）
+- [x] 【R127·bug#12】3.8.6 内核缺失文件返回 HTTP 202+application/json 错误信封——getFileText 误当文件内容，实测 404 JSON 混入 events.ndjson 首行；修复按正文识别（R78-P1 错误分类清账）
+- [x] 【R127·bug#13】vite CJS 产物 JSON 动态 import 转裸 require 相对路径——思源渲染进程 require 绑定 renderer_init 必炸（events.pull 实测）；前端 manifest 消费路径长期潜伏首次暴露；修复静态 import 内联（与 kernel.ts 同法），chunk 机制消除
+
 ### 5.0 R1：小驴生态中枢定位（新增收敛项）
 
 - [x] 【R1-P0】将快门定位固化为"小驴生态联动中枢 + 外部网关"，明确与雷切、管家、Quicker 的职责边界（详见 docs/09）——已固化入 quickgate README 双语与 DECISIONS D-0001
@@ -199,7 +204,7 @@
 ### 5.1 M0 spike【内核侧 ✅ R21 自动执行完成；前端侧（①②④⑤⑦）仍需思源窗口 DevTools——手册 docs/WALKTHROUGH.md】
 - [ ] 【spike】① 命令注册表路径实证——**静态已钉 langKey（v0.5.8）**；真机校 p.displayName/p.i18n 挂载【需前端 DevTools】
 - [ ] 【spike】② confirm API 与自制超时（校准 index.ts confirmWithFront）【需前端 DevTools】
-- [ ] 【spike】③ 桥文件端到端 <2s——快门已部署启用，**待内核重启**（kernel.js 生效）后 `lv-cli.mjs ping`【等内核重启】
+- [x] 【spike】③ 桥文件端到端 <2s——快门已部署启用，**待内核重启**（kernel.js 生效）后 `lv-cli.mjs ping`【等内核重启】 → ✅ 2026-10-03 真机 289ms（v0.7.3 部署后）
 - [ ] 【spike】④ Web Lock 多窗口单消费【需前端】
 - [x] 【spike】⑤ SSE/WS 广播可用性——✅ R22 实证通过（postMessage 自动建频道 + SSE 订阅 1s 内送达 + Token 鉴权）；**v1.5 push 通道解锁**：细化立项=外部 postMessage 推命令 ↔ 快门前端 SSE 消费，与 NDJSON 慢路径并存【等内核重启后可连同 e2e 一起做】
 - [x] 【spike】⑥ petal/loadPetals 形状——✅ 实证吻合（name/version/enabled；响应内嵌 js 源码体积大）
