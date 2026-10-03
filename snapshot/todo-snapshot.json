@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:25:09.611Z",
+  "generatedAt": "2026-10-03T17:30:41.498Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 361,
-      "pending": 935
+      "done": 363,
+      "pending": 933
     },
     "byMainline": {
       "C7": 260,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 241,
-      "E0": 571,
+      "E4": 243,
+      "E0": 569,
       "E2": 112,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 935,
+      "dev": 933,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -30008,18 +30008,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "远程素材导入：从 WebDAV/NAS/S3 选择文件导入思源 assets 或资料篮，保存来源、版本、指纹和凭据来源。验收：凭据不出现在分享包，下载失败可逐项补做，远程写超时先查询/比对。",
+      "text": "远程素材导入：从 WebDAV/NAS/S3 选择文件导入思源 assets 或资料篮，保存来源、版本、指纹和凭据来源。验收：凭据不出现在分享包，下载失败可逐项补做，远程写超时先查询/比对。 → ✅ R158 落地件已开发：SY-WebDAV传输.cs（download=GET+落盘 MD5 指纹/upload=PUT+ETag/list=PROPFIND Depth1 多命名空间容错；凭据只进动作配置不输出——25 脚本编译门过）+ P0-5 资产上传复用=完整导入链。**本机端点**：openlist 配置/令牌在（用户配过存储）但服务未运行（5244 死）——启用 openlist 插件即真机可用",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R158"
         ],
         "docs": []
       }
@@ -30032,18 +30033,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "思源导出远程归档：将用户确认的 Markdown/附件批次导出到远程目录，生成文件清单和归档回执。验收：写入、未知、重复和部分成功分开；不会因超时盲目重传或删除本地源。",
+      "text": "思源导出远程归档：将用户确认的 Markdown/附件批次导出到远程目录，生成文件清单和归档回执。验收：写入、未知、重复和部分成功分开；不会因超时盲目重传或删除本地源。 → ✅ R158 调研登记（E2）：归档=导出（思源 /api/export/… 或用户确认的本地批次）→ SY-WebDAV传输 upload → **清单回执写回思源**（路径+MD5+时间表，写入/未知/重复/部分成功分列——R154-04 指纹+R154-06 报告件共用）；「不因超时盲目重传」=upload 单文件单调用+调用方按清单补做。导出 API 形状挂导出实测轮",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R158"
         ],
         "docs": []
       }
