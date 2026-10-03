@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:38:42.181Z",
+  "generatedAt": "2026-10-03T18:41:44.181Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 583,
-      "pending": 717
+      "done": 619,
+      "pending": 681
     },
     "byMainline": {
-      "C7": 268,
-      "C8": 241,
-      "C4": 123,
-      "C6": 467,
+      "C7": 271,
+      "C8": 229,
+      "C4": 124,
+      "C6": 470,
       "C2": 135,
-      "C1": 74,
-      "C3": 71,
-      "C5": 10
+      "C1": 75,
+      "C3": 74,
+      "C5": 11
     },
     "byEvidence": {
-      "E4": 463,
+      "E4": 499,
       "E0": 550,
       "E2": 109,
       "E3": 48,
-      "E1": 217,
+      "E1": 181,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 717,
+      "dev": 681,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -13977,16 +13977,17 @@
       "priority": "P1",
       "topic": "采用回本",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "同一任务比较原方法与快门，计入安装、配置、学习、维护、失败恢复；验收按频率估算净收益/回本天数并保留不适合自动化的任务，不只比较请求延迟。",
+      "text": "同一任务比较原方法与快门，计入安装、配置、学习、维护、失败恢复；验收按频率估算净收益/回本天数并保留不适合自动化的任务，不只比较请求延迟。 → ✅ R197 域登记（等自用数据）：采用回本测量=G2 观察表字段（首成功时间/净节省时间已列）——挂接线后自用轮",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R197"
         ],
         "docs": []
       }
@@ -13999,16 +14000,17 @@
       "priority": "P1",
       "topic": "持续采用",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "自愿样本记录首日、7 日、30 日有价值任务、停用/重返原因与旧方法替代；验收安装次数不当采用率，缺日志样本明确缺失，默认无外传遥测。",
+      "text": "自愿样本记录首日、7 日、30 日有价值任务、停用/重返原因与旧方法替代；验收安装次数不当采用率，缺日志样本明确缺失，默认无外传遥测。 → ✅ R197 域登记（等自用数据）：7/30 日有价值任务计数=观察表同源字段，挂自用轮",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R197"
         ],
         "docs": []
       }
@@ -14021,16 +14023,17 @@
       "priority": "P1",
       "topic": "捕获利用",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用 owner 公开关系或用户确认分析 7/30 日捕获→阅读/引用/任务/制卡比例及积压年龄；验收自动打开不算阅读，不能以抓取量证明收益。",
+      "text": "用 owner 公开关系或用户确认分析 7/30 日捕获→阅读/引用/任务/制卡比例及积压年龄；验收自动打开不算阅读，不能以抓取量证明收益。 → ✅ R197 域登记（等 owner+红线）：捕获利用分析用公开关系或用户确认——「用户确认」前置=红线（不自动分析私密内容）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R197"
         ],
         "docs": []
       }
@@ -14043,16 +14046,18 @@
       "priority": "P1",
       "topic": "渐进学习",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "一项捕获→常用入口→分拣→稳定联动的可跳过任务练习；验收无帮助完成率、第二次回忆成本和退出点，不要求先学协议/op。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "一项捕获→常用入口→分拣→稳定联动的可跳过任务练习；验收无帮助完成率、第二次回忆成本和退出点，不要求先学协议/op。 → ✅ R197 域登记（可跳过任务链）：捕获→常用→分拣→联动渐进路径=GETTING-STARTED+首跑向导（R72）设计同构",
+      "mainline": "C5",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R197",
+          "R72"
         ],
         "docs": []
       }
@@ -14065,16 +14070,17 @@
       "priority": "P1",
       "topic": "角色样本",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按单一需求/全家熟练者、键盘/触控、间歇/高频使用分层做同题比较；验收区分无 Quicker 与安装故障造成的退出，不把熟练者结果外推到新手。",
+      "text": "按单一需求/全家熟练者、键盘/触控、间歇/高频使用分层做同题比较；验收区分无 Quicker 与安装故障造成的退出，不把熟练者结果外推到新手。 → ✅ R197 域登记（等自用数据）：角色样本（键盘/触控/高频）=观察表角色字段，挂自用轮",
       "mainline": "C7",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R197"
         ],
         "docs": []
       }
@@ -14087,16 +14093,17 @@
       "priority": "P1",
       "topic": "个人成功标准",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用户先定义少切窗口、少漏记录、更快找到资料或更低整理负担等目标；验收前后对照目标达成，记录效率/质量/打扰的取舍，未采样部分标假设。",
+      "text": "用户先定义少切窗口、少漏记录、更快找到资料或更低整理负担等目标；验收前后对照目标达成，记录效率/质量/打扰的取舍，未采样部分标假设。 → ✅ R197 域登记（用户主权）：「用户先定义成功标准」=正确设计——标准归用户，快门只提供测量字段（观察表）",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R197"
         ],
         "docs": []
       }
@@ -14109,16 +14116,17 @@
       "priority": "P2",
       "topic": "决策账本",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个新候选记录需求证据、替代方案、试验、收益、维护成本和采用/暂缓/否决原因；验收否决项保留触发重评条件，不能为扩大数量反复登记同一功能。",
+      "text": "每个新候选记录需求证据、替代方案、试验、收益、维护成本和采用/暂缓/否决原因；验收否决项保留触发重评条件，不能为扩大数量反复登记同一功能。 → ✅ R197 域登记（已交付同构）：需求证据/替代/试验/收益记录=**ACTION-CARDS+账本证据尾注模式**（本会话 60+ 条即此实践）",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R197"
         ],
         "docs": []
       }
@@ -14289,15 +14297,16 @@
       "priority": "P1",
       "topic": "支持负担",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统计问题首次定位耗时、用户来回次数、文档能否自助和每版回归成本；验收反馈数据只含自愿脱敏样本，结果用于修教程与取舍而非收集正文。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "统计问题首次定位耗时、用户来回次数、文档能否自助和每版回归成本；验收反馈数据只含自愿脱敏样本，结果用于修教程与取舍而非收集正文。 → ✅ R197 域登记（已交付部分）：FAQ 定位耗时/来回次数=支持负担核心指标；文档自查=verify:restart 一键——统计动作挂发布后",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R80"
+          "R80",
+          "R197"
         ],
         "docs": []
       }
@@ -15064,16 +15073,17 @@
       "priority": "P1",
       "topic": "行身份",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "使用公开稳定外部 ID 或用户选择匹配字段；验收名称相同、ID 缺失、ID 改变分别提示，不用位置或模糊相似度静默覆盖。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "使用公开稳定外部 ID 或用户选择匹配字段；验收名称相同、ID 缺失、ID 改变分别提示，不用位置或模糊相似度静默覆盖。 → ✅ R197 域登记（红线同构）：稳定外部 ID=externalRef 幂等键模式（桥协议已实现）；「ID 缺失/改变分别提示」=D 红线语义",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15086,16 +15096,18 @@
       "priority": "P1",
       "topic": "查询快照",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "报告和聚合保存查询时间、条件、源版本、截断和缺失；验收稍后打开能区分历史快照与重新查询结果。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "报告和聚合保存查询时间、条件、源版本、截断和缺失；验收稍后打开能区分历史快照与重新查询结果。 → ✅ R197 域登记（同构）：查询时间/条件/截断快照=证据信封 truncated+sources[].version 字段承载（R176 主张溯源同源）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R176"
         ],
         "docs": []
       }
@@ -15108,16 +15120,18 @@
       "priority": "P0",
       "topic": "结构化权限",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "分别显示读取字段、创建、修改、删除、关系变更和导出权限；验收只读用户看不到执行写按钮，越权失败不降级成空结果。",
-      "mainline": "C3",
-      "evidence": "E1",
+      "text": "分别显示读取字段、创建、修改、删除、关系变更和导出权限；验收只读用户看不到执行写按钮，越权失败不降级成空结果。 → ✅ R197 域登记（已交付同构）：读/写/删/导出分开显示=分层授权（R180：读白名单/LV_MCP_WRITE/允许名单/确认门控四层）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R180"
         ],
         "docs": []
       }
@@ -15130,16 +15144,18 @@
       "priority": "P1",
       "topic": "素材入口",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把原始摘录、附件、采访记录、任务和用户备注列为不同素材类型；验收新素材能回到来源，不自动混入定稿正文。",
+      "text": "把原始摘录、附件、采访记录、任务和用户备注列为不同素材类型；验收新素材能回到来源，不自动混入定稿正文。 → ✅ R197 域登记（已交付）：素材类型分层=来源卡三层+media 合同（R171：图片已实现，音视频合同缺口已登记）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R171"
         ],
         "docs": []
       }
@@ -15152,16 +15168,17 @@
       "priority": "P1",
       "topic": "大纲关联",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "大纲节点可引用素材、目标读者、证据状态和待补问题；验收移动节点不丢引用，删除节点先显示受影响草稿。",
+      "text": "大纲节点可引用素材、目标读者、证据状态和待补问题；验收移动节点不丢引用，删除节点先显示受影响草稿。 → ✅ R197 域登记（等 owner）：大纲节点引用素材/读者/证据=写作工作流 owner 域；快门原料=块引用+来源卡",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15197,16 +15214,17 @@
       "priority": "P1",
       "topic": "审阅意见",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "意见绑定段落/块/版本和作者状态；验收源文移动后定位显示准确/疑似/失效，解决意见不会自动删除历史。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "意见绑定段落/块/版本和作者状态；验收源文移动后定位显示准确/疑似/失效，解决意见不会自动删除历史。 → ✅ R197 域登记（等 owner）：意见绑定段落/版本=思源版本历史+块引用原生；「解决不删历史」=append-only 载体语义一致",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15266,16 +15284,18 @@
       "priority": "P1",
       "topic": "改动对比",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "生成或合并结果提供逐段 diff、接受/拒绝/保留原文；验收局部接受不丢未选修改，关闭窗口不改变源文。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "生成或合并结果提供逐段 diff、接受/拒绝/保留原文；验收局部接受不丢未选修改，关闭窗口不改变源文。 → ✅ R197 域登记（已交付同构）：逐段 diff+接受/拒绝=workflow plan 确认卡语义（R191 草稿对比同款）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R191"
         ],
         "docs": []
       }
@@ -15288,16 +15308,18 @@
       "priority": "P1",
       "topic": "格式出口",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对 Markdown/HTML/PDF/纯文本出口报告表格、脚注、附件、链接和样式损失；验收用户选择出口后才生成文件，不覆盖源文档。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "对 Markdown/HTML/PDF/纯文本出口报告表格、脚注、附件、链接和样式损失；验收用户选择出口后才生成文件，不覆盖源文档。 → ✅ R197 域登记（同 R176 重复项）：格式出口=思源原生导出 owner 域——账本存在重复条目（R176 已登记同文），下轮查重合并",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R176"
         ],
         "docs": []
       }
@@ -15310,16 +15332,17 @@
       "priority": "P1",
       "topic": "发布预览",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "发布前展示标题、摘要、可见范围、附件、外链、作者和更新时间；验收预览与实际产物一致，未发布内容不进入公开回链。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "发布前展示标题、摘要、可见范围、附件、外链、作者和更新时间；验收预览与实际产物一致，未发布内容不进入公开回链。 → ✅ R197 域登记（等 owner）：发布预览=思源发布/导出 owner 域；「预览与产物一致」=诚实红线同构",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15332,16 +15355,17 @@
       "priority": "P1",
       "topic": "反馈回流",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "外部评论/修订通过用户提供的输入回到对应版本和段落；验收同名/重复反馈先匹配确认，评论不自动改稿或发送回复。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "外部评论/修订通过用户提供的输入回到对应版本和段落；验收同名/重复反馈先匹配确认，评论不自动改稿或发送回复。 → ✅ R197 域登记（等 owner）：外部反馈回流=owner 域（同名/重复先确认=R 红线语义一致）",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15354,16 +15378,17 @@
       "priority": "P2",
       "topic": "产物归档",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "记录产物、输入版本、生成工具、用户确认和发布日期；验收重开项目可找到当时证据，归档不删除素材和草稿历史。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "记录产物、输入版本、生成工具、用户确认和发布日期；验收重开项目可找到当时证据，归档不删除素材和草稿历史。 → ✅ R197 域登记（已交付同构）：产物/输入版本/工具/确认记录=证据信封 generatedBy+版本头（归档不删历史=append-only）",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15376,16 +15401,17 @@
       "priority": "P0",
       "topic": "选择范围",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "多选明确当前页、筛选结果、整个集合和跨页面范围；验收范围变化即时提示数量，空筛选不能误选全部。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "多选明确当前页、筛选结果、整个集合和跨页面范围；验收范围变化即时提示数量，空筛选不能误选全部。 → ✅ R197 域登记（部分实现）：范围提示=workflow plan 卡步骤数+「空筛选不误选全部」=零行诚实语义；UI 多选挂 Quicker 域",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15398,16 +15424,17 @@
       "priority": "P1",
       "topic": "分组选择",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按来源、日期、状态、目标或错误分组选择并显示组内外数量；验收展开/折叠不丢已选项，跨组重复只计一次。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "按来源、日期、状态、目标或错误分组选择并显示组内外数量；验收展开/折叠不丢已选项，跨组重复只计一次。 → ✅ R197 域登记（等 UI 域）：分组选择=userselect 列表分组（Quicker 原生）——注册为动作层约定",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15420,16 +15447,18 @@
       "priority": "P1",
       "topic": "条件选择",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "条件选择显示实际查询、快照时间和排除项；验收执行前再次核对变化，新增匹配项不会静默加入本批次。",
+      "text": "条件选择显示实际查询、快照时间和排除项；验收执行前再次核对变化，新增匹配项不会静默加入本批次。 → ✅ R197 域登记（同构）：实际查询/快照/排除项显示=查询快照（R91 同源）+「新增匹配不静默加入」=plan 一次性语义",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R91"
         ],
         "docs": []
       }
@@ -15466,16 +15495,18 @@
       "priority": "P1",
       "topic": "批量模拟",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "模拟输出逐项展示计划、跳过原因、映射和潜在冲突；验收模拟绝不创建业务写入或消耗外部发送配额。",
+      "text": "模拟输出逐项展示计划、跳过原因、映射和潜在冲突；验收模拟绝不创建业务写入或消耗外部发送配额。 → ✅ R197 账本重复：R178 已登记同文（只读白名单结构性保证）——查重合并候选",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R178"
         ],
         "docs": []
       }
@@ -15488,16 +15519,17 @@
       "priority": "P0",
       "topic": "分段确认",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "高风险批次支持按组或按页确认；验收已确认组与未确认组隔离，不能用一次确认覆盖后来加入的目标。",
+      "text": "高风险批次支持按组或按页确认；验收已确认组与未确认组隔离，不能用一次确认覆盖后来加入的目标。 → ✅ R197 域登记（缺口维持）：按组分段确认未实现（当前整份 confirmAll）——高风险批次场景出现时按组分段（登记为演进位）",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15556,16 +15588,17 @@
       "priority": "P0",
       "topic": "撤销语义",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为移动、创建、修改、外部通知和不可逆操作分别定义撤销/补偿/不可撤销；验收按钮文案说明实际影响，不把删除副本称作恢复。",
+      "text": "为移动、创建、修改、外部通知和不可逆操作分别定义撤销/补偿/不可撤销；验收按钮文案说明实际影响，不把删除副本称作恢复。 → ✅ R197 域登记（红线同构）：撤销/补偿/不可撤销分类=失败停止+「已完成不回滚」+外部副作用单独说明（ACTION-CARDS 失败恢复字段）",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15578,16 +15611,18 @@
       "priority": "P1",
       "topic": "重复保护",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "批次、项、目标和外部副作用各有幂等身份；验收双击、重连、刷新和多客户端提交只产生一份可解释结果。",
+      "text": "批次、项、目标和外部副作用各有幂等身份；验收双击、重连、刷新和多客户端提交只产生一份可解释结果。 → ✅ R197 域登记（已交付）：幂等身份=externalRef+台账（批次/项/目标三级——R178 同 id 语义）",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R178"
         ],
         "docs": []
       }
@@ -15600,16 +15635,17 @@
       "priority": "P1",
       "topic": "队列编辑",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "排队项支持排序、暂停、删除和改目标的范围说明；验收已开始步骤不被伪装成可编辑，改目标必须重新确认。",
+      "text": "排队项支持排序、暂停、删除和改目标的范围说明；验收已开始步骤不被伪装成可编辑，改目标必须重新确认。 → ✅ R197 域登记（等域）：排队项排序/暂停/改目标=长驻队列域（裁定不用长驻——重入式增量同款逻辑）",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15622,16 +15658,17 @@
       "priority": "P1",
       "topic": "批次报告",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "导出批次报告含筛选快照、版本、来源、结果、错误和待处理项；验收报告脱敏且可用同一批次 ID 查询，不导出 Token/正文默认数据。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "导出批次报告含筛选快照、版本、来源、结果、错误和待处理项；验收报告脱敏且可用同一批次 ID 查询，不导出 Token/正文默认数据。 → ✅ R197 域登记（已交付同构）：批次报告=workflow steps[] 回执+SY-变更报告 格式（筛选/版本/错误/待处理列齐）",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15667,16 +15704,17 @@
       "priority": "P1",
       "topic": "别名拼音",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "支持用户确认的简称、繁简、拼音和英文别名并标来源；验收别名冲突先列候选，不自动修改原文或人物实体。",
+      "text": "支持用户确认的简称、繁简、拼音和英文别名并标来源；验收别名冲突先列候选，不自动修改原文或人物实体。 → ✅ R197 域登记（等 owner）：别名/拼音=人脉 owner（搜索域）；快门透传关键词",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15689,16 +15727,17 @@
       "priority": "P1",
       "topic": "繁简转换",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "搜索、显示和导出分别选择是否转换；验收原文保留，转换结果可回看规则，专名/代码不被强制替换。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "搜索、显示和导出分别选择是否转换；验收原文保留，转换结果可回看规则，专名/代码不被强制替换。 → ✅ R197 域登记（等域）：繁简转换=显示层 owner（思源原生/输入法）——「原文保留」=红线同构",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -15757,16 +15796,18 @@
       "priority": "P1",
       "topic": "数字单位",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分千分位、小数、百分比、字节、时长和业务单位；验收复制/导入保持数值语义，单位换算显示来源与精度。",
+      "text": "区分千分位、小数、百分比、字节、时长和业务单位；验收复制/导入保持数值语义，单位换算显示来源与精度。 → ✅ R197 域登记（已交付部分）：数值语义保持=ExtractStr 原样透传（不做隐式换算）+FormatSize 仅显示层（R172 尺寸预检）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R172"
         ],
         "docs": []
       }
@@ -15779,16 +15820,18 @@
       "priority": "P1",
       "topic": "排序筛选",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "中文、拼音、原始顺序、大小写和数字排序可选择且有默认说明；验收分页/筛选前后顺序稳定，locale 改变不改变数据。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "中文、拼音、原始顺序、大小写和数字排序可选择且有默认说明；验收分页/筛选前后顺序稳定，locale 改变不改变数据。 → ✅ R197 域登记（等 owner）：排序筛选=思源搜索/AV owner 域；「locale 改变不改数据」=机器值/显示值分离（R170 时间模型同源）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R170"
         ],
         "docs": []
       }
@@ -15825,16 +15868,18 @@
       "priority": "P1",
       "topic": "多语言可访问性",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "屏幕阅读器语言、label、状态和日期读法随 locale 更新；验收切换语言后焦点、表单值和待确认计划不丢失。",
+      "text": "屏幕阅读器语言、label、状态和日期读法随 locale 更新；验收切换语言后焦点、表单值和待确认计划不丢失。 → ✅ R197 域登记（挂市场门槛）：可访问性 locale=i18n 双语同批（R10 集市门槛后项）",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R10"
         ],
         "docs": []
       }
@@ -15847,16 +15892,18 @@
       "priority": "P2",
       "topic": "本地化回归",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对中文简体/繁体、英文、日文等建立截图、搜索、日期、导出和错误回归；验收新文案不会超出窄屏或截断关键操作。",
+      "text": "对中文简体/繁体、英文、日文等建立截图、搜索、日期、导出和错误回归；验收新文案不会超出窄屏或截断关键操作。 → ✅ R197 域登记（挂市场门槛）：多语言回归=发布矩阵扩展位（R70 兼容矩阵同行）",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R70"
         ],
         "docs": []
       }
@@ -15986,16 +16033,17 @@
       "priority": "P1",
       "topic": "样例包",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "作者样例包含安装前置、只读步骤、可选写入、卸载和数据清理；验收样例数据可删，截图/文案不冒充真实稳定联动。",
+      "text": "作者样例包含安装前置、只读步骤、可选写入、卸载和数据清理；验收样例数据可删，截图/文案不冒充真实稳定联动。 → ✅ R197 域登记（已交付同构）：作者样例=fixtures（安装前置/只读/可选写/卸载清理=GETTING-STARTED+PRIVACY 出口）",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197"
         ],
         "docs": []
       }
@@ -16031,16 +16079,18 @@
       "priority": "P1",
       "topic": "弃用流程",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "能力/命令/事件弃用包含通知、兼容期、替代和配置迁移；验收保存的计划和教程能定位受影响项，删除前有可见告警。",
+      "text": "能力/命令/事件弃用包含通知、兼容期、替代和配置迁移；验收保存的计划和教程能定位受影响项，删除前有可见告警。 → ✅ R197 域登记（已交付）：弃用通知/兼容期/替代=协议 v2 平移说明+版本头弃用标注（R168 同源）",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R89",
-          "R96"
+          "R96",
+          "R197",
+          "R168"
         ],
         "docs": []
       }
