@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T16:58:49.429Z",
+  "generatedAt": "2026-10-03T17:01:39.528Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
@@ -29603,7 +29603,7 @@
       "type": "评估",
       "status": "done",
       "blockedBy": null,
-      "text": "能力与版本预检：动作运行前探测 Quicker、Connector、浏览器扩展、思源插件、HTTP 权限和脚本依赖版本。验收：不满足前置时进入草稿/手动路径，不显示“可运行”假象；预检结果可复制到诊断报告。 → ✅ R146 调研登记（E2，实现对照）：思源侧预检已齐——bridge.ping（protocol/version）、config.discover（日记/收集箱发现+notes）、registry.list（15 插件清单）、内核路由/NDJSON 双通道探测、adapters 运行时 protocol/apiVersion/capabilities 校验（不满足=unsupported 诚实拒）、check-version.mjs（自版本三处门）。**缺口登记**：(a)Quicker/Connector/浏览器扩展版本预检无运行时实现（参考件头注 minQuickerVersion 仅文档级——补一个 SY·预检子程序可闭环，入待办）；(b)思源 AI 端点配置预检缺失（P0-3 AI 分支依赖，失败回退已设计）",
+      "text": "能力与版本预检：动作运行前探测 Quicker、Connector、浏览器扩展、思源插件、HTTP 权限和脚本依赖版本。验收：不满足前置时进入草稿/手动路径，不显示“可运行”假象；预检结果可复制到诊断报告。 → ✅ R146 调研登记（E2，实现对照）：思源侧预检已齐——bridge.ping（protocol/version）、config.discover（日记/收集箱发现+notes）、registry.list（15 插件清单）、内核路由/NDJSON 双通道探测、adapters 运行时 protocol/apiVersion/capabilities 校验（不满足=unsupported 诚实拒）、check-version.mjs（自版本三处门）。**缺口登记**：(a)Quicker/Connector/浏览器扩展版本预检无运行时实现（参考件头注 minQuickerVersion 仅文档级——补一个 SY·预检子程序可闭环，入待办）；(b)思源 AI 端点配置预检缺失（P0-3 AI 分支依赖，失败回退已设计）；**R147 缺口(a) 已闭环**：SY-预检.cs 新件（内核可达/令牌/快门桥/插件在装逐项预检，19 脚本编译门过）；缺口(b) 思源 AI 配置预检留 P0-3 实测轮",
       "mainline": "C6",
       "evidence": "E4",
       "refs": {
@@ -29612,7 +29612,8 @@
         ],
         "rounds": [
           "R160",
-          "R146"
+          "R146",
+          "R147"
         ],
         "docs": []
       }
