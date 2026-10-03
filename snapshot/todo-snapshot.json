@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T18:21:02.816Z",
+  "generatedAt": "2026-10-03T18:22:20.682Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 467,
-      "pending": 833
+      "done": 471,
+      "pending": 829
     },
     "byMainline": {
       "C7": 264,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 347,
-      "E0": 557,
+      "E4": 351,
+      "E0": 553,
       "E2": 110,
       "E3": 48,
       "E1": 325,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 833,
+      "dev": 829,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -21520,21 +21520,24 @@
       "priority": "P0",
       "topic": "Skill 分层",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分 Agent skill、MCP tool、快门 capability 和 prompt template 的安装/升级/禁用关系；验收缺一层时给明确诊断。",
+      "text": "区分 Agent skill、MCP tool、快门 capability 和 prompt template 的安装/升级/禁用关系；验收缺一层时给明确诊断。 → ✅ R186 调研登记（E2 四层已各有着落）：①prompt template=附A.1 结构化模板（docs/03）；②快门 capability=ecosystem-manifests（contract 契约）；③MCP tool=23 tools（LV_MCP_WRITE 门控分立禁用）；④Agent skill=等思源技能目录（R115 真机 smoke 同批）。升级/禁用关系：各层独立门控互不隐式授权（R166 五层分立）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R186",
+          "R166"
         ],
         "docs": [
-          "15-"
+          "15-",
+          "docs/03"
         ]
       }
     },
@@ -21626,18 +21629,19 @@
       "priority": "P1",
       "topic": "会话交接",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设计 Agent→快门的 intent 交接格式，保留来源会话、用户原话、上下文引用和截止时间；验收切换入口不丢失约束。",
+      "text": "设计 Agent→快门的 intent 交接格式，保留来源会话、用户原话、上下文引用和截止时间；验收切换入口不丢失约束。 → ✅ R186 调研登记（E2 已交付设计）：交接格式=桥信封（id=intent 幂等键+createdAt=截止基点+ttlMs=时限+device=目标）+ externalRef=业务关联键+id 前缀=来源会话标记（cli-/mcp-/qk-）——「切换入口不丢约束」=信封自包含",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R186"
         ],
         "docs": [
           "15-"
@@ -21678,18 +21682,19 @@
       "priority": "P1",
       "topic": "安装向导",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设计快门 skill/manifest 的安装、升级、禁用和卸载向导；验收卸载后历史回执可读且不会继续调用。",
+      "text": "设计快门 skill/manifest 的安装、升级、禁用和卸载向导；验收卸载后历史回执可读且不会继续调用。 → ✅ R186 调研登记（E2 已交付）：安装=GETTING-STARTED 三步+install-mcp.ps1 一键；升级=petal 热加载+版本门禁；禁用=petal 开关（后台 API 已验证）；卸载=uninstall 钩子+PRIVACY 清理路径——「卸载后历史回执可读」=回执文件随数据保留语义已在文档",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R186"
         ],
         "docs": [
           "15-"
@@ -21730,18 +21735,20 @@
       "priority": "P1",
       "topic": "多工作区",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "验证 Agent 会话、模板和能力目录按工作区隔离；验收切换工作区不串 Token、文档和动作草稿。",
+      "text": "验证 Agent 会话、模板和能力目录按工作区隔离；验收切换工作区不串 Token、文档和动作草稿。 → ✅ R186 调研登记（E2 已交付）：隔离三件套=SY_URL 绑定工作区（R140 端口规律实证 6806 单实例）+ device.json 设备隔离（storage/local 不随同步）+ Token 按 env/配置——「不串 Token/文档/草稿」=凭据与数据分离已实现。**缺口**：Agent 会话层隔离待思源 Agent 上线验证",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R186",
+          "R140"
         ],
         "docs": [
           "15-"
