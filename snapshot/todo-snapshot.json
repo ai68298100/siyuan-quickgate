@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:24:12.639Z",
+  "generatedAt": "2026-10-03T18:25:53.223Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 477,
-      "pending": 823
+      "done": 482,
+      "pending": 818
     },
     "byMainline": {
       "C7": 264,
       "C8": 252,
-      "C4": 130,
-      "C6": 461,
-      "C2": 135,
+      "C4": 128,
+      "C6": 462,
+      "C2": 136,
       "C1": 73,
       "C3": 64,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 357,
+      "E4": 362,
       "E0": 553,
       "E2": 110,
       "E3": 48,
-      "E1": 319,
+      "E1": 314,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 823,
+      "dev": 818,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -13122,17 +13122,18 @@
       "priority": "P1",
       "topic": "卡题质量",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "制卡/出题检查多知识点、答案歧义、无出处、过长和答案泄露；验收给具体改写建议而不自动判真，拒绝后保留原摘录，关联 R79 生成预览。",
-      "mainline": "C4",
-      "evidence": "E1",
+      "text": "制卡/出题检查多知识点、答案歧义、无出处、过长和答案泄露；验收给具体改写建议而不自动判真，拒绝后保留原摘录，关联 R79 生成预览。 → ✅ R189 调研登记（等 owner）：制卡/出题=闪卡 lv-cards（manifest maturity=design 态——能力未公开）。快门角色=透传摘录（来源卡已有），质量检查与改写建议归学习 owner AI 层。「拒绝后保留原摘录」与来源卡「摘录全文入卡」语义一致",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
           "R88",
-          "R79"
+          "R79",
+          "R189"
         ],
         "docs": []
       }
@@ -13145,16 +13146,17 @@
       "priority": "P1",
       "topic": "难点修复",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "学习 owner 提供困难项投影后，引导错题/难卡→原文→补前置概念/拆分/暂缓→再练；验收旧历史可查，不由快门重算成绩或因修订自动打卡。",
+      "text": "学习 owner 提供困难项投影后，引导错题/难卡→原文→补前置概念/拆分/暂缓→再练；验收旧历史可查，不由快门重算成绩或因修订自动打卡。 → ✅ R189 调研登记（等 owner）：同上——困难项投影=闪卡 owner 职责；快门透传链接（siyuan://blocks 回原文已有）。「不由快门重算成绩」=红线字面",
       "mainline": "C3",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R189"
         ],
         "docs": []
       }
@@ -13167,16 +13169,17 @@
       "priority": "P1",
       "topic": "专项复习",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分考前练习、今日错题、专题回顾与正式到期复习；验收范围/卡数/时长/是否改变调度可见，退出不丢卡，预览不影响正式调度。",
-      "mainline": "C4",
-      "evidence": "E1",
+      "text": "区分考前练习、今日错题、专题回顾与正式到期复习；验收范围/卡数/时长/是否改变调度可见，退出不丢卡，预览不影响正式调度。 → ✅ R189 调研登记（等 owner）：复习调度=闪卡 owner 域；「退出不丢卡/预览不影响正式调度」=快门 plan 一次性+TTL 语义同构（预览即 plan，不影响正式数据）",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R189"
         ],
         "docs": []
       }
@@ -13211,16 +13214,17 @@
       "priority": "P1",
       "topic": "学习口径",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "由 owner 区分回答次数、独立卡数、保留率、有效时长、积压与预期负担；验收分母/时间窗/重复回答可见，少量日样本不被解释成强学习结论。",
-      "mainline": "C3",
-      "evidence": "E1",
+      "text": "由 owner 区分回答次数、独立卡数、保留率、有效时长、积压与预期负担；验收分母/时间窗/重复回答可见，少量日样本不被解释成强学习结论。 → ✅ R189 调研登记（E2 部分实现）：**checkin.summary capability 已公开**（today 上下文+streaks 连击，LV·摘要格式化消费）——口径由 owner 定义已实现；闪卡侧等 owner 稳定。分母/时间窗可见=summary data 字段自含",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R189"
         ],
         "docs": []
       }
@@ -13365,16 +13369,18 @@
       "priority": "P1",
       "topic": "打卡更正",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "由 checkin owner 提供补记/改量/撤销的历史与更正投影；验收联动聚合显示原记录和更正，失效引用可解释，不把更正当新的独立完成。",
+      "text": "由 checkin owner 提供补记/改量/撤销的历史与更正投影；验收联动聚合显示原记录和更正，失效引用可解释，不把更正当新的独立完成。 → ✅ R189 调研登记（E2 实证边界）：**公开桥 v5 能力表无 delete/correct**（R142 bundle 实证）——更正=UI 专有操作属安全设计；联动聚合显示更正=event-deleted/event-updated 事件（recorded available；updated=observed 待 owner 升级）。「不把更正当独立完成」=幂等键 externalRef 语义一致",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R80",
-          "R88"
+          "R88",
+          "R189",
+          "R142"
         ],
         "docs": []
       }
