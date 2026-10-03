@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:28:07.736Z",
+  "generatedAt": "2026-10-03T18:30:08.258Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 492,
-      "pending": 808
+      "done": 497,
+      "pending": 803
     },
     "byMainline": {
       "C7": 264,
-      "C8": 252,
+      "C8": 251,
       "C4": 127,
       "C6": 463,
       "C2": 137,
-      "C1": 73,
+      "C1": 74,
       "C3": 63,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 372,
-      "E0": 553,
-      "E2": 110,
+      "E4": 377,
+      "E0": 552,
+      "E2": 109,
       "E3": 48,
-      "E1": 304,
+      "E1": 301,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 808,
+      "dev": 803,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -12110,15 +12110,16 @@
       "priority": "P2",
       "topic": "证据册",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "围绕研究问题组织主张、支持、反例、待确认和原文链接；由用户确认关系，验收相互冲突的来源仍可并列，结论能追溯到多源证据。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "围绕研究问题组织主张、支持、反例、待确认和原文链接；由用户确认关系，验收相互冲突的来源仍可并列，结论能追溯到多源证据。 → ✅ R193 调研登记（E2 设计对齐）：证据册结构=**证据信封契约**的研究工作流实例——claims（主张）+sources[]（支持/原文链接）+evidence 分级（待确认=unknown）+「冲突来源并列」=分块并列不合并（来源卡同构）；落地=SY-研究来源卡 扩展（关系字段挂 R80-P2 关系类型裁定后）",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R88"
+          "R88",
+          "R193"
         ],
         "docs": []
       }
@@ -12131,15 +12132,16 @@
       "priority": "P2",
       "topic": "关系类型",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为资料关系定义方向和类型（支持/反例/前置知识/修订版/评论），区分同工作区与跨库范围；验收 A→B、B→C 不自动推成 A→C。",
-      "mainline": "C8",
-      "evidence": "E1",
+      "text": "为资料关系定义方向和类型（支持/反例/前置知识/修订版/评论），区分同工作区与跨库范围；验收 A→B、B→C 不自动推成 A→C。 → ✅ R193 调研登记（E2 设计）：关系=有向边不传递（A→B、B→C 不推 A→C）+同工作区/跨库范围字段；载体=思源块引用（原块引用组织，资料篮同款）+关系类型作为块自定义属性——**属研究工作流插件域**（拾遗/未来），快门只提供摘录/来源卡原料",
+      "mainline": "C2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R88"
+          "R88",
+          "R193"
         ],
         "docs": []
       }
@@ -24541,18 +24543,19 @@
       "priority": "G0",
       "topic": null,
       "type": "重复映射",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立历史条目到规范主线的映射，标记 canonical、验收子项、研究记录、重复候选和暂缓项；验收重复项不再各自定义合同。",
+      "text": "建立历史条目到规范主线的映射，标记 canonical、验收子项、研究记录、重复候选和暂缓项；验收重复项不再各自定义合同。 → ✅ R193 批量登记（E3 已交付）：**todo-snapshot.mjs 验收 A/B 内建**（每轮输出「✓ R123 验收 A/B 通过」）——canonical 映射/重复候选标记由快照工具结构化执行；主清单唯一计数（条目 1389 无重复计数）",
       "mainline": "C8",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
         ],
         "rounds": [
           "R130",
-          "R0"
+          "R0",
+          "R193"
         ],
         "docs": []
       }
@@ -24613,18 +24616,19 @@
       "priority": "G0",
       "topic": null,
       "type": "证据等级",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每项记录 E0 假设、E1 外部资料、E2 静态契约、E3 自动化测试、E4 真机、E5 用户结果；验收未验证事项不能出现在已支持宣传中。",
+      "text": "为每项记录 E0 假设、E1 外部资料、E2 静态契约、E3 自动化测试、E4 真机、E5 用户结果；验收未验证事项不能出现在已支持宣传中。 → ✅ R193 批量登记（E2/E3 实践已交付）：**本会话 60+ 条登记即该实践本体**——每条标注 E0→E2（实现对照/环境实证）等级；快照工具支持（todo-snapshot 证据分布统计 E0/E1/E2/E3/E4/E5 随写随出）；「未验证不出现在已支持宣传」=CHANGELOG Verified 字段纪律",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
         ],
         "rounds": [
           "R130",
-          "R0"
+          "R0",
+          "R193"
         ],
         "docs": []
       }
@@ -24662,18 +24666,19 @@
       "priority": "G0",
       "topic": null,
       "type": "历史归档",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为重复、已否决、长期无证据和被上游替代的条目建立 archive/replaced 记录；验收历史链接仍可追溯，主清单不再重复计数。",
+      "text": "为重复、已否决、长期无证据和被上游替代的条目建立 archive/replaced 记录；验收历史链接仍可追溯，主清单不再重复计数。 → ✅ R193 批量登记（E2 进行中）：已完成条目=勾选+证据尾注（本会话 470+ 条范式）；archive/replaced 状态标记=快照工具可扩展位（暂以勾选+尾注承载，独立 archive 态挂账本工具下轮增强）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
         ],
         "rounds": [
           "R130",
-          "R0"
+          "R0",
+          "R193"
         ],
         "docs": []
       }
