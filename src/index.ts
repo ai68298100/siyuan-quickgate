@@ -182,7 +182,10 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     private startBridge() {
-        if (this.poller?.isRunning) return;
+        if (this.poller?.isRunning) {
+            this.startBroadcastSub(); // 桥已在跑、仅广播开关变化时也要接上订阅（幂等）
+            return;
+        }
         const service = new BridgeService(this.deps());
         this.activeService = service;
         this.poller = new SingleFlightPoller({
@@ -192,17 +195,22 @@ export default class QuickGatePlugin extends Plugin {
             shouldRun: () => this.settings.bridgeEnabled,
         });
         this.poller.start();
-        // v1.5 广播快路径（独立开关，默认关）：SSE 订阅 qg-cmd 频道，毫秒级命令通道
-        if (this.settings.broadcastEnabled && !this.broadcastSub?.running) {
-            this.broadcastSub = new BroadcastSubscriber({
-                enabled: () => this.settings.bridgeEnabled && this.settings.broadcastEnabled,
-                onCommand: (cmd) => service.executeAndRecord(cmd).then(() => {}),
-                log: (msg) => console.warn(`[${PLUGIN_NAME}] ${msg}`),
-            });
-            this.broadcastSub.start();
-            console.info(`[${PLUGIN_NAME}] 广播快路径已启动（频道 ${BROADCAST_CHANNEL}）`);
-        }
+        this.startBroadcastSub();
         console.info(`[${PLUGIN_NAME}] 桥已启动，间隔 ${this.settings.pollMs}ms`);
+    }
+
+    /** v1.5 广播快路径（独立开关，默认关）：SSE 订阅 qg-cmd 频道，毫秒级命令通道。幂等。 */
+    private startBroadcastSub() {
+        if (!this.settings.broadcastEnabled || this.broadcastSub?.running) return;
+        const service = this.activeService;
+        if (!service) return;
+        this.broadcastSub = new BroadcastSubscriber({
+            enabled: () => this.settings.bridgeEnabled && this.settings.broadcastEnabled,
+            onCommand: (cmd) => service.executeAndRecord(cmd).then(() => {}),
+            log: (msg) => console.warn(`[${PLUGIN_NAME}] ${msg}`),
+        });
+        this.broadcastSub.start();
+        console.info(`[${PLUGIN_NAME}] 广播快路径已启动（频道 ${BROADCAST_CHANNEL}）`);
     }
 
     private async stopBridge() {
@@ -449,7 +457,13 @@ export default class QuickGatePlugin extends Plugin {
             this.settings.bridgeEnabled = enabledInput.checked;
             this.store.settings = this.settings;
             await this.store.saveSettings();
-            if (this.settings.bridgeEnabled && !this.isMobileGuard()) this.startBridge(); else this.stopBridge();
+            if (this.settings.bridgeEnabled && !this.isMobileGuard()) {
+                this.startBridge();
+                this.startEventBridge(); // 与 onload 配对：开启桥即接上事件物化，无需重启插件
+            } else {
+                this.stopBridge();
+                this.stopEventBridge(); // 与 onload 配对：关桥即退订，事件物化不得在桥关闭后继续写
+            }
             showMessage(`外部命令桥已${this.settings.bridgeEnabled ? "开启" : "关闭"}`, 3000);
         };
         row("外部命令桥（默认关；开启后外部程序可发命令）", enabledInput);

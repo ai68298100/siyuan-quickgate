@@ -2,6 +2,20 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.7.3 · 2026-10-03（R69 待办池 P0/P1 清账：三处正确性修复）
+
+### Fixed
+- **P0·超时重复派发**：`dispatchWithTimeout` 超时分支误将 `dispatch(cmd)` **再次调用**——写操作（如 checkin.record）执行超 15s 会**执行两遍**（重复打卡/重复写入），且与"迟到完成仅记日志"注释自相矛盾。修复：超时后只观测原 Promise 的迟到结果，绝不二次调用（回归测试：底层操作恰好调用 1 次）
+- **P1·广播订阅无法创建**：桥已运行时在设置页打开广播开关，`startBridge()` 早退导致 `BroadcastSubscriber` 永不创建——开关显示"已开启"但快路径死路，直到关开桥才恢复。修复：抽出幂等 `startBroadcastSub()`，桥运行中也接上订阅
+- **P1·事件订阅生命周期缺口**：设置页开桥只调 `startBridge()` 漏 `startEventBridge()`（事件物化须重启插件才生效）；关桥漏 `stopEventBridge()`（桥关了物化还在继续写）。修复：与 onload 配对——开桥即接上、关桥即退订
+- **P1·plugin.api args 形状**：实现只接受数组，对象会被**静默丢弃参数后照常调用**（违反"未知不得改写为成功"）；MCP schema 却声明 object。修复：契约三处钉死（实现/MCP schema/api.md）——数组=位置参数原样、对象=单一 options 实参、其他形状显式 `rejected`（回归测试三形状）
+
+### Docs
+- api.md：`events.*`/`workflow.*` 过期的"设计态/当前回 unsupported"表述更正为 v0.7.x 已实现
+
+### Verified
+- 108 单测（+2 回归）；tsc 零错误；构建通过
+
 ## v0.7.2 · 2026-10-03（bug#10：广播订阅断连自愈）
 
 ### Fixed

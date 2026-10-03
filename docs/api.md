@@ -49,8 +49,8 @@
 | `diagnostics.report` | `{}` | `{protocol, plugin, version, bridge:{enabled,pollMs,basePath,commandsFileLines}, registry:{source,hostPlugins}, confirmExec, rawApiEnabled}` | 脱敏诊断快照（不含 Token/正文/个人路径） |
 | `config.discover` | `{}` | `{diaryNotebookId, inboxDocId, notes[]}` | 自动发现（spike⑧ 校准前 best-effort；失败回 null + notes 说明） |
 | `template.new` | `{notebook, hpath, template?\|templatePath?}` | `{docId}` | 内核 renderSprig 渲染（支持 `{{}}` 语法）后 createDocWithMd；templatePath 相对 `/templates/`（v0.3.0） |
-| `events.*` / `workflow.*` | — | — | **设计态契约**（docs/09 R1）：M2 实现，当前回 `unsupported` |
-| `plugin.api` | `{plugin, method, args}` | 桥返回 | 高级透传：默认关 + 允许名单 |
+| `events.*` / `workflow.*` | 见 docs/api.md 各行 | — | v0.7.x 已实现（events.list/pull 物化读取、workflow.plan/execute 计划池 5 分钟过期）；早期"设计态"表述作废 |
+| `plugin.api` | `{plugin, method, args}` | 桥返回 | 高级透传：默认关 + 允许名单；args 形状：数组=位置参数原样、对象=作为唯一 options 实参、其他类型 `rejected`（v0.7.3 钉死） |
 
 ## 错误语义
 

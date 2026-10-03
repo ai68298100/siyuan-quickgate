@@ -111,7 +111,7 @@ const ARGS: Record<string, { properties: Record<string, { type: string; descript
         properties: {
             plugin: { type: "string", description: "目标插件 id" },
             method: { type: "string", description: "公开桥方法名" },
-            args: { type: "object", description: "方法参数" },
+            args: { type: "object", description: "方法参数：数组=位置参数原样；对象=作为唯一 options 实参；缺省=无参" },
         },
         required: ["plugin", "method"],
     },

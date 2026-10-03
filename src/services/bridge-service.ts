@@ -275,15 +275,16 @@ export class BridgeService {
         const EXEC_TIMEOUT_MS = this.deps.execTimeoutMs?.() ?? 15000;
         return new Promise<BridgeResult>((resolve) => {
             let settled = false;
+            const inFlight = this.dispatch(cmd); // 只派发一次；超时后仅观测迟到结果，不得再次调用同一写操作
             const timer = setTimeout(() => {
                 if (settled) return;
                 settled = true;
                 resolve({ status: "failed", data: null, message: `执行超过 ${Math.round(EXEC_TIMEOUT_MS / 100) / 10}s 未返回，已标记失败（若稍后完成，副作用已发生，见日志）` });
-                this.dispatch(cmd)
+                inFlight
                     .then(() => { this.lateCompletions += 1; console.warn(`[${this.deps.pluginName}] 迟到完成：${cmd.id} ${cmd.op}`); })
                     .catch(() => { this.lateCompletions += 1; });
             }, EXEC_TIMEOUT_MS);
-            this.dispatch(cmd)
+            inFlight
                 .then((r) => { if (!settled) { settled = true; clearTimeout(timer); resolve(r); } })
                 .catch((e) => { if (!settled) { settled = true; clearTimeout(timer); resolve({ status: "failed", data: null, message: `执行异常：${e instanceof Error ? e.message : String(e)}` }); } });
         });
@@ -530,8 +531,15 @@ export class BridgeService {
                 const bridge = (globalName ? w.window?.[globalName] : null) as Record<string, unknown> | null | undefined;
                 const fn = bridge && typeof (bridge as Record<string, unknown>)[method] === "function" ? (bridge as Record<string, unknown>)[method] as () => unknown : undefined;
                 if (!fn) return { status: "unsupported", data: null, message: "桥方法不存在" };
+                // args 形状（契约 v0.7.3 钉死）：数组=位置参数原样；对象=作为唯一 options 实参；
+                // 其他类型显式拒绝——不得静默丢弃参数后照常调用（未知不得改写为成功）
+                let callArgs: unknown[];
+                if (Array.isArray(a.args)) callArgs = a.args as unknown[];
+                else if (a.args !== undefined && a.args !== null && typeof a.args === "object") callArgs = [a.args];
+                else if (a.args === undefined || a.args === null) callArgs = [];
+                else return this.reject("args 须为数组（位置参数）或对象（单一 options 实参）");
                 try {
-                    const data = await fn.apply(bridge, Array.isArray(a.args) ? (a.args as unknown[]) : []);
+                    const data = await fn.apply(bridge, callArgs);
                     return { status: "recorded", data, message: "已透传" };
                 } catch (e) {
                     return { status: "failed", data: null, message: `透传异常：${e instanceof Error ? e.message : String(e)}` };
