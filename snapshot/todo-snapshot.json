@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:51:56.317Z",
+  "generatedAt": "2026-10-03T18:54:54.355Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 703,
-      "pending": 597
+      "done": 723,
+      "pending": 577
     },
     "byMainline": {
       "C7": 271,
       "C8": 229,
       "C4": 124,
       "C6": 470,
-      "C2": 135,
-      "C1": 75,
+      "C2": 133,
+      "C1": 77,
       "C3": 74,
       "C5": 11
     },
     "byEvidence": {
-      "E4": 570,
+      "E4": 590,
       "E0": 548,
       "E2": 109,
       "E3": 48,
-      "E1": 112,
+      "E1": 92,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 597,
+      "dev": 577,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -17188,16 +17188,17 @@
       "priority": "P0",
       "topic": "捕获到推进",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "文本/链接/图片进入收件箱后可选择整理、建立任务、加入研究或仅保存；验收一次捕获只形成一个来源身份，后续分支可追踪。",
+      "text": "文本/链接/图片进入收件箱后可选择整理、建立任务、加入研究或仅保存；验收一次捕获只形成一个来源身份，后续分支可追踪。 → ✅ R203 域登记（E2 组装对照）：场景链全 op 已在 api.md 表（捕获→分拣→任务/研究分叉），一次捕获一来源身份=来源卡指纹；链式编排 UI=意图中枢域挂 G2",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17212,16 +17213,18 @@
       "priority": "P1",
       "topic": "研究问题",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "从问题建立资料篮、证据、反例、待确认点和下一次检索；验收引用来源/版本可回跳，快门不替用户下结论。",
+      "text": "从问题建立资料篮、证据、反例、待确认点和下一次检索；验收引用来源/版本可回跳，快门不替用户下结论。 → ✅ R203 域登记（等 owner+红线）：资料篮/证据=R80-P2 同构；「快门不替用户下结论」=红线字面",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R80"
         ],
         "docs": [
           "00-"
@@ -17236,16 +17239,17 @@
       "priority": "P1",
       "topic": "阅读到学习",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "阅读摘录可生成待审卡题、来源链接和复习计划预览；验收拒绝/修改不污染原文，学习 owner 决定调度。",
+      "text": "阅读摘录可生成待审卡题、来源链接和复习计划预览；验收拒绝/修改不污染原文，学习 owner 决定调度。 → ✅ R203 域登记（等 owner）：待审卡题=闪卡 owner；「拒绝/修改不污染原文」=来源卡分块语义",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17260,16 +17264,18 @@
       "priority": "P1",
       "topic": "学习到行动",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "复习/考试结果可选择生成补强、复盘或打卡候选；验收结果与学习口径由 owner 提供，快门不重算成绩或自动打卡。",
+      "text": "复习/考试结果可选择生成补强、复盘或打卡候选；验收结果与学习口径由 owner 提供，快门不重算成绩或自动打卡。 → ✅ R203 域登记（等 owner+红线）：「结果与口径由 owner 提供，快门不重算成绩或自动打卡」=红线字面（R189 同款裁定）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R189"
         ],
         "docs": [
           "00-"
@@ -17284,16 +17290,18 @@
       "priority": "P1",
       "topic": "会议准备",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按联系人/项目/时间整理最近互动、资料、未完承诺和会前问题；验收查看不写互动，隐私字段按 owner 投影。",
+      "text": "按联系人/项目/时间整理最近互动、资料、未完承诺和会前问题；验收查看不写互动，隐私字段按 owner 投影。 → ✅ R203 账本重复项：R191 已登记同款（contacts.search 408ms 可组装）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R191"
         ],
         "docs": [
           "00-"
@@ -17308,16 +17316,17 @@
       "priority": "P1",
       "topic": "会议到跟进",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "会后把用户明确确认的决定、行动项、负责人和回访日期分发到对应 owner；验收同一承诺不重复创建，发送动作需独立确认。",
+      "text": "会后把用户明确确认的决定、行动项、负责人和回访日期分发到对应 owner；验收同一承诺不重复创建，发送动作需独立确认。 → ✅ R203 域登记（等 owner+授权分层）：「同一承诺不重复创建」=externalRef 幂等；「发送动作需独立确认」=授权分层（通知≠写入确认）",
       "mainline": "C7",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17332,16 +17341,17 @@
       "priority": "P1",
       "topic": "项目推进",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "项目入口显示目标、当前阻塞、资料、待办、最近结果和下一步候选；验收归档/切换项目不删除原记录，缺模块保留手动路径。",
+      "text": "项目入口显示目标、当前阻塞、资料、待办、最近结果和下一步候选；验收归档/切换项目不删除原记录，缺模块保留手动路径。 → ✅ R203 域登记（等 owner）：项目入口=雷切 owner；「缺模块保留手动路径」=ACTION-CARDS 手动替代字段",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17356,16 +17366,17 @@
       "priority": "P1",
       "topic": "每日收束",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "晚间从当日捕获、完成、未完成、异常和明日候选生成可编辑总结；验收未知/缺失不写成零，用户可排除私人内容。",
+      "text": "晚间从当日捕获、完成、未完成、异常和明日候选生成可编辑总结；验收未知/缺失不写成零，用户可排除私人内容。 → ✅ R203 域登记（E2 组装对照）：晚间总结=SY-12 汇总同构（待办链）；「未知/缺失不写成零」=红线；「可排除私人内容」=sensitivity 字段",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17380,16 +17391,18 @@
       "priority": "P1",
       "topic": "媒体到知识",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "OCR/转录/视频摘录进入可校对来源块，再由用户选择研究、任务或卡题；验收派生文本保留时间戳和原媒体回链。",
+      "text": "OCR/转录/视频摘录进入可校对来源块，再由用户选择研究、任务或卡题；验收派生文本保留时间戳和原媒体回链。 → ✅ R203 域登记（E2 组装对照）：OCR→可校对来源块=p0-5+SY-OCR清理+来源卡全链已有；时间戳/原媒体回链=媒体合同扩展位（R171 登记）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R171"
         ],
         "docs": [
           "00-"
@@ -17404,16 +17417,17 @@
       "priority": "P1",
       "topic": "个人管理",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把“记住某事”“稍后处理”“等待别人”分成不同结果和提醒 owner；验收快门不把所有捕获都变成任务或提醒。",
+      "text": "把“记住某事”“稍后处理”“等待别人”分成不同结果和提醒 owner；验收快门不把所有捕获都变成任务或提醒。 → ✅ R203 域登记（红线字面）：「快门不把所有捕获都变成任务或提醒」=不复制业务判断红线字面——记事/稍后/等待的区分归用户与 owner",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17428,16 +17442,18 @@
       "priority": "P1",
       "topic": "周期回顾",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按周/月回看捕获利用、未闭环意图、重复失败和人工接管；验收统计说明样本和缺失，不以调用量代表成长。",
+      "text": "按周/月回看捕获利用、未闭环意图、重复失败和人工接管；验收统计说明样本和缺失，不以调用量代表成长。 → ✅ R203 域登记（等自用数据+红线）：捕获利用/未闭环统计=G2 观察表；「统计说明样本和缺失」「调用量≠成长」=审计可见性红线（R181）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R181"
         ],
         "docs": [
           "00-"
@@ -17452,16 +17468,18 @@
       "priority": "P2",
       "topic": "产物发布",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "研究/会议/项目素材可选择形成文章、报告、分享或内部归档；验收发布前引用、附件、权限和版本差异可检查。",
+      "text": "研究/会议/项目素材可选择形成文章、报告、分享或内部归档；验收发布前引用、附件、权限和版本差异可检查。 → ✅ R203 域登记（组装候选）：引用/附件/权限检查=R92 发布域（SQL 核对+来源卡版本）；发布=思源原生 owner",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R92"
         ],
         "docs": [
           "00-"
@@ -17476,16 +17494,17 @@
       "priority": "P1",
       "topic": "故障恢复",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个场景包定义思源不可达、插件缺席、目标变化、外部服务失败和未知结果的降级路线；验收仍能保存用户输入和手动完成。",
+      "text": "每个场景包定义思源不可达、插件缺席、目标变化、外部服务失败和未知结果的降级路线；验收仍能保存用户输入和手动完成。 → ✅ R203 域登记（已交付）：每场景降级路线=ACTION-CARDS 失败恢复字段+FAQ 七类——「仍能保存用户输入」=草稿本地暂存语义",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17500,16 +17519,19 @@
       "priority": "P1",
       "topic": "迁移场景",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用户换设备/工作区/插件版本时可查看待续意图、草稿、结果和能力差异；验收默认不自动重放写操作。",
+      "text": "用户换设备/工作区/插件版本时可查看待续意图、草稿、结果和能力差异；验收默认不自动重放写操作。 → ✅ R203 域登记（已交付）：待续意图/能力差异=R83 恢复批次+R140 端口规律；「默认不自动重放写操作」=红线字面",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R83",
+          "R140"
         ],
         "docs": [
           "00-"
@@ -17524,16 +17546,17 @@
       "priority": "P0",
       "topic": "新用户首周",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设计从一次捕获到一次可复用结果的渐进学习路径；验收不要求先学习协议、插件清单或 JSON，记录每个退出点。",
+      "text": "设计从一次捕获到一次可复用结果的渐进学习路径；验收不要求先学习协议、插件清单或 JSON，记录每个退出点。 → ✅ R203 域登记（已交付路径）：渐进学习=GETTING-STARTED 三步（不要求先学协议/JSON）；「记录每个退出点」=观察表字段",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "00-"
@@ -17548,16 +17571,17 @@
       "priority": "P0",
       "topic": "结果工作台",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供待处理意图、未知结果、最近完成、需用户决定和可复用模板的统一视图；验收不把业务数据复制成另一套事实库。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "提供待处理意图、未知结果、最近完成、需用户决定和可复用模板的统一视图；验收不把业务数据复制成另一套事实库。 → ✅ R203 域登记（挂意图中枢 UI）：统一视图=意图中枢域挂 G2；「不复制成另一套事实库」=红线字面（回执/results 即事实源）",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "01-"
@@ -17572,16 +17596,17 @@
       "priority": "P1",
       "topic": "收件箱分流",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "收件箱按来源/年龄/目标/风险/预计耗时给分流建议；验收用户可批量保留、归档、转任务或关联项目，建议不自动执行。",
+      "text": "收件箱按来源/年龄/目标/风险/预计耗时给分流建议；验收用户可批量保留、归档、转任务或关联项目，建议不自动执行。 → ✅ R203 域登记（红线）：分流建议不自动执行=只读建议红线；批量操作=userselect+workflow（确认卡语义）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "01-"
@@ -17596,16 +17621,19 @@
       "priority": "P0",
       "topic": "待续中心",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "列出中断、等待用户、等待插件、等待外部回执和过期意图；验收每项给真实阻塞层、继续/重计划/放弃入口。",
+      "text": "列出中断、等待用户、等待插件、等待外部回执和过期意图；验收每项给真实阻塞层、继续/重计划/放弃入口。 → ✅ R203 域登记（E2 同构）：中断/等待分层=R83 恢复批次+待续上下文（R201）同构；「真实阻塞层」=错误分层已交付（网络/鉴权/owner 缺失分类）",
       "mainline": "C1",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203",
+          "R83",
+          "R201"
         ],
         "docs": [
           "01-"
@@ -17620,16 +17648,17 @@
       "priority": "P1",
       "topic": "结果历史",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按意图、场景、目标、时间和来源查询结果链；验收显示原计划与实际差异，未知和人工接管可筛选。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "按意图、场景、目标、时间和来源查询结果链；验收显示原计划与实际差异，未知和人工接管可筛选。 → ✅ R203 域登记（已交付查询面）：按 id/intent 查询结果链=results 按 id 匹配（LV·取回执）+审计按时间/op——「原计划与实际差异」=plan vs steps 回执",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "01-"
@@ -17644,16 +17673,17 @@
       "priority": "P1",
       "topic": "下一步候选",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "从明确未完成项、用户设定期限和业务 owner 状态生成候选下一步；验收推荐带依据、成本和拒绝入口，不制造隐形任务。",
+      "text": "从明确未完成项、用户设定期限和业务 owner 状态生成候选下一步；验收推荐带依据、成本和拒绝入口，不制造隐形任务。 → ✅ R203 域登记（红线）：推荐带依据+拒绝入口+「不制造隐形任务」=只读建议红线（R203 收件箱分流同款）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R203"
         ],
         "docs": [
           "01-"
