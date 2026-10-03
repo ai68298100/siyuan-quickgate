@@ -31,6 +31,17 @@ describe("queue.compactCommands（阻断项1 修正）", () => {
         expect(compactCommands(text, new Set(["a"]))).toBe("{bad json");
         expect(compactCommands(text, new Set(["a"]), { dropBadLines: true })).toBe("");
     });
+
+    it("信封不完整（op 缺失）但带合法 id：凭 id 不得逃过压缩（bug#11 回归）", () => {
+        const bad = JSON.stringify({ v: 1, id: "cli-x", args: {}, createdAt: "2026-10-03T12:43:40Z", ttlMs: 60000 });
+        const text = [bad, cmd("a")].join("\n");
+        // 修复前：该行按 id 判定"可跟踪"永久滞留队列，多消费者下反复产生指纹回执
+        expect(compactCommands(text, new Set(), { dropBadLines: true })).toBe(cmd("a")); // 坏行移除，未记账的有效行保留
+        expect(compactCommands(text, new Set(["a"]))).toBe(bad); // 不开 dropBadLines 仍保留（防静默丢数据）
+        // op 非字符串同样视为信封不完整
+        const badOp = JSON.stringify({ v: 1, id: "cli-y", op: 42, args: {} });
+        expect(compactCommands(badOp, new Set(), { dropBadLines: true })).toBe("");
+    });
 });
 
 describe("queue.capProcessed（阻断项4 边界）", () => {

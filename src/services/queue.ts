@@ -38,16 +38,27 @@ export function compactCommands(
         const t = raw.trim();
         if (t === "") return false; // 空行直接压缩掉
         let id: unknown;
+        let envelopeValid = true;
         try {
             const obj = JSON.parse(t);
-            id = obj && typeof obj === "object" && !Array.isArray(obj) ? (obj as Record<string, unknown>).id : undefined;
+            if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+                id = (obj as Record<string, unknown>).id;
+                // 信封不完整（op 缺失/非字符串）：消费方永远无法执行。按坏行处理——
+                // 否则该行凭合法 id 字段逃过压缩、永久滞留队列（bug#11：
+                // 多消费者窗口下反复产生同一指纹的 rejected 回执）
+                envelopeValid = typeof (obj as Record<string, unknown>).op === "string";
+            } else {
+                id = undefined;
+                envelopeValid = false;
+            }
         } catch {
             id = undefined;
+            envelopeValid = false;
         }
-        if (typeof id === "string") {
-            return !processedIds.has(id); // 有 id：按记账移除
+        if (typeof id === "string" && envelopeValid) {
+            return !processedIds.has(id); // 有 id 且信封完整：按记账移除
         }
-        return !dropBad; // 无可跟踪 id（坏行）：默认保留，dropBadLines=true 时移除
+        return !dropBad; // 坏行（含信封不完整）：默认保留，dropBadLines=true 时移除
     });
     return kept.join("\n");
 }
