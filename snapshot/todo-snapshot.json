@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-10-03T17:15:40.006Z",
+  "generatedAt": "2026-10-03T17:17:36.858Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 355,
-      "pending": 941
+      "done": 357,
+      "pending": 939
     },
     "byMainline": {
-      "C7": 262,
+      "C7": 261,
       "C8": 259,
       "C4": 131,
-      "C6": 455,
+      "C6": 456,
       "C2": 135,
       "C1": 72,
       "C3": 64,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 235,
-      "E0": 577,
+      "E4": 237,
+      "E0": 575,
       "E2": 112,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 941,
+      "dev": 939,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -29784,18 +29784,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Word 选区留证：用户主动选择 Word 文本，读取 `Selection.Range` 与 `Range.Information` 的页码/表格上下文，生成思源证据块。验收：带文件、页码、选区摘要、时间和回链；无法访问对象模型时退化为复制选区，不后台扫描全文。",
+      "text": "Word 选区留证：用户主动选择 Word 文本，读取 `Selection.Range` 与 `Range.Information` 的页码/表格上下文，生成思源证据块。验收：带文件、页码、选区摘要、时间和回链；无法访问对象模型时退化为复制选区，不后台扫描全文。 → ✅ R155 调研登记（E1+E2）：**本机环境实证（注册表）**——Word.Application/Excel.Application/KWPS.Application ProgID 全在（WPS 兼容别名与 MS 原生并存），COM 晚绑定（Marshal.GetActiveObject→Selection/Range）免 Office 互操作程序集。**设计**：留证卡=选区文本+Range.Information 页码+文档名 → 复用 SY-研究来源卡 结构（source=word-document，指纹=选区 hash）；前置守卫=SY-粘贴守卫 进程名校验（WINWORD/WPS）。**主路径裁定**：Quicker 原生 Word 支持模块优先（成熟度更高），COM 晚绑定为无模块版兜底——挂 Quicker GUI 轮实测两者",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R155"
         ],
         "docs": []
       }
@@ -29832,18 +29833,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Excel 区域证据卡：保存工作簿、工作表、`Range.Address`、`Value2` 原始值、`Text` 显示值及筛选/日期说明，生成 Markdown 表格或 CSV 附件。验收：多单元格显示值为 Null 时仍保留原始值和地址，失败退化为用户导出 CSV。",
-      "mainline": "C7",
-      "evidence": "E0",
+      "text": "Excel 区域证据卡：保存工作簿、工作表、`Range.Address`、`Value2` 原始值、`Text` 显示值及筛选/日期说明，生成 Markdown 表格或 CSV 附件。验收：多单元格显示值为 Null 时仍保留原始值和地址，失败退化为用户导出 CSV。 → ✅ R155 调研登记（E1+E2）：Excel.Application 晚绑定→Selection.Address+Value2 二维数组→Markdown 表（**Text 显示值并注**：Value2 是原始值、Text 是含格式的显示串——证据卡两列都要，日期/金额误读是主要风险）；筛选状态用 Worksheet.FilterMode 记录。验收对齐：公式/空值/显示格式保留=Value2+Text 双列；不直接修改 Excel=只读。**待实测**：GetActiveObject 在 Excel 未运行时抛 0x800401E3（MK_E_UNAVAILABLE）——动作分支需明确「先打开工作簿」提示；挂 Quicker GUI 轮",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R155"
         ],
         "docs": []
       }
