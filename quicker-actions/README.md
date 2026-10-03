@@ -33,6 +33,7 @@
 ## 许可与红线复测清单
 
 - **许可**：本目录全部参考件与导出动作按 **「可自用可修改」** 分发（MIT 顺延小驴系）；再分发保留版权头即可，禁止售卖。
+- **statestorage 配置备份（换机迁移，§11）**：动作的 statestorage 落盘在 `%APPDATA%\Quicker\states\state_<动作UUID>.json`（每个动作一个文件；Quicker 界面：动作右键→「查看状态」可见同内容）。换机：①导出动作 `.qa`（配置不含 Token）②复制对应 `state_*.json` 到新机同目录 ③首跑把 `SY_TOKEN` 重新粘一次（Token 只存本机，不随备份走）。思源侧设备名在 `<工作区>/storage/local/siyuan-quickgate/device.json`（不随同步，每台机器独立生成，无需迁移）。
 - **每次动作更新后的红线复测**（§11，逐项打勾后才发布）：
   - [ ] AI 生成 SQL 只读强制：`sql:` 前缀仍走 GuardSql（SELECT/EXPLAIN 单语句+13 禁止词+强制 LIMIT）——跑一次 `p0-3` 的拒绝用例
   - [ ] 动作不执行外部传入代码；自由文本进 SQL 前必须经单引号转义（JStr/Replace("'","''")）

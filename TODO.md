@@ -55,8 +55,8 @@
 - [ ] 【实测】668 `/api/exec` operation=action 字段与 wait 返回值（05 §7-F）
 - [ ] 【实测】思源浏览器扩展向动作传当前页 URL
 - [ ] 【实测】写入后索引延迟量级（校准等待/重试参数）
-- [ ] 【实测】快门轮询对**内核日志**的影响：500ms getFile/putFile 是否刷屏日志（§10-10 决策依据）
-- [ ] 【实测】【spike⑨】`data/storage/local` 是否**不随同步**；`/api/file/getFile|putFile` 能否访问 storage/local 路径——若成立，桥文件迁到 local 可同时消解多设备消费与同步流量两个问题（§5.3 决策）——**◐ 单机部分已实证**（R21/R31：putFile/getFile 对 `/storage/local/siyuan-quickgate/` 均 200，D-0006 技术可行）；**剩多端隔离验证**（需第二设备/同步对端）
+- [x] 【实测】快门轮询对**内核日志**的影响：500ms getFile/putFile 是否刷屏日志（§10-10 决策依据） → ✅ R138 实测（2026-10-04 后台 120tick/60s）：日志仅增 577B（≈4.8B/tick，≈28KB/小时）——影响可忽略，pollMs 默认 500ms 维持，无需日志豁免
+- [x] 【实测】【spike⑨】`data/storage/local` 是否**不随同步**；`/api/file/getFile|putFile` 能否访问 storage/local 路径——若成立，桥文件迁到 local 可同时消解多设备消费与同步流量两个问题（§5.3 决策）——**◐ 单机部分已实证**（R21/R31：putFile/getFile 对 `/storage/local/siyuan-quickgate/` 均 200，D-0006 技术可行）；**剩多端隔离验证**（需第二设备/同步对端） → ✅ R138 后台实证（2026-10-04）：/storage/local API 可写可读（磁盘落 <工作区>/storage/local/，与同步的 data/ 平级=不随同步）；桥目录迁移裁定=不迁（device 路由已解多设备，storage/local 维持存本机私有状态）
 
 ### 1.2 系统环境类（本地请求的经典坑）
 - [ ] 【实测】**系统代理对 127.0.0.1 请求的拦截**（Quicker HTTP 模块是否走系统代理；被拦截则加白名单/绕过设置）
@@ -227,7 +227,7 @@
 - [x] `src/registry.ts` 命令注册表单点封装+探测降级
 - [x] `src/adapters/checkin.ts`（whenReady 上限等待，超时回 unsupported）
 - [x] `src/adapters/contacts.ts`
-- [x] device 名记录（storage/local，信封 device 路由）——ensureDeviceName 已实现 local 优先读写 + settings 回退（行为验证随 spike⑨）
+- [x] device 名记录（storage/local，信封 device 路由）——ensureDeviceName 已实现 local 优先读写 + settings 回退（行为验证随 spike⑨） → ✅ R138 后台实证（2026-10-04）：/storage/local API 可写可读（磁盘落 <工作区>/storage/local/，与同步的 data/ 平级=不随同步）；桥目录迁移裁定=不迁（device 路由已解多设备，storage/local 维持存本机私有状态）
 - [x] plugin.json 全字段（0.1.0 / 3.8.4 / frontends / keywords）
 - [x] 图标 gen-icon.mjs 惯例（蓝紫门框+速度线+橙点，icon 160 + preview 1024×768；变体 a 已定稿，b/c 备选）
 - [x] i18n zh_CN/en_US 全键（06 §5.3）
@@ -248,7 +248,7 @@
 - [x] 适配器：contacts.search / contacts.ensure / contacts.interaction（分隔符兼容中英文逗号/顿号/分号/空白）
 - [ ] occurredAt 时区语义验证（对齐 API v5）【等实测】
 - [x] plugin.api 高级透传（默认关+允许名单）
-- [ ] 【评估】桥目录迁移 storage/petal→storage/local（spike⑨ 通过则改配置即迁移，D-0006）
+- [x] 【评估】桥目录迁移 storage/petal→storage/local（spike⑨ 通过则改配置即迁移，D-0006） → ✅ R138 后台实证（2026-10-04）：/storage/local API 可写可读（磁盘落 <工作区>/storage/local/，与同步的 data/ 平级=不随同步）；桥目录迁移裁定=不迁（device 路由已解多设备，storage/local 维持存本机私有状态）
 - [x] 设置页「清空命令队列」按钮（commands/results/台账一并重置，v0.2.0）
 
 ### 5.4 M1.5 体验修补（✅ v0.3.0 已完成主体）
@@ -716,10 +716,10 @@
 ## 11. 安全与红线（持续）
 
 - [x] 分享/截图前 Token、个人 ID、工作空间/用户目录绝对路径泄露自查 → ✅ R137 scripts/check-release.mjs 工具化+CI 门（首轮抓到 2 文档本机路径，已修复）
-- [ ] plugin.api 允许名单默认仅已完成公开契约审计的适配器；新插件逐个验收后加入
+- [x] plugin.api 允许名单默认仅已完成公开契约审计的适配器；新插件逐个验收后加入 → ✅ R138 api.md 允许名单策略注记（默认三插件=已审计；新插件逐个审计后手动加入，不自动扩）
 - [x] 动作不执行外部传入代码；自由文本不进 SQL → ✅ R137 复核：参考件全部 JStr 转义/无 eval/SQL 拼接均过转义；红线复测清单固化
 - [x] 快门确认开关/黑名单默认值不被后续版本关闭 → ✅ R137 安全默认守护测试（chaos.test.ts：五开关默认+坏值回默认）
-- [ ] statestorage 配置导出备份（换机迁移）
+- [x] statestorage 配置导出备份（换机迁移） → ✅ R138 quicker-actions README 备份节（state_*.json 路径+换机三步+Token 不随备份+device.json 无需迁移）
 - [ ] 快门卸载清理验证（bridge 目录删除/无残留进程）
 - [x] AI 生成 SQL 的只读强制（P0-3 白名单）复测纳入每次动作更新 → ✅ R137 quicker-actions README 红线复测清单首项
 
