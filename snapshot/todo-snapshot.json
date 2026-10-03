@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:01:39.528Z",
+  "generatedAt": "2026-10-03T17:03:37.443Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 345,
-      "pending": 951
+      "done": 347,
+      "pending": 949
     },
     "byMainline": {
       "C7": 260,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 225,
-      "E0": 585,
+      "E4": 227,
+      "E0": 583,
       "E2": 113,
       "E3": 50,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 951,
+      "dev": 949,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -29531,19 +29531,23 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "上下文采集夹具：固定当前窗口、进程、文档、块、选区、浏览器 URL、剪贴板和用户显式路径的采集顺序。验收：分栏文档与工作台输入框不会拼成一个来源，缺字段显示 `unknown` 而不是猜测。",
+      "text": "上下文采集夹具：固定当前窗口、进程、文档、块、选区、浏览器 URL、剪贴板和用户显式路径的采集顺序。验收：分栏文档与工作台输入框不会拼成一个来源，缺字段显示 `unknown` 而不是猜测。 → ✅ R148 调研登记（E2，实现对照）：采集顺序钉死为「显式输入 > 选中文本（思源前台）> 剪贴板 > userinput 兜底」（docs/03 §0 四级兜底已定）；上下文字段映射——窗口/进程（Quicker getwindowtitle）、文档/块（readEditorContext：rootTitle/blockId，spike⑦ bundle 实证）、浏览器 URL（浏览器扩展传参，快摘同款）、剪贴板（clipboard 变量）。**缺口登记**：(a)分栏文档下 readEditorContext 只读最后聚焦 protyle（spike⑦ 已实证单容器查询——多面板语义=「最后交互处」，登记为语义非缺陷）；(b)来源窗口与思源面板同时有选区时的优先级未钉——裁定：选中文本非空即用，不交叉猜测",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "21"
+          "21",
+          "0"
         ],
         "rounds": [
-          "R160"
+          "R160",
+          "R148"
         ],
-        "docs": []
+        "docs": [
+          "docs/03"
+        ]
       }
     },
     {
@@ -29554,17 +29558,18 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "焦点与危险输入保护：为模拟输入、粘贴、打开文件和网页动作增加目标窗口确认、域名/路径白名单和焦点变化检测。验收：焦点变化、弹窗遮挡或域名不匹配时动作暂停，不能把内容写入错误应用。",
+      "text": "焦点与危险输入保护：为模拟输入、粘贴、打开文件和网页动作增加目标窗口确认、域名/路径白名单和焦点变化检测。验收：焦点变化、弹窗遮挡或域名不匹配时动作暂停，不能把内容写入错误应用。 → ✅ R148 调研登记+缺口当场开发：思源侧设计性无模拟输入（doc.open 走 openTab 受控打开）；Quicker 侧粘贴类动作的焦点确认已闭环——**SY-粘贴守卫.cs 新件**（GetForegroundWindow+标题/进程双校验，不匹配即输出 允许粘贴=false 终止，20 脚本编译门过）；域名白名单属浏览器动作域（挂浏览器扩展实测轮）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
-          "R160"
+          "R160",
+          "R148"
         ],
         "docs": []
       }

@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 // ==== g2-capture.cs ====
 public class __Snippet0 {
@@ -2183,8 +2184,84 @@ public static void Exec(Quicker.Public.IStepContext context)
 
 }
 
-// ==== SY-路由.cs ====
+// ==== SY-粘贴守卫.cs ====
 public class __Snippet16 {
+//.cs 文件类型，便于外部编辑时使用
+// ============================================================================
+// SY·粘贴守卫 —— 模拟粘贴前的目标窗口确认（R151-04 焦点与危险输入保护核心件）
+// 蓝图：docs/21 R151-04 · 用法：写剪贴板 → 本守卫 → [允许粘贴=true 时] 模拟按键 Ctrl+V
+// @version 1.0.0 · 2026-10-04 首版（csc C#5 编译验证通过）
+//
+// 【模块设置】普通线程（需查前台窗口）。
+// 【输入变量】窗口标题关键字(文本，前台窗口标题须含此关键字；空=不校验直接放行)
+//             校验进程名(文本，可空，如 "SiYuan"；进程名比标题更稳)
+// 【输出变量】允许粘贴(布尔) 前台窗口(文本) 消息(文本)
+// 【语义】R151-04 验收：焦点变化/弹窗遮挡/目标不匹配时**不粘贴**——本守卫输出 允许粘贴=false，
+//         动作的条件分支据此终止并提示，绝不把内容写进错误应用。
+// 【依赖】user32 P/Invoke（GetForegroundWindow/GetWindowText），零第三方。
+// ============================================================================
+
+public static void Exec(Quicker.Public.IStepContext context)
+{
+    var keyword = (context.GetVarValue("窗口标题关键字") as string ?? "").Trim();
+    var processHint = (context.GetVarValue("校验进程名") as string ?? "").Trim();
+
+    string title;
+    string processName;
+    GetForeground(out title, out processName);
+    context.SetVarValue("前台窗口", title + (processName.Length > 0 ? " [" + processName + "]" : ""));
+
+    var ok = true;
+    var why = "";
+    if (keyword.Length > 0 && title.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) < 0)
+    {
+        ok = false;
+        why = "前台窗口标题不含关键字「" + keyword + "」";
+    }
+    if (ok && processHint.Length > 0 && processName.IndexOf(processHint, StringComparison.OrdinalIgnoreCase) < 0)
+    {
+        ok = false;
+        why = "前台进程不是「" + processHint + "」";
+    }
+
+    context.SetVarValue("允许粘贴", ok);
+    context.SetVarValue("消息", ok
+        ? "✓ 目标窗口匹配，可粘贴"
+        : "✗ 已阻止粘贴：" + why + "（把目标窗口带到前台后重试）");
+}
+
+[DllImport("user32.dll")]
+private static extern IntPtr GetForegroundWindow();
+
+[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+private static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
+[DllImport("user32.dll")]
+private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+private static void GetForeground(out string title, out string processName)
+{
+    title = "";
+    processName = "";
+    try
+    {
+        var h = GetForegroundWindow();
+        if (h == IntPtr.Zero) return;
+        var sb = new StringBuilder(512);
+        GetWindowText(h, sb, 512);
+        title = sb.ToString();
+        uint pid;
+        GetWindowThreadProcessId(h, out pid);
+        var p = System.Diagnostics.Process.GetProcessById((int)pid);
+        processName = p.ProcessName;
+    }
+    catch { /* 前台查询失败不抛——由关键字校验自然拒绝 */ }
+}
+
+}
+
+// ==== SY-路由.cs ====
+public class __Snippet17 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·路由 —— 超级面板分发器总装（六分支 http/sql-url/url/bridge/cmd/act + 占位符 §5.1）
@@ -2497,7 +2574,7 @@ public struct KernelResult { public bool Success; public string Text; public str
 }
 
 // ==== SY-路由前缀解析.cs ====
-public class __Snippet17 {
+public class __Snippet18 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·路由前缀解析 —— 捕获多目标路由的解析层（参考实现，Quicker C# 模块「普通模式v2」）
@@ -2595,7 +2672,7 @@ public static void Exec(Quicker.Public.IStepContext context)
 }
 
 // ==== SY-预检.cs ====
-public class __Snippet18 {
+public class __Snippet19 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·预检 —— 动作运行前能力与版本预检（R151-06 缺口(a) 闭环件）
