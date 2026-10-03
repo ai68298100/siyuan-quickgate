@@ -26,6 +26,24 @@ describe("混沌工程：设置归一化恶劣场景", () => {
         expect(s.pollMs).toBe(1000);
         expect(s.confirmExec).toBe(false);
     });
+
+    it("安全默认守护（§11 红线）：确认开关默认开、桥默认关、允许名单非空——任何历史/损坏数据不得关闭", () => {
+        // 全空/垃圾输入 → 安全默认
+        for (const bad of [null, undefined, {}, { schemaVersion: 999 }, []]) {
+            const s = normalizeSettings(bad as unknown as Record<string, unknown>);
+            expect(s.confirmExec, "commands.run 确认门必须默认开").toBe(true);
+            expect(s.bridgeEnabled, "外部面必须默认关").toBe(false);
+            expect(s.rawApiEnabled, "plugin.api 透传必须默认关").toBe(false);
+            expect(s.broadcastEnabled, "广播快路径必须默认关").toBe(false);
+            expect(s.mobileBridgeEnabled, "移动端桥必须默认关").toBe(false);
+            expect(s.rawApiAllowlist.length, "允许名单默认须含已审计适配器").toBeGreaterThan(0);
+        }
+        // 部分字段损坏：坏字段回默认，其余保留（confirmExec 坏值不得悄悄变 false）
+        const partial = normalizeSettings({ confirmExec: "true", blacklist: "x", pollMs: "abc" } as unknown as Record<string, unknown>);
+        expect(partial.confirmExec).toBe(true);
+        expect(partial.blacklist).toEqual([]);
+        expect(partial.pollMs).toBe(500);
+    });
 });
 
 describe("混沌工程：JSON 恶劣输入", () => {

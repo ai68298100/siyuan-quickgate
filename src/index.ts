@@ -691,7 +691,9 @@ export default class QuickGatePlugin extends Plugin {
         const about = document.createElement("div");
         about.className = "b3-label";
         about.style.fontSize = "12px";
-        about.textContent = `小驴快门 v${PLUGIN_VERSION} · 协议 v1 · 小驴生态联动中枢 + 外部网关。op 契约见仓库 docs/api.md；M0 spike 实证项见 docs/WALKTHROUGH.md。`;
+        about.textContent = `小驴快门 v${PLUGIN_VERSION} · 协议 v1 · 小驴生态联动中枢 + 外部网关。`
+            + `使用说明与自助排障见仓库 docs/GETTING-STARTED.md（5 分钟上手）与 docs/FAQ.md（症状→原因→解法）；`
+            + `数据流向与隐私边界见 docs/PRIVACY.md（本插件不外传任何数据）。`;
         root.appendChild(about);
     }
 }

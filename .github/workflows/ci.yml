@@ -28,6 +28,8 @@ jobs:
       # MCP bundle 构建（esbuild JS API，pnpm 布局探测）
       - run: corepack pnpm run build:mcp
       - run: corepack pnpm run build
+      # 发布自查：Token/个人路径/内网地址泄露扫描（§11 红线，命中即红）
+      - run: corepack pnpm run check:release
       - uses: actions/upload-artifact@v4
         with:
           name: package

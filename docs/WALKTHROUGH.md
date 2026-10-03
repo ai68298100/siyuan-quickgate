@@ -6,7 +6,7 @@
 > **M0 spike 复测收官（R70，2026-10-02）**：`npm run verify:restart` **9/9 全绿**——③桥 444ms / ⑩⓪ 401 / ⑩内核路由功能面（bug#9 修复后）/ ⑤广播 / **v1.5 真机 227ms** / MCP 内核路由 / §10-10 日志 +254B。唯余：⑪（需在打卡里记/删一条）、④多窗口与 ⑦blockId/①复核（DevTools 现场）。
 > **MCP 真 e2e 全链首次通过（R110，2026-10-03）**：三通道（广播快路径/内核路由/NDJSON）全部经真实前端消费——bridge.ping / registry.list / editor.context / daily.status 四 op 全 recorded。v0.7.2 解除 pre-release 转正式版。系统进入全功能验证态。
 > **CI 容器化内核侧验收上线（R105，2026-10-03）**：GitHub Actions ubuntu + b3log/siyuan docker（serve 子命令+bypass+预置 conf：api.token/bazaar trust）→ **⑩路由 kernel-sync/events.list/降级/MCP registry.list 301ms 全 recorded**（⑥⑧⑨ 内核侧事实在容器复现）；③⑤v1.5/⑪ 需前端环境（本机 verify:restart 覆盖）。手动触发：`gh workflow run ci-e2e-experiment.yml`。十轮诊断全记录见 workflow 文件与该分支历史。
-> 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧 spike ①②⑦ 已用本机 bundle 静态核实（R26/R27，**不需要 DevTools**）：grep `D:\biji\SiYuan\resources\stage\build\app\` 编译产物可直接核实前端假设——这是实际运行的代码，比远端源码更硬。剩余 DevTools 现场：④ 多窗口 Web Lock、⑦ blockId 光标爬升、⑪ 事件现场、① 可选复核。
+> 内核侧 spike（⑥⑧⑨⑩⓪⑤）已由自动化探针执行（2026-10-02）；前端侧 spike ①②⑦ 已用本机 bundle 静态核实（R26/R27，**不需要 DevTools**）：grep `<思源安装目录>\resources\stage\build\app\` 编译产物可直接核实前端假设——这是实际运行的代码，比远端源码更硬。剩余 DevTools 现场：④ 多窗口 Web Lock、⑦ blockId 光标爬升、⑪ 事件现场、① 可选复核。
 > **重启复测一键化（R24，R65 收敛入 npm scripts）**：思源重启后跑 **`npm run verify:restart`**（即 `node tools/verify-restart.mjs`，自动读 env；`SIYUAN_LOG=<工作空间>/temp/siyuan.log` 可附产 §10-10 日志增长读数）——③桥端到端含延迟 / ⑩⓪负向鉴权+路由 ping+events.list+降级 / ⑪事件物化计数 / ⑤广播存活 / **v1.5 postMessage→回执延迟测量** / **MCP 内核路由**。自主层一条 **`npm run accept`**（单测+MCP 协议冒烟）。手工单发广播命令可用 **`lv-cli.mjs fast`**（postMessage 推信封→qg-cmd 频道，回执算 e2eMs；`--channel` 可换频道自测 HTTP 层）。
 
 ## ① 命令注册表形状 ✅（2026-10-02，bundle 静态核实；原 DevTools 尾巴全部钉住）
@@ -52,7 +52,7 @@
 - 结论：**v1.5 push 通道真机全线打通**（毫秒级、Token 鉴权、频道按名自治）；与 NDJSON 双通道幂等竞态由预留语义保证（单测覆盖），真机重复推演可随时重跑 verify-restart
 
 ## ⑦ editor.context 字段校准 ◐（2026-10-02，本机 bundle 静态核实；**发现并修复 bug#7**；DevTools 现场部分待补）
-- **静态核实法**（DevTools 不可用时的替代证据链）：直接 grep 本机安装的编译产物 `D:\biji\SiYuan\resources\stage\build\app\common.js`——这是实际运行的代码
+- **静态核实法**（DevTools 不可用时的替代证据链）：直接 grep 本机安装的编译产物 `<思源安装目录>\resources\stage\build\app\common.js`——这是实际运行的代码
 - **bug#7**：`data-doc-id` 属性在整个 bundle 中不存在（只有 `data-doc-type`）→ readEditorContext 主路径恒空，一直在靠 fallback 工作；v0.6.2 修复
 - 实证（bundle 内联证据）：
   - `.protyle` 容器自带 `data-node-id`=rootID（Protyle 类加载路径 `this.element.setAttribute("data-node-id", i.block.rootID)`，与 `fn__none` 切换同一方法）→ docId 主路径
