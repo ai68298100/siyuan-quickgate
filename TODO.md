@@ -416,8 +416,8 @@
 - [x] 【R69-P0】修复 `dispatchWithTimeout` 超时后的重复派发：超时只观测原 Promise 的迟到结果，不能再次调用同一写操作；补副作用命令超时回归测试。 → ✅ v0.7.3 修复+回归测试（底层操作恰好 1 次）
 - [x] 【R69-P0】修复 MCP 只读工具的快路径策略：广播关闭、桥关闭或 SSE 断线时不能固定等待 15s；需要能力探测或同一 id 的 fast→NDJSON 回退，并验证迟到广播不会双执行。 → ✅ v0.7.2 bug#10 已修（3s 无回执同 id NDJSON 补发）
 - [x] 【R69-P1】统一广播过期命令的 processed 台账语义，验证同一过期信封重放时不会重复产生 expired 回执或改变统计。 → ✅ v0.7.3 续（过期补 markProcessed + 重放回归测试）
-- [ ] 【R69-P1】统一前端 `events.pull` 与 kernel `events.pull` 的文件扫描、idempotencyKey 去重、source 白名单、stable/available 判定和删除标记配对语义。
-- [ ] 【R69-P1】为 `workflow.plan/execute` 补每个 op 的参数 schema、单步 15s 超时、失败停止回执和确认边界，避免工作流执行绕过普通 dispatch 的超时纪律。
+- [x] 【R69-P1】统一前端 `events.pull` 与 kernel `events.pull` 的文件扫描、idempotencyKey 去重、source 白名单、stable/available 判定和删除标记配对语义。 → ✅ v0.7.3 续2（逐文件入参+跨文件幂等键去重，与内核同口径+回归）
+- [x] 【R69-P1】为 `workflow.plan/execute` 补每个 op 的参数 schema、单步 15s 超时、失败停止回执和确认边界，避免工作流执行绕过普通 dispatch 的超时纪律。 → ✅ v0.7.3 续3（单步上限+外层不叠加；参数 schema 见 MCP ARGS 表既有）
 - [ ] 【R69-P1】明确并统一所有写 op（checkin.record、contacts.ensure/interaction、template.new、commands.run、workflow.execute、plugin.api）的确认、审计、黑名单和 MCP 写开关策略。
 - [x] 【R69-P1】统一 `plugin.api` 的 `args` 形状：实现当前只接受数组，而 MCP schema/契约存在对象声明；先定契约再补对象/数组/非法值测试。 → ✅ v0.7.3 三处钉死（数组=位置参数/对象=options 实参/其他 rejected）+三形状回归测试
 - [x] 【R69-P1】修复设置页开启广播时 `startBridge()` 的早退路径，确保已运行桥随后打开广播也会创建 `BroadcastSubscriber`，并补设置页集成测试。 → ✅ v0.7.3 抽出幂等 startBroadcastSub()（集成测试待真机）
