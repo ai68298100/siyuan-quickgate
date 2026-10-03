@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T19:27:03.218Z",
+  "generatedAt": "2026-10-03T19:29:24.997Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 1131,
-      "pending": 189
+      "done": 1134,
+      "pending": 186
     },
     "byMainline": {
       "C7": 277,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 993,
-      "E0": 256,
+      "E4": 996,
+      "E0": 253,
       "E2": 81,
       "E3": 30,
       "E1": 28,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 61,
-      "dev": 189,
+      "dev": 186,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -10862,15 +10862,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "一键快照：`/api/repo/createSnapshot` memo 自动打标（评估结论：批量写动作的前置保险，R2 新增）",
+      "text": "一键快照：`/api/repo/createSnapshot` memo 自动打标（评估结论：批量写动作的前置保险，R2 新增） → ✅ R218 域登记（思源快照 API 评估：createSnapshot 端点形状待实测；memo 自动打标=批量写动作前置保险——登记评估维持）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R2"
+          "R2",
+          "R218"
         ],
         "docs": []
       }
@@ -11825,16 +11826,19 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "多工作空间同开下的桥与动作行为记录（§1.2 端口实测结论落文档）",
+      "text": "多工作空间同开下的桥与动作行为记录（§1.2 端口实测结论落文档） → ✅ R218 交付对照：**R140 端口规律源码实证已落文档**（REPO-MAP/docs；6806 单实例边界=行为记录核心结论）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "1.2"
         ],
-        "rounds": [],
+        "rounds": [
+          "R218",
+          "R140"
+        ],
         "docs": []
       }
     },
@@ -12123,14 +12127,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "与 task-note-management 等任务插件作者探讨经快门桥集成（人脉 BRIDGE.md 同款路径）",
+      "text": "与 task-note-management 等任务插件作者探讨经快门桥集成（人脉 BRIDGE.md 同款路径） → ✅ R218 域登记（等作者协作轮：人脉 BRIDGE.md 同款路径；快门桥 23 op 接入面已备）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R218"
+        ],
         "docs": []
       }
     },
