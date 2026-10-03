@@ -13,7 +13,7 @@ import { BridgeService, EditorContextResult, EcosystemManifest } from "./service
 import { SingleFlightPoller } from "./services/poller";
 import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
-import { appendEventLine, normalizeCheckinEvent, normalizeCheckinEventDeleted } from "./services/eventbridge";
+import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted } from "./services/eventbridge";
 import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
@@ -120,9 +120,15 @@ export default class QuickGatePlugin extends Plugin {
         this.eventBridgeHandler = undefined;
     }
 
-    /** 批量物化：一次读改写追加多行；空列表不动文件 */
-    private async materializeHubEvents(events: HubEvent[] | null) {
+    /** 批量物化：single-flight 串行（并发读改写会丢更新，R69-P1）；空列表不动文件 */
+    private materializeEnqueue = createSingleFlight();
+
+    private materializeHubEvents(events: HubEvent[] | null) {
         if (!events || events.length === 0) return;
+        void this.materializeEnqueue(() => this.doMaterialize(events));
+    }
+
+    private async doMaterialize(events: HubEvent[]) {
         try {
             const path = "/storage/petal/siyuan-checkin/bridge/events.ndjson";
             const old = (await this.kernelApi.getFileText(path)) ?? "";

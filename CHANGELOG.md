@@ -2,7 +2,7 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
-## v0.7.3 · 2026-10-03（R69 待办池 P0/P1 清账：七处正确性修复）
+## v0.7.3 · 2026-10-03（R69 待办池 P0/P1 清账：八处正确性修复）
 
 ### Fixed
 - **P0·超时重复派发**：`dispatchWithTimeout` 超时分支误将 `dispatch(cmd)` **再次调用**——写操作（如 checkin.record）执行超 15s 会**执行两遍**（重复打卡/重复写入），且与"迟到完成仅记日志"注释自相矛盾。修复：超时后只观测原 Promise 的迟到结果，绝不二次调用（回归测试：底层操作恰好调用 1 次）
@@ -13,13 +13,14 @@
 - **P1·诊断包统计归零**：导出诊断每次 `new BridgeService()`——计数全零失真。修复：优先用当前活动实例（桥关时才回落新实例）
 - **P1·广播订阅无法创建**：桥已运行时在设置页打开广播开关，`startBridge()` 早退导致 `BroadcastSubscriber` 永不创建——开关显示"已开启"但快路径死路。修复：抽出幂等 `startBroadcastSub()`
 - **P1·事件订阅生命周期缺口**：设置页开桥只调 `startBridge()` 漏 `startEventBridge()`（事件物化须重启插件才生效）；关桥漏 `stopEventBridge()`（桥关了物化还在继续写）。修复：与 onload 配对——开桥即接上、关桥即退订
+- **P1·事件物化并发丢更新**：materializeHubEvents 读→改→写无串行化——两个快速连续事件同读旧文本，后写覆盖前写（事件丢失）。修复：createSingleFlight 串行队列，前一任务落定才启动下一任务，单任务失败不阻塞（回归测试：20 并发全保留有序 / 失败不阻塞）
 - **P1·plugin.api args 形状**：实现只接受数组，对象会被**静默丢弃参数后照常调用**（违反"未知不得改写为成功"）；MCP schema 却声明 object。修复：契约三处钉死（实现/MCP schema/api.md）——数组=位置参数原样、对象=单一 options 实参、其他形状显式 `rejected`（回归测试三形状）
 
 ### Docs
 - api.md：`events.*`/`workflow.*` 过期的"设计态/当前回 unsupported"表述更正为 v0.7.x 已实现
 
 ### Verified
-- 111 单测（+5 回归）；tsc 零错误；构建通过
+- 113 单测（+7 回归）；tsc 零错误；构建通过
 
 ## v0.7.2 · 2026-10-03（bug#10：广播订阅断连自愈）
 

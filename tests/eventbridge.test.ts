@@ -83,4 +83,32 @@ describe("eventbridge（D-0009 事件物化）", () => {
         expect(lines.length).toBe(200);
         expect(lines[0]).toContain("k5"); // 最旧的被裁掉
     });
+
+    it("createSingleFlight：并发读改写串行化，无丢更新（R69-P1 回归）", async () => {
+        const { createSingleFlight } = await import("../src/services/eventbridge");
+        const enqueue = createSingleFlight();
+        // 模拟桥文件读改写：读（含延迟）→ 追加 → 写回。20 个并发触发，
+        // 无串行化时后任务读到旧文本会覆盖前任务（丢更新）；串行后 20 行全在
+        let file = "";
+        const simulateMaterialize = (tag: string) => enqueue(async () => {
+            const old = file; // 读
+            await new Promise((r) => setTimeout(r, 2)); // 读-写窗口
+            file = appendEventLine(old, {
+                name: "checkin:event-recorded", source: "s", emittedAt: "t",
+                payload: null, idempotencyKey: tag,
+            }); // 写回
+        });
+        await Promise.all(Array.from({ length: 20 }, (_, i) => simulateMaterialize(`k${i}`)));
+        const lines = file.trim().split("\n");
+        expect(lines.length).toBe(20);
+        for (let i = 0; i < 20; i++) expect(lines[i]).toContain(`k${i}`); // 全部保留且有序
+    });
+
+    it("createSingleFlight：单任务失败不阻塞后续任务", async () => {
+        const { createSingleFlight } = await import("../src/services/eventbridge");
+        const enqueue = createSingleFlight();
+        await expect(enqueue(async () => { throw new Error("boom"); })).rejects.toThrow("boom");
+        const out = await enqueue(async () => "after-failure");
+        expect(out).toBe("after-failure");
+    });
 });

@@ -85,3 +85,20 @@ export function appendEventLine(existingText: string, event: HubEvent, cap = 200
     lines.push(JSON.stringify(event));
     return lines.slice(-cap).join("\n") + "\n";
 }
+
+/**
+ * single-flight 串行队列（R69-P1）：物化是"读→改→写"三步，并发触发时后任务
+ * 会读到旧文本覆盖前任务写入（丢更新）。队列保证前一任务落定（成功或失败）后
+ * 才启动下一任务；单任务失败不阻塞后续。
+ */
+export function createSingleFlight(): <T>(task: () => Promise<T>) => Promise<T> {
+    let chain: Promise<unknown> = Promise.resolve();
+    return <T>(task: () => Promise<T>): Promise<T> => {
+        const run = chain.then(task, task);
+        chain = run.then(
+            () => undefined,
+            () => undefined,
+        );
+        return run;
+    };
+}
