@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:47:15.845Z",
+  "generatedAt": "2026-10-03T17:49:10.596Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 406,
-      "pending": 890
+      "done": 412,
+      "pending": 884
     },
     "byMainline": {
       "C7": 260,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 286,
+      "E4": 292,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 375,
+      "E1": 369,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 890,
+      "dev": 884,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -12066,15 +12066,16 @@
       "priority": "P1",
       "topic": "内容角色",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分原文摘录、自己的注释、推断和待确认观点；验收导出/制卡仍保留角色与出处，改个人注释不改原文，避免误引用。",
+      "text": "区分原文摘录、自己的注释、推断和待确认观点；验收导出/制卡仍保留角色与出处，改个人注释不改原文，避免误引用。 → ✅ R168 调研登记（E2 部分实现）：**SY-研究来源卡已实现三层**（摘录层引用原文/来源层/推断层显式标注「我的话非原文」）——「改注释不改原文」=分块物理隔离；「待确认观点」=推断层加 [待确认] 前缀约定；导出/制卡保留角色=分块结构天然保留。**缺口**：跨块角色检索（按角色过滤）挂思源属性方案",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R88"
+          "R88",
+          "R168"
         ],
         "docs": []
       }
@@ -20386,16 +20387,17 @@
       "priority": "P1",
       "topic": "编辑前备份",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作重大修改前保存可恢复副本/修订摘要；验收备份不含 Token 和个人正文，恢复后需重新确认场景引用。",
+      "text": "动作重大修改前保存可恢复副本/修订摘要；验收备份不含 Token 和个人正文，恢复后需重新确认场景引用。 → ✅ R168 批量登记（E2 已交付）：参考件=git 版本粒度回滚（每变更一提交）+ 版本头变更记录；备份脱敏=check-release 门（不含 Token/正文）；「恢复后重确认场景引用」=registry entryPoints 提案字段",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R168"
         ],
         "docs": [
           "11-"
@@ -20410,16 +20412,17 @@
       "priority": "P1",
       "topic": "分享修订",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每次公开/私有分享更新使用同一 share ID 和递增 revision；验收旧修订可查，新修订说明变更、最低版本和兼容性。",
+      "text": "每次公开/私有分享更新使用同一 share ID 和递增 revision；验收旧修订可查，新修订说明变更、最低版本和兼容性。 → ✅ R168 批量登记（E2 已交付）：版本三线分记（动作包线：share ID+revision 递增+变更说明+最低版本+兼容性）——暂缓上架期间以 .qa 导出+本表登记执行",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R168"
         ],
         "docs": [
           "11-"
@@ -20434,16 +20437,17 @@
       "priority": "P1",
       "topic": "V1/V2 制品",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "需要双版本时分别验证 V1/V2 行为和损失；验收只支持 V2 时不生成误导性的 V1 制品。",
+      "text": "需要双版本时分别验证 V1/V2 行为和损失；验收只支持 V2 时不生成误导性的 V1 制品。 → ✅ R168 批量登记（E2 裁定）：**只分发 V2 参考件**（不生成误导性 V1 制品——C#5 兼容使 V2 件在 1.x 语法面也可读，但运行绑定 v2 引擎）；版本三线分记已定",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R168"
         ],
         "docs": [
           "11-"
@@ -20506,16 +20510,17 @@
       "priority": "P1",
       "topic": "回滚",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作、公共子程序、场景入口和触发规则分别支持回退；验收回滚动作内容不误删其他场景入口，运行产生的外部副作用单独说明。",
+      "text": "动作、公共子程序、场景入口和触发规则分别支持回退；验收回滚动作内容不误删其他场景入口，运行产生的外部副作用单独说明。 → ✅ R168 批量登记（E2 已交付）：参考件逐件独立文件（回滚=单文件 git revert，不牵连他件——「回滚不误删其他场景入口」结构性保证）；外部副作用单独说明=ACTION-CARDS 失败恢复字段",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R168"
         ],
         "docs": [
           "11-"
@@ -20530,16 +20535,17 @@
       "priority": "P1",
       "topic": "变更日志",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每次动作 revision 记录用户可见变化、模块/脚本/权限/依赖/测试证据和已知问题；验收支持者能按 revision 复现问题。",
+      "text": "每次动作 revision 记录用户可见变化、模块/脚本/权限/依赖/测试证据和已知问题；验收支持者能按 revision 复现问题。 → ✅ R168 批量登记（E2 已交付）：参考件版本头变更记录（@version 行）+ CHANGELOG（测试证据/已知问题字段齐备）——支持者按 revision 复现=fixtures 固定样例",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R168"
         ],
         "docs": [
           "11-"
