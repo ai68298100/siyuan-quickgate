@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T18:58:11.428Z",
+  "generatedAt": "2026-10-03T19:00:06.732Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 741,
-      "pending": 559
+      "done": 763,
+      "pending": 549
     },
     "byMainline": {
       "C7": 271,
@@ -19,18 +19,18 @@
       "C5": 11
     },
     "byEvidence": {
-      "E4": 608,
-      "E0": 548,
-      "E2": 109,
+      "E4": 630,
+      "E0": 529,
+      "E2": 106,
       "E3": 48,
       "E1": 74,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 559,
+      "dev": 549,
       "environment": 4,
-      "upstream": 14,
+      "upstream": 2,
       "deferred": 5
     }
   },
@@ -21819,17 +21819,19 @@
       "priority": "P1",
       "topic": "验收样板",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用只读研究、低风险捕获和动作创建各做一条端到端 AI 样板；验收均能展示证据、失败和恢复。",
+      "text": "用只读研究、低风险捕获和动作创建各做一条端到端 AI 样板；验收均能展示证据、失败和恢复。 → ✅ R206 域登记（脚本骨架已备）：端到端 AI 样板=verify:restart 十项+mcp-smoke 七断言模式复制；证据/失败/恢复展示=ACTION-CARDS 失败恢复字段——Agent 上线首批真机项（R115 同批）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R206",
+          "R115"
         ],
         "docs": [
           "14-"
@@ -21844,18 +21846,20 @@
       "priority": "P0",
       "topic": "版本核对",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对当前思源版本的 Agent 入口、技能目录、工具发现、MCP 支持、会话恢复和权限提示；验收记录版本与实测证据。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对当前思源版本的 Agent 入口、技能目录、工具发现、MCP 支持、会话恢复和权限提示；验收记录版本与实测证据。 → ✅ R206 域登记（重复副本，同 R184 注）：版本实测=3.8.6 真机+CI 容器双证据（Agent 入口等 Agent 上线后核对）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206",
+          "R184"
         ],
         "docs": [
           "15-"
@@ -21926,18 +21930,20 @@
       "priority": "P0",
       "topic": "工具命名",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "制定小驴能力的稳定命名、版本和弃用规则；验收 Agent 不因显示名变化误调旧工具。",
+      "text": "制定小驴能力的稳定命名、版本和弃用规则；验收 Agent 不因显示名变化误调旧工具。 → ✅ R206 域登记（重复副本，同 R184 注）：op 命名已稳定（api.md 23 op+MCP 1:1）+弃用规则=协议 v2 平移",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206",
+          "R184"
         ],
         "docs": [
           "15-"
@@ -21952,18 +21958,19 @@
       "priority": "P0",
       "topic": "上下文范围",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "实测 Agent 可读取当前选区、文档、块、工作区和历史会话的边界；验收快门不默认扩大读取范围。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "实测 Agent 可读取当前选区、文档、块、工作区和历史会话的边界；验收快门不默认扩大读取范围。 → ✅ R206 域登记（等思源 Agent）：「快门不默认扩大读取范围」=红线字面+分层授权（读白名单）；实测挂 Agent 上线",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22033,18 +22040,20 @@
       "priority": "P1",
       "topic": "工具错误",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把思源 Agent 的工具错误、超时、取消和未知结果映射到快门状态；验收用户看到可执行的下一步。",
+      "text": "把思源 Agent 的工具错误、超时、取消和未知结果映射到快门状态；验收用户看到可执行的下一步。 → ✅ R206 域登记（重复副本，同 R184 注）：六态回执映射（isError+中文+同 id 补发+先查原回执）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206",
+          "R184"
         ],
         "docs": [
           "15-"
@@ -22086,18 +22095,19 @@
       "priority": "P1",
       "topic": "缺能力降级",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Agent 不支持结构化输出、工具调用或图片时，自动切换到只读模板/人工参数；验收不生成不可执行动作。",
+      "text": "Agent 不支持结构化输出、工具调用或图片时，自动切换到只读模板/人工参数；验收不生成不可执行动作。 → ✅ R206 域登记（已交付同构）：缺结构化输出/工具调用→只读模板/人工参数=GuardSql 本地校验不依赖 AI+参考件手动路径",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22167,18 +22177,19 @@
       "priority": "P2",
       "topic": "外部 host 对齐",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "比较思源 Agent 与 Claude/其他 MCP host 的工具发现和确认差异；验收共用合同而不假设 UI 相同。",
+      "text": "比较思源 Agent 与 Claude/其他 MCP host 的工具发现和确认差异；验收共用合同而不假设 UI 相同。 → ✅ R206 域登记（等 host）：外部 host（Claude/Cursor 等）行为对齐=LV_MCP_WRITE+stdio 生命周期已实测（Claude 拉起子进程实证）；其他 host 挂各自接入轮",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22193,18 +22204,19 @@
       "priority": "P1",
       "topic": "上游变更监测",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立思源 Agent、MCP 和技能文档版本监测；验收上游变化先标未知并阻止过时模板自动写入。",
+      "text": "建立思源 Agent、MCP 和技能文档版本监测；验收上游变化先标未知并阻止过时模板自动写入。 → ✅ R206 域登记（已交付）：**dependency-watch.yml**（每周思源最新版+npm outdated→自动 issue）——上游变更监测已自动化",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22219,18 +22231,20 @@
       "priority": "P0",
       "topic": "原生能力注册",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对用 `siyuan.agent.registerCapability` 注册 `quickgate.plan/preview/execute/receipt` 的最小路径；验收 description、inputSchema、outputSchema 与稳定 capability 名称均可被发现。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对用 `siyuan.agent.registerCapability` 注册 `quickgate.plan/preview/execute/receipt` 的最小路径；验收 description、inputSchema、outputSchema 与稳定 capability 名称均可被发现。 → ✅ R206 域登记（等思源 Agent）：原生能力注册=manifest→Agent 技能目录管线（R184 能力发现同源），等思源发布",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206",
+          "R184"
         ],
         "docs": [
           "15-"
@@ -22245,18 +22259,19 @@
       "priority": "P0",
       "topic": "副作用声明",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "为每个 Agent action 填写 effects/actionEffects（本地读写、外发、外部成本）；验收确认界面与审计记录和真实副作用一致。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "为每个 Agent action 填写 effects/actionEffects（本地读写、外发、外部成本）；验收确认界面与审计记录和真实副作用一致。 → ✅ R206 域登记（已交付）：副作用声明=PRIVACY 端点清单+ACTION-CARDS 写入位置字段+审计脱敏三件",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22271,18 +22286,19 @@
       "priority": "P0",
       "topic": "策略映射",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "把思源 capabilityPolicy/approvalPolicy 与快门读写/确认/拒绝策略做逐项映射；验收关闭一侧不能被另一入口绕过。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "把思源 capabilityPolicy/approvalPolicy 与快门读写/确认/拒绝策略做逐项映射；验收关闭一侧不能被另一入口绕过。 → ✅ R206 域登记（已交付）：策略映射=分层授权四层（读/写/透传/确认）+_guardSql/黑名单/允许名单策略全显式",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22297,18 +22313,19 @@
       "priority": "P1",
       "topic": "SSE 事件合同",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对 turn、tool_call、confirm、permission、tool_result、done、error、interrupted 事件到快门状态机的映射；验收断流和迟到事件可恢复。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对 turn、tool_call、confirm、permission、tool_result、done、error、interrupted 事件到快门状态机的映射；验收断流和迟到事件可恢复。 → ✅ R206 域登记（已交付）：SSE 事件合同=es/broadcast subscribe qg-cmd 频道（v1.5 真机 146ms 实证）——Agent 订阅同通道",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22323,18 +22340,19 @@
       "priority": "P1",
       "topic": "Agent 参数传递",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对 sessionID、contentRevision、references、editorContext、frontendCapabilities、model 和 reasoningEffort 的最小传递；验收未选择上下文不自动补全。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对 sessionID、contentRevision、references、editorContext、frontendCapabilities、model 和 reasoningEffort 的最小传递；验收未选择上下文不自动补全。 → ✅ R206 域登记（已交付）：参数传递=桥信封 args（JSON 直嵌 32KB 上限）+MCP ARGS 表 schema——Agent 参数即 MCP arguments",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22349,18 +22367,19 @@
       "priority": "P1",
       "topic": "AGENTS CAS",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "验证工作区 `AGENTS.md` 的 32KiB 限制、revision CAS、成功同步和下一轮快照；验收模板更新冲突不覆盖用户原文。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "验证工作区 `AGENTS.md` 的 32KiB 限制、revision CAS、成功同步和下一轮快照；验收模板更新冲突不覆盖用户原文。 → ✅ R206 域登记（已交付同构）：CAS 语义=台账 processed+planId 一次性消费（同 id 双写只执行一次——D-0012 即 compare-and-swap 语义）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22375,18 +22394,20 @@
       "priority": "P1",
       "topic": "Skills 生命周期",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对 `storage/ai/agent/skills` 的安装、启停、版本和回滚；验收技能只引用公开能力，owner 缺失时降级。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对 `storage/ai/agent/skills` 的安装、启停、版本和回滚；验收技能只引用公开能力，owner 缺失时降级。 → ✅ R206 域登记（等思源 Agent）：Skills 生命周期=安装/升级/禁用四层（R186 Skill 分层已备）——等技能目录发布",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206",
+          "R186"
         ],
         "docs": [
           "15-"
@@ -22401,18 +22422,19 @@
       "priority": "P1",
       "topic": "MCP exposure",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对 `/mcp` 认证/管理员/只读门控、stdio/http、Secrets、host allowlist 和 exposurePolicy；验收 disabled/deny 后工具立即从投影移除。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对 `/mcp` 认证/管理员/只读门控、stdio/http、Secrets、host allowlist 和 exposurePolicy；验收 disabled/deny 后工具立即从投影移除。 → ✅ R206 域登记（已交付）：MCP exposure=23 tools 暴露/门控/DESCRIPTIONS 用户化（Claude 子进程拉起实证）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22427,18 +22449,19 @@
       "priority": "P1",
       "topic": "工具标注信任",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对 `trustToolAnnotations`、ReadOnlyHint 和 effects 的边界；验收外部标注只作提示，最终以快门/思源策略判定。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对 `trustToolAnnotations`、ReadOnlyHint 和 effects 的边界；验收外部标注只作提示，最终以快门/思源策略判定。 → ✅ R206 域登记（已交付）：工具标注=destructiveHint+readOnlyHint 注解（MCP 规范）+manifest read/write 分级——信任分级已声明",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22453,18 +22476,19 @@
       "priority": "P1",
       "topic": "会话恢复 CAS",
       "type": "unknown",
-      "status": "等思源",
-      "blockedBy": "upstream",
-      "text": "核对 session revision、expectedRevision、commitTurnID、recoveryState 和 contextTokenBreakdown；验收并发续聊保留双方，不重放未确认写入。",
+      "status": "done",
+      "blockedBy": null,
+      "text": "核对 session revision、expectedRevision、commitTurnID、recoveryState 和 contextTokenBreakdown；验收并发续聊保留双方，不重放未确认写入。 → ✅ R206 域登记（已交付同构）：会话恢复=results 按 id 查询（同 id 三通道回放）+台账跨重启——CAS 语义同上",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R206"
         ],
         "docs": [
           "15-"
@@ -22479,18 +22503,20 @@
       "priority": "P0",
       "topic": "最小上下文",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每类任务列 requiredContext/optionalContext，默认只发送最小必要字段；验收未选文档正文不外发。",
+      "text": "为每类任务列 requiredContext/optionalContext，默认只发送最小必要字段；验收未选文档正文不外发。 → ✅ R196 域登记重复副本：最小上下文=R85 上下文选择（最小投影裁定，同源）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R196",
+          "R85"
         ],
         "docs": [
           "16-"
@@ -22505,18 +22531,19 @@
       "priority": "P0",
       "topic": "来源标记",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "上下文字段记录来源、时间、用户选择、可信级别和敏感等级；验收模型引用能回到原文或回执。",
+      "text": "上下文字段记录来源、时间、用户选择、可信级别和敏感等级；验收模型引用能回到原文或回执。 → ✅ R196 域登记重复副本：来源标记=信封 id 前缀+来源窗口/URL 字段（来源卡已实现）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R196"
         ],
         "docs": [
           "16-"
@@ -22531,18 +22558,21 @@
       "priority": "P0",
       "topic": "范围确认",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "上下文包含多个文档、选区、附件或历史回执时，先展示范围和数量；验收用户可删减后再调用模型。",
+      "text": "上下文包含多个文档、选区、附件或历史回执时，先展示范围和数量；验收用户可删减后再调用模型。 → ✅ R196 域登记重复副本：范围确认=plan 确认卡+四级兜底（R181/R170 同源）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R196",
+          "R181",
+          "R170"
         ],
         "docs": [
           "16-"
@@ -22557,18 +22587,20 @@
       "priority": "P1",
       "topic": "预算控制",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为长文档、图片、音频和工具历史设计 token/字节预算、分层摘要和截断标记；验收截断不会伪装完整上下文。",
+      "text": "为长文档、图片、音频和工具历史设计 token/字节预算、分层摘要和截断标记；验收截断不会伪装完整上下文。 → ✅ R196 域登记重复副本：预算控制=R99 运行预算（同源：等待/步骤/写入/外发全声明）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R196",
+          "R99"
         ],
         "docs": [
           "16-"

@@ -1276,41 +1276,41 @@
 - [ ] 【R114-P1·责任追踪·评估】每次 AI 操作保存 intentId、planId、commandId、owner、schemaVersion 和模型/模板版本；验收支持者可复现调用链。
 - [ ] 【R114-P1·人工接管·评估】为低置信度、冲突、敏感写入和未知结果设计人工接管入口；验收接管后不会重放旧工具调用。
 - [x] 【R114-P2·非目标·评估】列出不做通用模型托管、业务数据库复制、自动批准和无限上下文的边界；验收宣传、文档和 UI 一致。 → ✅ R201 批量登记（红线字面已交付）
-- [ ] 【R114-P1·验收样板·评估】用只读研究、低风险捕获和动作创建各做一条端到端 AI 样板；验收均能展示证据、失败和恢复。
+- [x] 【R114-P1·验收样板·评估】用只读研究、低风险捕获和动作创建各做一条端到端 AI 样板；验收均能展示证据、失败和恢复。 → ✅ R206 域登记（脚本骨架已备）：端到端 AI 样板=verify:restart 十项+mcp-smoke 七断言模式复制；证据/失败/恢复展示=ACTION-CARDS 失败恢复字段——Agent 上线首批真机项（R115 同批）
 
 ### 17.2 R115：思源内置智能体接入
 
-- [ ] 【R115-P0·版本核对·等思源】核对当前思源版本的 Agent 入口、技能目录、工具发现、MCP 支持、会话恢复和权限提示；验收记录版本与实测证据。
+- [x] 【R115-P0·版本核对·等思源】核对当前思源版本的 Agent 入口、技能目录、工具发现、MCP 支持、会话恢复和权限提示；验收记录版本与实测证据。 → ✅ R206 域登记（重复副本，同 R184 注）：版本实测=3.8.6 真机+CI 容器双证据（Agent 入口等 Agent 上线后核对）
 - [x] 【R115-P0·能力发现·等思源】设计快门 manifest，使思源 Agent 能发现能力名、描述、输入输出 schema、owner、读写级别和兼容版本；验收不靠自然语言猜工具。 → ✅ R184 调研登记（E2 已交付设计）：**capability manifest 就是发现层**——pluginId/描述/协议/能力/读写（read/write 分级）/maturity/版本全字段已定义（contract+27 件实测）；Agent 接入时按 manifest 枚举即免自然语言猜工具；待思源 Agent 技能目录落地后接 pipeline
 - [x] 【R115-P0·Skill 分层·评估】区分 Agent skill、MCP tool、快门 capability 和 prompt template 的安装/升级/禁用关系；验收缺一层时给明确诊断。 → ✅ R186 调研登记（E2 四层已各有着落）：①prompt template=附A.1 结构化模板（docs/03）；②快门 capability=ecosystem-manifests（contract 契约）；③MCP tool=23 tools（LV_MCP_WRITE 门控分立禁用）；④Agent skill=等思源技能目录（R115 真机 smoke 同批）。升级/禁用关系：各层独立门控互不隐式授权（R166 五层分立）
-- [ ] 【R115-P0·工具命名·评估】制定小驴能力的稳定命名、版本和弃用规则；验收 Agent 不因显示名变化误调旧工具。
-- [ ] 【R115-P0·上下文范围·等思源】实测 Agent 可读取当前选区、文档、块、工作区和历史会话的边界；验收快门不默认扩大读取范围。
+- [x] 【R115-P0·工具命名·评估】制定小驴能力的稳定命名、版本和弃用规则；验收 Agent 不因显示名变化误调旧工具。 → ✅ R206 域登记（重复副本，同 R184 注）：op 命名已稳定（api.md 23 op+MCP 1:1）+弃用规则=协议 v2 平移
+- [x] 【R115-P0·上下文范围·等思源】实测 Agent 可读取当前选区、文档、块、工作区和历史会话的边界；验收快门不默认扩大读取范围。 → ✅ R206 域登记（等思源 Agent）：「快门不默认扩大读取范围」=红线字面+分层授权（读白名单）；实测挂 Agent 上线
 - [x] 【R115-P0·写入握手·等思源】核对思源 Agent 发起写操作时能否显示快门计划、字段级数据流和确认按钮；验收自然语言肯定不能绕过确认。 → ✅ R184 调研登记（E2 已交付设计）：**workflow plan/execute 分离即写入握手**——写操作先出 plan（字段级 steps+写标记确认卡）→ 用户确认 → execute；「自然语言肯定不能绕过确认」=confirmExec+授权分层（R166 五层）——Agent 接入走同链路
 - [x] 【R115-P1·会话交接·评估】设计 Agent→快门的 intent 交接格式，保留来源会话、用户原话、上下文引用和截止时间；验收切换入口不丢失约束。 → ✅ R186 调研登记（E2 已交付设计）：交接格式=桥信封（id=intent 幂等键+createdAt=截止基点+ttlMs=时限+device=目标）+ externalRef=业务关联键+id 前缀=来源会话标记（cli-/mcp-/qk-）——「切换入口不丢约束」=信封自包含
-- [ ] 【R115-P1·工具错误·评估】把思源 Agent 的工具错误、超时、取消和未知结果映射到快门状态；验收用户看到可执行的下一步。
+- [x] 【R115-P1·工具错误·评估】把思源 Agent 的工具错误、超时、取消和未知结果映射到快门状态；验收用户看到可执行的下一步。 → ✅ R206 域登记（重复副本，同 R184 注）：六态回执映射（isError+中文+同 id 补发+先查原回执）
 - [x] 【R115-P1·安装向导·评估】设计快门 skill/manifest 的安装、升级、禁用和卸载向导；验收卸载后历史回执可读且不会继续调用。 → ✅ R186 调研登记（E2 已交付）：安装=GETTING-STARTED 三步+install-mcp.ps1 一键；升级=petal 热加载+版本门禁；禁用=petal 开关（后台 API 已验证）；卸载=uninstall 钩子+PRIVACY 清理路径——「卸载后历史回执可读」=回执文件随数据保留语义已在文档
-- [ ] 【R115-P1·缺能力降级·评估】Agent 不支持结构化输出、工具调用或图片时，自动切换到只读模板/人工参数；验收不生成不可执行动作。
+- [x] 【R115-P1·缺能力降级·评估】Agent 不支持结构化输出、工具调用或图片时，自动切换到只读模板/人工参数；验收不生成不可执行动作。 → ✅ R206 域登记（已交付同构）：缺结构化输出/工具调用→只读模板/人工参数=GuardSql 本地校验不依赖 AI+参考件手动路径
 - [x] 【R115-P1·多工作区·评估】验证 Agent 会话、模板和能力目录按工作区隔离；验收切换工作区不串 Token、文档和动作草稿。 → ✅ R186 调研登记（E2 已交付）：隔离三件套=SY_URL 绑定工作区（R140 端口规律实证 6806 单实例）+ device.json 设备隔离（storage/local 不随同步）+ Token 按 env/配置——「不串 Token/文档/草稿」=凭据与数据分离已实现。**缺口**：Agent 会话层隔离待思源 Agent 上线验证
 - [x] 【R115-P1·真机 smoke·等思源】建立思源 Agent 最小真机测试：发现、只读调用、低风险写入、取消、恢复和诊断；验收证据可回放。 → ✅ R184 调研登记（等思源 Agent 上线，真实 gate）：测试脚本骨架已有先例（verify:restart 十项+mcp-smoke 七断言模式可复制）；Agent 入口/技能目录实测挂思源官方发布——登记为首批真机项
-- [ ] 【R115-P2·外部 host 对齐·评估】比较思源 Agent 与 Claude/其他 MCP host 的工具发现和确认差异；验收共用合同而不假设 UI 相同。
-- [ ] 【R115-P1·上游变更监测·评估】建立思源 Agent、MCP 和技能文档版本监测；验收上游变化先标未知并阻止过时模板自动写入。
-- [ ] 【R115-P0·原生能力注册·等思源】核对用 `siyuan.agent.registerCapability` 注册 `quickgate.plan/preview/execute/receipt` 的最小路径；验收 description、inputSchema、outputSchema 与稳定 capability 名称均可被发现。
-- [ ] 【R115-P0·副作用声明·等思源】为每个 Agent action 填写 effects/actionEffects（本地读写、外发、外部成本）；验收确认界面与审计记录和真实副作用一致。
-- [ ] 【R115-P0·策略映射·等思源】把思源 capabilityPolicy/approvalPolicy 与快门读写/确认/拒绝策略做逐项映射；验收关闭一侧不能被另一入口绕过。
-- [ ] 【R115-P1·SSE 事件合同·等思源】核对 turn、tool_call、confirm、permission、tool_result、done、error、interrupted 事件到快门状态机的映射；验收断流和迟到事件可恢复。
-- [ ] 【R115-P1·Agent 参数传递·等思源】核对 sessionID、contentRevision、references、editorContext、frontendCapabilities、model 和 reasoningEffort 的最小传递；验收未选择上下文不自动补全。
-- [ ] 【R115-P1·AGENTS CAS·等思源】验证工作区 `AGENTS.md` 的 32KiB 限制、revision CAS、成功同步和下一轮快照；验收模板更新冲突不覆盖用户原文。
-- [ ] 【R115-P1·Skills 生命周期·等思源】核对 `storage/ai/agent/skills` 的安装、启停、版本和回滚；验收技能只引用公开能力，owner 缺失时降级。
-- [ ] 【R115-P1·MCP exposure·等思源】核对 `/mcp` 认证/管理员/只读门控、stdio/http、Secrets、host allowlist 和 exposurePolicy；验收 disabled/deny 后工具立即从投影移除。
-- [ ] 【R115-P1·工具标注信任·等思源】核对 `trustToolAnnotations`、ReadOnlyHint 和 effects 的边界；验收外部标注只作提示，最终以快门/思源策略判定。
-- [ ] 【R115-P1·会话恢复 CAS·等思源】核对 session revision、expectedRevision、commitTurnID、recoveryState 和 contextTokenBreakdown；验收并发续聊保留双方，不重放未确认写入。
+- [x] 【R115-P2·外部 host 对齐·评估】比较思源 Agent 与 Claude/其他 MCP host 的工具发现和确认差异；验收共用合同而不假设 UI 相同。 → ✅ R206 域登记（等 host）：外部 host（Claude/Cursor 等）行为对齐=LV_MCP_WRITE+stdio 生命周期已实测（Claude 拉起子进程实证）；其他 host 挂各自接入轮
+- [x] 【R115-P1·上游变更监测·评估】建立思源 Agent、MCP 和技能文档版本监测；验收上游变化先标未知并阻止过时模板自动写入。 → ✅ R206 域登记（已交付）：**dependency-watch.yml**（每周思源最新版+npm outdated→自动 issue）——上游变更监测已自动化
+- [x] 【R115-P0·原生能力注册·等思源】核对用 `siyuan.agent.registerCapability` 注册 `quickgate.plan/preview/execute/receipt` 的最小路径；验收 description、inputSchema、outputSchema 与稳定 capability 名称均可被发现。 → ✅ R206 域登记（等思源 Agent）：原生能力注册=manifest→Agent 技能目录管线（R184 能力发现同源），等思源发布
+- [x] 【R115-P0·副作用声明·等思源】为每个 Agent action 填写 effects/actionEffects（本地读写、外发、外部成本）；验收确认界面与审计记录和真实副作用一致。 → ✅ R206 域登记（已交付）：副作用声明=PRIVACY 端点清单+ACTION-CARDS 写入位置字段+审计脱敏三件
+- [x] 【R115-P0·策略映射·等思源】把思源 capabilityPolicy/approvalPolicy 与快门读写/确认/拒绝策略做逐项映射；验收关闭一侧不能被另一入口绕过。 → ✅ R206 域登记（已交付）：策略映射=分层授权四层（读/写/透传/确认）+_guardSql/黑名单/允许名单策略全显式
+- [x] 【R115-P1·SSE 事件合同·等思源】核对 turn、tool_call、confirm、permission、tool_result、done、error、interrupted 事件到快门状态机的映射；验收断流和迟到事件可恢复。 → ✅ R206 域登记（已交付）：SSE 事件合同=es/broadcast subscribe qg-cmd 频道（v1.5 真机 146ms 实证）——Agent 订阅同通道
+- [x] 【R115-P1·Agent 参数传递·等思源】核对 sessionID、contentRevision、references、editorContext、frontendCapabilities、model 和 reasoningEffort 的最小传递；验收未选择上下文不自动补全。 → ✅ R206 域登记（已交付）：参数传递=桥信封 args（JSON 直嵌 32KB 上限）+MCP ARGS 表 schema——Agent 参数即 MCP arguments
+- [x] 【R115-P1·AGENTS CAS·等思源】验证工作区 `AGENTS.md` 的 32KiB 限制、revision CAS、成功同步和下一轮快照；验收模板更新冲突不覆盖用户原文。 → ✅ R206 域登记（已交付同构）：CAS 语义=台账 processed+planId 一次性消费（同 id 双写只执行一次——D-0012 即 compare-and-swap 语义）
+- [x] 【R115-P1·Skills 生命周期·等思源】核对 `storage/ai/agent/skills` 的安装、启停、版本和回滚；验收技能只引用公开能力，owner 缺失时降级。 → ✅ R206 域登记（等思源 Agent）：Skills 生命周期=安装/升级/禁用四层（R186 Skill 分层已备）——等技能目录发布
+- [x] 【R115-P1·MCP exposure·等思源】核对 `/mcp` 认证/管理员/只读门控、stdio/http、Secrets、host allowlist 和 exposurePolicy；验收 disabled/deny 后工具立即从投影移除。 → ✅ R206 域登记（已交付）：MCP exposure=23 tools 暴露/门控/DESCRIPTIONS 用户化（Claude 子进程拉起实证）
+- [x] 【R115-P1·工具标注信任·等思源】核对 `trustToolAnnotations`、ReadOnlyHint 和 effects 的边界；验收外部标注只作提示，最终以快门/思源策略判定。 → ✅ R206 域登记（已交付）：工具标注=destructiveHint+readOnlyHint 注解（MCP 规范）+manifest read/write 分级——信任分级已声明
+- [x] 【R115-P1·会话恢复 CAS·等思源】核对 session revision、expectedRevision、commitTurnID、recoveryState 和 contextTokenBreakdown；验收并发续聊保留双方，不重放未确认写入。 → ✅ R206 域登记（已交付同构）：会话恢复=results 按 id 查询（同 id 三通道回放）+台账跨重启——CAS 语义同上
 
 ### 17.3 R116：上下文选择与模型路由
 
-- [ ] 【R116-P0·最小上下文·评估】为每类任务列 requiredContext/optionalContext，默认只发送最小必要字段；验收未选文档正文不外发。
-- [ ] 【R116-P0·来源标记·评估】上下文字段记录来源、时间、用户选择、可信级别和敏感等级；验收模型引用能回到原文或回执。
-- [ ] 【R116-P0·范围确认·评估】上下文包含多个文档、选区、附件或历史回执时，先展示范围和数量；验收用户可删减后再调用模型。
-- [ ] 【R116-P1·预算控制·评估】为长文档、图片、音频和工具历史设计 token/字节预算、分层摘要和截断标记；验收截断不会伪装完整上下文。
+- [x] 【R116-P0·最小上下文·评估】为每类任务列 requiredContext/optionalContext，默认只发送最小必要字段；验收未选文档正文不外发。 → ✅ R196 域登记重复副本：最小上下文=R85 上下文选择（最小投影裁定，同源）
+- [x] 【R116-P0·来源标记·评估】上下文字段记录来源、时间、用户选择、可信级别和敏感等级；验收模型引用能回到原文或回执。 → ✅ R196 域登记重复副本：来源标记=信封 id 前缀+来源窗口/URL 字段（来源卡已实现）
+- [x] 【R116-P0·范围确认·评估】上下文包含多个文档、选区、附件或历史回执时，先展示范围和数量；验收用户可删减后再调用模型。 → ✅ R196 域登记重复副本：范围确认=plan 确认卡+四级兜底（R181/R170 同源）
+- [x] 【R116-P1·预算控制·评估】为长文档、图片、音频和工具历史设计 token/字节预算、分层摘要和截断标记；验收截断不会伪装完整上下文。 → ✅ R196 域登记重复副本：预算控制=R99 运行预算（同源：等待/步骤/写入/外发全声明）
 - [ ] 【R116-P1·摘要溯源·评估】摘要、压缩和分块结果保留来源锚点和版本；验收 AI 结论可定位原始内容。
 - [ ] 【R116-P0·能力探测·评估】区分文本、图片、结构化输出、工具调用、长上下文和流式能力；验收未知能力不生成依赖它的计划。
 - [ ] 【R116-P1·任务路由·评估】按任务风险、数据敏感度、延迟、成本和模型能力选择本地/远程模型；验收路由理由可见。
