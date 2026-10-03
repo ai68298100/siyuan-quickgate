@@ -177,8 +177,9 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     private isMobileGuard(): boolean {
-        // TODO(M1.5)：移动端默认关桥，设置页显式打开后带 :mobile-on 后缀
-        return this.isMobile && !this.settings.deviceName.endsWith(":mobile-on");
+        // TODO(M1.5)：移动端默认关桥；显式设置项 mobileBridgeEnabled 开启后放行
+        // （旧版隐式 deviceName ":mobile-on" 后缀仍兜底识别——normalize 迁移前的双保险）
+        return this.isMobile && !(this.settings.mobileBridgeEnabled || this.settings.deviceName.endsWith(":mobile-on"));
     }
 
     private asDataIO(): DataIO {
@@ -474,6 +475,19 @@ export default class QuickGatePlugin extends Plugin {
             showMessage(`外部命令桥已${this.settings.bridgeEnabled ? "开启" : "关闭"}`, 3000);
         };
         row("外部命令桥（默认关；开启后外部程序可发命令）", enabledInput);
+
+        const mobileInput = document.createElement("input");
+        mobileInput.type = "checkbox";
+        mobileInput.className = "b3-switch";
+        mobileInput.checked = this.settings.mobileBridgeEnabled
+            || this.settings.deviceName.endsWith(":mobile-on"); // 旧后缀迁移前也如实显示
+        mobileInput.onchange = async () => {
+            this.settings.mobileBridgeEnabled = mobileInput.checked;
+            this.store.settings = this.settings;
+            await this.store.saveSettings();
+            showMessage(`移动端桥已${this.settings.mobileBridgeEnabled ? "允许" : "关闭"}（仅在移动端设备上生效）`, 3000);
+        };
+        row("移动端桥 opt-in（默认关；移动端上开启外部命令桥需单独打开此项）", mobileInput);
 
         const bcInput = document.createElement("input");
         bcInput.type = "checkbox";

@@ -55,3 +55,126 @@ describe("混沌工程：JSON 恶劣输入", () => {
         expect(parsed.data.length).toBe(1024 * 1024);
     });
 });
+
+// ============================================================================
+// 多写者混沌（R69-P1：CLI/PowerShell/MCP 并发 getFile→append→putFile 的窗口实证）
+// 结论（确定性实证）：双写者交错存在真实丢行窗口（stale-writer overwrite）；
+// 系统性恢复 = 调用方超时后**同 id** 重发（台账去重，绝不双执行）→ 最终无丢失。
+// 生产约定：外部单写者（每个客户端只写自己的命令、消费靠快门）+ MCP 3s 补发已内建。
+// ============================================================================
+import { BridgeService } from "../src/services/bridge-service";
+import { KernelApi } from "../src/services/kernelApi";
+import { BridgeStore } from "../src/services/store";
+
+class ChaosKernel {
+    files = new Map<string, string>();
+    putCount = 0;
+    api: KernelApi;
+    constructor(jitterMs = 0) {
+        this.api = new KernelApi((async (url: RequestInfo | URL, init?: RequestInit) => {
+            const u = String(url);
+            const body = typeof init?.body === "string" ? JSON.parse(init.body) : {};
+            const jitter = () => new Promise((r) => setTimeout(r, jitterMs));
+            if (u === "/api/file/getFile") {
+                await jitter();
+                const text = this.files.get(body.path);
+                return { ok: text !== undefined, status: text !== undefined ? 200 : 404, text: async () => text ?? "" } as Response;
+            }
+            if (u === "/api/file/putFile") {
+                const form = init?.body as FormData;
+                await jitter(); // 扩大写-写交错窗口
+                this.files.set(String(form.get("path")), await (form.get("file") as File).text());
+                this.putCount += 1;
+                return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: null }) } as Response;
+            }
+            return { ok: false, status: 404, text: async () => "{}" } as Response;
+        }) as unknown as typeof fetch);
+    }
+    lines(path: string): string[] {
+        return (this.files.get(path) ?? "").split(/\r?\n/).filter((l) => l.trim() !== "");
+    }
+}
+
+const chaosSettings = () => ({
+    schemaVersion: 1 as const, bridgeEnabled: true, pollMs: 20, backoffMaxMs: 10000,
+    confirmExec: false, blacklist: [] as string[], auditMax: 200,
+    rawApiEnabled: false, rawApiAllowlist: [], broadcastEnabled: false,
+    bridgeBasePath: "/bridge", deviceName: "dev-a",
+});
+
+function makeService(mem: ChaosKernel) {
+    const store = new BridgeStore({ load: async () => null, save: async () => {} });
+    return new BridgeService({
+        api: mem.api, store, settings: chaosSettings,
+        pluginName: "chaos", pluginVersion: "0",
+        deviceName: () => "dev-a",
+        registry: () => ({ source: "fallback", plugins: [] }),
+        confirm: async () => true,
+        audit: () => {},
+        editorContext: () => null,
+        dailyStatus: async () => ({ docId: null, exists: false }),
+        openDoc: () => {}, openSetting: () => {},
+        getCheckin: () => undefined, getContacts: () => undefined,
+        loadPetals: async () => [],
+        discoverConfig: async () => ({ diaryNotebookId: null, inboxDocId: null, notes: [] }),
+    });
+}
+
+const CMD_PATH = "/bridge/commands.ndjson";
+const RES_PATH = "/bridge/results.ndjson";
+
+function envelope(id: string): string {
+    return JSON.stringify({ v: 1, id, op: "bridge.ping", args: {}, createdAt: new Date().toISOString() });
+}
+
+function receiptsFor(mem: ChaosKernel, id: string): string[] {
+    return mem.lines(RES_PATH).filter((l) => l.includes("\"id\":\"" + id + "\""));
+}
+
+describe("混沌工程：多写者（R69-P1 混沌测试）", () => {
+
+    it("确定性双写者交错：stale-writer 丢行窗口实证", async () => {
+        const mem = new ChaosKernel(3);
+        // A 读（拿到空文件）→ B 读+追加 B1+写 → A 追加 A1 写回（基于旧快照）→ B1 被覆盖丢失
+        const readA = mem.api.getFileText(CMD_PATH); await readA;         // A 的快照 = 空
+        const textB = (await mem.api.getFileText(CMD_PATH)) ?? "";        // B 的快照 = 空
+        await mem.api.putFileText(CMD_PATH, textB + envelope("B1") + "\n"); // B 写入 B1
+        await mem.api.putFileText(CMD_PATH, (await readA ?? "") + envelope("A1") + "\n"); // A 旧快照写回
+
+        expect(mem.lines(CMD_PATH).map((l) => JSON.parse(l).id).sort()).toEqual(["A1"]); // B1 丢失实证
+    }, 15000);
+
+    it("丢行后同 id 重发：台账去重恢复——每 id 恰好一条回执，无永久丢失无双执行", async () => {
+        const mem = new ChaosKernel(2);
+        const svc = makeService(mem);
+        // 复现丢行：B1 被覆盖
+        const readA = mem.api.getFileText(CMD_PATH); await readA;
+        const textB = (await mem.api.getFileText(CMD_PATH)) ?? "";
+        await mem.api.putFileText(CMD_PATH, textB + envelope("B1") + "\n");
+        await mem.api.putFileText(CMD_PATH, envelope("A1") + "\n");
+
+        // 消费者消费 A1（B1 已不在文件里）
+        await svc.tick();
+        expect(receiptsFor(mem, "A1").length).toBe(1);
+
+        // 调用方超时发现 B1 无回执 → **同 id** 重发（MCP 3s 补发同款语义）
+        await mem.api.putFileText(CMD_PATH, (mem.files.get(CMD_PATH) ?? "").trimEnd() + "\n" + envelope("B1") + "\n");
+        await svc.tick();
+
+        expect(receiptsFor(mem, "B1").length).toBe(1); // 恢复：恰好一条
+        expect(mem.lines(RES_PATH).length).toBe(2);    // 总回执 = 命令数，无双执行
+    }, 15000);
+
+    it("消费者压缩不吞并发追加：生产者新行在压缩窗口后仍被消费", async () => {
+        const mem = new ChaosKernel(1);
+        const svc = makeService(mem);
+        mem.files.set(CMD_PATH, envelope("C1") + "\n");
+        await svc.tick();                 // 消费 C1 → 压缩
+        expect(mem.lines(CMD_PATH).length).toBe(0); // C1 已压缩
+        // 并发生产者在压缩后追加 C2（真实时序：压缩与追加都走整文件写，追加基于最新读）
+        const latest = (await mem.api.getFileText(CMD_PATH)) ?? "";
+        await mem.api.putFileText(CMD_PATH, latest + envelope("C2") + "\n");
+        await svc.tick();
+        expect(receiptsFor(mem, "C2").length).toBe(1); // 新行存活且被消费（阻断项1 语义）
+    }, 15000);
+});

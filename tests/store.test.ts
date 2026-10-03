@@ -17,6 +17,18 @@ describe("store.normalize（不兼容→缺省重建，永不抛错）", () => {
         expect(s.deviceName.length).toBe(64);
         expect(normalizeSettings(undefined)).toEqual(DEFAULT_SETTINGS);
     });
+
+    it("settings：移动端桥 opt-in 迁移（R69-P1）——显式字段优先，旧 :mobile-on 后缀迁移", () => {
+        // 旧版隐式后缀 → 迁移为 true
+        expect(normalizeSettings({ deviceName: "phone:mobile-on" }).mobileBridgeEnabled).toBe(true);
+        // 无后缀无字段 → 默认关
+        expect(normalizeSettings({ deviceName: "desktop" }).mobileBridgeEnabled).toBe(false);
+        // 显式字段优先：false 显式覆盖旧后缀（用户已在设置关掉）
+        expect(normalizeSettings({ deviceName: "phone:mobile-on", mobileBridgeEnabled: false }).mobileBridgeEnabled).toBe(false);
+        expect(normalizeSettings({ mobileBridgeEnabled: true }).mobileBridgeEnabled).toBe(true);
+        // 非布尔回默认
+        expect(normalizeSettings({ mobileBridgeEnabled: "yes" }).mobileBridgeEnabled).toBe(false);
+    });
 });
 
 describe("BridgeStore 记账", () => {

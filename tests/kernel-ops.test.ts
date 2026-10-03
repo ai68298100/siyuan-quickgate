@@ -203,4 +203,33 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
         expect(r2.status).toBe("unsupported");
         expect(r2.message).toContain("no.such.op");
     });
+
+    it("config.discover 收集箱发现：约定名唯一命中即取；零命中回 null+指引；自定义名生效（R69-P2）", async () => {
+        // 唯一命中
+        const depsHit = makeDeps({
+            kpostScript: new Map([
+                ["/api/notebook/lsNotebooks", []],
+                ["/api/query/sql", { data: [{ id: "20240101120000-abc", content: "收集箱", box: "nb1" }] }] as never,
+            ]),
+        });
+        const r1 = await createKernelOpHandler(depsHit.deps)("config.discover", {});
+        expect((r1.data as { inboxDocId: string }).inboxDocId).toBe("20240101120000-abc");
+        expect((r1.data as { notes: string[] }).notes.join()).toContain("收集箱（按约定名发现）");
+
+        // 零命中 → null + 指引建文档/手填
+        const depsMiss = makeDeps({
+            kpostScript: new Map([
+                ["/api/notebook/lsNotebooks", []],
+                ["/api/query/sql", { data: [] }] as never,
+            ]),
+        });
+        const r2 = await createKernelOpHandler(depsMiss.deps)("config.discover", {});
+        expect((r2.data as { inboxDocId: string | null }).inboxDocId).toBeNull();
+        expect((r2.data as { notes: string[] }).notes.join()).toContain("未发现收集箱根文档");
+
+        // 自定义约定名传入 SQL（取最后一次 SQL 调用——前一次零命中调用用的是默认名）
+        await createKernelOpHandler(depsMiss.deps)("config.discover", { inboxName: "收件箱" });
+        const sqlCalls = depsMiss.calls.filter((c) => c.endpoint === "/api/query/sql");
+        expect(JSON.stringify(sqlCalls[sqlCalls.length - 1]?.payload)).toContain("收件箱");
+    });
 });

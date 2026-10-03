@@ -43,6 +43,12 @@ export function normalizeSettings(raw: unknown): QuickGateSettings {
     }
     if (typeof obj.deviceName === "string") s.deviceName = obj.deviceName.slice(0, 64);
     if (typeof obj.broadcastEnabled === "boolean") s.broadcastEnabled = obj.broadcastEnabled;
+    // 移动端桥 opt-in：显式字段优先；缺省时从旧版隐式后缀迁移（deviceName ":mobile-on"，R69-P1）
+    if (typeof obj.mobileBridgeEnabled === "boolean") {
+        s.mobileBridgeEnabled = obj.mobileBridgeEnabled;
+    } else if (typeof obj.deviceName === "string" && obj.deviceName.endsWith(":mobile-on")) {
+        s.mobileBridgeEnabled = true;
+    }
     return s;
 }
 

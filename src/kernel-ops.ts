@@ -94,7 +94,7 @@ export async function kernelEventsPull(deps: KernelDeps, args: Args): Promise<Re
     return { id: "kernel", op: "events.pull", status: "recorded", data: { events, files }, message: `拉取 ${events.length} 条` };
 }
 
-export async function kernelConfigDiscover(deps: KernelDeps): Promise<Receipt> {
+export async function kernelConfigDiscover(deps: KernelDeps, args: Args = {}): Promise<Receipt> {
     const notes: string[] = [];
     let diaryNotebookId: string | null = null;
     try {
@@ -150,7 +150,39 @@ export async function kernelConfigDiscover(deps: KernelDeps): Promise<Receipt> {
         notes.push(`发现失败：${e instanceof Error ? e.message : String(e)}`);
     }
     if (!diaryNotebookId) notes.push("未发现日记笔记本（回退手填）");
-    return { id: "kernel", op: "config.discover", status: "recorded", data: { diaryNotebookId, inboxDocId: null, notes }, message: "内核侧发现完成" };
+
+    // 收集箱发现（R69-P2 兜底补齐）：约定名优先——根级文档名「收集箱/Inbox」。
+    // 决策（v0.7.3）：只发现不静默创建（建在哪本笔记本是产品决策，擅自建违反最小惊讶）；
+    // 零命中回 null + notes 指引手填；调用方可传 args.inboxName 自定义约定名。
+    let inboxDocId: string | null = null;
+    try {
+        const nameArg = typeof args.inboxName === "string" && args.inboxName.trim() ? args.inboxName.trim() : "";
+        const names = nameArg ? [nameArg] : ["收集箱", "Inbox", "inbox"];
+        const inList = names.map((n) => "'" + n.replace(/'/g, "''") + "'").join(",");
+        const r = await deps.kpost<{ data?: unknown }>("/api/query/sql", {
+            stmt: `SELECT id, content, box FROM blocks WHERE type='d' AND parent_id='' AND content IN (${inList}) ORDER BY id LIMIT 10`,
+        });
+        const rows = (r && typeof r === "object" ? (r as { data?: unknown }).data ?? r : r) as unknown[];
+        const docs = Array.isArray(rows) ? rows : [];
+        if (docs.length === 1) {
+            const doc = docs[0] as { id?: string; content?: string; box?: string };
+            if (doc.id) {
+                inboxDocId = doc.id;
+                notes.push(`收集箱（按约定名发现）：${doc.content ?? ""}（笔记本 ${doc.box ?? "?"}）`);
+            }
+        } else if (docs.length > 1) {
+            const first = docs[0] as { id?: string; content?: string; box?: string };
+            if (first.id) {
+                inboxDocId = first.id;
+                notes.push(`收集箱：发现 ${docs.length} 个同名根文档，取最早创建的「${first.content ?? ""}」（笔记本 ${first.box ?? "?"}）；如需指定其它，请手填收集箱文档ID`);
+            }
+        } else {
+            notes.push(`未发现收集箱根文档（约定名${nameArg ? "：" + nameArg : "：收集箱/Inbox"}）——可在思源建一个名为「收集箱」的顶层文档，或手填收集箱文档ID`);
+        }
+    } catch (e) {
+        notes.push(`收集箱发现失败：${e instanceof Error ? e.message : String(e)}（回退手填）`);
+    }
+    return { id: "kernel", op: "config.discover", status: "recorded", data: { diaryNotebookId, inboxDocId, notes }, message: "内核侧发现完成" };
 }
 
 export async function kernelTemplateNew(deps: KernelDeps, args: Args): Promise<Receipt> {
@@ -192,7 +224,7 @@ export function createKernelOpHandler(deps: KernelDeps): (op: string, args: Args
             case "registry.list": return await kernelRegistryList(deps);
             case "events.list": return kernelEventsList(deps);
             case "events.pull": return await kernelEventsPull(deps, args);
-            case "config.discover": return await kernelConfigDiscover(deps);
+            case "config.discover": return await kernelConfigDiscover(deps, args);
             case "template.new": return await kernelTemplateNew(deps, args);
             case "diagnostics.report": return kernelDiagnostics(deps);
             default:

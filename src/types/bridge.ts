@@ -79,6 +79,8 @@ export interface QuickGateSettings {
     deviceName: string;
     /** v1.5 广播快路径：前端 SSE 订阅 /es/broadcast/subscribe?channel=qg-cmd（新外部面，默认关） */
     broadcastEnabled: boolean;
+    /** 移动端桥 opt-in（默认关；旧版用 deviceName ":mobile-on" 隐式后缀，加载时迁移为本字段） */
+    mobileBridgeEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: QuickGateSettings = {
@@ -94,6 +96,7 @@ export const DEFAULT_SETTINGS: QuickGateSettings = {
     bridgeBasePath: "/storage/petal/siyuan-quickgate/bridge",
     deviceName: "",
     broadcastEnabled: false,
+    mobileBridgeEnabled: false,
 };
 
 /** 命令注册表条目（spike① 已实证：id=langKey；形状见 services/registry.ts 头注与 WALKTHROUGH ①） */
