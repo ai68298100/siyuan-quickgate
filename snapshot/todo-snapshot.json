@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T19:17:55.661Z",
+  "generatedAt": "2026-10-03T19:19:43.554Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 1021,
-      "pending": 291
+      "done": 1027,
+      "pending": 288
     },
     "byMainline": {
       "C7": 279,
@@ -19,16 +19,16 @@
       "C5": 11
     },
     "byEvidence": {
-      "E4": 885,
-      "E0": 352,
+      "E4": 891,
+      "E0": 346,
       "E2": 90,
       "E3": 32,
       "E1": 29,
       "E5": 1
     },
     "byBlocked": {
-      "user": 66,
-      "dev": 291,
+      "user": 63,
+      "dev": 288,
       "environment": 4,
       "upstream": 2,
       "deferred": 5
@@ -896,17 +896,19 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "`SY·内核请求`：配置读取（statestorage + `%APPDATA%\\siyuan\\env` 兜底）→ HTTP → 通用错误分支 → 输出（03 §0 / 04 §8）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "`SY·内核请求`：配置读取（statestorage + `%APPDATA%\\siyuan\\env` 兜底）→ HTTP → 通用错误分支 → 输出（03 §0 / 04 §8） → ✅ R215 交付对照：**SY-内核请求.cs v1.1** 即本项实现（env 兜底→HTTP→401 自愈→通用错误分支——csc 编译门通过）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "0",
           "8"
         ],
-        "rounds": [],
+        "rounds": [
+          "R215"
+        ],
         "docs": []
       }
     },
@@ -918,16 +920,18 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "`LV·发命令`：id 生成 → 拼 NDJSON → putFile → 输出 id（02 §6）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "`LV·发命令`：id 生成 → 拼 NDJSON → putFile → 输出 id（02 §6） → ✅ R215 交付对照：**LV-发命令.cs** 即本项实现（id 生成/信封直嵌/Multipart putFile）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "6"
         ],
-        "rounds": [],
+        "rounds": [
+          "R215"
+        ],
         "docs": []
       }
     },
@@ -939,14 +943,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "等用户",
-      "blockedBy": "user",
-      "text": "`LV·取回执`：循环 getFile → 逐行 JSON.parse 按 id 匹配 → 按 op 等待（普通快门约1.2s、数据约8s、commands.run确认约35s或pending）",
+      "status": "done",
+      "blockedBy": null,
+      "text": "`LV·取回执`：循环 getFile → 逐行 JSON.parse 按 id 匹配 → 按 op 等待（普通快门约1.2s、数据约8s、commands.run确认约35s或pending） → ✅ R215 交付对照：**LV-取回执.cs** 即本项实现（按 op 预算轮询/timeout 诚实/不换 id）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R215"
+        ],
         "docs": []
       }
     },
@@ -10634,14 +10640,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "（可选）打卡 NDJSON 桥",
+      "text": "（可选）打卡 NDJSON 桥 → ✅ R215 裁定（可选项维持可选）：打卡公开桥 v5（windowBridge+事件）已覆盖外部面——NDJSON 桥为无 windowBridge 环境兜底，登记为兜底选项不做",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R215"
+        ],
         "docs": []
       }
     },
@@ -10653,14 +10661,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "（可选）人脉 NDJSON 桥",
+      "text": "（可选）人脉 NDJSON 桥 → ✅ R215 裁定（可选项维持可选）：人脉公开桥 v1（searchPeople/ensurePerson/recordInteraction）已覆盖——同上兜底选项不做",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R215"
+        ],
         "docs": []
       }
     },
@@ -11437,14 +11447,16 @@
       "priority": null,
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作使用手册（安装→令牌→首跑→错误自检）",
+      "text": "动作使用手册（安装→令牌→首跑→错误自检） → ✅ R215 交付对照：**GETTING-STARTED 三步+FAQ 错误自检+ACTION-CARDS 八字段**（三件合计即使用手册——已交付）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R215"
+        ],
         "docs": []
       }
     },

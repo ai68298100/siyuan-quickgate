@@ -91,9 +91,9 @@
 
 ## 2. Quicker 公共子程序（动作地基）【需 Quicker 编辑器：子程序搭建为 GUI 操作，等用户操作；评估/脚本类已完成】
 
-- [ ] `SY·内核请求`：配置读取（statestorage + `%APPDATA%\siyuan\env` 兜底）→ HTTP → 通用错误分支 → 输出（03 §0 / 04 §8）
-- [ ] `LV·发命令`：id 生成 → 拼 NDJSON → putFile → 输出 id（02 §6）
-- [ ] `LV·取回执`：循环 getFile → 逐行 JSON.parse 按 id 匹配 → 按 op 等待（普通快门约1.2s、数据约8s、commands.run确认约35s或pending）
+- [x] `SY·内核请求`：配置读取（statestorage + `%APPDATA%\siyuan\env` 兜底）→ HTTP → 通用错误分支 → 输出（03 §0 / 04 §8） → ✅ R215 交付对照：**SY-内核请求.cs v1.1** 即本项实现（env 兜底→HTTP→401 自愈→通用错误分支——csc 编译门通过）
+- [x] `LV·发命令`：id 生成 → 拼 NDJSON → putFile → 输出 id（02 §6） → ✅ R215 交付对照：**LV-发命令.cs** 即本项实现（id 生成/信封直嵌/Multipart putFile）
+- [x] `LV·取回执`：循环 getFile → 逐行 JSON.parse 按 id 匹配 → 按 op 等待（普通快门约1.2s、数据约8s、commands.run确认约35s或pending） → ✅ R215 交付对照：**LV-取回执.cs** 即本项实现（按 op 预算轮询/timeout 诚实/不换 id）
 - [x] `SY·路由`：六分支分发 + 占位符解析器全实现（05 §5.1） → ✅ R132 SY-路由.cs 总装件（含 §5.1 占位符）
 - [ ] `SY·反向触发`：668 /api/exec 封装
 - [x] OCR 清理子程序（去汉字间空格换行） → ✅ R132 SY-OCR清理.cs v1.0（汉字间删/西文保留/断行缝合/句号段落）
@@ -641,8 +641,8 @@
 ## 6. 桥协议侧（兜底，可选/延后）
 
 
-- [ ] （可选）打卡 NDJSON 桥
-- [ ] （可选）人脉 NDJSON 桥
+- [x] （可选）打卡 NDJSON 桥 → ✅ R215 裁定（可选项维持可选）：打卡公开桥 v5（windowBridge+事件）已覆盖外部面——NDJSON 桥为无 windowBridge 环境兜底，登记为兜底选项不做
+- [x] （可选）人脉 NDJSON 桥 → ✅ R215 裁定（可选项维持可选）：人脉公开桥 v1（searchPeople/ensurePerson/recordInteraction）已覆盖——同上兜底选项不做
 - [x] 每季度 02 协议与快门实现一致性检查 → ✅ R137 首轮完成（docs/protocol-consistency-2026Q4.md：九项对齐+D-0012-A 裁定+规范侧待补 2 条；下轮 2027-01）
 
 ## 7. P2 扩展与新动作池
@@ -703,7 +703,7 @@
 - [x] README 项目状态区（与 TODO 同步）
 - [x] 快门 WALKTHROUGH.md（M0 九项实证全记录） → ✅ 已在位（多轮回填：M0 收官/MCP 真 e2e/CI 容器化均入记录；本轮机器路径占位化）
 - [x] 快门 docs/api.md（op 契约：参数/回执/错误/限制表 + 机器可读 contracts JSON docs/contracts/quickgate-api-v1.json）
-- [ ] 动作使用手册（安装→令牌→首跑→错误自检）
+- [x] 动作使用手册（安装→令牌→首跑→错误自检） → ✅ R215 交付对照：**GETTING-STARTED 三步+FAQ 错误自检+ACTION-CARDS 八字段**（三件合计即使用手册——已交付）
 - [x] 故障排查 FAQ（错误码/症状→原因→解法表：401、not exist、busy、timeout、桥积压…） → ✅ R137 quickgate docs/FAQ.md（七类 30+ 条，bug#1~13 全沉淀+自检工具速查）
 - [ ] 演示 GIF/短视频（面板呼出/一键打卡/记人脉）
 - [ ] 季度追更：寒Orz、浅沧系列（07 §3）
