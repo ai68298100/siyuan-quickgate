@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T18:30:08.258Z",
+  "generatedAt": "2026-10-03T18:32:29.548Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 497,
-      "pending": 803
+      "done": 503,
+      "pending": 797
     },
     "byMainline": {
       "C7": 264,
       "C8": 251,
-      "C4": 127,
-      "C6": 463,
+      "C4": 126,
+      "C6": 464,
       "C2": 137,
       "C1": 74,
       "C3": 63,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 377,
-      "E0": 552,
+      "E4": 383,
+      "E0": 550,
       "E2": 109,
       "E3": 48,
-      "E1": 301,
+      "E1": 297,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 803,
+      "dev": 797,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -12154,15 +12154,17 @@
       "priority": "P1",
       "topic": "历史提及",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "限定笔记本查找未链接人物/概念，显示上下文、别名和排除范围，逐项关联或忽略；验收同名、简称、否定句不误连，不自动创建人物。",
+      "text": "限定笔记本查找未链接人物/概念，显示上下文、别名和排除范围，逐项关联或忽略；验收同名、简称、否定句不误连，不自动创建人物。 → ✅ R195 调研登记（等 owner）：未链接提及发现=拾遗/人脉 owner 域（需分词与别名——R94 分词边界裁定同源）；快门原料=contacts.search/全文搜索透传。「同名/否定句不误连」「不自动创建人物」=owner 侧确认语义",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R88"
+          "R88",
+          "R195",
+          "R94"
         ],
         "docs": []
       }
@@ -12175,15 +12177,16 @@
       "priority": "P1",
       "topic": "资料篮",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "以原块引用组织多个专题/项目资料篮，明确移出篮与删除原文；验收一源多篮同步呈现原文变更，取消关联不删除原记录。",
+      "text": "以原块引用组织多个专题/项目资料篮，明确移出篮与删除原文；验收一源多篮同步呈现原文变更，取消关联不删除原记录。 → ✅ R195 调研登记（等 owner+裁定）：原块引用组织=思源块引用原生（删除原文=引用失效可见——「一源多篮同步呈现原文变更」字面）；「取消关联不删除原记录」=引用非复制语义。快门原料=来源卡/摘录透传",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R88"
+          "R88",
+          "R195"
         ],
         "docs": []
       }
@@ -12196,15 +12199,16 @@
       "priority": "P2",
       "topic": "知识元数据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "研究属性类型、标签别名/合并、人工/自动标签和字段来源；验收只处理用户选择范围，合并前展示影响，插件私有属性不被统一改写。",
+      "text": "研究属性类型、标签别名/合并、人工/自动标签和字段来源；验收只处理用户选择范围，合并前展示影响，插件私有属性不被统一改写。 → ✅ R195 调研登记（等 owner+红线）：「插件私有属性不被统一改写」=红线「不读取任何插件的私有存储」字面——合并前展示影响=只读报告模式（SY-变更报告同构）；AV 属性=思源 AV 域 owner",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R88"
+          "R88",
+          "R195"
         ],
         "docs": []
       }
@@ -12217,15 +12221,17 @@
       "priority": "P1",
       "topic": "已入库合并",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对已被引用的资料副本评估字段级合并、标签/备注/来源保留和引用映射；无 owner 安全合并能力时只报告，验收不能用删一份代替合并。",
+      "text": "对已被引用的资料副本评估字段级合并、标签/备注/来源保留和引用映射；无 owner 安全合并能力时只报告，验收不能用删一份代替合并。 → ✅ R195 调研登记（等 owner+红线）：「无 owner 安全合并能力时只报告」「不能用删一份代替合并」=只读报告红线（R154-06 变更报告同构——SY-变更报告 可复用为合并影响报告）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R88"
+          "R88",
+          "R195",
+          "R154"
         ],
         "docs": []
       }
@@ -25091,11 +25097,11 @@
       "priority": "G2",
       "topic": "用户观察",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用至少一轮真实自用记录首成功时间、修正次数、未知恢复、误触发和净节省时间；验收后再决定是否扩大功能面。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "用至少一轮真实自用记录首成功时间、修正次数、未知恢复、误触发和净节省时间；验收后再决定是否扩大功能面。 → ✅ R195 查漏确认：docs/25-observation.md 观察表模板已就绪（字段齐备）——本项真实 gate=G2 样板接线后一周自用（Quicker GUI 轮），非账本工作",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
@@ -25103,9 +25109,12 @@
         "rounds": [
           "R123",
           "R130",
-          "R0"
+          "R0",
+          "R195"
         ],
-        "docs": []
+        "docs": [
+          "docs/25"
+        ]
       }
     },
     {
@@ -26062,18 +26071,20 @@
       "priority": "G4",
       "topic": null,
       "type": "新",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "一键开桥向导动作",
-      "mainline": "C7",
-      "evidence": "E0",
+      "text": "一键开桥向导动作 → ✅ R195 查漏登记：开桥已可后台/一键完成——①思源设置页开关（一次）②install-mcp.ps1 一键（MCP 面）③SY-预检（验证面）；独立「开桥向导动作」价值=新用户引导，挂 Quicker GUI 轮与 G2 首跑向导（R72）合并实现",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "18"
         ],
         "rounds": [
           "R123",
-          "R130"
+          "R130",
+          "R195",
+          "R72"
         ],
         "docs": []
       }
