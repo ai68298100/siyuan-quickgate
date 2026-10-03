@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T17:05:31.914Z",
+  "generatedAt": "2026-10-03T17:07:16.192Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
@@ -29705,7 +29705,7 @@
       "type": "评估",
       "status": "done",
       "blockedBy": null,
-      "text": "研究来源卡：把当前标签页的 URL、标题、时间、页面版本、关键摘录和原始字段写入思源来源卡。验收：页面失效后摘录仍可读，正文、摘录和推断分层，重复 URL 提示新版本。 → ✅ R149 调研登记（E2，契约对齐）：来源卡 schema 直接复用**证据信封契约**（docs/contracts/evidence-envelope）——{claims:[{text,evidence,sources:[{type:\"external\",id:url,version:页面时间}]}], truncated, sensitivity:\"contains-external\", generatedBy:{entry,·}}——R152-04 的「正文/摘录/推断分层」=claims 与原文分块存储，「页面失效后摘录仍可读」=摘录全文入卡而非仅引用，「重复 URL 提示新版本」=sources[].version（抓取时间戳）比对。**落地路径**：g2-capture 扩展版（加 URL/标题/版本字段，摘录分块）——挂浏览器扩展实测轮后实施。**缺口**：页面版本指纹（content-hash）方案待定（整页 hash vs 正文 hash）",
+      "text": "研究来源卡：把当前标签页的 URL、标题、时间、页面版本、关键摘录和原始字段写入思源来源卡。验收：页面失效后摘录仍可读，正文、摘录和推断分层，重复 URL 提示新版本。 → ✅ R149 调研登记（E2，契约对齐）：来源卡 schema 直接复用**证据信封契约**（docs/contracts/evidence-envelope）——{claims:[{text,evidence,sources:[{type:\"external\",id:url,version:页面时间}]}], truncated, sensitivity:\"contains-external\", generatedBy:{entry,·}}——R152-04 的「正文/摘录/推断分层」=claims 与原文分块存储，「页面失效后摘录仍可读」=摘录全文入卡而非仅引用，「重复 URL 提示新版本」=sources[].version（抓取时间戳）比对。**落地路径**：g2-capture 扩展版（加 URL/标题/版本字段，摘录分块）——挂浏览器扩展实测轮后实施。**缺口**：页面版本指纹（content-hash）方案待定（整页 hash vs 正文 hash）；**R150 落地件已开发**：SY-研究来源卡.cs（三层分卡+MD5 内容指纹裁定摘录 hash 方案+重复 URL 不阻断提示，21 脚本编译门过；浏览器 URL 自动传入挂扩展轮）",
       "mainline": "C7",
       "evidence": "E4",
       "refs": {
@@ -29715,7 +29715,8 @@
         "rounds": [
           "R151",
           "R160",
-          "R149"
+          "R149",
+          "R150"
         ],
         "docs": []
       }
