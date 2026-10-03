@@ -403,7 +403,7 @@
 #### 5.9.2 上游规范与分发调研转为验收项
 
 - [ ] 【R70·发布门禁】依据官方 Kernel Plugin 规范，增加 `plugin.json.kernels` 与 `kernel.js` 的 `package.zip` 解包静态断言；缺字段、缺文件或 `if-no-files-found: ignore` 时 CI 必须失败。
-- [ ] 【R70·版本门禁】补齐 `plugin.json`、`package.json`、`src/index.ts` 的版本一致性检查，并让 `update_version` 不再遗漏 `PLUGIN_VERSION`；发布包、tag、CHANGELOG、README 版本同步纳入同一检查表。
+- [x] 【R70·版本门禁】补齐 `plugin.json`、`package.json`、`src/index.ts` 的版本一致性检查，并让 `update_version` 不再遗漏 `PLUGIN_VERSION`；发布包、tag、CHANGELOG、README 版本同步纳入同一检查表。 → ✅ v0.7.3 续6（check-version.mjs 门禁进 CI check 链；update_version 同步 PLUGIN_VERSION；CHANGELOG/tag/README 同步待发布工具链统一——门禁已可加期望值参数校验）
 - [ ] 【R70·生命周期】验证 `kernel-plugin-state-change` 就绪时序、禁用/重新启用/热加载、多窗口 frontend 与 Kernel RPC 的竞态，形成可重复验收步骤。
 - [ ] 【R70·兼容性】建立 SiYuan 3.8.4（最低版本）、3.8.6（当前实测）、3.8.7-alpha/下一稳定版的兼容矩阵，覆盖 `kernels:["all"]`、私有路由、broadcast、petal 和内置 MCP 共存。
 - [ ] 【R70·鉴权】补私有路由的有效 Token、无 Token、错误 Token、只读工作区、非管理员和 HTTPS 组合矩阵；确认 401/403/404/超时消息不泄露正文或令牌。

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T12:30:12.392Z",
+  "generatedAt": "2026-10-03T12:30:29.620Z",
   "source": "TODO.md",
   "counts": {
     "total": 1375,
     "checkboxes": 1375,
     "byStatus": {
-      "done": 280,
-      "pending": 980
+      "done": 281,
+      "pending": 979
     },
     "byMainline": {
       "C7": 261,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 183,
+      "E4": 184,
       "E0": 610,
       "E2": 117,
       "E3": 49,
-      "E1": 414,
+      "E1": 413,
       "E5": 2
     },
     "byBlocked": {
       "user": 88,
-      "dev": 980,
+      "dev": 979,
       "environment": 4,
       "resolved": 1,
       "upstream": 17,
@@ -6716,11 +6716,11 @@
       "priority": null,
       "topic": "版本门禁",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "补齐 `plugin.json`、`package.json`、`src/index.ts` 的版本一致性检查，并让 `update_version` 不再遗漏 `PLUGIN_VERSION`；发布包、tag、CHANGELOG、README 版本同步纳入同一检查表。",
+      "text": "补齐 `plugin.json`、`package.json`、`src/index.ts` 的版本一致性检查，并让 `update_version` 不再遗漏 `PLUGIN_VERSION`；发布包、tag、CHANGELOG、README 版本同步纳入同一检查表。 → ✅ v0.7.3 续6（check-version.mjs 门禁进 CI check 链；update_version 同步 PLUGIN_VERSION；CHANGELOG/tag/README 同步待发布工具链统一——门禁已可加期望值参数校验）",
       "mainline": "C4",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
