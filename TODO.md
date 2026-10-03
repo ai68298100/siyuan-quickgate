@@ -412,11 +412,11 @@
 
 #### 5.9.1 状态与文档边界
 
-- [ ] 【R69·账本】建立“设计仓库 `quicksrer 动作` ↔ 实现仓库 `siyuan-quickgate`”映射表：记录实现仓库路径、分支、tag、当前版本和权威文件，避免把两个仓库的统计混在一起。
+- [x] 【R69·账本】建立“设计仓库 `quicksrer 动作` ↔ 实现仓库 `siyuan-quickgate`”映射表：记录实现仓库路径、分支、tag、当前版本和权威文件，避免把两个仓库的统计混在一起。 → ✅ R218 交付 **docs/REPO-MAP.md**（仓库映射/权威文档映射/版本锚点三表——随版本更新）
 - [ ] 【R69·文档】刷新根 `README.md` 的状态头、版本、单测数、待办数、内核版本和默认端口到 R68/v0.7.1/3.8.6；旧 1568 只保留在历史更正说明中。
-- [ ] 【R69·文档】重写或明确标注 `docs/09-本轮审查与收敛建议.md` 的 230 项/“无源码无 CI”内容为历史快照，并补当前 v0.7.1 实现仓库证据。
-- [ ] 【R69·文档】同步 `docs/13-版本与发布策略.md`、`quicker-actions/README.md`、`quicker-actions/reference/README.md` 的版本线、导出状态和六件参考件边界。
-- [ ] 【R69·文档】同步实现仓库 `docs/PROGRESS.md`、`docs/ROADMAP.md`、`docs/WALKTHROUGH.md` 到 v0.7.1/R68/3.8.6：明确内核路由与 `registry.list` 冒烟已通过，③桥端到端、v1.5 延迟、⑪真实打卡仍待用户开桥/给数据。
+- [x] 【R69·文档】重写或明确标注 `docs/09-本轮审查与收敛建议.md` 的 230 项/“无源码无 CI”内容为历史快照，并补当前 v0.7.1 实现仓库证据。 → ✅ R218 docs/09 头部加历史快照声明（过时表述已过时标注+指向 REPO-MAP）
+- [x] 【R69·文档】同步 `docs/13-版本与发布策略.md`、`quicker-actions/README.md`、`quicker-actions/reference/README.md` 的版本线、导出状态和六件参考件边界。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）
+- [x] 【R69·文档】同步实现仓库 `docs/PROGRESS.md`、`docs/ROADMAP.md`、`docs/WALKTHROUGH.md` 到 v0.7.1/R68/3.8.6：明确内核路由与 `registry.list` 冒烟已通过，③桥端到端、v1.5 延迟、⑪真实打卡仍待用户开桥/给数据。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）
 - [ ] 【R69·口径】清理 TODO 内部过期勾选和措辞（spike③、v1.5、spike⑩、registry frontend、雷切 0.44 等），重新按实际复核结果计算总项数；把“代理→内核路由冒烟通过”和“Claude/Cursor 真 MCP host 完整会话未验”分开记录，禁止把后者写成已完成。
 - [ ] 【R69·契约】以 `src/ops.ts`、实现和 contracts JSON 为单一核对基准，刷新 `docs/api.md` 中 events/workflow 的 design/unsupported 旧描述、`source` 字段说明和三通道回退语义。
 

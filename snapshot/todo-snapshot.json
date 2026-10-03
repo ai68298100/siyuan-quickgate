@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T19:23:45.157Z",
+  "generatedAt": "2026-10-03T19:27:03.218Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 1127,
-      "pending": 193
+      "done": 1131,
+      "pending": 189
     },
     "byMainline": {
       "C7": 277,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 989,
-      "E0": 260,
+      "E4": 993,
+      "E0": 256,
       "E2": 81,
       "E3": 30,
       "E1": 28,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 61,
-      "dev": 193,
+      "dev": 189,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -6879,16 +6879,17 @@
       "priority": null,
       "topic": "账本",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立“设计仓库 `quicksrer 动作` ↔ 实现仓库 `siyuan-quickgate`”映射表：记录实现仓库路径、分支、tag、当前版本和权威文件，避免把两个仓库的统计混在一起。",
+      "text": "建立“设计仓库 `quicksrer 动作` ↔ 实现仓库 `siyuan-quickgate`”映射表：记录实现仓库路径、分支、tag、当前版本和权威文件，避免把两个仓库的统计混在一起。 → ✅ R218 交付 **docs/REPO-MAP.md**（仓库映射/权威文档映射/版本锚点三表——随版本更新）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R218"
         ],
         "docs": []
       }
@@ -6923,16 +6924,17 @@
       "priority": null,
       "topic": "文档",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "重写或明确标注 `docs/09-本轮审查与收敛建议.md` 的 230 项/“无源码无 CI”内容为历史快照，并补当前 v0.7.1 实现仓库证据。",
+      "text": "重写或明确标注 `docs/09-本轮审查与收敛建议.md` 的 230 项/“无源码无 CI”内容为历史快照，并补当前 v0.7.1 实现仓库证据。 → ✅ R218 docs/09 头部加历史快照声明（过时表述已过时标注+指向 REPO-MAP）",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R218"
         ],
         "docs": [
           "docs/09"
@@ -6947,16 +6949,17 @@
       "priority": null,
       "topic": "文档",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "同步 `docs/13-版本与发布策略.md`、`quicker-actions/README.md`、`quicker-actions/reference/README.md` 的版本线、导出状态和六件参考件边界。",
+      "text": "同步 `docs/13-版本与发布策略.md`、`quicker-actions/README.md`、`quicker-actions/reference/README.md` 的版本线、导出状态和六件参考件边界。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R218"
         ],
         "docs": [
           "docs/13"
@@ -6971,18 +6974,21 @@
       "priority": null,
       "topic": "文档",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "同步实现仓库 `docs/PROGRESS.md`、`docs/ROADMAP.md`、`docs/WALKTHROUGH.md` 到 v0.7.1/R68/3.8.6：明确内核路由与 `registry.list` 冒烟已通过，③桥端到端、v1.5 延迟、⑪真实打卡仍待用户开桥/给数据。",
+      "text": "同步实现仓库 `docs/PROGRESS.md`、`docs/ROADMAP.md`、`docs/WALKTHROUGH.md` 到 v0.7.1/R68/3.8.6：明确内核路由与 `registry.list` 冒烟已通过，③桥端到端、v1.5 延迟、⑪真实打卡仍待用户开桥/给数据。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R218"
         ],
-        "docs": []
+        "docs": [
+          "docs/13"
+        ]
       }
     },
     {
