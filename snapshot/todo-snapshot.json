@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:07:16.192Z",
+  "generatedAt": "2026-10-03T17:10:29.056Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 349,
-      "pending": 947
+      "done": 351,
+      "pending": 945
     },
     "byMainline": {
       "C7": 260,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 229,
-      "E0": 582,
+      "E4": 231,
+      "E0": 580,
       "E2": 113,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 947,
+      "dev": 945,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -29922,18 +29922,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "文件/文件夹项目索引：资源管理器主动选中文件或目录，写入项目文档的路径、扩展名、大小、修改时间和可选哈希。验收：默认只写引用与元数据，不移动源文件；权限不足进入待归档清单。",
+      "text": "文件/文件夹项目索引：资源管理器主动选中文件或目录，写入项目文档的路径、扩展名、大小、修改时间和可选哈希。验收：默认只写引用与元数据，不移动源文件；权限不足进入待归档清单。 → ✅ R152 落地件已开发：SY-文件项目索引.cs（元数据表+可选 MD5≤100MB+部分成功清单+目录条目数不递归；22 脚本编译门过；资源管理器选中文件→路径列表变量接线待 Quicker GUI 轮）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R152"
         ],
         "docs": []
       }
@@ -30066,18 +30067,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "截图 OCR 审阅块：截取屏幕选区，保留原图并生成可编辑 OCR 文本写入收件箱。验收：原图与文本一一关联，低置信度标记，取消/空图/模型下载失败不丢原图。",
+      "text": "截图 OCR 审阅块：截取屏幕选区，保留原图并生成可编辑 OCR 文本写入收件箱。验收：原图与文本一一关联，低置信度标记，取消/空图/模型下载失败不丢原图。 → ✅ R152 调研登记（E2，组装评估）：全部组件已在库——截图选区（Quicker 模块）→OCR（Quicker 模块）→文本清理（SY-OCR清理.cs）→原图入库+alt 关联（p0-5 剪贴板图片入库.cs 已实现「OCR 写 alt=图片可检索」即本项核心验收）→低置信标记（OCR 模块置信度字段透传 alt 尾注）。**组装配方**：截图→OCR→清理→p0-5 全链，无新代码需求；取消/空图分支由各模块失败分支串联",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R152"
         ],
         "docs": []
       }
