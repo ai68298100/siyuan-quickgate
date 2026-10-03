@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:43:15.136Z",
+  "generatedAt": "2026-10-03T17:45:25.581Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 398,
-      "pending": 898
+      "done": 401,
+      "pending": 895
     },
     "byMainline": {
       "C7": 260,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 278,
+      "E4": 281,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 383,
+      "E1": 380,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 898,
+      "dev": 895,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -19705,19 +19705,21 @@
       "priority": "P0",
       "topic": "生成提示模板",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为每个快门动作提供“用户结果、输入、输出、目标、约束、错误、回执、版本”的 AI 提示模板；验收不只描述“帮我做一个动作”。",
+      "text": "为每个快门动作提供“用户结果、输入、输出、目标、约束、错误、回执、版本”的 AI 提示模板；验收不只描述“帮我做一个动作”。 → ✅ R165 交付 **docs/03 附A.1**：结构化八字段模板（用户结果/输入/输出/目标/约束/错误/回执/版本）——现有 P0-1~P0-5 提示词即该结构实例",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R165"
         ],
         "docs": [
-          "10-"
+          "10-",
+          "docs/03"
         ]
       }
     },
@@ -19801,16 +19803,17 @@
       "priority": "P0",
       "topic": "暂存隔离",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 新建动作默认进入暂存区，显示暂存 ID、来源对话、生成时间和草稿状态；验收未“保留到场景”前不出现在稳定动作目录。",
+      "text": "AI 新建动作默认进入暂存区，显示暂存 ID、来源对话、生成时间和草稿状态；验收未“保留到场景”前不出现在稳定动作目录。 → ✅ R165 附A.1 暂存隔离=Quicker 原生暂存区能力（与本仓库 reference+.qa 分发天然兼容）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R165"
         ],
         "docs": [
           "10-"
@@ -19873,16 +19876,17 @@
       "priority": "P1",
       "topic": "模块幻觉",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立不存在模块、过期模块、V1/V2 不兼容模块和参数名错误的样本；验收 AI 生成错误能被静态门禁捕获而不是运行时才暴露。",
+      "text": "建立不存在模块、过期模块、V1/V2 不兼容模块和参数名错误的样本；验收 AI 生成错误能被静态门禁捕获而不是运行时才暴露。 → ✅ R165 附A.1 模块幻觉门=csc 编译门静态验证（27 脚本运行先例；编译期暴露而非运行时）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R106",
-          "R113"
+          "R113",
+          "R165"
         ],
         "docs": [
           "10-"
