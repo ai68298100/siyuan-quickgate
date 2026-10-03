@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-03T17:12:27.848Z",
+  "generatedAt": "2026-10-03T17:15:40.006Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 353,
-      "pending": 943
+      "done": 355,
+      "pending": 941
     },
     "byMainline": {
-      "C7": 261,
+      "C7": 262,
       "C8": 259,
-      "C4": 132,
+      "C4": 131,
       "C6": 455,
       "C2": 135,
       "C1": 72,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 233,
-      "E0": 579,
+      "E4": 235,
+      "E0": 577,
       "E2": 112,
       "E3": 49,
       "E1": 413,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 943,
+      "dev": 941,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -28018,18 +28018,19 @@
       "priority": "G2",
       "topic": "宿主承载决策",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "比较思源自定义 Tab、Dock、Dialog 和移动页的宽度、生命周期与返回路径，形成容器选择记录；验收五个主导航可在桌面和窄面板访问，不以独立网页假设替代插件内原型。",
+      "text": "比较思源自定义 Tab、Dock、Dialog 和移动页的宽度、生命周期与返回路径，形成容器选择记录；验收五个主导航可在桌面和窄面板访问，不以独立网页假设替代插件内原型。 → ✅ R154 调研登记（E2，容器决策记录）：快门承载=**Dialog 单容器**（设置面板 Dialog、最近回执 Dialog 680px、审计导出确认 Dialog）+ showMessage 轻提示；**Dock/Tab 不用**（快门无常驻面板需求——外部网关定位，UI 面最小化）；移动页不用（桥默认关+isMobileGuard）。返回路径=Dialog 自带遮罩关闭。「五主导航可窄面板访问」验收对快门 N/A（登记为最小 UI 面裁定）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "20"
         ],
         "rounds": [
           "R150",
-          "R2"
+          "R2",
+          "R154"
         ],
         "docs": []
       }
@@ -28042,18 +28043,19 @@
       "priority": "G2",
       "topic": "界面技术边界",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "核对当前 b3 DOM 设置实际入口与未接入的 Svelte 辅助组件，决定保留/复用范围和迁移接缝；验收不重复维护两套设置事实，组件样例不会被当作运行时实现证据。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "核对当前 b3 DOM 设置实际入口与未接入的 Svelte 辅助组件，决定保留/复用范围和迁移接缝；验收不重复维护两套设置事实，组件样例不会被当作运行时实现证据。 → ✅ R154 调研登记+清理（E2 实证）：**唯一设置事实=b3 DOM 直绘**（index.ts 20 处 b3- 类 + SDK Dialog 三类：设置面板/最近回执/审计导出确认）；模板遗留 src/libs/ Svelte 助手**零引用零进产物**——已整目录删除（同 api.ts 死代码先例），124 单测/构建全过。「两套设置事实」风险不存在；迁移接缝=无",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "20"
         ],
         "rounds": [
           "R150",
-          "R1"
+          "R1",
+          "R154"
         ],
         "docs": []
       }
