@@ -2,6 +2,15 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-03 · v0.7.3（R69 池清账八处修复 + 真机批 10/10 全绿 + bug#11/12/13）
+
+- R69/R70 池清账 13 条：超时重复派发、workflow 单步超时、外层超时竞争、events.pull 双路径、过期信封台账、诊断包统计、广播订阅创建、事件订阅生命周期、plugin.api args 契约、single-flight、死代码 api.ts 删除、版本门禁 check-version.mjs
+- **真机批**（思源全自动重启×4 + 部署）：verify:restart **10/10**——③桥 289ms/⑩路由/MCP 路由 621ms/**⑪事件物化闭环**（checkin.record→events.ndjson→events.pull 11ms）/**v1.5 快路径 146ms**/MCP 冒烟 6/6
+- **bug#11** 信封不完整行凭 id 逃过压缩（真机 33 条重复回执）→ compactCommands 按信封完整性分类
+- **bug#12** 3.8.6 缺失文件返回 HTTP 202+错误信封 → getFileText 正文识别
+- **bug#13** vite CJS JSON 动态 import 裸 require 渲染进程必炸（前端 manifest 路径长期潜伏）→ 静态 import 内联，chunk 消除
+- 114 单测（+8）；版本门禁进 CI check 链；PLUGIN_VERSION 三处一致性
+
 ## 2026-10-03 · v0.7.2（bug#10：广播订阅断连自愈）
 
 - 退避上限 5s + MCP 快路径 3s 无回执同 id NDJSON 补发（预留语义防双执行）；99 单测
