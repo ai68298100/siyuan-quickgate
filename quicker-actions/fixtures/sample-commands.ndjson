@@ -1,0 +1,4 @@
+{"v":1,"id":"fx-capture-1","op":"checkin.record","args":{"itemId":"item-mu4sy296-syjkx3r","value":100},"createdAt":"2026-10-04T00:00:00.000Z","ttlMs":60000}
+{"v":1,"id":"fx-capture-2","op":"checkin.record","args":{},"createdAt":"2026-10-04T00:00:01.000Z","ttlMs":60000}
+{"v":1,"id":"fx-empty","op":"doc.open","args":{},"createdAt":"2026-10-04T00:00:02.000Z","ttlMs":60000}
+{"v":1,"id":"fx-past","op":"bridge.ping","args":{},"createdAt":"2025-01-01T00:00:00.000Z","ttlMs":1000}
