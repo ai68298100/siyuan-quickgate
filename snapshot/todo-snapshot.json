@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:34:50.378Z",
+  "generatedAt": "2026-10-03T17:36:50.566Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 368,
-      "pending": 928
+      "done": 370,
+      "pending": 926
     },
     "byMainline": {
       "C7": 260,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 248,
+      "E4": 250,
       "E0": 564,
       "E2": 112,
       "E3": 49,
-      "E1": 413,
+      "E1": 411,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 928,
+      "dev": 926,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -18433,15 +18433,16 @@
       "priority": "P0",
       "topic": "动作结果卡",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个 Quicker 动作先写用户任务、触发入口、输入、输出、写入 owner、成功证据、失败恢复和手动替代；验收用户不看模块名也能判断是否适合自己。",
+      "text": "每个 Quicker 动作先写用户任务、触发入口、输入、输出、写入 owner、成功证据、失败恢复和手动替代；验收用户不看模块名也能判断是否适合自己。 → ✅ R161 交付 **quicker-actions/ACTION-CARDS.md**：七张用户动作卡（划词摘录/快速捕获/全局快查/打开日记/图片入库/汇总待办/数据体检）+ 子程序速查表——要素全齐（用户任务/触发/输入/输出/写入位置/成功证据/失败恢复/手动替代），素材源自参考件头注与 api.md",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R161"
         ],
         "docs": [
           "06-"
@@ -18686,15 +18687,16 @@
       "priority": "P0",
       "topic": "完成判据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分动作已调用、owner 已接受、业务已写入、结果可回读和用户已定位；验收 Quicker notify 不代替快门/业务回执证明。",
+      "text": "区分动作已调用、owner 已接受、业务已写入、结果可回读和用户已定位；验收 Quicker notify 不代替快门/业务回执证明。 → ✅ R161 调研登记（E2）：五级判据×回执语义映射表入 ACTION-CARDS.md 文末——1 调用=运行记录/2 owner 接受=回执 recorded/3 业务写入=回执 data/4 可回读=块链接/5 用户定位=跳转高亮；红线注「notify≠证据」",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R113"
+          "R113",
+          "R161"
         ],
         "docs": [
           "06-"
