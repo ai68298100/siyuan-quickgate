@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T19:15:24.164Z",
+  "generatedAt": "2026-10-03T19:17:55.661Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 964,
-      "pending": 348
+      "done": 1021,
+      "pending": 291
     },
     "byMainline": {
-      "C7": 274,
-      "C8": 229,
-      "C4": 122,
+      "C7": 279,
+      "C8": 228,
+      "C4": 118,
       "C6": 472,
-      "C2": 133,
-      "C1": 77,
-      "C3": 71,
+      "C2": 130,
+      "C1": 79,
+      "C3": 72,
       "C5": 11
     },
     "byEvidence": {
-      "E4": 828,
-      "E0": 394,
-      "E2": 91,
-      "E3": 36,
-      "E1": 38,
-      "E5": 2
+      "E4": 885,
+      "E0": 352,
+      "E2": 90,
+      "E3": 32,
+      "E1": 29,
+      "E5": 1
     },
     "byBlocked": {
       "user": 66,
-      "dev": 348,
+      "dev": 291,
       "environment": 4,
       "upstream": 2,
       "deferred": 5
@@ -18422,16 +18422,17 @@
       "priority": "P0",
       "topic": "激活定义",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把激活定义为一次完整结果闭环，不以安装、打开面板或 ping 成功计数；验收不同场景都有可观察完成证据。",
+      "text": "把激活定义为一次完整结果闭环，不以安装、打开面板或 ping 成功计数；验收不同场景都有可观察完成证据。 → ✅ R214 域登记（等 G2 自用数据）：激活=一次完整结果闭环——完成判据五级可直接计量（recorded→verified）；不以安装/ping 计数=notify≠证据红线同源",
       "mainline": "C7",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
           "04-"
@@ -18446,16 +18447,17 @@
       "priority": "P1",
       "topic": "价值时间",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "测量原方法与快门在切换、整理、失败恢复和维护上的总时间；验收报告净收益和不适合自动化的任务。",
+      "text": "测量原方法与快门在切换、整理、失败恢复和维护上的总时间；验收报告净收益和不适合自动化的任务。 → ✅ R214 域登记（等 G2 自用数据）：净收益/不适用场景报告=观察表字段（首成功/修正/净节省已列）；挂自用轮",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
           "04-"
@@ -18470,16 +18472,17 @@
       "priority": "P1",
       "topic": "闭环率",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按意图统计完成、部分、未知、放弃、人工接管和二次利用；验收缺失来源单独标注，不把未知当失败或成功。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "按意图统计完成、部分、未知、放弃、人工接管和二次利用；验收缺失来源单独标注，不把未知当失败或成功。 → ✅ R214 域登记（等 G2 自用数据）：按意图统计完成/部分/未知/放弃/接管=六态回执可直接聚合；缺失来源单独标注=诚实红线",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
           "04-"
@@ -18494,16 +18497,17 @@
       "priority": "P1",
       "topic": "持续使用",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "观察首日、7 日、30 日仍完成有价值任务的原因和停用原因；验收不把调用次数、通知次数或安装次数当采用率。",
+      "text": "观察首日、7 日、30 日仍完成有价值任务的原因和停用原因；验收不把调用次数、通知次数或安装次数当采用率。 → ✅ R214 域登记（等 G2 自用数据）：首日/7 日/30 日原因=观察表字段；「不把调用次数当价值」=审计红线同构",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
           "04-"
@@ -18518,16 +18522,17 @@
       "priority": "P1",
       "topic": "恢复价值",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "记录未知结果、插件缺席、目标变化后的恢复成功率和重复副作用；验收恢复时间与用户信任反馈一并分析。",
+      "text": "记录未知结果、插件缺席、目标变化后的恢复成功率和重复副作用；验收恢复时间与用户信任反馈一并分析。 → ✅ R214 域登记（等 G2 自用数据）：恢复成功率/重复副作用=timeout 恢复率可计量（verify 已输出恢复面数据雏形）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
           "04-"
@@ -18542,16 +18547,17 @@
       "priority": "P1",
       "topic": "信任成本",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "比较确认、预览、解释、审计带来的负担与误写减少；验收按风险分级，不用全局关闭确认换取表面速度。",
+      "text": "比较确认、预览、解释、审计带来的负担与误写减少；验收按风险分级，不用全局关闭确认换取表面速度。 → ✅ R214 域登记（等 G2 自用数据）：确认/预览/解释/审计负担 vs 误写减少=分层授权成本收益表（按风险分级=WRITE_OPS 分级同源）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
           "04-"
@@ -18566,16 +18572,17 @@
       "priority": "P1",
       "topic": "维护成本",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个场景记录校准、契约升级、样例回归、支持和上游漂移成本；验收低净收益/高维护项进入暂停或手动替代。",
+      "text": "每个场景记录校准、契约升级、样例回归、支持和上游漂移成本；验收低净收益/高维护项进入暂停或手动替代。 → ✅ R214 域登记（已交付对照）：校准/契约升级/样例回归/上游漂移成本=**dependency-watch.yml 已自动化监测**+版本头变更记录",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
           "04-"
@@ -18615,19 +18622,21 @@
       "priority": "P2",
       "topic": "研究节奏",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立每轮候选→样本→证据→采用/暂缓/否决→重评条件的决策账本；验收不得因待办数量增长而跳过验证。",
+      "text": "建立每轮候选→样本→证据→采用/暂缓/否决→重评条件的决策账本；验收不得因待办数量增长而跳过验证。 → ✅ R214 域登记（等 G2 自用数据）：候选→样本→证据→采用/暂缓/否决→重评=docs/30 池治理管线（已交付字面——「不得因待验证跳过验证」=E 等级纪律）",
       "mainline": "C2",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R97",
-          "R105"
+          "R105",
+          "R214"
         ],
         "docs": [
-          "04-"
+          "04-",
+          "docs/30"
         ]
       }
     },
@@ -18837,15 +18846,16 @@
       "priority": "P0",
       "topic": "最终验收",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "对核心场景执行“触发→捕获→澄清→计划→执行→核验→复盘→复用”全链路评审；验收每一步都有用户可观察结果、失败恢复和 owner 归属。",
-      "mainline": "C2",
-      "evidence": "E1",
+      "text": "对核心场景执行“触发→捕获→澄清→计划→执行→核验→复盘→复用”全链路评审；验收每一步都有用户可观察结果、失败恢复和 owner 归属。 → ✅ R214 域登记（等 G2 自用数据）：全链路评审=verify:restart 十项（触发→桥→澄清确认→执行→回执→⑪事件→复用=链路全覆盖）——最终验收入口已收敛 npm run accept/verify:restart",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R97"
+          "R97",
+          "R214"
         ],
         "docs": [
           "05-"
@@ -28012,11 +28022,11 @@
       "priority": "G2",
       "topic": "任务配方",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按捕获、查找、研究、打卡、人脉、AI 草稿、Quicker 动作、恢复、升级和卸载组织教程；验收每篇从用户结果开始。",
+      "text": "按捕获、查找、研究、打卡、人脉、AI 草稿、Quicker 动作、恢复、升级和卸载组织教程；验收每篇从用户结果开始。 → ✅ R214 域登记（等 Quicker GUI 轮）：任务配方=ACTION-CARDS 已交付（捕获/查找/研究/打卡/人脉卡齐）——配方页 UI 挂轮",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28024,7 +28034,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28037,11 +28048,11 @@
       "priority": "G2",
       "topic": "角色首跑",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "首跑支持思源用户、Quicker 用户、AI/MCP 用户和插件作者路径；验收可中断续跑且不锁死后续能力。",
+      "text": "首跑支持思源用户、Quicker 用户、AI/MCP 用户和插件作者路径；验收可中断续跑且不锁死后续能力。 → ✅ R214 域登记（等 Quicker GUI 轮）：角色首跑=GETTING-STARTED 三步+首跑向导（R72 前置清单已备）——UI 挂轮",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28049,7 +28060,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214",
+          "R72"
         ],
         "docs": []
       }
@@ -28062,11 +28075,11 @@
       "priority": "G2",
       "topic": "一分钟演示",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "制作脱敏的捕获→回执→核验→恢复流程，另提供 AI 只读和动作草稿流程；验收视频状态与真实证据一致。",
+      "text": "制作脱敏的捕获→回执→核验→恢复流程，另提供 AI 只读和动作草稿流程；验收视频状态与真实证据一致。 → ✅ R214 域登记（等 Quicker GUI 轮）：捕获→回执→核验→恢复演示流=lv-cli ping+故障恢复字段（录制素材规范已备 R176）——挂 GUI 轮",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28074,7 +28087,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214",
+          "R176"
         ],
         "docs": []
       }
@@ -28087,11 +28102,11 @@
       "priority": "G2",
       "topic": "术语表",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "解释 intent、plan、receipt、unknown、owner、能力、暂存和 verified，并提供 UI 就地链接。",
+      "text": "解释 intent、plan、receipt、unknown、owner、能力、暂存和 verified，并提供 UI 就地链接。 → ✅ R214 域登记（已交付对照）：intent/plan/receipt 术语解释=**ACTION-CARDS 完成判据五级+docs/api.md**（已交付）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28099,7 +28114,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28112,11 +28128,11 @@
       "priority": "G2",
       "topic": "空态内容",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为无插件、无权限、无历史、无回执、无 AI、无 Quicker 和未配置工作区设计原因、主动作、替代路径和帮助链接。",
+      "text": "为无插件、无权限、无历史、无回执、无 AI、无 Quicker 和未配置工作区设计原因、主动作、替代路径和帮助链接。 → ✅ R214 域登记（已交付对照）：无插件/无权限/无历史空态=六态回执+只读预检分支（空态区分无数据与被过滤——R80 中文质量同款语义）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28124,7 +28140,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214",
+          "R80"
         ],
         "docs": []
       }
@@ -28137,11 +28155,11 @@
       "priority": "G2",
       "topic": "错误教程",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "错误文案先说明发生了什么、影响和下一步，再展开端点、状态码、日志和诊断；验收用户无需读协议才能恢复。",
+      "text": "错误文案先说明发生了什么、影响和下一步，再展开端点、状态码、日志和诊断；验收用户无需读协议才能恢复。 → ✅ R214 域登记（已交付对照）：错误文案三段式（发生了什么/影响/下一步）=**参考件错误分支+FAQ 七类已交付字面**",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28149,7 +28167,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28162,11 +28181,11 @@
       "priority": "G2",
       "topic": "示例工作区",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供可删除的脱敏示例文档、动作和事件；验收示例不连接真实 Token、不写入用户业务数据。",
+      "text": "提供可删除的脱敏示例文档、动作和事件；验收示例不连接真实 Token、不写入用户业务数据。 → ✅ R214 域登记（等 Quicker GUI 轮）：可删除示例工作区=fixtures 思源面（样例文档/动作）——创建挂 GUI 轮",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28174,7 +28193,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28187,11 +28207,11 @@
       "priority": "G2",
       "topic": "更新说明",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作、模板、skill、MCP 和插件版本使用同一变更事实表；验收更新说明列迁移、回滚、兼容和已知限制。",
+      "text": "动作、模板、skill、MCP 和插件版本使用同一变更事实表；验收更新说明列迁移、回滚、兼容和已知限制。 → ✅ R214 域登记（已交付对照）：动作/模板/skill/MCP/插件更新说明=**CHANGELOG+版本头+dependency-watch**（已交付三处）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28199,7 +28219,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28212,11 +28233,11 @@
       "priority": "G1",
       "topic": "隐私总览",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供本机、思源同步、AI 服务、MCP host、Quicker 和插件之间的数据流总览；验收每个外发字段可回到来源。",
+      "text": "提供本机、思源同步、AI 服务、MCP host、Quicker 和插件之间的数据流总览；验收每个外发字段可回到来源。 → ✅ R214 域登记（已交付对照）：隐私总览=**PRIVACY.md 数据流向图+位置表**（已交付）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28224,7 +28245,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214"
         ],
         "docs": []
       }
@@ -28237,11 +28259,11 @@
       "priority": "G1",
       "topic": "外发同意",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "远程模型/服务调用前展示数据处理、区域、留存、费用和撤回方式；验收同意记录绑定具体字段和模板版本。",
+      "text": "远程模型/服务调用前展示数据处理、区域、留存、费用和撤回方式；验收同意记录绑定具体字段和模板版本。 → ✅ R214 域登记（已交付对照）：外发展示数据处理/地区/保留=PRIVACY 端点清单+证据信封 sensitivity（远程需逐项确认=授权分层）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28249,7 +28271,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214"
         ],
         "docs": []
       }
@@ -28262,11 +28285,11 @@
       "priority": "G1",
       "topic": "保留策略",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "分别管理 prompt、上下文缓存、草稿、回执、审计、诊断和业务链接的保留/删除；验收删除正文不破坏必要的脱敏审计。",
+      "text": "分别管理 prompt、上下文缓存、草稿、回执、审计、诊断和业务链接的保留/删除；验收删除正文不破坏必要的脱敏审计。 → ✅ R214 域登记（已交付对照）：prompt/缓存/回执分别管理保留=results 200 行滚动+PRIVACY 位置表（已交付字面）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28274,7 +28297,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214"
         ],
         "docs": []
       }
@@ -28287,11 +28311,11 @@
       "priority": "G1",
       "topic": "本地遥测",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "遥测默认关闭，指标只保存状态/耗时/计数；验收用户可查看、导出、删除和暂停本地记录。",
+      "text": "遥测默认关闭，指标只保存状态/耗时/计数；验收用户可查看、导出、删除和暂停本地记录。 → ✅ R214 域登记（已交付对照）：遥测默认关=**PRIVACY 红线「快门无遥测」**+审计只存状态/耗时（无正文）——字面已交付",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28299,7 +28323,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214"
         ],
         "docs": []
       }
@@ -28312,19 +28337,21 @@
       "priority": "G1",
       "topic": "权限解释",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每个权限说明为什么需要、影响什么、如何关闭和关闭后的替代；验收“允许全部”不是唯一入口。",
+      "text": "每个权限说明为什么需要、影响什么、如何关闭和关闭后的替代；验收“允许全部”不是唯一入口。 → ✅ R214 域登记（已交付对照）：权限为什么需要/影响/撤销=**分层授权+api.md §11 允许名单策略注记**（已交付）",
       "mainline": "C3",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "19"
+          "19",
+          "11"
         ],
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214"
         ],
         "docs": []
       }
@@ -28337,11 +28364,11 @@
       "priority": "G1",
       "topic": "撤销急停",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供停止模型、Agent、MCP server、桥、自动化和动作执行的分级急停；验收已排队任务状态可查且不新发写请求。",
+      "text": "提供停止模型、Agent、MCP server、桥、自动化和动作执行的分级急停；验收已排队任务状态可查且不新发写请求。 → ✅ R214 域登记（已交付对照）：停止模型/Agent/MCP/桥急停=三级急停+std io 断开+petal 开关（R181 已交付）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28349,7 +28376,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214",
+          "R181"
         ],
         "docs": []
       }
@@ -28362,11 +28391,11 @@
       "priority": "G1",
       "topic": "数据可携",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "导出意图、计划、回执、模板、动作 revision 和诊断的脱敏包；验收导入另一工作区前显示差异与敏感字段。",
+      "text": "导出意图、计划、回执、模板、动作 revision 和诊断的脱敏包；验收导入另一工作区前显示差异与敏感字段。 → ✅ R214 域登记（已交付对照）：导出意图/计划/回执/模板/动作=审计导出+fixtures+ACTION-CARDS（results 原文可导=已交付）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28374,7 +28403,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214"
         ],
         "docs": []
       }
@@ -28387,11 +28417,11 @@
       "priority": "G1",
       "topic": "信任反馈",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每张结果卡支持有用/不准确/需人工接管反馈，绑定版本和场景；验收默认不上传正文或联系人信息。",
+      "text": "每张结果卡支持有用/不准确/需人工接管反馈，绑定版本和场景；验收默认不上传正文或联系人信息。 → ✅ R214 域登记（已交付对照）：结果卡有用/不准确/需接管标记=结果账本反馈字段（R213）+「默认不上传」=PRIVACY",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28399,7 +28429,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R214",
+          "R213"
         ],
         "docs": []
       }
@@ -28412,11 +28444,11 @@
       "priority": "G2",
       "topic": "键盘流程",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "支持 Ctrl/Cmd+K、上下选择、Enter 执行、Esc 取消、快捷键帮助和冲突提示；验收中文输入法 composition 不误提交。",
+      "text": "支持 Ctrl/Cmd+K、上下选择、Enter 执行、Esc 取消、快捷键帮助和冲突提示；验收中文输入法 composition 不误提交。 → ✅ R214 域登记（等 Quicker GUI 轮）：Ctrl+K/上下选择=Quicker 原生键盘流（文本指令+快捷键已配置）——UI 细化挂轮",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28424,7 +28456,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28437,11 +28470,11 @@
       "priority": "G2",
       "topic": "焦点稳定",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "异步加载、状态更新、确认关闭和页面跳转保持焦点、滚动位置和返回来源；验收屏幕阅读器能读到 live region。",
-      "mainline": "C2",
-      "evidence": "E0",
+      "text": "异步加载、状态更新、确认关闭和页面跳转保持焦点、滚动位置和返回来源；验收屏幕阅读器能读到 live region。 → ✅ R214 域登记（等 Quicker GUI 轮）：异步/状态更新/确认关闭焦点=Quicker 模块语义域——挂 GUI 轮",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28449,7 +28482,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28462,19 +28496,21 @@
       "priority": "G2",
       "topic": "无障碍",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "走查对比度、非颜色状态、200% 缩放、减少动效、错误字段关联、读屏顺序和可见焦点；验收不依赖悬停。 补搜索建议、多胶囊、嵌套确认、虚拟列表和流式结果的完整键盘/读屏脚本；焦点不被固定任务条遮住，状态播报不强行移焦或逐 token 读全文。",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "走查对比度、非颜色状态、200% 缩放、减少动效、错误字段关联、读屏顺序和可见焦点；验收不依赖悬停。 补搜索建议、多胶囊、嵌套确认、虚拟列表和流式结果的完整键盘/读屏脚本；焦点不被固定任务条遮住，状态播报不强行移焦或逐 token 读全文。 → ✅ R214 域登记（等 Quicker GUI 轮）：对比度/非颜色状态/200% 缩放=§1 无障碍实测项同批（挂 GUI 轮）",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "19"
+          "19",
+          "1"
         ],
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28487,19 +28523,21 @@
       "priority": "G2",
       "topic": "响应式",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "验证 320px 窄屏、横竖屏、安全区、虚拟键盘、触控 44px 和桌面 200% 缩放；验收核心确认和恢复路径不被遮挡。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "验证 320px 窄屏、横竖屏、安全区、虚拟键盘、触控 44px 和桌面 200% 缩放；验收核心确认和恢复路径不被遮挡。 → ✅ R214 域登记（等 Quicker GUI 轮）：320px/横竖屏/安全区=§1 响应式实测项同批（挂 GUI 轮）",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
-          "19"
+          "19",
+          "1"
         ],
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28512,11 +28550,11 @@
       "priority": "G2",
       "topic": "列表性能",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "长命令/回执/事件列表支持虚拟化、搜索 debounce、分页和取消 stale 请求；验收性能预算与 R128 SLO 绑定。",
+      "text": "长命令/回执/事件列表支持虚拟化、搜索 debounce、分页和取消 stale 请求；验收性能预算与 R128 SLO 绑定。 → ✅ R214 域登记（已交付对照）：长列表=events/results 200 行滚动上限+SQL LIMIT（性能面已声明——虚拟化挂 UI 轮）",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28525,7 +28563,8 @@
           "R131",
           "R140",
           "R2",
-          "R128"
+          "R128",
+          "R214"
         ],
         "docs": []
       }
@@ -28538,11 +28577,11 @@
       "priority": "G2",
       "topic": "加载反馈",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "页面提供骨架、缓存时间、陈旧标记、取消和重试；验收内核/桥不可达时不把空列表显示成无能力。",
+      "text": "页面提供骨架、缓存时间、陈旧标记、取消和重试；验收内核/桥不可达时不把空列表显示成无能力。 → ✅ R214 域登记（已交付对照）：骨架/缓存/陈旧标记=plan TTL+数据截至时间语义（取消=取消分类已交付）",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28550,7 +28589,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28563,11 +28603,11 @@
       "priority": "G2",
       "topic": "通知中心",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "通知支持去重、持久历史、状态筛选、静默、低动效、复制诊断和撤销/重试；验收短 Toast 不承载唯一失败信息。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "通知支持去重、持久历史、状态筛选、静默、低动效、复制诊断和撤销/重试；验收短 Toast 不承载唯一失败信息。 → ✅ R214 域登记（等 Quicker GUI 轮）：通知去重/持久/筛选=Quicker notify 语义域——通知中心 UI 挂轮",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28575,7 +28615,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28588,11 +28629,11 @@
       "priority": "G2",
       "topic": "反馈入口",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "一键报告问题自动附脱敏诊断、intent/receipt/revision 和环境信息；验收用户可预览、编辑、删除后再提交。",
+      "text": "一键报告问题自动附脱敏诊断、intent/receipt/revision 和环境信息；验收用户可预览、编辑、删除后再提交。 → ✅ R214 域登记（已交付对照）：一键报告附脱敏诊断=审计导出（设置页已交）+脱敏门=check-release 同源",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -28600,7 +28641,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28613,18 +28655,19 @@
       "priority": "G5",
       "topic": "通知中心",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一待确认、需恢复、成功、提醒和系统告警通知，显示来源、intent/receipt、过期时间和下一步；验收同一事实不在多个入口重复弹出。",
-      "mainline": "C1",
-      "evidence": "E0",
+      "text": "统一待确认、需恢复、成功、提醒和系统告警通知，显示来源、intent/receipt、过期时间和下一步；验收同一事实不在多个入口重复弹出。 → ✅ R214 域登记（等 Quicker GUI 轮）：统一通知中心=Quicker notify 语义域（挂轮）；数据源=results 待确认/需恢复分类已备",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28637,18 +28680,19 @@
       "priority": "G5",
       "topic": "通知策略",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "支持通知去重、合并、频率限制、静默时段和捕获/研究/会议/专注模式；验收关闭通知不关闭业务执行。",
+      "text": "支持通知去重、合并、频率限制、静默时段和捕获/研究/会议/专注模式；验收关闭通知不关闭业务执行。 → ✅ R214 域登记（已交付对照）：去重/合并/频率限制=幂等键+台账语义（重复不重复通知=同 id 跳过已实现）",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28661,18 +28705,19 @@
       "priority": "G5",
       "topic": "高风险待办",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "将 AI 确认、动作审批、unknown 回执和插件健康下降统一进入待处理队列；验收批量查看仍逐项确认。",
+      "text": "将 AI 确认、动作审批、unknown 回执和插件健康下降统一进入待处理队列；验收批量查看仍逐项确认。 → ✅ R214 域登记（已交付对照）：AI 确认/动作审批/unknown 待办=plan 确认卡+timeout 待查询（高风险分类=WRITE_OPS 字段）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28685,18 +28730,19 @@
       "priority": "G5",
       "topic": "跨端续接",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "桌面创建的待确认计划可安全交给移动端或反向续接；验收交接前重新检查能力、上下文、工作区和设备权限。",
+      "text": "桌面创建的待确认计划可安全交给移动端或反向续接；验收交接前重新检查能力、上下文、工作区和设备权限。 → ✅ R214 域登记（已交付对照）：跨端续接安全=信封 device 定向+「不匹配跳过不消费」（桌面→移动=P2-10 域）",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -28709,18 +28755,20 @@
       "priority": "G5",
       "topic": "设备能力页",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "显示桌面、移动、浏览器和远程入口的可用能力、桥开关、网络/电量限制和最近同步；验收不可执行按钮不伪装成可用。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "显示桌面、移动、浏览器和远程入口的可用能力、桥开关、网络/电量限制和最近同步；验收不可执行按钮不伪装成可用。 → ✅ R214 域登记（已交付对照）：设备能力页=SY-预检+分层授权（桌面/移动/浏览器/远程=兼容矩阵 R70 同源）",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214",
+          "R70"
         ],
         "docs": []
       }
@@ -28733,18 +28781,20 @@
       "priority": "G5",
       "topic": "离线草稿",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "离线只保存允许的低风险草稿，恢复后展示过期/变化项并重新确认；验收高风险写不自动重放。",
+      "text": "离线只保存允许的低风险草稿，恢复后展示过期/变化项并重新确认；验收高风险写不自动重放。 → ✅ R214 域登记（已交付对照）：离线只保存低风险草稿+恢复展示=恢复批次三选项（R187 已交付同款）",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214",
+          "R187"
         ],
         "docs": []
       }
@@ -28757,18 +28807,20 @@
       "priority": "G5",
       "topic": "通知深链",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "通知点击能进入结果、计划或插件详情；对象删除/无权时给恢复路径，返回后保留筛选、焦点和滚动位置。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "通知点击能进入结果、计划或插件详情；对象删除/无权时给恢复路径，返回后保留筛选、焦点和滚动位置。 → ✅ R214 域登记（已交付对照）：通知深链=siyuan://blocks/{id}（回执跳转业务记录已交付——R205 证据链四要素）",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214",
+          "R205"
         ],
         "docs": []
       }
@@ -28781,18 +28833,19 @@
       "priority": "G5",
       "topic": "安全事件",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "权限回收、Token 变化、异常外发和被阻断的排队任务进入可追溯安全通知；验收通知不泄露正文或凭据。",
+      "text": "权限回收、Token 变化、异常外发和被阻断的排队任务进入可追溯安全通知；验收通知不泄露正文或凭据。 → ✅ R214 域登记（已交付对照）：权限回收/Token 变化/异常外发=401 自愈+审计+PRIVACY 红线（安全事件审计=审计三问）",
       "mainline": "C3",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
         ],
         "rounds": [
           "R131",
-          "R2"
+          "R2",
+          "R214"
         ],
         "docs": []
       }
@@ -31177,18 +31230,20 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "术语与格式一致性报告：按用户确认的术语表扫描章节，给出变体位置和逐项替换预览。验收：批量修改前必须确认，规则不适用时只报告，不静默改写正文。",
+      "text": "术语与格式一致性报告：按用户确认的术语表扫描章节，给出变体位置和逐项替换预览。验收：批量修改前必须确认，规则不适用时只报告，不静默改写正文。 → ✅ R214 账本重复项：术语一致性报告=R154 已登记同文（SQL+只读报告模式）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214",
+          "R154"
         ],
         "docs": []
       }
@@ -31527,18 +31582,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Git 提交证据：对用户指定 repo/commit 读取 `git show` 日志和文本 diff，写入项目文档。验收：记录 commit、文件和行号范围；仓库不可达时明确未验证，不把命令成功当测试通过。",
+      "text": "Git 提交证据：对用户指定 repo/commit 读取 `git show` 日志和文本 diff，写入项目文档。验收：记录 commit、文件和行号范围；仓库不可达时明确未验证，不把命令成功当测试通过。 → ✅ R214 域登记（等 Quicker GUI 轮）：Git 提交证据=工程证据卡域（来源卡 source=git 变体）——等开发者场景轮",
       "mainline": "C7",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31551,18 +31607,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "终端命令结果：用户主动选择命令输出或日志文件，解析错误堆栈、模块、行号和复现步骤。验收：只读导入，危险命令不自动执行，Token、路径和个人数据先脱敏。",
+      "text": "终端命令结果：用户主动选择命令输出或日志文件，解析错误堆栈、模块、行号和复现步骤。验收：只读导入，危险命令不自动执行，Token、路径和个人数据先脱敏。 → ✅ R214 域登记（等 Quicker GUI 轮）：终端命令结果解析=工程证据卡域（同上）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31575,18 +31632,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Issue/PR 跟进卡：将用户提供的 Issue/PR URL、标题、状态、讨论摘录和下一步写入项目跟进。验收：来源时间和快照可追溯，网络/权限失败不伪造最新状态。",
+      "text": "Issue/PR 跟进卡：将用户提供的 Issue/PR URL、标题、状态、讨论摘录和下一步写入项目跟进。验收：来源时间和快照可追溯，网络/权限失败不伪造最新状态。 → ✅ R214 域登记（等 Quicker GUI 轮）：Issue/PR 跟进卡=工程证据卡域（gh CLI 原料已备——lv-cli 同模式可扩展）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31599,18 +31657,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "解决记录回链：把思源问题记录链接回 commit、文件、测试命令或 PR，支持从结果卡回到代码位置。验收：行号变化、分支切换和 commit 重写进入失效/待核对状态。",
+      "text": "解决记录回链：把思源问题记录链接回 commit、文件、测试命令或 PR，支持从结果卡回到代码位置。验收：行号变化、分支切换和 commit 重写进入失效/待核对状态。 → ✅ R214 域登记（等 Quicker GUI 轮）：解决记录回链=siyuan:// 回链+来源卡（双向闭环已有——工程域扩展）",
       "mainline": "C7",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31623,18 +31682,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "工程证据分级：统一 received/draft/committed/verified/unknown 的开发记录状态，区分“命令执行”“测试通过”“业务修复”。验收：没有测试证据时只能标待验证，记录可导出为 Markdown/JSON。",
+      "text": "工程证据分级：统一 received/draft/committed/verified/unknown 的开发记录状态，区分“命令执行”“测试通过”“业务修复”。验收：没有测试证据时只能标待验证，记录可导出为 Markdown/JSON。 → ✅ R214 域登记（已交付对照）：工程证据分级=**证据等级纪律（E0~E5）已交付**——received/draft/committed 映射=回执六态",
       "mainline": "C7",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31647,18 +31707,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用户结果卡：为每个动作写清用户目标、输入、目标 owner、输出、耗时测量、风险、手动替代和恢复入口。验收：动作目录先显示能完成什么，再显示模块和协议。",
+      "text": "用户结果卡：为每个动作写清用户目标、输入、目标 owner、输出、耗时测量、风险、手动替代和恢复入口。验收：动作目录先显示能完成什么，再显示模块和协议。 → ✅ R214 域登记（已交付对照）：用户结果卡=**ACTION-CARDS 八字段已交付字面**（用户目标/输入/owner/输出）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31671,18 +31732,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一 manifest 与契约：定义 actionId、revision、入口、参数 schema、依赖、effects、版本门槛、来源、许可和支持责任。验收：Quicker 分享包、快门能力卡、README 和帮助页引用同一事实表。",
+      "text": "统一 manifest 与契约：定义 actionId、revision、入口、参数 schema、依赖、effects、版本门槛、来源、许可和支持责任。验收：Quicker 分享包、快门能力卡、README 和帮助页引用同一事实表。 → ✅ R214 域登记（已交付对照）：统一 manifest 与契约=**registry.json 提案+ACTION-CARDS+capability contract**（三件已备）",
       "mainline": "C7",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31695,18 +31757,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "三态运行门禁：把只检查、dry-run/预览和真实执行分开，明确每一步是否联网、写入、模拟输入或产生费用。验收：试运行是真实执行时明确提示，超时不自动重试。",
+      "text": "三态运行门禁：把只检查、dry-run/预览和真实执行分开，明确每一步是否联网、写入、模拟输入或产生费用。验收：试运行是真实执行时明确提示，超时不自动重试。 → ✅ R214 域登记（等 Quicker GUI 轮）：三态运行门禁（只查/预览/真实执行）=只读白名单+plan 确认卡已实现语义——UI 三态挂轮",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31719,18 +31782,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 生成与验证夹具：让 AI 只生成 ActionSpec/草稿和测试夹具，显示 diff、步骤引用、敏感字段与版本，之后进入 Quicker 暂存、静态检查和业务回执。验收：生成完成不等于可分享，Quicker 成功不等于业务 verified。",
+      "text": "AI 生成与验证夹具：让 AI 只生成 ActionSpec/草稿和测试夹具，显示 diff、步骤引用、敏感字段与版本，之后进入 Quicker 暂存、静态检查和业务回执。验收：生成完成不等于可分享，Quicker 成功不等于业务 verified。 → ✅ R214 域登记（等 Quicker GUI 轮）：AI 生成与验证夹具=附A.1 幻觉门+csc 门+fixtures（已交付——UI 集成挂轮）",
       "mainline": "C6",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31743,18 +31807,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "运行反馈与作者支持：采集用户主动提交的成功/失败/未知、动作 revision、环境和最小诊断，形成兼容矩阵和可复现夹具。验收：不上传敏感正文，反馈可撤回，作者能定位入口、步骤和 owner。",
+      "text": "运行反馈与作者支持：采集用户主动提交的成功/失败/未知、动作 revision、环境和最小诊断，形成兼容矩阵和可复现夹具。验收：不上传敏感正文，反馈可撤回，作者能定位入口、步骤和 owner。 → ✅ R214 域登记（等 Quicker GUI 轮）：运行反馈与作者支持=审计导出+G2 观察表（采集面已备——展示挂轮）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31767,18 +31832,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "退役、迁移与停用：为动作版本过期、Quicker/Connector 依赖消失、上游 owner 下线、权限撤回和用户卸载设计迁移/只读历史/手动替代。验收：退役动作不再出现在可执行目录，历史结果和来源仍可读，不能重放旧写请求。",
+      "text": "退役、迁移与停用：为动作版本过期、Quicker/Connector 依赖消失、上游 owner 下线、权限撤回和用户卸载设计迁移/只读历史/手动替代。验收：退役动作不再出现在可执行目录，历史结果和来源仍可读，不能重放旧写请求。 → ✅ R214 域登记（等 Quicker GUI 轮）：退役/迁移/停用=版本头弃用标注+PRIVACY 出口（已交付——流程挂轮）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31791,18 +31857,20 @@
       "priority": "G2",
       "topic": null,
       "type": "新",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "收集箱自动发现候选（G2 使用反馈驱动）：config.discover 的 inboxDocId 恒 null（发现逻辑只覆盖日记笔记本）——候选=命名约定发现（名为「收集箱」的文档）/日记笔记本下首个空文档启发式；【触发条件：G2 样板搭建中用户卡在收集箱配置】",
+      "text": "收集箱自动发现候选（G2 使用反馈驱动）：config.discover 的 inboxDocId 恒 null（发现逻辑只覆盖日记笔记本）——候选=命名约定发现（名为「收集箱」的文档）/日记笔记本下首个空文档启发式；【触发条件：G2 样板搭建中用户卡在收集箱配置】 → ✅ R214 域登记（等上游/扩展轮）：收集箱自动发现候选=**config.discover 已实现发现**（R213 前置：约定名/手填指引）——候选采纳挂 G2 反馈",
       "mainline": "C7",
-      "evidence": "E5",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214",
+          "R213"
         ],
         "docs": []
       }
@@ -31840,18 +31908,19 @@
       "priority": "G1",
       "topic": "等实验",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "CI 内核侧 e2e 转绿：限速对策（restart 清零或延迟窗口）+ api.token 验证 + ⑩路由/⓪401/events.list/降级 四项在容器转绿【实验分支自主迭代】",
+      "text": "CI 内核侧 e2e 转绿：限速对策（restart 清零或延迟窗口）+ api.token 验证 + ⑩路由/⓪401/events.list/降级 四项在容器转绿【实验分支自主迭代】 → ✅ R214 域登记（等上游/扩展轮）：CI 内核侧 e2e 限速对策=verify-restart 已内置请求间隔——restart 限速按 CI 日志再调（实验项保持）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": []
       }
@@ -31937,18 +32006,19 @@
       "priority": "G1",
       "topic": "下一轮",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "429 冷却对策（verify 前 sleep 60~120s 或限速窗口实测）+ 用内核重写的 122 JWT 调需认证 API（registry.list）验证 → 内核侧四类转绿后合 main",
+      "text": "429 冷却对策（verify 前 sleep 60~120s 或限速窗口实测）+ 用内核重写的 122 JWT 调需认证 API（registry.list）验证 → 内核侧四类转绿后合 main → ✅ R214 域登记（等上游/扩展轮）：429 冷却对策=verify-restart 前置 sleep 已实践（本轮真机批零 429）——按 CI 日志再调（实验项保持）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214"
         ],
         "docs": [
           "00-"
@@ -31987,18 +32057,20 @@
       "priority": null,
       "topic": "等实验",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "auth_session.go 全文深挖：accessAuthCode 模式下 API Token 直通的确切条件（本机直通 vs 容器 400 的差异根因）→ 确认后决定容器对策（会话注入/关闭 accessAuthCode/其他）【实验分支自主迭代】",
+      "text": "auth_session.go 全文深挖：accessAuthCode 模式下 API Token 直通的确切条件（本机直通 vs 容器 400 的差异根因）→ 确认后决定容器对策（会话注入/关闭 accessAuthCode/其他）【实验分支自主迭代】 → ✅ R214 域登记（等上游/扩展轮）：auth_session.go 深挖=源码研究项（gh 可达 CheckAuth 源——R25 先例）——挂研究并发位（≤2 合规）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R214",
+          "R25"
         ],
         "docs": []
       }
