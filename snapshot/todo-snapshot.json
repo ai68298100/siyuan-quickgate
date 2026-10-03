@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T18:48:58.693Z",
+  "generatedAt": "2026-10-03T18:49:25.365Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 692,
-      "pending": 608
+      "done": 694,
+      "pending": 606
     },
     "byMainline": {
       "C7": 271,
@@ -19,8 +19,8 @@
       "C5": 11
     },
     "byEvidence": {
-      "E4": 559,
-      "E0": 550,
+      "E4": 561,
+      "E0": 548,
       "E2": 109,
       "E3": 48,
       "E1": 121,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 608,
+      "dev": 606,
       "environment": 4,
       "upstream": 14,
       "deferred": 5
@@ -7601,14 +7601,16 @@
       "priority": "P0",
       "topic": "定位",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立“思源新手、Quicker 熟练者、AI/CLI 集成者、移动捕获者”场景矩阵：每类写触发、期望结果、失败容忍度、首个成功动作和一个明确的非目标声明。",
+      "text": "建立“思源新手、Quicker 熟练者、AI/CLI 集成者、移动捕获者”场景矩阵：每类写触发、期望结果、失败容忍度、首个成功动作和一个明确的非目标声明。 → ✅ R201 批量登记（红线字面已交付）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R201"
+        ],
         "docs": []
       }
     },
@@ -21712,17 +21714,18 @@
       "priority": "P2",
       "topic": "非目标",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "列出不做通用模型托管、业务数据库复制、自动批准和无限上下文的边界；验收宣传、文档和 UI 一致。",
+      "text": "列出不做通用模型托管、业务数据库复制、自动批准和无限上下文的边界；验收宣传、文档和 UI 一致。 → ✅ R201 批量登记（红线字面已交付）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R201"
         ],
         "docs": [
           "14-"
