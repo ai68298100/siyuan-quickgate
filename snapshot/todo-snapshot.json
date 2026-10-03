@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:58:07.142Z",
+  "generatedAt": "2026-10-03T18:01:59.384Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 422,
-      "pending": 875
+      "done": 423,
+      "pending": 874
     },
     "byMainline": {
       "C7": 260,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 302,
-      "E0": 565,
+      "E4": 303,
+      "E0": 564,
       "E2": 112,
       "E3": 49,
       "E1": 359,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 66,
-      "dev": 875,
+      "dev": 874,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -2159,15 +2159,16 @@
       "priority": null,
       "topic": null,
       "type": "新",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "p0-5 剪贴板图片入库加尺寸预检：>20MB 提示分片/压缩路径（当前 30s 超时兜底）；验收超限保留原剪贴板并给手动替代。（媒体域 R90-P1 体积限制缺口）",
+      "text": "p0-5 剪贴板图片入库加尺寸预检：>20MB 提示分片/压缩路径（当前 30s 超时兜底）；验收超限保留原剪贴板并给手动替代。（媒体域 R90-P1 体积限制缺口） → ✅ R172 当场解决：p0-5 加 >20MB 预检（保留原剪贴板+压缩/裁剪手动替代提示）——28 脚本编译门过",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
-          "R90"
+          "R90",
+          "R172"
         ],
         "docs": []
       }

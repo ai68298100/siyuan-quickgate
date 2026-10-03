@@ -48,6 +48,14 @@ public static void Exec(Quicker.Public.IStepContext context)
         png = ms.ToArray();
     }
 
+    // 尺寸预检（R90-P1 体积限制缺口）：>20MB 提示压缩/分片替代，不盲目上传等超时
+    if (png.Length > 20L * 1024 * 1024)
+    {
+        context.SetVarValue("是否成功", false);
+        context.SetVarValue("结果消息", "❌ 图片 " + FormatSize(png.Length) + " 超过 20MB——请先压缩或裁剪后重试（大图直接上传会超时）");
+        return;
+    }
+
     // ②multipart 上传（file + assetDir 两字段，思源要求 multipart/form-data）
     var uploadResult = UploadAsset(syUrl, token, assetDir, png);
     if (!uploadResult.Success)
@@ -197,6 +205,13 @@ public static int ExtractNum(string json, string field)
     var n = 0;
     int.TryParse(ExtractStr(json, field) ?? "", out n);
     return n;
+}
+
+public static string FormatSize(long bytes)
+{
+    if (bytes < 1024) return bytes + "B";
+    if (bytes < 1024 * 1024) return (bytes / 1024.0).ToString("F1") + "KB";
+    return (bytes / 1024.0 / 1024).ToString("F1") + "MB";
 }
 
 public struct KernelResult { public bool Success; public string Text; public string Error; }
