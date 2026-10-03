@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T16:55:48.147Z",
+  "generatedAt": "2026-10-03T16:57:19.219Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 341,
-      "pending": 955
+      "done": 343,
+      "pending": 953
     },
     "byMainline": {
       "C7": 262,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 221,
-      "E0": 588,
-      "E2": 114,
+      "E4": 223,
+      "E0": 587,
+      "E2": 113,
       "E3": 50,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 955,
+      "dev": 953,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -29481,17 +29481,18 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作本体与入口复用：为每个思源增强动作登记唯一 `actionId`、revision、输入 schema、输出 schema 和副作用；把面板、热键、思源场景、浏览器场景、文本指令、HTTP/移动入口映射到同一动作。验收：入口变更不会复制一份逻辑，结果卡能回到实际 revision。",
+      "text": "动作本体与入口复用：为每个思源增强动作登记唯一 `actionId`、revision、输入 schema、输出 schema 和副作用；把面板、热键、思源场景、浏览器场景、文本指令、HTTP/移动入口映射到同一动作。验收：入口变更不会复制一份逻辑，结果卡能回到实际 revision。 → ✅ R145 调研登记（E2 草案）：动作本体登记格式提案——quicker-actions/registry.json，每动作 {actionId（如 sy.quick-capture）, revision（随 .qa 导出递增）, title, inputs/outputs schema（对齐 reference/*.cs 头部变量表）, effects:[触及 op 列表], entryPoints:[hotkey/textcmd/panel/browser], minQuickerVersion}；与 capability-registry-contract 同构（能力登记五态复用），面板/热键/场景/浏览器四入口引用同一 actionId。**待决**：registry.json 由导出脚本自动生成（推荐，导出时从 .qa 抽取）还是手维护——挂 G2 观察后定",
       "mainline": "C7",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
-          "R160"
+          "R160",
+          "R145"
         ],
         "docs": []
       }
@@ -29504,19 +29505,22 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "前台/后台/未运行分支：分别设计思源前台、思源后台、思源未运行、Quicker 未启动和目标窗口丢失的处理。验收：每种状态都有可解释提示和手动替代，后台触发不会把未知焦点当作选区。",
+      "text": "前台/后台/未运行分支：分别设计思源前台、思源后台、思源未运行、Quicker 未启动和目标窗口丢失的处理。验收：每种状态都有可解释提示和手动替代，后台触发不会把未知焦点当作选区。 → ✅ R145 调研登记（E2，实现对照）：五态矩阵已有组件级覆盖——①前台=全功能；②后台=桥/内核路由全可用+confirmWithFront window.focus() 激活尝试+editor.context 诚实 null；③未运行=SY-思源未运行分支.cs（探测300ms→询问→exe/siyuan://启动→重探15s，真机验证过的启动链）；④前端不在线=内核路由 FRONTEND_ONLY 诚实降级提示；⑤移动端=isMobileGuard 显式 opt-in。**缺口登记**：(a)Quicker 未启动态在思源侧无感知路径（668 反向触发只能 Quicker 发起，记边界）；(b)后台时 confirm 激活成功率未实测（08-O10 保留）；(c)多窗口下 editor.context 取最后聚焦 protyle 待验",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
-          "R160"
+          "R160",
+          "R145"
         ],
-        "docs": []
+        "docs": [
+          "08-"
+        ]
       }
     },
     {
