@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T12:22:32.717Z",
+  "generatedAt": "2026-10-03T12:25:27.702Z",
   "source": "TODO.md",
   "counts": {
     "total": 1375,
     "checkboxes": 1375,
     "byStatus": {
-      "done": 278,
-      "pending": 982
+      "done": 279,
+      "pending": 981
     },
     "byMainline": {
       "C7": 261,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 181,
-      "E0": 612,
+      "E4": 182,
+      "E0": 611,
       "E2": 117,
       "E3": 49,
       "E1": 414,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 88,
-      "dev": 982,
+      "dev": 981,
       "environment": 4,
       "resolved": 1,
       "upstream": 17,
@@ -7134,11 +7134,11 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。",
+      "text": "为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。 → ✅ v0.7.3 续4（createSingleFlight 串行队列+20 并发/失败不阻塞回归）",
       "mainline": "C4",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [

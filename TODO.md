@@ -425,7 +425,7 @@
 - [ ] 【R69-P1】为多窗口桥增加真实互斥/命令认领机制（Web Lock、独立锁文件或等价方案）；当前单飞只保证单个 frontend 实例，不能证明两个窗口不会重复消费。
 - [ ] 【R69-P1】验证 CLI、PowerShell、MCP 多生产者同时 `getFile→append→putFile` 时不会互相覆盖命令；若无法保证，明确串行化或改为独立命令文件/内核追加服务。
 - [x] 【R69-P1】诊断包使用当前活动 `BridgeService` 的统计或持久化统计；禁止每次导出新建服务导致计数归零。 → ✅ v0.7.3 续（activeService 优先，桥关才回落新实例）
-- [ ] 【R69-P1】为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。
+- [x] 【R69-P1】为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。 → ✅ v0.7.3 续4（createSingleFlight 串行队列+20 并发/失败不阻塞回归）
 - [ ] 【R69-P1】对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。
 - [ ] 【R69-P1】把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。
 - [ ] 【R69-P2】补 `config.discover` 的收集箱文档发现、自动创建和手填兜底；当前 `inboxDocId:null` 不能与“配置发现”承诺并列。
