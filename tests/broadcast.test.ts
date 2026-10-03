@@ -193,4 +193,43 @@ describe("executeAndRecord（预留语义）", () => {
         expect(exp.executed).toBe(false);
         expect(exp.receipt?.status).toBe("expired");
     });
+
+    it("过期信封入台账：同一信封重放（SSE 重投/NDJSON 补扫）不重复回执不重复计数（R69-P1 回归）", async () => {
+        const { BridgeService } = await import("../src/services/bridge-service");
+        const { BridgeStore } = await import("../src/services/store");
+        const { KernelApi } = await import("../src/services/kernelApi");
+        const noopFetch = (async () => ({ ok: false, status: 404, text: async () => "" }) as unknown as Response) as unknown as typeof fetch;
+        const store = new BridgeStore({ load: async () => null, save: async () => {} });
+        const service = new BridgeService({
+            api: new KernelApi(noopFetch),
+            store,
+            settings: () => ({
+                schemaVersion: 1 as const, bridgeEnabled: true, pollMs: 500, backoffMaxMs: 10000,
+                confirmExec: false, blacklist: [], auditMax: 200,
+                rawApiEnabled: false, rawApiAllowlist: [], broadcastEnabled: false,
+                bridgeBasePath: "/bridge", deviceName: "dev-a",
+            }),
+            pluginName: "siyuan-quickgate",
+            pluginVersion: "0.7.3",
+            deviceName: () => "dev-a",
+            registry: () => ({ source: "fallback", plugins: [] }),
+            confirm: async () => true,
+            audit: () => {},
+            editorContext: () => null,
+            dailyStatus: async () => ({ docId: null, exists: false }),
+            openDoc: () => {},
+            openSetting: () => {},
+            getCheckin: () => undefined,
+            getContacts: () => undefined,
+        });
+        const cmd: BridgeCommand = { v: 1, id: "ex-1", op: "bridge.ping", args: {}, createdAt: new Date(Date.now() - 60000).toISOString(), ttlMs: 1000 };
+        const first = await service.executeAndRecord(cmd);
+        expect(first.receipt?.status).toBe("expired");
+        const expiredAfterFirst = service.stats.expired;
+        // 同一信封重放：台账已记账 → 静默跳过（修复前：再次回 expired 回执且 expired 计数 +1）
+        const replay = await service.executeAndRecord(cmd);
+        expect(replay.executed).toBe(false);
+        expect(replay.receipt).toBeUndefined();
+        expect(service.stats.expired).toBe(expiredAfterFirst);
+    });
 });

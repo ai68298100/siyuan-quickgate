@@ -627,7 +627,8 @@ export default class QuickGatePlugin extends Plugin {
         diagBtn.textContent = "导出诊断包（到剪贴板）";
         diagBtn.onclick = async () => {
             try {
-                const service = new BridgeService(this.deps());
+                // 统计须取自当前活动服务实例：临时 new 的服务计数全零，诊断包会失真（桥关时才回落新实例）
+                const service = this.activeService ?? new BridgeService(this.deps());
                 const mem = memDiagnostics(this.settings, this.auditLog, service);
                 await navigator.clipboard.writeText(JSON.stringify(mem, null, 2));
                 showMessage("诊断包已复制到剪贴板（脱敏）", 3000);

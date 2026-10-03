@@ -217,6 +217,7 @@ export class BridgeService {
         if (cmd.device && cmd.device !== this.deps.deviceName()) return { executed: false }; // 非目标设备
         if (this.deps.store.isProcessed(cmd.id)) return { executed: false };
         if (isExpired(cmd, now)) {
+            this.deps.store.markProcessed(cmd.id, now); // 过期同样入台账：同一信封重放（SSE 重投/NDJSON 补扫）不得重复回执或重复计数
             this.stats.expired += 1;
             let expiredReceipt: BridgeReceipt | undefined;
             if (cmd.reply !== false) {
