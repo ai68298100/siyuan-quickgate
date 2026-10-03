@@ -51,11 +51,16 @@ export interface PullOptions {
     limit?: number;
 }
 
-/** 拉取：白名单过滤 → since 过滤（emittedAt > since）→ limit 截断 */
-export function pullEvents(text: string, whitelist: Map<string, { source: string }>, files: string[], opts: PullOptions): HubEvent[] {
+/**
+ * 拉取：白名单过滤 → since 过滤（emittedAt > since）→ idempotencyKey 去重 → limit 截断。
+ * 入参为逐文件文本（file 归属真实来源）；idempotencyKey 去重与内核路径 kernelEventsPull 同口径
+ * （R69-P1：双路径一致——跨源文件重复行只保留先到者）。
+ */
+export function pullEvents(texts: Array<{ file: string; text: string }>, whitelist: Map<string, { source: string }>, opts: PullOptions): HubEvent[] {
     const out: HubEvent[] = [];
     const sinceTs = opts.since ? Date.parse(opts.since) : NaN;
-    for (const file of files) {
+    const seen = new Set<string>();
+    for (const { file, text } of texts) {
         for (const line of text.replace(/\r\n/g, "\n").split("\n")) {
             if (out.length >= (opts.limit ?? 200)) return out;
             const e = parseEventLine(line, file);
@@ -63,6 +68,8 @@ export function pullEvents(text: string, whitelist: Map<string, { source: string
             if (!whitelist.has(e.name)) continue;
             if (opts.names && !opts.names.includes(e.name)) continue;
             if (!Number.isNaN(sinceTs) && Date.parse(e.emittedAt) <= sinceTs) continue;
+            if (seen.has(e.idempotencyKey)) continue;
+            seen.add(e.idempotencyKey);
             out.push(e);
         }
     }

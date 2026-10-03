@@ -19,12 +19,28 @@ describe("events 白名单与拉取", () => {
             JSON.stringify({ name: "checkin:event-recorded", emittedAt: "2026-10-02T09:00:00Z", idempotencyKey: "k3" }),
             JSON.stringify({ name: "checkin:event-recorded", emittedAt: "2026-10-02T10:00:00Z", idempotencyKey: "k4" }),
         ].join("\n");
-        const all = pullEvents(text, wl, ["f1"], {});
+        const all = pullEvents([{ file: "f1", text }], wl, {});
         expect(all.length).toBe(3);
-        const since = pullEvents(text, wl, ["f1"], { since: "2026-10-02T00:00:00Z" });
+        const since = pullEvents([{ file: "f1", text }], wl, { since: "2026-10-02T00:00:00Z" });
         expect(since.map((e) => e.idempotencyKey)).toEqual(["k3", "k4"]);
-        const limited = pullEvents(text, wl, ["f1"], { limit: 1 });
+        const limited = pullEvents([{ file: "f1", text }], wl, { limit: 1 });
         expect(limited.length).toBe(1);
+    });
+
+    it("pull：多文件不重复解析、source 归属真实文件、idempotencyKey 跨文件去重（R69-P1 回归）", () => {
+        const f1 = [
+            JSON.stringify({ name: "checkin:event-recorded", emittedAt: "2026-10-01T10:00:00Z", idempotencyKey: "ka" }),
+        ].join("\n");
+        const f2 = [
+            JSON.stringify({ name: "checkin:event-recorded", emittedAt: "2026-10-01T11:00:00Z", idempotencyKey: "kb" }),
+            JSON.stringify({ name: "checkin:event-recorded", emittedAt: "2026-10-01T12:00:00Z", idempotencyKey: "ka" }), // 与 f1 跨文件重复
+        ].join("\n");
+        // 修复前：合并文本按 files 数量重复解析（每事件出现 2 次且 source 错乱）、无跨文件去重
+        const out = pullEvents([{ file: "/a.ndjson", text: f1 }, { file: "/b.ndjson", text: f2 }], wl, {});
+        expect(out.length).toBe(2); // ka + kb，重复 ka 只留先到者
+        expect(out.map((e) => e.idempotencyKey)).toEqual(["ka", "kb"]);
+        expect(out.find((e) => e.idempotencyKey === "ka").source).toBe("/a.ndjson"); // 归属真实来源文件
+        expect(out.find((e) => e.idempotencyKey === "kb").source).toBe("/b.ndjson");
     });
 });
 

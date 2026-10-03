@@ -472,12 +472,12 @@ export class BridgeService {
                 for (const source of new Set([...wl.values()].map((v) => v.source))) {
                     files.push(`/storage/petal/${source}/bridge/events.ndjson`);
                 }
-                const texts: string[] = [];
+                const texts: Array<{ file: string; text: string }> = [];
                 for (const f of files) {
                     const t = await this.deps.api.getFileText(f);
-                    if (t) texts.push(t);
+                    if (t) texts.push({ file: f, text: t });
                 }
-                const events = pullEvents(texts.join("\n"), wl, files, {
+                const events = pullEvents(texts, wl, {
                     names: Array.isArray(a.names) ? a.names.filter((x): x is string => typeof x === "string") : undefined,
                     since: typeof a.since === "string" ? a.since : undefined,
                     limit: typeof a.limit === "number" ? Math.min(a.limit, 200) : undefined,
