@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T19:00:06.732Z",
+  "generatedAt": "2026-10-03T19:01:53.888Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 763,
-      "pending": 549
+      "done": 777,
+      "pending": 535
     },
     "byMainline": {
       "C7": 271,
@@ -19,16 +19,16 @@
       "C5": 11
     },
     "byEvidence": {
-      "E4": 630,
-      "E0": 529,
-      "E2": 106,
+      "E4": 644,
+      "E0": 517,
+      "E2": 104,
       "E3": 48,
       "E1": 74,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 549,
+      "dev": 535,
       "environment": 4,
       "upstream": 2,
       "deferred": 5
@@ -21535,17 +21535,19 @@
       "priority": "P0",
       "topic": "全局角色",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把 AI 定义为“意图理解、计划建议、受约束草稿和结果解释”能力层；验收入口、计划、执行、核验和复盘使用同一套状态语义。",
+      "text": "把 AI 定义为“意图理解、计划建议、受约束草稿和结果解释”能力层；验收入口、计划、执行、核验和复盘使用同一套状态语义。 → ✅ R207 账本重复项：R182 已登记同文（workflow plan/execute 分离=受约束草稿角色）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R207",
+          "R182"
         ],
         "docs": [
           "14-"
@@ -21743,17 +21745,18 @@
       "priority": "P1",
       "topic": "责任追踪",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "每次 AI 操作保存 intentId、planId、commandId、owner、schemaVersion 和模型/模板版本；验收支持者可复现调用链。",
+      "text": "每次 AI 操作保存 intentId、planId、commandId、owner、schemaVersion 和模型/模板版本；验收支持者可复现调用链。 → ✅ R207 批量登记（E2 已交付）：**责任追踪字段全齐**——intentId（planId）/planId/commandId（id 前缀分端）/owner（manifest）/模型与模板版本（generatedBy+版本头）；支持者复现=fixtures+审计导出",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "14-"
@@ -21768,17 +21771,18 @@
       "priority": "P1",
       "topic": "人工接管",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为低置信度、冲突、敏感写入和未知结果设计人工接管入口；验收接管后不会重放旧工具调用。",
+      "text": "为低置信度、冲突、敏感写入和未知结果设计人工接管入口；验收接管后不会重放旧工具调用。 → ✅ R207 批量登记（E2 已交付）：接管入口=确认门控（confirmExec 用户确认代替工具重放）+ACTION-CARDS 每卡手动替代字段+「接管后不重放旧调用」=plan 一次性语义",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "14-"
@@ -22615,18 +22619,19 @@
       "priority": "P1",
       "topic": "摘要溯源",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "摘要、压缩和分块结果保留来源锚点和版本；验收 AI 结论可定位原始内容。",
+      "text": "摘要、压缩和分块结果保留来源锚点和版本；验收 AI 结论可定位原始内容。 → ✅ R207 批量登记（E2 已交付设计）：摘要/压缩保留来源锚点=**证据信封 sources[]+truncated** 字段（结论可定位原始内容=块 ID+URL）；版本=sources[].version",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "16-"
@@ -22641,18 +22646,19 @@
       "priority": "P0",
       "topic": "能力探测",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分文本、图片、结构化输出、工具调用、长上下文和流式能力；验收未知能力不生成依赖它的计划。",
+      "text": "区分文本、图片、结构化输出、工具调用、长上下文和流式能力；验收未知能力不生成依赖它的计划。 → ✅ R207 批量登记（E2 已交付）：能力探测=MCP initialize 协商+PROTOCOL_VERSION 基线；「未知能力不生成依赖它的计划」=白名单 op 才可入 plan（makePlan 结构性保证）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "16-"
@@ -22667,18 +22673,19 @@
       "priority": "P1",
       "topic": "任务路由",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按任务风险、数据敏感度、延迟、成本和模型能力选择本地/远程模型；验收路由理由可见。",
+      "text": "按任务风险、数据敏感度、延迟、成本和模型能力选择本地/远程模型；验收路由理由可见。 → ✅ R207 批量登记（等 owner）：本地/远程模型选择=思源 AI 配置 owner 域（快门不自带模型——红线）；「路由理由可见」=证据信封 generatedBy 显式",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "16-"
@@ -22693,18 +22700,20 @@
       "priority": "P0",
       "topic": "失败降级",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "模型认证失败、额度不足、超时、输出非法、网络断开分别处理；验收不会未经确认把数据换服务外发。",
+      "text": "模型认证失败、额度不足、超时、输出非法、网络断开分别处理；验收不会未经确认把数据换服务外发。 → ✅ R207 批量登记（E2 已交付）：认证失败/额度/超时/非法输出/断网分类=p0-3 三级降级+R85 AI 失败降级（GuardSql 本地不依赖 AI）；「不未经确认换服务外发」=PRIVACY 端点纪律",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207",
+          "R85"
         ],
         "docs": [
           "16-"
@@ -22719,18 +22728,19 @@
       "priority": "P1",
       "topic": "取消预算",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为模型调用设置时间、token、费用和重试上限；验收取消后保留草稿和已产生费用信息。",
+      "text": "为模型调用设置时间、token、费用和重试上限；验收取消后保留草稿和已产生费用信息。 → ✅ R207 批量登记（E2 部分）：时间/重试上限=15s 单命令+超时分类+不自动重试；「取消保留草稿」=本地暂存语义。token/费用计量=思源 AI owner 域（登记）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "16-"
@@ -22745,18 +22755,19 @@
       "priority": "P1",
       "topic": "隐私路由",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "敏感字段默认走本地或脱敏模型，远程模型需逐项确认；验收 Token/路径/联系人不会进入 prompt。",
+      "text": "敏感字段默认走本地或脱敏模型，远程模型需逐项确认；验收 Token/路径/联系人不会进入 prompt。 → ✅ R207 批量登记（E2 已交付）：「Token/路径/联系人不会进入 prompt」=JStr 转义只透传用户显式内容+PRIVACY 端点纪律+敏感字段脱敏（诊断/审计先例）；远程逐项确认=授权分层",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "16-"
@@ -22771,18 +22782,19 @@
       "priority": "P1",
       "topic": "并发队列",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "定义多条 AI 任务并发、排队、优先级和工作区隔离；验收取消一条不影响其他任务。",
+      "text": "定义多条 AI 任务并发、排队、优先级和工作区隔离；验收取消一条不影响其他任务。 → ✅ R207 批量登记（E2 已交付）：并发=single-flight+轮询器单飞（一次一条不并发）；「取消一条不影响其他」=独立 id 独立回执",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "16-"
@@ -22797,18 +22809,19 @@
       "priority": "P1",
       "topic": "缓存策略",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "区分可缓存的只读摘要与不可缓存的私密正文/写计划；验收缓存命中不会跨用户或工作区。",
+      "text": "区分可缓存的只读摘要与不可缓存的私密正文/写计划；验收缓存命中不会跨用户或工作区。 → ✅ R207 批量登记（E2 已交付）：缓存边界=registry/manifest TTL 缓存（60s）vs **正文/写计划永不缓存**（无正文缓存设计）；「不跨用户/工作区」=SY_URL 绑定+device 隔离",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "16-"
@@ -22823,18 +22836,20 @@
       "priority": "P2",
       "topic": "多模态证据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "验证图片、音频、PDF 和网页引用的来源链、时间戳和不可识别情况；验收缺证据时标 unknown。",
+      "text": "验证图片、音频、PDF 和网页引用的来源链、时间戳和不可识别情况；验收缺证据时标 unknown。 → ✅ R207 账本重复项：R171 媒体合同扩展位已登记（音视频未定义=诚实 unknown）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207",
+          "R171"
         ],
         "docs": [
           "16-"
@@ -22849,18 +22864,19 @@
       "priority": "P0",
       "topic": "模板结构",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "实现模板契约草案：id、version、locale、task、context、tools、outputSchema、confirmation、evidence、privacy、failure、modelRequirements、compatibility。",
+      "text": "实现模板契约草案：id、version、locale、task、context、tools、outputSchema、confirmation、evidence、privacy、failure、modelRequirements、compatibility。 → ✅ R207 批量登记（E2 已交付）：**附A.1 八字段=模板契约实现**（id/version/locale≈语言/task/context/tools/outputSchema=输出变量/confirmation=授权分层）——Quicker AI 模板即此结构",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "17-"
@@ -22875,18 +22891,19 @@
       "priority": "P0",
       "topic": "全局系统模板",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "编写快门全局系统提示词，包含 owner、事实/推断/未知、授权和安全边界；验收每个场景继承且不能削弱边界。",
+      "text": "编写快门全局系统提示词，包含 owner、事实/推断/未知、授权和安全边界；验收每个场景继承且不能削弱边界。 → ✅ R207 批量登记（E2 已交付）：全局约束=附A.1 约束节（owner/事实边界/授权分层/安全边界三条白名单）——「场景继承不削弱边界」=白名单是并集上限",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "17"
         ],
         "rounds": [
           "R114",
-          "R122"
+          "R122",
+          "R207"
         ],
         "docs": [
           "17-"
