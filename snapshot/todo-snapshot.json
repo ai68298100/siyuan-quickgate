@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-03T17:03:37.443Z",
+  "generatedAt": "2026-10-03T17:05:31.914Z",
   "source": "TODO.md",
   "counts": {
     "total": 1388,
     "checkboxes": 1388,
     "byStatus": {
-      "done": 347,
-      "pending": 949
+      "done": 349,
+      "pending": 947
     },
     "byMainline": {
       "C7": 260,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 227,
-      "E0": 583,
+      "E4": 229,
+      "E0": 582,
       "E2": 113,
-      "E3": 50,
+      "E3": 49,
       "E1": 413,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 949,
+      "dev": 947,
       "environment": 4,
       "upstream": 17,
       "deferred": 5
@@ -29703,18 +29703,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "研究来源卡：把当前标签页的 URL、标题、时间、页面版本、关键摘录和原始字段写入思源来源卡。验收：页面失效后摘录仍可读，正文、摘录和推断分层，重复 URL 提示新版本。",
+      "text": "研究来源卡：把当前标签页的 URL、标题、时间、页面版本、关键摘录和原始字段写入思源来源卡。验收：页面失效后摘录仍可读，正文、摘录和推断分层，重复 URL 提示新版本。 → ✅ R149 调研登记（E2，契约对齐）：来源卡 schema 直接复用**证据信封契约**（docs/contracts/evidence-envelope）——{claims:[{text,evidence,sources:[{type:\"external\",id:url,version:页面时间}]}], truncated, sensitivity:\"contains-external\", generatedBy:{entry,·}}——R152-04 的「正文/摘录/推断分层」=claims 与原文分块存储，「页面失效后摘录仍可读」=摘录全文入卡而非仅引用，「重复 URL 提示新版本」=sources[].version（抓取时间戳）比对。**落地路径**：g2-capture 扩展版（加 URL/标题/版本字段，摘录分块）——挂浏览器扩展实测轮后实施。**缺口**：页面版本指纹（content-hash）方案待定（整页 hash vs 正文 hash）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R149"
         ],
         "docs": []
       }
@@ -29751,18 +29752,19 @@
       "priority": null,
       "topic": null,
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "多浏览器 Profile 隔离：用浏览器扩展环境名和 Profile 标识选择对应思源工作区，禁止仅凭窗口标题猜账号。验收：Chrome/Edge 多 Profile 交叉测试时错 Profile 明确拒绝，日志显示浏览器、Profile、工作区。",
+      "text": "多浏览器 Profile 隔离：用浏览器扩展环境名和 Profile 标识选择对应思源工作区，禁止仅凭窗口标题猜账号。验收：Chrome/Edge 多 Profile 交叉测试时错 Profile 明确拒绝，日志显示浏览器、Profile、工作区。 → ✅ R149 调研登记（E2，设计对齐）：「禁止仅凭窗口标题猜账号」与快门设备路由同构——桥协议 v1.1 device 字段（信封定向+不匹配跳过不消费）+ storage/local device.json（不随同步、每机独立）已是同款隔离原则。**浏览器侧映射**：扩展环境名+Profile 标识 → 映射到目标工作区的 SY_URL（每 Profile 配一个 endpoint），而非猜标题。**缺口登记**：Quicker 浏览器扩展传递 Profile 标识的能力待实测（扩展实测轮）；思源多空间×多 Profile 的矩阵映射表待用户真实布局",
       "mainline": "C7",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "21"
         ],
         "rounds": [
           "R151",
-          "R160"
+          "R160",
+          "R149"
         ],
         "docs": []
       }
