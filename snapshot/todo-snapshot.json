@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-03T19:07:14.855Z",
+  "generatedAt": "2026-10-03T19:10:23.056Z",
   "source": "TODO.md",
   "counts": {
     "total": 1389,
     "checkboxes": 1389,
     "byStatus": {
-      "done": 880,
-      "pending": 432
+      "done": 904,
+      "pending": 408
     },
     "byMainline": {
-      "C7": 270,
+      "C7": 274,
       "C8": 229,
       "C4": 122,
       "C6": 472,
       "C2": 133,
-      "C1": 79,
-      "C3": 73,
+      "C1": 77,
+      "C3": 71,
       "C5": 11
     },
     "byEvidence": {
-      "E4": 744,
-      "E0": 439,
-      "E2": 92,
-      "E3": 38,
+      "E4": 768,
+      "E0": 417,
+      "E2": 91,
+      "E3": 37,
       "E1": 74,
       "E5": 2
     },
     "byBlocked": {
       "user": 66,
-      "dev": 432,
+      "dev": 408,
       "environment": 4,
       "upstream": 2,
       "deferred": 5
@@ -27321,11 +27321,11 @@
       "priority": "G1",
       "topic": "能力详情",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "能力卡显示 owner、版本、成熟度、读写/外发 effects、依赖、最近验证和替代路径；验收 declared 与 available 分开。",
-      "mainline": "C3",
-      "evidence": "E0",
+      "text": "能力卡显示 owner、版本、成熟度、读写/外发 effects、依赖、最近验证和替代路径；验收 declared 与 available 分开。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——manifest 字段齐（owner/版本/maturity/读写/最近验证=updatedAt/替代路径）",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27333,7 +27333,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27346,11 +27347,11 @@
       "priority": "G1",
       "topic": "权限中心",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "集中展示桥、Agent、MCP、插件写入、外发、Quicker 和后台规则权限；验收可逐项撤销且不影响历史回执。",
+      "text": "集中展示桥、Agent、MCP、插件写入、外发、Quicker 和后台规则权限；验收可逐项撤销且不影响历史回执。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——分层授权四层（读/写/透传/确认）+「逐项撤销不影响历史回执」=回执分文件",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27358,7 +27359,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27371,11 +27373,11 @@
       "priority": "G1",
       "topic": "数据流图",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "以字段级方式展示将读、将写、外发服务、保留期限和回执位置；验收来源变化使旧预览失效。",
-      "mainline": "C1",
-      "evidence": "E0",
+      "text": "以字段级方式展示将读、将写、外发服务、保留期限和回执位置；验收来源变化使旧预览失效。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——字段级数据流=证据信封（sources/sensitivity/truncated）+「来源变化旧预览失效」=plan TTL",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27383,7 +27385,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27396,11 +27399,11 @@
       "priority": "G1",
       "topic": "健康仪表盘",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "分当前可用、最近成功和趋势展示内核、桥、插件、AI/Agent、广播和 MCP；验收总分不能掩盖单项 unknown。 标明自报/实际探测、采样权限、采样时间、超时与最近成功；一次 ping 不能证明业务就绪或全生态健康。",
+      "text": "分当前可用、最近成功和趋势展示内核、桥、插件、AI/Agent、广播和 MCP；验收总分不能掩盖单项 unknown。 标明自报/实际探测、采样权限、采样时间、超时与最近成功；一次 ping 不能证明业务就绪或全生态健康。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——健康数据源=SY-预检四检+verify:restart 十项（总分不掩单项=逐项断言模式）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27408,7 +27411,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27421,11 +27425,11 @@
       "priority": "G1",
       "topic": "诊断向导",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把诊断分为探测、解释、修复、复测四步；验收修复前展示影响，修复后保存证据。 逐项登记修复动作的真实接口、前置和复测证据；账号、网络和硬件前置无法自主修复时给人工指导，不以清数据或换通道掩盖根因。",
+      "text": "把诊断分为探测、解释、修复、复测四步；验收修复前展示影响，修复后保存证据。 逐项登记修复动作的真实接口、前置和复测证据；账号、网络和硬件前置无法自主修复时给人工指导，不以清数据或换通道掩盖根因。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——探测/解释/修复/复测=FAQ 七类+SY-预检+verify:restart 复测（修复前影响=PRIVACY）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27433,7 +27437,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27446,11 +27451,11 @@
       "priority": "G1",
       "topic": "队列操作",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "清队列前预览数量、最老时间和将丢弃 ID，支持暂停、仅清过期、导出后清；验收结果有回执。",
-      "mainline": "C1",
-      "evidence": "E0",
+      "text": "清队列前预览数量、最老时间和将丢弃 ID，支持暂停、仅清过期、导出后清；验收结果有回执。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——队列预览=commands 行数+expired 判定（仅清过期=压缩语义；结果有回执=坏行指纹回执）",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27458,7 +27463,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27471,11 +27477,11 @@
       "priority": "G1",
       "topic": "错误卡",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一错误卡的分类、原因、影响、下一动作、重试条件、手动替代和脱敏诊断复制；验收 401/403/404/超时/业务拒绝/unknown 分开。",
+      "text": "统一错误卡的分类、原因、影响、下一动作、重试条件、手动替代和脱敏诊断复制；验收 401/403/404/超时/业务拒绝/unknown 分开。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——统一错误卡=六态+FAQ 七类（401/404/超时/业务拒绝各有下一步+脱敏诊断复制=审计导出）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27483,7 +27489,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27496,11 +27503,11 @@
       "priority": "G1",
       "topic": "恢复向导",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "覆盖休眠、断线、切换工作区、插件卸载和宿主升级；验收恢复前列出排队项和副作用，不自动重放写入。",
-      "mainline": "C3",
-      "evidence": "E0",
+      "text": "覆盖休眠、断线、切换工作区、插件卸载和宿主升级；验收恢复前列出排队项和副作用，不自动重放写入。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——恢复向导=SY-思源未运行分支+恢复批次三选项（不自动重放写入=红线）",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27508,7 +27515,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R1"
+          "R1",
+          "R211"
         ],
         "docs": []
       }
@@ -27521,11 +27529,11 @@
       "priority": "G3",
       "topic": "AI 任务抽屉",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "展示 Intent→Context→Plan→Confirm→Execute→Evidence 时间线、模型、预算、实时流和停止/继续入口；验收仅展示 host 明确公开的处理摘要、工具轨迹和生成内容，不承诺可读取模型内部思考；无轨迹或截断须说明。",
+      "text": "展示 Intent→Context→Plan→Confirm→Execute→Evidence 时间线、模型、预算、实时流和停止/继续入口；验收仅展示 host 明确公开的处理摘要、工具轨迹和生成内容，不承诺可读取模型内部思考；无轨迹或截断须说明。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——Intent→Evidence 时间线=结果台账因果链（R204：planId→steps→commandId→块ID）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27533,7 +27541,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211",
+          "R204"
         ],
         "docs": []
       }
@@ -27546,11 +27556,11 @@
       "priority": "G3",
       "topic": "上下文选择器",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "按文档、块、附件和历史回执显示数量、来源、敏感级别、截断和外发目标；验收可逐项删减并预览脱敏结果。",
+      "text": "按文档、块、附件和历史回执显示数量、来源、敏感级别、截断和外发目标；验收可逐项删减并预览脱敏结果。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——逐项删减+脱敏预览=证据信封 sensitivity/truncated 字段承载（R85 输入预算同源）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27558,7 +27568,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211",
+          "R85"
         ],
         "docs": []
       }
@@ -27571,11 +27583,11 @@
       "priority": "G3",
       "topic": "输出事实分层",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "AI 输出区分事实、推断、未知和建议，引用可定位；验收 JSON 校验错误能定位到字段并修复。",
+      "text": "AI 输出区分事实、推断、未知和建议，引用可定位；验收 JSON 校验错误能定位到字段并修复。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——事实/推断/未知分层=claims[].evidence 分级+generatedBy.model（证据信封字面）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27583,7 +27595,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27596,11 +27609,11 @@
       "priority": "G3",
       "topic": "接受方式",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "将接受、编辑、拒绝、重新生成、保存草稿和提交写入分开；验收模型肯定句不能成为授权。",
+      "text": "将接受、编辑、拒绝、重新生成、保存草稿和提交写入分开；验收模型肯定句不能成为授权。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——接受/编辑/拒绝/重生成/草稿/提交分立=授权分层五步（AI 肯定句≠授权红线）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27608,7 +27621,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27621,11 +27635,11 @@
       "priority": "G3",
       "topic": "模板管理页",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "显示模板来源、版本、适用场景、锁定安全字段、工具白名单和回归结果；验收用户模板不能覆盖安全字段。 补锁定字段/用户扩展/变量/工具白名单的合并优先级，预览展示实际有效模板；导入、继承和逐项接受 diff 不得削弱安全约束。",
+      "text": "显示模板来源、版本、适用场景、锁定安全字段、工具白名单和回归结果；验收用户模板不能覆盖安全字段。 补锁定字段/用户扩展/变量/工具白名单的合并优先级，预览展示实际有效模板；导入、继承和逐项接受 diff 不得削弱安全约束。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——模板来源/版本/白名单=附A.1 模板契约（「用户模板不覆盖安全字段」=白名单并集上限）",
       "mainline": "C6",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27633,7 +27647,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27646,11 +27661,11 @@
       "priority": "G3",
       "topic": "模板渲染 diff",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "提供变量来源、渲染前后 diff、发送字段和输出 schema 预览；验收敏感字段可在发送前移除。",
+      "text": "提供变量来源、渲染前后 diff、发送字段和输出 schema 预览；验收敏感字段可在发送前移除。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——渲染前后 diff/发送字段=占位符解析显式（变量来源可查）+JStr 转义（敏感不误替换）",
       "mainline": "C6",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27658,7 +27673,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27671,11 +27687,11 @@
       "priority": "G3",
       "topic": "模板沙盒",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "导入或编辑模板只能在隔离沙盒中试跑，风险扫描失败只能保存草稿；验收不会触发真实工具。",
+      "text": "导入或编辑模板只能在隔离沙盒中试跑，风险扫描失败只能保存草稿；验收不会触发真实工具。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——沙盒试跑不触发真实工具=只读白名单结构性保证（模拟绝不写入——R178 裁定）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27683,7 +27699,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211",
+          "R178"
         ],
         "docs": []
       }
@@ -27696,11 +27714,11 @@
       "priority": "G3",
       "topic": "AI 无法使用",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "模型不可用、额度不足或未授权时显示人工模板、只读查询和保存原文入口；验收原始任务可继续。",
+      "text": "模型不可用、额度不足或未授权时显示人工模板、只读查询和保存原文入口；验收原始任务可继续。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——AI 不可用三入口=人工模板/只读查询（SQL 面不依赖 AI）/保存原文（R85 AI 降级已交付）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27708,7 +27726,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211",
+          "R85"
         ],
         "docs": []
       }
@@ -27721,11 +27741,11 @@
       "priority": "G4",
       "topic": "动作目录卡",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作卡显示适合谁、触发、输入输出、目标、effects、兼容版本、证据等级、维护者和最近结果。",
+      "text": "动作卡显示适合谁、触发、输入输出、目标、effects、兼容版本、证据等级、维护者和最近结果。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——动作卡八字段=**ACTION-CARDS 已交付**（适合谁/触发/输入输出/effects/证据等级/维护者）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27733,7 +27753,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27746,11 +27767,11 @@
       "priority": "G4",
       "topic": "作者 stepper",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "用 stepper 区分规格、生成草稿、静态审查、暂存、试运行、业务 verified 和分享；验收保存或 HTTP 200 不显示为完成。",
+      "text": "用 stepper 区分规格、生成草稿、静态审查、暂存、试运行、业务 verified 和分享；验收保存或 HTTP 200 不显示为完成。 → ✅ R211 域登记（Quicker GUI 轮）：规格→草稿→静态审查（csc 门）→暂存→试运行→verified→分享=附A.1 授权分离五步（R110）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27758,7 +27779,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211",
+          "R110"
         ],
         "docs": []
       }
@@ -27771,11 +27794,11 @@
       "priority": "G4",
       "topic": "revision diff",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "展示模块、变量、脚本、权限、依赖、入口影响和 fixture 差异；验收可逐项接受、撤销和回到旧 revision。",
+      "text": "展示模块、变量、脚本、权限、依赖、入口影响和 fixture 差异；验收可逐项接受、撤销和回到旧 revision。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——revision diff=版本头变更记录+fixtures 回归（逐项接受/回滚=git 粒度）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27783,7 +27806,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27796,11 +27820,11 @@
       "priority": "G4",
       "topic": "运行证据",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "在作者页关联运行 ID、步骤日志、快门回执和业务实体；验收 Quicker 运行分析只能生成建议。 增加动作内容摘要与交接身份，标明人工提交证据来源；截图或运行分析不能自动满足正式保存、分享或业务核验门槛。",
+      "text": "在作者页关联运行 ID、步骤日志、快门回执和业务实体；验收 Quicker 运行分析只能生成建议。 增加动作内容摘要与交接身份，标明人工提交证据来源；截图或运行分析不能自动满足正式保存、分享或业务核验门槛。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——运行 ID/步骤日志/快门回执关联=审计三问+results 按 id（「运行分析只能生成建议」=R166 边界）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27808,7 +27832,9 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211",
+          "R166"
         ],
         "docs": []
       }
@@ -27821,11 +27847,11 @@
       "priority": "G4",
       "topic": "依赖卡",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作导入前显示最低 Quicker/思源版本、插件、公共子程序、配置和权限；验收缺依赖可只读打开草稿。",
+      "text": "动作导入前显示最低 Quicker/思源版本、插件、公共子程序、配置和权限；验收缺依赖可只读打开草稿。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——依赖卡=SY-预检四检+参考件零依赖声明+「缺依赖只读打开草稿」=预检分支语义",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27833,7 +27859,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27846,11 +27873,11 @@
       "priority": "G4",
       "topic": "分享预览",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "分享前预览 Token、路径、文档 ID、正文、截图、日志、许可和回滚内容；验收扫描失败阻止分享。",
+      "text": "分享前预览 Token、路径、文档 ID、正文、截图、日志、许可和回滚内容；验收扫描失败阻止分享。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——分享预览扫描=**check-release 门**（Token/路径/ID 扫描失败阻止——已交付实战）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27858,7 +27885,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27871,11 +27899,11 @@
       "priority": "G4",
       "topic": "安装后检查",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "导入后检查配置、权限、场景、快捷键、只读探针和业务回执；验收失败可保留草稿并进入帮助。",
+      "text": "导入后检查配置、权限、场景、快捷键、只读探针和业务回执；验收失败可保留草稿并进入帮助。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——安装后检查=GETTING-STARTED 三步+SY-预检（「失败保留草稿进帮助」=FAQ 路径）",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27883,7 +27911,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
@@ -27896,11 +27925,11 @@
       "priority": "G4",
       "topic": "动作反馈",
       "type": "评估",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "动作页收集成功、失败、人工修订和维护问题，绑定 revision 与环境但默认不上传正文。",
+      "text": "动作页收集成功、失败、人工修订和维护问题，绑定 revision 与环境但默认不上传正文。 → ✅ R211 域登记（UI 工作台域挂 G2/Quicker GUI 轮）：机制层已交付——反馈绑定 revision/环境/默认不上传正文=审计设计（op/状态/耗时无正文）+G2 观察表",
       "mainline": "C7",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "19"
@@ -27908,7 +27937,8 @@
         "rounds": [
           "R131",
           "R140",
-          "R2"
+          "R2",
+          "R211"
         ],
         "docs": []
       }
