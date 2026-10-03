@@ -67,6 +67,8 @@ try {
     check("写工具未暴露", !names.includes("checkin.record") && !names.includes("commands.run"));
     const denied = await ro.call("tools/call", { name: "checkin.record", arguments: { itemId: "x" } });
     check("tools/call 写工具诚实拒绝", denied.result?.isError === true && String(denied.result?.content?.[0]?.text ?? "").includes("LV_MCP_WRITE"));
+    const unknownMethod = await ro.call("no/such/method", {});
+    check("未知方法 → JSON-RPC -32601", unknownMethod.error?.code === -32601, `code=${unknownMethod.error?.code}`);
     const roEnd = ro;
     roEnd.end();
 
