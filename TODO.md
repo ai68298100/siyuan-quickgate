@@ -169,6 +169,9 @@
 
 ## 5. 小驴快门插件（siyuan-quickgate）
 
+- [x] 【R144·R74-P0 收口】千条命令队列压测基准（tests/bench-tick.test.ts 入仓）：1000×bridge.ping 单 tick **93ms**（≈10k cmd/s 内存面），IO 仅 getFile×2+putFile×2（回执/压缩批量写）——裁定**不设 MAX_TICK_COMMANDS 上限**（桥语义=尽快清积压+轮询器单飞+慢 op 15s 单命令上限已兜底）；再评估条件写进测试头注；大 payload（32KB args）在 32KB 信封上限内天然受限
+- [x] 【R144·文档时效】GETTING-STARTED 复测样例 9/9→10/10（⑪/v1.5 转绿条件与 MCP 冷启动说明补齐）
+
 - [x] 【R142·⑪补充】删除事件（event-deleted）物化路径核实：打卡公开桥 v5 能力表**无 delete 能力**（仅 read/record——删除是 UI 专有操作，公开桥不暴露属安全设计，bundle 实证）；快门侧 normalizeCheckinEventDeleted/物化链已有单测覆盖。**真机验证方式=你在打卡 UI 删除那条「quickgate e2e 验证(可删)」测试记录**，删除即触发全链（事件→events.ndjson→events.pull 可拉到 deleted 标记）
 - [x] 【R142·WorkBuddy】《思源笔记插件-提示语-精简版》正文仍待登录（IAB 标签页已被关闭未登录）；再次可用时：浏览器面板扫码或直接粘贴正文
 
