@@ -8,6 +8,9 @@
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
 
 ### Added
+- **设置页「收藏与最近使用管理」（TODO L472 消费面 · R250）**：收藏列表（移除）/ 最近使用列表（单条移除 + 一键清空）——favorites.json 的完整 UI 管理入口，不再只有 CLI。
+- **favorites.remove 支持 `clearRecent:true`（TODO L472 清除历史 · R241）**：一次清空全部最近使用、无需逐条 plugin/command；契约 JSON/api.md/MCP schema 同步。
+- **调研追加（docs/10-生态调研-R3.md §6 · R241）**：思源内置 CLI `serve` 安全评估（旗标齐全无后门，自托管场景不立项）；uTools-siyuan 同类对照（跨宿主泳道需求验证，单目的客户端，快门差异化守住编排层）。
 - **私有路由鉴权七格矩阵 E4 实测（TODO L434）**：思源 3.8.6 真机——有效 Token/Bearer/query token 均 200 回执；无 Authorization/错误 Token 均 401（消息只泄露失败位置不泄露令牌）；未知 op 结构化回执；畸形 JSON 400。七格全部零泄漏（响应不含令牌本体/工作区路径）。剩余格（只读工作区/非管理员/HTTPS）需专用环境，挂后续轮。
 - **可用性等级口径表（TODO L470）**：docs/api.md 六级口径（随插件可用/需开桥/需广播开关/需上游插件/需授权/仅桌面·待真机）+ 逐级覆盖映射；与设置页实时状态区的优先级关系明确（实时态优先于静态表）。
 - **MCP 规范 annotations 输出（R234 生态调研候选① · docs/10-生态调研-R2.md）**：tools/list 四注解显式恒填——readOnlyHint（14 只读）/destructiveHint（plugin.api/workflow.execute）/idempotentHint（16 天然幂等 op；config.discover 有 opt-in 创建面故不入列）/openWorldHint（commands.run/plugin.api 开放世界）。关键发现：MCP 规范对 destructiveHint 缺省按 true 解读——此前只读工具省略该字段会被宿主确认 UI 误判破坏性。注解只是宿主 UI 投影，安全仍以服务端门控为准。新增 tests/mcp-annotations.test.ts。
@@ -299,9 +302,3 @@
 - 集市暂缓上架；当前唯一分发渠道为 GitHub Release（手动导入 package.zip）
 - M0 spike 九项待思源真机实证（docs/WALKTHROUGH.md）
 
-### Added（R241 续）
-- **favorites.remove 支持 `clearRecent:true`（TODO L472 清除历史）**：一次清空全部最近使用、无需逐条 plugin/command；契约 JSON/api.md/MCP schema 同步；+1 测试（158 全绿）。
-- **调研追加（docs/10-生态调研-R3.md §6）**：思源内置 CLI `serve` 安全评估（旗标齐全无后门，自托管场景不立项）；uTools-siyuan 同类对照（跨宿主泳道需求验证，单目的客户端，快门差异化守住编排层）。
-
-### Added（R250 续）
-- **设置页「收藏与最近使用管理」（TODO L472 消费面）**：收藏列表（移除）/ 最近使用列表（单条移除 + 一键清空）——favorites.json 的完整 UI 管理入口，不再只有 CLI。
