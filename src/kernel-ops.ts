@@ -271,3 +271,40 @@ export function createKernelOpHandler(deps: KernelDeps): (op: string, args: Args
         }
     };
 }
+
+// ---------- Agent 能力（R245 · 上游：v3.8.6 kernel/plugin/api_agent.go siyuan.agent.registerCapability）----------
+// 快门 kernel.js 向内置 Agent 原生注册能力（模型可见名 plugin__siyuan-quickgate__<name>）；
+// 处理器复用 kernel-ops 纯逻辑；effects 由 kernel.ts 按能力如实声明（ToolEffects 四标志）。
+
+export interface AgentToolResult {
+    text: string;
+    data?: unknown;
+    isError?: boolean;
+}
+
+/** 快速捕获：追加到今日日记（appendDailyNoteBlock 由内核自行定位/创建今日文档） */
+export async function kernelAgentCapture(deps: KernelDeps, args: Args): Promise<AgentToolResult> {
+    const text = typeof args.text === "string" ? args.text.trim() : "";
+    if (!text) return { text: "text 缺失（要记的一句话）", isError: true };
+    try {
+        const disc = await kernelConfigDiscover(deps, {});
+        const notebook = (disc.data as { diaryNotebookId?: string | null } | null)?.diaryNotebookId ?? null;
+        if (!notebook) return { text: "未发现日记笔记本（请确认某笔记本配置了日记保存路径），已取消捕获", isError: true };
+        const hhmm = new Date().toTimeString().slice(0, 5);
+        await deps.kpost("/api/block/appendDailyNoteBlock", { notebook, dataType: "markdown", data: `- ${hhmm} ${text}` });
+        return { text: `已记到今日日记（笔记本 ${notebook}）：- ${hhmm} ${text}` };
+    } catch (e) {
+        return { text: `捕获失败：${e instanceof Error ? e.message : String(e)}`, isError: true };
+    }
+}
+
+/** 发现（config.discover 的 Agent 面） */
+export async function kernelAgentDiscover(deps: KernelDeps, args: Args): Promise<AgentToolResult> {
+    const r = await kernelConfigDiscover(deps, args);
+    const d = (r.data ?? {}) as { diaryNotebookId?: string | null; inboxDocId?: string | null; notes?: string[] };
+    return {
+        text: `${r.message}\n${(d.notes ?? []).join("\n")}`,
+        data: { diaryNotebookId: d.diaryNotebookId ?? null, inboxDocId: d.inboxDocId ?? null },
+        isError: r.status !== "recorded",
+    };
+}

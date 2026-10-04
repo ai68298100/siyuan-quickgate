@@ -16,7 +16,7 @@
  */
 import type * as kernel from "siyuan/kernel";
 import manifestJson from "./assets/ecosystem-manifests.json";
-import { createKernelOpHandler } from "./kernel-ops";
+import { createKernelOpHandler, kernelAgentCapture, kernelAgentDiscover, kernelPing } from "./kernel-ops";
 import type { EcosystemManifest } from "./services/bridge-service";
 
 const api: kernel.ISiyuan = siyuan;
@@ -54,13 +54,62 @@ async function getFileText(path: string): Promise<string | null> {
 /* ---------- 生命周期与私有路由 ---------- */
 
 api.plugin.lifecycle.onload = async () => {
+    api.plugin.lifecycle.onrunning = () => { /* 无操作——内核对该可选钩子的调用在未绑定时报 error 噪音（plugin.go:884，日志 62 次） */ };
     await api.logger.info(`[${PLUGIN_NAME}] kernel sync route loading (experimental v2)`);
-    const handleOp = createKernelOpHandler({
+    const agentDeps = {
         kpost,
         getFileText,
         manifest: manifestJson as EcosystemManifest,
         pluginName: PLUGIN_NAME,
-    });
+    };
+    const handleOp = createKernelOpHandler(agentDeps);
+
+    // —— 内置 Agent 能力注册（R245 · 上游 v3.8.6 kernel/plugin/api_agent.go：siyuan.agent.registerCapability）——
+    // 模型可见名 plugin__siyuan-quickgate__<name>；老内核无 siyuan.agent 则跳过（不影响其他功能）。
+    // effects 如实声明（ToolEffects 四标志）；安全由 Agent 侧授权/审批 + 快门处理器内校验共同承担。
+    try {
+        const agent = (api as unknown as { agent?: { registerCapability?: (name: string, config: unknown, handler: (args: Record<string, unknown>) => Promise<unknown>) => Promise<unknown> } }).agent;
+        if (agent?.registerCapability) {
+            const wrap = (r: { text: string; data?: unknown; isError?: boolean }) =>
+                ({ content: [{ type: "text", text: r.text }], structuredContent: r.data, isError: r.isError === true });
+            await agent.registerCapability("quickgate_ping", {
+                title: "QuickGate Ping",
+                description: "快门健康探针（内核同步通道连通性）",
+                inputSchema: { type: "object", properties: {} },
+                effects: { localRead: true },
+            }, async () => {
+                const r = await kernelPing(agentDeps);
+                return { content: [{ type: "text", text: r.message }], structuredContent: r.data };
+            });
+            await agent.registerCapability("quickgate_discover", {
+                title: "QuickGate 生态发现",
+                description: "发现日记笔记本与收集箱文档（只读；createInboxIfMissing=true 授权自动创建收集箱）",
+                inputSchema: {
+                    type: "object",
+                    properties: {
+                        createInboxIfMissing: { type: "boolean", description: "收集箱不存在时授权自动创建" },
+                        inboxName: { type: "string", description: "自定义约定名（默认 收集箱/Inbox）" },
+                    },
+                },
+                effects: { localRead: true, localWrite: false },
+            }, async (args) => wrap(await kernelAgentDiscover(agentDeps, args ?? {})));
+            await agent.registerCapability("quickgate_capture", {
+                title: "QuickGate 快速捕获",
+                description: "把一句话追加到今日日记（- HH:mm 格式；要求某笔记本配置了日记保存路径）",
+                inputSchema: {
+                    type: "object",
+                    properties: { text: { type: "string", description: "要记的一句话" } },
+                    required: ["text"],
+                },
+                effects: { localWrite: true },
+            }, async (args) => wrap(await kernelAgentCapture(agentDeps, args ?? {})));
+            await api.logger.info(`[${PLUGIN_NAME}] 内置 Agent 能力已注册（ping/discover/capture）`);
+        } else {
+            await api.logger.info(`[${PLUGIN_NAME}] 内核无 siyuan.agent API——跳过 Agent 能力注册`);
+        }
+    } catch (e) {
+        await api.logger.warn(`[${PLUGIN_NAME}] Agent 能力注册失败（不影响其他功能）：${e instanceof Error ? e.message : String(e)}`);
+    }
     api.server.private.http.handler = async (req) => {
         try {
             if (req.context.path !== "/exec") {

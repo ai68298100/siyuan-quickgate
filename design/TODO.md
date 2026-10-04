@@ -423,6 +423,8 @@
 - [x] 【R244·循环C】生态调研 R4（重大上游事件）：思源 3.8 内置 **Agent 运行时**（kernel/agent/* 源码实证：go-openai + 会话/决策/能力三层管控 + 外部 MCP 接入 `Conf.AI.MCP.Servers`→EnsureMCPConnected）——**L561「原生 MCP=竞品」口径改写：快门 MCP 可注册为内置 Agent 的能力扩展源（分发渠道级差异）**；外部工具受 Agent 白名单隔离但快门侧安全门照常生效（D-0013）。调研=docs/10-生态调研-R4.md
 
 - [ ] 【R244-A·等用户/等模型】快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】
+- [x] 【R245·新功能】内置 Agent **原生插件能力注册**（比外部 MCP 更深的集成路径）：kernel.ts 经 v3.8.6 `siyuan.agent.registerCapability` 注册三能力——quickgate_ping（健康探针）/quickgate_discover（日记+收集箱发现，透传 createInboxIfMissing）/quickgate_capture（一句话追加今日日记，appendDailyNoteBlock）；模型可见名 plugin__siyuan-quickgate__<name>，effects 如实声明（ToolEffects 四标志），老内核无 API 自动跳过。**E4：3.8.6 真机注册成功**（内核日志「内置 Agent 能力已注册（ping/discover/capture）」，热重载后保持）。顺手消音 onrunning 可选钩子噪音（历史 62 条 error）。Agent 会话端到端（模型驱动调用）挂 R244-A【等用户/等模型】。回归 tests/kernel-agent.test.ts 4 条，162 全绿；kernel.js 热部署
+
 
 
 
