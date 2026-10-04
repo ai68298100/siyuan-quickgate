@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-04T21:03:55.037Z",
+  "startedAt": "2026-10-04T21:07:57.709Z",
   "url": "http://127.0.0.1:14643",
   "checks": [
     {
@@ -15,7 +15,7 @@
     {
       "name": "桥 ping",
       "status": "pass",
-      "note": "recorded（1ms）"
+      "note": "recorded（0ms）"
     },
     {
       "name": "内核路由",
@@ -40,5 +40,5 @@
   ],
   "failures": 2,
   "skipped": 0,
-  "finishedAt": "2026-10-04T21:04:06.979Z"
+  "finishedAt": "2026-10-04T21:08:11.330Z"
 }

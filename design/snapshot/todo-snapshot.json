@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-04T20:53:30.699Z",
+  "generatedAt": "2026-10-04T21:10:08.328Z",
   "source": "TODO.md",
   "counts": {
     "total": 1402,
@@ -20,10 +20,10 @@
     },
     "byEvidence": {
       "E4": 1031,
-      "E0": 242,
+      "E0": 241,
       "E2": 74,
       "E3": 26,
-      "E1": 28,
+      "E1": 29,
       "E5": 1
     },
     "byBlocked": {
@@ -7154,18 +7154,21 @@
       "type": "unknown",
       "status": "等用户",
       "blockedBy": "user",
-      "text": "快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】",
+      "text": "快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】；**版本要求修正（R249 调研 R5）**：3.8.6 的内置 MCP 客户端有连接 bug（#19998，2026-07-28 协议无 tool list notification 的服务器连不上，alpha.4 修复）——接入指南要求内核 **≥3.8.7-alpha.4 或等稳定版**",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E1",
       "refs": {
         "sections": [],
         "rounds": [
           "R2",
           "R3",
           "R5",
-          "R6"
+          "R6",
+          "R249"
         ],
-        "docs": []
+        "docs": [
+          "07-"
+        ]
       }
     },
     {
@@ -7178,7 +7181,7 @@
       "type": "unknown",
       "status": "done",
       "blockedBy": null,
-      "text": "内置 Agent **原生插件能力注册**（比外部 MCP 更深的集成路径）：kernel.ts 经 v3.8.6 `siyuan.agent.registerCapability` 注册三能力——quickgate_ping（健康探针）/quickgate_discover（日记+收集箱发现，透传 createInboxIfMissing）/quickgate_capture（一句话追加今日日记，appendDailyNoteBlock）；模型可见名 plugin__siyuan-quickgate__<name>，effects 如实声明（ToolEffects 四标志），老内核无 API 自动跳过。**E4：3.8.6 真机注册成功**（内核日志「内置 Agent 能力已注册（ping/discover/capture）」，热重载后保持）。顺手消音 onrunning 可选钩子噪音（历史 62 条 error）。Agent 会话端到端（模型驱动调用）挂 R244-A【等用户/等模型】。回归 tests/kernel-agent.test.ts 4 条，162 全绿；kernel.js 热部署",
+      "text": "内置 Agent **原生插件能力注册**（比外部 MCP 更深的集成路径）：kernel.ts 经 v3.8.6 `siyuan.agent.registerCapability` 注册三能力——quickgate_ping（健康探针）/quickgate_discover（日记+收集箱发现，透传 createInboxIfMissing）/quickgate_capture（一句话追加今日日记，appendDailyNoteBlock）；模型可见名 plugin__siyuan-quickgate__<name>，effects 如实声明（ToolEffects 四标志），老内核无 API 自动跳过。**E4：3.8.6 真机注册成功**（内核日志「内置 Agent 能力已注册（ping/discover/capture）」，热重载后保持）。顺手消音 onrunning 可选钩子噪音（历史 62 条 error）。Agent 会话端到端（模型驱动调用）挂 R244-A【等用户/等模型】。回归 tests/kernel-agent.test.ts 4 条，162 全绿；kernel.js 热部署；R249 补充：3.8.7-alpha.4 内核插件沙箱已支持 Web Crypto API（#20042）——内核侧 id/随机需求可用 crypto，备查",
       "mainline": "C6",
       "evidence": "E4",
       "refs": {
@@ -7188,7 +7191,8 @@
           "R3",
           "R5",
           "R6",
-          "R244"
+          "R244",
+          "R249"
         ],
         "docs": []
       }
