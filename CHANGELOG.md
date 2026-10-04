@@ -8,6 +8,8 @@
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
 
 ### Added
+- **设置面板验收补齐（TODO L502/L503/L513/L514 · R73 快赢批）**：①「恢复默认设置」按钮（列出影响+确认；保留 deviceName 本机身份，恢复后重开面板反映默认值）；②plugin.api 启用前确认框（列出将授权的名单/留痕/可逆性，取消回滚开关）；③审计对话框升级——关键词(op/状态/插件)+日期双筛选、单条复制 JSON（20 条窗口内不做分页/虚拟化：数据量不支撑，裁剪声明；审计条目无 device 字段=该筛选不适用）。
+- **命令搜索别名映射（TODO L471）**：`services/search-alias.ts` 中英/拼音别名表 + `expandSearchKeyword`——「打卡/daka/checkin」「摘录/捕获/capture」「人脉/contacts」「闪卡/review」等互达；交叉命中即设计行为（跨语言广撒网）。裁剪声明：不做全量拼音引擎（依赖重收益薄，高频词走别名表）；raw op 本就不进命令注册表，仅诊断面可见。回归：tests/search-alias.test.ts 5 条。
 - **plugin.api 允许名单设置页编辑器（TODO L458）**：设置项审计结论落地——13 个设置字段中 7 个已有 UI；允许名单此前无编辑入口但文档承诺「新插件由用户手动加入」（承诺无法履行），现补 textarea 编辑器（默认=三个已完成契约审计的插件）；`backoffMaxMs`/`auditMax`/`bridgeBasePath`/`deviceName` 裁定为代码默认/自动管理，设置页不暴露（类型注释与 api.md 已注记）。
 - **事件域幂等注册表（TODO L599 / C9 合同 §3）**：`IdempotencyRegistry`（idempotency.json，键=`<pluginId>:<idempotencyKey>`，TTL 30 天 + LRU 2000）接入事件物化写入侧——events.ndjson 滚动裁剪（cap=200）后的重放事件此前会被重复追加，现按注册表去重，「同一用户动作只记一次」跨滚动窗口成立。纪律：先写后记账（putFile 失败不 mark，避免事件永久丢失）；持久化 fail-open（坏形状重建，重启重放至多重复一行）。回归：tests/idempotency.test.ts 8 条（TTL/LRU/往返/坏形状/去重计划）。
 - **写 op 统一审计面（TODO L446 差距① / safety-gate §6）**：`checkin.record`、`contacts.ensure/interaction`、`template.new`、`workflow.execute`、`plugin.api` 出口统一落 audit（NDJSON tick 与广播快路径共用；rejected 也留痕）；`command` 字段只记 args 键名（零 PII），commands.run 维持原自审计不双写。

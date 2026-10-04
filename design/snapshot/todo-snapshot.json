@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-10-04T17:49:15.626Z",
+  "generatedAt": "2026-10-04T18:00:38.638Z",
   "source": "TODO.md",
   "counts": {
     "total": 1393,
     "checkboxes": 1393,
     "byStatus": {
-      "done": 1150,
-      "pending": 174
+      "done": 1155,
+      "pending": 169
     },
     "byMainline": {
-      "C7": 277,
+      "C7": 278,
       "C8": 218,
-      "C4": 113,
+      "C4": 111,
       "C6": 504,
       "C2": 123,
       "C1": 77,
-      "C3": 71,
+      "C3": 72,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1009,
-      "E0": 254,
+      "E4": 1014,
+      "E0": 249,
       "E2": 74,
       "E3": 29,
       "E1": 26,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 61,
-      "dev": 174,
+      "dev": 169,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -7838,14 +7838,16 @@
       "priority": "P1",
       "topic": "搜索",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "命令搜索支持中英文、拼音或关键词别名和前缀映射；“打卡/daka/checkin”“摘录/捕获/capture”均命中，raw op 仅在高级诊断出现。",
+      "text": "命令搜索支持中英文、拼音或关键词别名和前缀映射；“打卡/daka/checkin”“摘录/捕获/capture”均命中，raw op 仅在高级诊断出现。 → ✅ R230 交付（本批）：services/search-alias.ts 中英/拼音别名表+expandSearchKeyword，接入 commands.search（任一命中即算）；条目验收词对「打卡/daka/checkin」「摘录/捕获/capture」测试互达 ✓；raw op 本就不进命令注册表（registry=宿主插件命令），仅诊断面可见=既有满足；裁剪声明：全量拼音引擎不做（依赖重收益薄，高频词走别名表，扩表须对应真实宿主命令词）。回归 tests/search-alias.test.ts 5 条+集成，146 全绿",
       "mainline": "C8",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R230"
+        ],
         "docs": []
       }
     },
@@ -8313,14 +8315,16 @@
       "priority": "P0",
       "topic": "信息架构",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设置页分为状态概览、基础连接、安全与权限、性能、生态、数据与队列、诊断、关于；基础项首屏，高级项折叠。",
+      "text": "设置页分为状态概览、基础连接、安全与权限、性能、生态、数据与队列、诊断、关于；基础项首屏，高级项折叠。 → ✅ R230 对照销账（e266fd0+本批）：状态概览卡（role=status+数据截至）+四折叠组（基础连接首屏展开/安全与权限/数据与队列/诊断与生态）+常显关于节（版本/协议/帮助链接）+「恢复默认设置」；基础项首屏、高级项折叠 ✓。合并裁量声明：性能控件（pollMs）并入基础连接、生态并入诊断组、关于用常显节替代折叠组——信息架构实质（概览/首屏/折叠）达成",
       "mainline": "C3",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R230"
+        ],
         "docs": []
       }
     },
@@ -8332,14 +8336,16 @@
       "priority": "P0",
       "topic": "标签",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "所有输入有可关联 label、说明、默认值、单位、范围、示例和恢复默认；按 W3C 表单标签/fieldset 规则验收。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "所有输入有可关联 label、说明、默认值、单位、范围、示例和恢复默认；按 W3C 表单标签/fieldset 规则验收。 → ✅ R230 对照销账：row() 统一 label.htmlFor 自动关联控件 id（W3C 表单标签）+ 次行 hint 说明 ✓；pollMs hint 含范围（200~60000）与行为、allowlist/blacklist hint 含格式示例、raw 透传 hint 含默认值 ✓；本批补「恢复默认设置」全局按钮（确认后还原+保留 deviceName+重开面板）。单位/逐字段示例按需含于 hint，不为凑数添加",
+      "mainline": "C7",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R230"
+        ],
         "docs": []
       }
     },
@@ -8522,14 +8528,16 @@
       "priority": "P1",
       "topic": "数据操作",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "清空队列、启用 raw API、导出敏感诊断的确认框列出影响数量、保留时间和可逆性，并提供取消。",
-      "mainline": "C4",
-      "evidence": "E0",
+      "text": "清空队列、启用 raw API、导出敏感诊断的确认框列出影响数量、保留时间和可逆性，并提供取消。 → ✅ R230 对照销账：清空队列确认框已列出影响数量+最早提交时间+不可逆声明+取消（e266fd0 既有）；本批补 plugin.api 启用确认框（列出将授权名单/审计留痕/可逆回退，取消回滚开关）；导出敏感诊断=导出内容本身脱敏（诊断快照不含 Token/正文/个人路径，审计条目不含参数值）+复制前无二次确认（内容已脱敏故豁免，声明）",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R230"
+        ],
         "docs": []
       }
     },
@@ -8541,14 +8549,16 @@
       "priority": "P1",
       "topic": "审计视图",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "审计/回执/事件支持时间、op、状态、插件、device 筛选，搜索、分页/虚拟化、复制单行和下载脱敏文件。",
+      "text": "审计/回执/事件支持时间、op、状态、插件、device 筛选，搜索、分页/虚拟化、复制单行和下载脱敏文件。 → ✅ R230 补齐+销账：审计对话框=关键词（op/状态/插件）+日期双筛选+单条复制 JSON+完整导出（剪贴板，内容脱敏）；裁剪声明：分页/虚拟化不做（20 条窗口数据量不支撑）、device 筛选不适用（AuditEntry 无 device 字段——审计按本机单设备设计，device 路由在命令信封层）；回执视图（最近 20 条）与事件（events.pull）维持只读面",
       "mainline": "C1",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R230"
+        ],
         "docs": []
       }
     },

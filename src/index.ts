@@ -637,11 +637,30 @@ export default class QuickGatePlugin extends Plugin {
         rawInput.className = "b3-switch";
         rawInput.checked = this.settings.rawApiEnabled;
         rawInput.onchange = async () => {
-            this.settings.rawApiEnabled = rawInput.checked;
+            if (rawInput.checked) {
+                // L513：启用前列出影响/留痕/可逆性（危险开关确认框纪律）；取消则回滚开关
+                const 名单 = this.settings.rawApiAllowlist.length > 0
+                    ? this.settings.rawApiAllowlist.join("、")
+                    : "（当前名单为空——开启后调用仍会被全部拒绝，请先在下方编辑名单）";
+                confirm(
+                    "小驴快门 · 启用 plugin.api 高级透传",
+                    `将允许外部客户端（MCP/CLI）经快门调用名单内插件的窗口桥方法：${名单}。\n` +
+                    `所有调用留审计（仅记录插件与方法名，不含参数值）。随时可关闭本开关回退，设置即改即生效。`,
+                    async () => {
+                        this.settings.rawApiEnabled = true;
+                        this.store.settings = this.settings;
+                        await this.store.saveSettings();
+                        showMessage("plugin.api 已启用（名单可在下方编辑）", 3000);
+                    },
+                    () => { rawInput.checked = false; },
+                );
+                return;
+            }
+            this.settings.rawApiEnabled = false;
             this.store.settings = this.settings;
             await this.store.saveSettings();
         };
-        row(secSec, "plugin.api 高级透传", rawInput, "默认关；配合允许名单使用（见下方黑名单）");
+        row(secSec, "plugin.api 高级透传", rawInput, "默认关；启用前确认；配合允许名单使用（见下方黑名单）");
 
         // 允许名单编辑器（L458：api.md §11 承诺「新插件由用户手动加入」——此前无入口，承诺无法履行）
         const allowlistInput = document.createElement("textarea");
@@ -733,27 +752,53 @@ export default class QuickGatePlugin extends Plugin {
         auditBtn.className = "b3-button b3-button--outline";
         auditBtn.textContent = "查看审计（最近 20 条）";
         auditBtn.onclick = () => {
-            const render = (filter: string) => {
-                const kw = filter.trim().toLowerCase();
-                const lines = this.auditLog.slice(-20)
-                    .filter((a) => !kw || `${a.plugin}/${a.command} ${a.status}`.toLowerCase().includes(kw))
-                    .map((a) => `${a.time} ${a.plugin}/${a.command} → ${a.status} (${a.elapsedMs}ms)`)
-                    .join("\n") || "（无匹配）";
-                return `<div style="margin-bottom:6px"><input id="qg-audit-filter" class="b3-text-field fn__block" placeholder="筛选：op / 状态 / 插件" value="${filter.replace(/"/g, "&quot;")}" /></div>` +
-                    `<div class="b3-typography" style="white-space:pre-wrap;font-size:12px">${lines.replace(/</g, "&lt;")}</div>`;
+            // L514：关键词（op/状态/插件）+ 日期筛选 + 逐条复制；20 条窗口内不做分页/虚拟化（数据量不支撑，裁剪声明）
+            const state = { kw: "", date: "" };
+            const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+            const view = () => this.auditLog.slice(-20).filter((a) => {
+                if (state.date && !a.time.startsWith(state.date)) return false;
+                if (state.kw && !`${a.plugin}/${a.command} ${a.status}`.toLowerCase().includes(state.kw)) return false;
+                return true;
+            });
+            const render = () => {
+                const rows = view().map((a) => {
+                    const idx = this.auditLog.indexOf(a);
+                    return `<div style="margin-bottom:2px">${esc(`${a.time} ${a.plugin}/${a.command} → ${a.status} (${a.elapsedMs}ms)`)} ` +
+                        `<button class="b3-button b3-button--small" data-qg-copy="${idx}">复制</button></div>`;
+                }).join("") || "（无匹配）";
+                return `<div style="display:flex;gap:6px;margin-bottom:6px">` +
+                    `<input id="qg-audit-filter" class="b3-text-field" style="flex:1" placeholder="筛选：op / 状态 / 插件" value="${esc(state.kw)}" />` +
+                    `<input id="qg-audit-date" type="date" class="b3-text-field" style="width:150px" value="${state.date}" title="按日期筛选" />` +
+                    `</div><div style="white-space:pre-wrap;font-size:12px">${rows}</div>`;
             };
-            const d = new Dialog({ title: "审计日志", content: `<div style="padding:12px">${render("")}</div>`, width: "640px" });
+            const rerender = () => {
+                const body = d.element.querySelector("#qg-audit-body");
+                if (body) body.innerHTML = render();
+                const again = d.element.querySelector("#qg-audit-filter") as HTMLInputElement | null;
+                if (again && document.activeElement === again || document.activeElement?.id === "qg-audit-date") {
+                    const focusBack = d.element.querySelector(`#${document.activeElement?.id}`) as HTMLInputElement | null;
+                    focusBack?.focus();
+                }
+            };
+            const d = new Dialog({ title: "审计日志", content: `<div style="padding:12px"><div id="qg-audit-body">${render()}</div></div>`, width: "640px" });
             d.element.addEventListener("input", (ev) => {
                 const target = ev.target as HTMLInputElement;
-                if (target.id === "qg-audit-filter") {
-                    const body = d.element.querySelector("div[style*='padding']");
-                    if (body) body.innerHTML = render(target.value);
-                    const again = d.element.querySelector("#qg-audit-filter") as HTMLInputElement | null;
-                    if (again) { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
-                }
+                if (target.id === "qg-audit-filter") state.kw = target.value.trim().toLowerCase();
+                else if (target.id === "qg-audit-date") state.date = target.value;
+                else return;
+                rerender();
+                const again = d.element.querySelector(`#${target.id}`) as HTMLInputElement | null;
+                if (again && target.id === "qg-audit-filter") { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+            });
+            d.element.addEventListener("click", (ev) => {
+                const btn = (ev.target as HTMLElement).closest("[data-qg-copy]") as HTMLElement | null;
+                if (!btn) return;
+                const entry = this.auditLog[Number(btn.dataset.qgCopy)];
+                if (!entry) return;
+                void navigator.clipboard.writeText(JSON.stringify(entry, null, 2)).then(() => showMessage("已复制单条审计（JSON，脱敏字段本就不含参数值）", 2500, "info"));
             });
         };
-        row(secQueue, "审计日志（含筛选）", auditBtn, "按 op / 状态 / 插件过滤最近 20 条");
+        row(secQueue, "审计日志（筛选+复制）", auditBtn, "按 op / 状态 / 插件关键词与日期过滤最近 20 条；单条可复制 JSON");
 
         const auditExportBtn = document.createElement("button");
         auditExportBtn.className = "b3-button b3-button--outline";
@@ -842,6 +887,33 @@ export default class QuickGatePlugin extends Plugin {
         about.textContent = `小驴快门 v${PLUGIN_VERSION} · 协议 v1 · 小驴生态联动中枢 + 外部网关。`
             + `数据流向与隐私边界见 PRIVACY.md（本插件不外传任何数据）。`;
         root.appendChild(about);
+        // L503：全局恢复默认（保留 deviceName——device 路由身份属自动管理字段，重置不应改变本机身份）
+        const resetBtn = document.createElement("button");
+        resetBtn.className = "b3-button b3-button--outline";
+        resetBtn.textContent = "恢复默认设置";
+        resetBtn.onclick = () => {
+            confirm(
+                "小驴快门 · 恢复默认设置",
+                "将恢复全部设置为出厂默认：桥/广播关闭、轮询 500ms、黑名单与允许名单还原、确认门控开启；桥若在运行会停止。设备名保留（本机身份不变）。当前自定义值不可找回。",
+                async () => {
+                    const deviceName = this.settings.deviceName;
+                    this.settings = { ...DEFAULT_SETTINGS, deviceName };
+                    this.store.settings = this.settings;
+                    await this.store.saveSettings();
+                    this.stopBridge();
+                    this.stopEventBridge();
+                    if (this.broadcastSub?.running) await this.broadcastSub.stop();
+                    dialog.destroy();
+                    this.openSettingPanel(); // 重开面板反映默认值
+                    showMessage("已恢复默认设置（设备名保留）", 3000);
+                },
+                () => { },
+            );
+        };
+        const resetRow = document.createElement("div");
+        resetRow.style.marginTop = "4px";
+        resetRow.appendChild(resetBtn);
+        root.appendChild(resetRow);
         const help = document.createElement("div");
         help.style.fontSize = "12px";
         help.style.marginTop = "4px";

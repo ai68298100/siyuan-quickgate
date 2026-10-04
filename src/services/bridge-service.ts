@@ -18,6 +18,7 @@ import {
     BridgeResult,
 } from "./adapters";
 import { validateTemplatePath, validateTemplateContent } from "./path-guard";
+import { expandSearchKeyword } from "./search-alias";
 
 export interface EditorContextResult {
     docId: string | null;
@@ -381,10 +382,11 @@ export class BridgeService {
             case "commands.search": {
                 const kw = typeof a.keyword === "string" ? a.keyword.toLowerCase() : "";
                 const probe = this.deps.registry();
+                const kws = kw ? expandSearchKeyword(kw) : []; // L471：中英/拼音别名扩展，任一命中即算
                 const hits = probe.plugins
                     .filter((p) => !s.blacklist.includes(p.name))
                     .flatMap((p) => p.commands)
-                    .filter((c) => !kw || c.title.toLowerCase().includes(kw) || c.id.toLowerCase().includes(kw) || c.plugin.toLowerCase().includes(kw))
+                    .filter((c) => kws.length === 0 || kws.some((k) => c.title.toLowerCase().includes(k) || c.id.toLowerCase().includes(k) || c.plugin.toLowerCase().includes(k)))
                     .slice(0, 50);
                 return { status: "recorded", data: { commands: hits }, message: `命中 ${hits.length} 条` };
             }
