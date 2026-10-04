@@ -63,7 +63,7 @@ try {
     ro.notify("notifications/initialized");
     const list = await ro.call("tools/list", {});
     const names = (list.result?.tools ?? []).map((t) => t.name);
-    check("tools/list 默认只读 13 工具", names.length === 13, `实际 ${names.length}`);
+    check("tools/list 默认只读 14 工具", names.length === 14, `实际 ${names.length}`);
     check("写工具未暴露", !names.includes("checkin.record") && !names.includes("commands.run"));
     const denied = await ro.call("tools/call", { name: "checkin.record", arguments: { itemId: "x" } });
     check("tools/call 写工具诚实拒绝", denied.result?.isError === true && String(denied.result?.content?.[0]?.text ?? "").includes("LV_MCP_WRITE"));
@@ -75,7 +75,7 @@ try {
     // —— 写模式会话——
     const rw = await session(true);
     const list2 = await rw.call("tools/list", {});
-    check("LV_MCP_WRITE=1 时 23 工具全暴露", (list2.result?.tools ?? []).length === 23, `实际 ${(list2.result?.tools ?? []).length}`);
+    check("LV_MCP_WRITE=1 时 26 工具全暴露", (list2.result?.tools ?? []).length === 26, `实际 ${(list2.result?.tools ?? []).length}`);
     if (process.env.SMOKE_SKIP_LIVE === "1") {
         // CI 模式：无内核，跳过 live 回执断言（协议层已由前五断言覆盖）
         console.log("  (SMOKE_SKIP_LIVE=1：跳过 bridge.ping 真实回执断言)");
