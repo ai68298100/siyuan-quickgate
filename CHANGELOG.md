@@ -7,6 +7,9 @@
 ### Security
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
 
+### Fixed
+- **CI 红转绿（R258）**：①pnpm 版本双指定（workflows version 输入 vs packageManager 字段）——删除 version 输入，单一事实源=package.json；②行删除遗留空 with 块致 YAML 无效（0s 失败）；③mcp-smoke 计数断言 13/23 未随 favorites 更新（第四处计数遗漏）→14/26。CI 于 39 提交推送后转绿。
+
 ### Added
 - **设置页「收藏与最近使用管理」（TODO L472 消费面 · R250）**：收藏列表（移除）/ 最近使用列表（单条移除 + 一键清空）——favorites.json 的完整 UI 管理入口，不再只有 CLI。
 - **favorites.remove 支持 `clearRecent:true`（TODO L472 清除历史 · R241）**：一次清空全部最近使用、无需逐条 plugin/command；契约 JSON/api.md/MCP schema 同步。
