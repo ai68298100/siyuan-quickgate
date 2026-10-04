@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-04T19:41:36.934Z",
+  "startedAt": "2026-10-04T19:48:05.353Z",
   "url": "http://127.0.0.1:14643",
   "checks": [
     {
@@ -23,6 +23,11 @@
       "note": "pong（内核同步通道）"
     },
     {
+      "name": "config.discover",
+      "status": "pass",
+      "note": "日记=20240517134619-n7wcr1m 收集箱=null"
+    },
+    {
       "name": "petal 加载",
       "status": "pass",
       "note": "快门已加载"
@@ -30,5 +35,5 @@
   ],
   "failures": 2,
   "skipped": 0,
-  "finishedAt": "2026-10-04T19:41:53.786Z"
+  "finishedAt": "2026-10-04T19:48:22.941Z"
 }

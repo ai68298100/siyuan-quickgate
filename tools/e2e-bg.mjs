@@ -230,6 +230,17 @@ async function main() {
     } catch (e) { record("内核路由", "fail", e.message); report.failures++; }
     await gap();
 
+    // 4.5 config.discover（内核路由只读发现：日记笔记本/收集箱；R236 增）
+    try {
+        const r = await fetch(url + "/plugin/private/siyuan-quickgate/exec", { method: "POST", headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ op: "config.discover", args: {} }) });
+        const j = await r.json();
+        const d = j?.data?.data ?? {};
+        const ok = r.ok && j?.data?.status === "recorded";
+        record("config.discover", ok ? "pass" : "fail", ok ? `日记=${d.diaryNotebookId ?? "null"} 收集箱=${d.inboxDocId ?? "null"}` : "HTTP " + r.status);
+        if (!ok) report.failures++;
+    } catch (e) { record("config.discover", "fail", e.message); report.failures++; }
+    await gap();
+
     // 5. petal 加载（快门在装）
     try {
         // R214 校准：frontend="all" 返回空数组，真实 petals 按 frontend 枚举（desktop/mobile）
