@@ -440,22 +440,90 @@ export default class QuickGatePlugin extends Plugin {
     private openSettingPanel() {
         const dialog = new Dialog({
             title: "小驴快门 · 设置",
-            content: `<div class="b3-dialog__content" id="qg-settings" style="padding:12px"></div>`,
-            width: "560px",
+            content: `<div class="b3-dialog__content" id="qg-settings" style="padding:12px;max-height:72vh;overflow:auto"></div>`,
+            width: "640px",
             height: "auto",
         });
         const root = dialog.element.querySelector("#qg-settings") as HTMLElement;
-        const row = (label: string, ctrl: HTMLElement) => {
+        let seq = 0;
+
+        // —— 分组折叠节（details 原生键盘可达；open=首屏展开）——
+        const section = (title: string, open: boolean) => {
+            const d = document.createElement("details");
+            d.open = open;
+            d.style.marginBottom = "4px";
+            const s = document.createElement("summary");
+            s.textContent = title;
+            s.style.cursor = "pointer";
+            s.style.fontWeight = "bold";
+            s.style.padding = "4px 0";
+            d.appendChild(s);
+            const body = document.createElement("div");
+            d.appendChild(body);
+            root.appendChild(d);
+            return body;
+        };
+        // —— 行：label 关联控件（ htmlFor），hint 为次行说明——
+        const row = (parent: HTMLElement, label: string, ctrl: HTMLElement, hint?: string) => {
             const div = document.createElement("div");
             div.className = "fn__flex b3-label";
-            const l = document.createElement("div");
+            div.style.flexWrap = "wrap";
+            div.style.alignItems = "center";
+            const l = document.createElement("label");
             l.textContent = label;
             l.style.flex = "1";
             l.style.paddingRight = "12px";
+            l.style.minWidth = "200px";
+            if (!ctrl.id) ctrl.id = `qg-f-${++seq}`;
+            l.htmlFor = ctrl.id;
             div.appendChild(l);
             div.appendChild(ctrl);
-            root.appendChild(div);
+            if (hint) {
+                const h = document.createElement("div");
+                h.style.fontSize = "11px";
+                h.style.width = "100%";
+                h.style.color = "var(--b3-theme-on-surface)";
+                h.textContent = hint;
+                div.appendChild(h);
+            }
+            parent.appendChild(div);
+            return div;
         };
+
+        // —— 状态概览（首屏；role=status 动态刷新 + 数据截至时间，超出原型要求）——
+        const statusCard = document.createElement("div");
+        statusCard.className = "b3-card";
+        statusCard.style.padding = "8px 12px";
+        statusCard.style.marginBottom = "8px";
+        const statusLine = document.createElement("div");
+        statusLine.setAttribute("role", "status");
+        statusLine.setAttribute("aria-live", "polite");
+        statusLine.style.fontSize = "12px";
+        statusLine.style.lineHeight = "1.9";
+        statusCard.appendChild(statusLine);
+        root.appendChild(statusCard);
+        const badge = (ok: boolean, okText: string, offText: string) =>
+            `<span style="color:${ok ? "var(--b3-theme-primary)" : "var(--b3-theme-on-surface)"}">● ${ok ? okText : offText}</span>`;
+        const refreshStatus = () => {
+            const st = this.activeService?.stats;
+            const avg = st && st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null;
+            statusLine.innerHTML = [
+                badge(!!this.poller?.isRunning, "桥 运行中", "桥 已停止"),
+                badge(!!this.broadcastSub?.running, "广播 运行中", "广播 关"),
+                badge(!!this.eventBridgeHandler, "事件物化 已接", "事件物化 未接"),
+                st ? `本次运行 ${st.commands} 条（成功 ${st.ok} / 拒绝 ${st.rejected} / 失败 ${st.failed} / 过期 ${st.expired}）` : "服务未启动",
+                avg !== null ? `平均 ${avg}ms` : null,
+                st?.lastActivityAt ? `数据截至 ${new Date(st.lastActivityAt).toLocaleTimeString()}` : null,
+            ].filter(Boolean).join(" · ");
+        };
+        refreshStatus();
+        const statusTimer = window.setInterval(() => {
+            if (!document.body.contains(root)) { window.clearInterval(statusTimer); return; }
+            refreshStatus();
+        }, 3000);
+
+        // —— 基础连接（首屏展开）——
+        const secBasic = section("基础连接", true);
 
         const enabledInput = document.createElement("input");
         enabledInput.type = "checkbox";
@@ -472,9 +540,10 @@ export default class QuickGatePlugin extends Plugin {
                 this.stopBridge();
                 this.stopEventBridge(); // 与 onload 配对：关桥即退订，事件物化不得在桥关闭后继续写
             }
+            refreshStatus();
             showMessage(`外部命令桥已${this.settings.bridgeEnabled ? "开启" : "关闭"}`, 3000);
         };
-        row("外部命令桥（默认关；开启后外部程序可发命令）", enabledInput);
+        row(secBasic, "外部命令桥", enabledInput, "默认关；开启后外部程序（Quicker/CLI/MCP）可发命令");
 
         const mobileInput = document.createElement("input");
         mobileInput.type = "checkbox";
@@ -487,7 +556,7 @@ export default class QuickGatePlugin extends Plugin {
             await this.store.saveSettings();
             showMessage(`移动端桥已${this.settings.mobileBridgeEnabled ? "允许" : "关闭"}（仅在移动端设备上生效）`, 3000);
         };
-        row("移动端桥 opt-in（默认关；移动端上开启外部命令桥需单独打开此项）", mobileInput);
+        row(secBasic, "移动端桥 opt-in", mobileInput, "默认关；移动端上开启外部命令桥需单独打开此项");
 
         const bcInput = document.createElement("input");
         bcInput.type = "checkbox";
@@ -502,23 +571,42 @@ export default class QuickGatePlugin extends Plugin {
             } else if (this.broadcastSub?.running) {
                 await this.broadcastSub.stop();
             }
+            refreshStatus();
             showMessage(`广播快路径已${this.settings.broadcastEnabled ? "开启（毫秒级命令通道 qg-cmd）" : "关闭"}`, 3000);
         };
-        row("广播快路径 v1.5（默认关；需先开桥；postMessage→qg-cmd 频道毫秒级执行）", bcInput);
+        row(secBasic, "广播快路径 v1.5", bcInput, "默认关；需先开桥；postMessage→qg-cmd 频道毫秒级执行");
 
+        const pollWrap = document.createElement("div");
+        pollWrap.style.display = "flex";
+        pollWrap.style.alignItems = "center";
+        pollWrap.style.gap = "6px";
         const pollInput = document.createElement("input");
         pollInput.type = "number";
         pollInput.className = "b3-text-field fn__size200";
         pollInput.value = String(this.settings.pollMs);
+        const pollErr = document.createElement("span");
+        pollErr.setAttribute("role", "alert");
+        pollErr.style.color = "var(--b3-theme-error)";
+        pollErr.style.fontSize = "11px";
+        pollWrap.appendChild(pollInput);
+        pollWrap.appendChild(pollErr);
         pollInput.onchange = async () => {
             const v = parseInt(pollInput.value, 10);
             if (v >= 200 && v <= 60000) {
+                pollErr.textContent = "";
                 this.settings.pollMs = v;
                 this.store.settings = this.settings;
                 await this.store.saveSettings();
+            } else {
+                // 行内校验：不静默还原，给出原因（超出原型「inline 校验」要求）
+                pollErr.textContent = "须为 200~60000 的整数，已还原当前生效值";
+                pollInput.value = String(this.settings.pollMs);
             }
         };
-        row("轮询间隔（ms，200~60000）", pollInput);
+        row(secBasic, "轮询间隔（ms）", pollWrap, "200~60000；行内校验，非法值还原并提示");
+
+        // —— 安全与权限（折叠）——
+        const secSec = section("安全与权限", false);
 
         const confirmInput = document.createElement("input");
         confirmInput.type = "checkbox";
@@ -529,7 +617,7 @@ export default class QuickGatePlugin extends Plugin {
             this.store.settings = this.settings;
             await this.store.saveSettings();
         };
-        row("命令执行前确认（默认开，30 秒超时拒绝）", confirmInput);
+        row(secSec, "命令执行前确认", confirmInput, "默认开；思源端弹确认，30 秒超时拒绝");
 
         const rawInput = document.createElement("input");
         rawInput.type = "checkbox";
@@ -540,11 +628,25 @@ export default class QuickGatePlugin extends Plugin {
             this.store.settings = this.settings;
             await this.store.saveSettings();
         };
-        row("plugin.api 高级透传（默认关）", rawInput);
+        row(secSec, "plugin.api 高级透传", rawInput, "默认关；配合允许名单使用（见下方黑名单）");
+
+        const blacklistInput = document.createElement("textarea");
+        blacklistInput.className = "b3-text-field fn__block";
+        blacklistInput.rows = 2;
+        blacklistInput.value = this.settings.blacklist.join(", ");
+        blacklistInput.onchange = async () => {
+            this.settings.blacklist = blacklistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
+            this.store.settings = this.settings;
+            await this.store.saveSettings();
+        };
+        row(secSec, "插件黑名单", blacklistInput, "逗号分隔；名单内插件不暴露命令");
+
+        // —— 数据与队列（折叠）——
+        const secQueue = section("数据与队列", false);
 
         const queueBtn = document.createElement("button");
         queueBtn.className = "b3-button b3-button--outline";
-        queueBtn.textContent = "队列状态";
+        queueBtn.textContent = "查看队列与运行统计";
         queueBtn.onclick = async () => {
             try {
                 const text = (await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/commands.ndjson`)) ?? "";
@@ -564,41 +666,69 @@ export default class QuickGatePlugin extends Plugin {
                 showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
         };
-        row("可观测性（R2）", queueBtn);
+        row(secQueue, "队列与运行统计", queueBtn);
 
         const clearBtn = document.createElement("button");
         clearBtn.className = "b3-button b3-button--outline";
         clearBtn.textContent = "清空命令队列";
         clearBtn.onclick = async () => {
-            confirm("小驴快门", "清空 commands 与 results 桥文件，并重置处理台账？未消费命令将全部丢弃。", async () => {
-                try {
-                    const base = this.settings.bridgeBasePath;
-                    await this.kernelApi.putFileText(`${base}/commands.ndjson`, "");
-                    await this.kernelApi.putFileText(`${base}/results.ndjson`, "");
-                    this.store.processed = { schemaVersion: 1, processed: {} };
-                    await this.store.saveProcessed();
-                    showMessage("命令队列已清空", 3000);
-                } catch (e) {
-                    showMessage(`清空失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+            try {
+                const base = this.settings.bridgeBasePath;
+                // 清空前预览：数量 / 最老命令时间（超出原型「清队列前预览」要求）
+                const text = (await this.kernelApi.getFileText(`${base}/commands.ndjson`)) ?? "";
+                const ls = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
+                let oldest = "";
+                for (const l of ls) {
+                    try { const c = JSON.parse(l); if (typeof c.createdAt === "string" && (!oldest || c.createdAt < oldest)) oldest = c.createdAt; } catch { }
                 }
-            }, () => {});
+                const preview = ls.length === 0
+                    ? "队列当前为空。仍将清空回执文件并重置处理台账。"
+                    : `将丢弃 ${ls.length} 条未消费命令${oldest ? `（最早提交 ${oldest}）` : ""}，并清空回执文件与处理台账。`;
+                confirm("小驴快门 · 清空队列", preview + " 此操作不可撤销。", async () => {
+                    try {
+                        await this.kernelApi.putFileText(`${base}/commands.ndjson`, "");
+                        await this.kernelApi.putFileText(`${base}/results.ndjson`, "");
+                        this.store.processed = { schemaVersion: 1, processed: {} };
+                        await this.store.saveProcessed();
+                        showMessage("命令队列已清空", 3000);
+                    } catch (e) {
+                        showMessage(`清空失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+                    }
+                }, () => {});
+            } catch (e) {
+                showMessage(`预览失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+            }
         };
-        row("排障", clearBtn);
+        row(secQueue, "排障", clearBtn, "清空前预览将丢弃数量与最老命令（不可撤销）");
 
+        const auditFilterInput = document.createElement("input");
+        auditFilterInput.className = "b3-text-field fn__size200";
+        auditFilterInput.placeholder = "筛选：op / 状态 / 插件";
         const auditBtn = document.createElement("button");
         auditBtn.className = "b3-button b3-button--outline";
         auditBtn.textContent = "查看审计（最近 20 条）";
         auditBtn.onclick = () => {
-            const lines = this.auditLog.slice(-20)
-                .map((a) => `${a.time} ${a.plugin}/${a.command} → ${a.status} (${a.elapsedMs}ms)`)
-                .join("\n") || "（暂无）";
-            new Dialog({
-                title: "审计日志",
-                content: `<div class="b3-typography" style="padding:12px;white-space:pre-wrap;font-size:12px">${lines.replace(/</g, "&lt;")}</div>`,
-                width: "640px",
+            const render = (filter: string) => {
+                const kw = filter.trim().toLowerCase();
+                const lines = this.auditLog.slice(-20)
+                    .filter((a) => !kw || `${a.plugin}/${a.command} ${a.status}`.toLowerCase().includes(kw))
+                    .map((a) => `${a.time} ${a.plugin}/${a.command} → ${a.status} (${a.elapsedMs}ms)`)
+                    .join("\n") || "（无匹配）";
+                return `<div style="margin-bottom:6px"><input id="qg-audit-filter" class="b3-text-field fn__block" placeholder="筛选：op / 状态 / 插件" value="${filter.replace(/"/g, "&quot;")}" /></div>` +
+                    `<div class="b3-typography" style="white-space:pre-wrap;font-size:12px">${lines.replace(/</g, "&lt;")}</div>`;
+            };
+            const d = new Dialog({ title: "审计日志", content: `<div style="padding:12px">${render("")}</div>`, width: "640px" });
+            d.element.addEventListener("input", (ev) => {
+                const target = ev.target as HTMLInputElement;
+                if (target.id === "qg-audit-filter") {
+                    const body = d.element.querySelector("div[style*='padding']");
+                    if (body) body.innerHTML = render(target.value);
+                    const again = d.element.querySelector("#qg-audit-filter") as HTMLInputElement | null;
+                    if (again) { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+                }
             });
         };
-        row("审计日志", auditBtn);
+        row(secQueue, "审计日志（含筛选）", auditBtn, "按 op / 状态 / 插件过滤最近 20 条");
 
         const auditExportBtn = document.createElement("button");
         auditExportBtn.className = "b3-button b3-button--outline";
@@ -612,7 +742,7 @@ export default class QuickGatePlugin extends Plugin {
                 showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
         };
-        row("审计导出（完整 auditLog → 剪贴板）", auditExportBtn);
+        row(secQueue, "审计导出（完整 auditLog → 剪贴板）", auditExportBtn);
 
         const receiptBtn = document.createElement("button");
         receiptBtn.className = "b3-button b3-button--outline";
@@ -630,18 +760,10 @@ export default class QuickGatePlugin extends Plugin {
                 showMessage(`读取回执失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
         };
-        row("最近回执", receiptBtn);
+        row(secQueue, "最近回执", receiptBtn);
 
-        const blacklistInput = document.createElement("textarea");
-        blacklistInput.className = "b3-text-field fn__block";
-        blacklistInput.rows = 2;
-        blacklistInput.value = this.settings.blacklist.join(", ");
-        blacklistInput.onchange = async () => {
-            this.settings.blacklist = blacklistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-        };
-        row("插件黑名单（逗号分隔，不暴露其命令）", blacklistInput);
+        // —— 诊断与生态（折叠）——
+        const secDiag = section("诊断与生态", false);
 
         const diagBtn = document.createElement("button");
         diagBtn.className = "b3-button b3-button--outline";
@@ -657,7 +779,7 @@ export default class QuickGatePlugin extends Plugin {
                 showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
         };
-        row("诊断", diagBtn);
+        row(secDiag, "诊断", diagBtn, "脱敏：不含 Token / 正文 / 个人路径");
 
         const ecoBtn = document.createElement("button");
         ecoBtn.className = "b3-button b3-button--outline";
@@ -686,14 +808,26 @@ export default class QuickGatePlugin extends Plugin {
                 showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
         };
-        row("生态", ecoBtn);
+        row(secDiag, "生态", ecoBtn);
 
+        // —— 关于（常显 + 帮助链接，超出原型「帮助入口」要求）——
         const about = document.createElement("div");
         about.className = "b3-label";
         about.style.fontSize = "12px";
         about.textContent = `小驴快门 v${PLUGIN_VERSION} · 协议 v1 · 小驴生态联动中枢 + 外部网关。`
-            + `使用说明与自助排障见仓库 docs/GETTING-STARTED.md（5 分钟上手）与 docs/FAQ.md（症状→原因→解法）；`
-            + `数据流向与隐私边界见 docs/PRIVACY.md（本插件不外传任何数据）。`;
+            + `数据流向与隐私边界见 PRIVACY.md（本插件不外传任何数据）。`;
         root.appendChild(about);
+        const help = document.createElement("div");
+        help.style.fontSize = "12px";
+        help.style.marginTop = "4px";
+        help.innerHTML = "帮助：" +
+            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/GETTING-STARTED.md">上手指南</a> · ` +
+            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/FAQ.md">故障排查 FAQ</a> · ` +
+            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/PRIVACY.md">隐私说明</a> · ` +
+            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>`;
+        root.appendChild(help);
+
+        // 键盘可达：打开后焦点落首控件（原型「焦点落首控件」）
+        enabledInput.focus();
     }
 }
