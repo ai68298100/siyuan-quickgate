@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-04T16:48:57.941Z",
+  "generatedAt": "2026-10-04T17:10:11.087Z",
   "source": "TODO.md",
   "counts": {
     "total": 1393,
     "checkboxes": 1393,
     "byStatus": {
-      "done": 1143,
-      "pending": 181
+      "done": 1145,
+      "pending": 179
     },
     "byMainline": {
       "C7": 277,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1002,
+      "E4": 1004,
       "E0": 255,
-      "E2": 79,
-      "E3": 30,
+      "E2": 78,
+      "E3": 29,
       "E1": 26,
       "E5": 1
     },
     "byBlocked": {
       "user": 61,
-      "dev": 181,
+      "dev": 179,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -9852,15 +9852,18 @@
       "priority": "P1",
       "topic": "类型门禁",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "◐ R226 半交付（契约+schema+校验器=设计仓库侧已落，TS 类型/CI 门禁挂 quickgate 批）：将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。",
+      "text": "将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。 → ✅ R226+R227 全链交付：R226=C9 合同+schema.json+设计仓库校验器（本仓库 scripts/validate-ecosystem-manifest.mjs）；R227（quickgate 1be02ba）=EcosystemManifest 接口补齐 v2 字段（events/sourceOfTruth/ingestion/minProtocol/eventNamespace/capabilitySchemas/updatedAt）+六处 `as unknown` 断言全部移除+`check:manifest` 入 check 链（CI ci.yml 首步 run check=契约违规阻断发布）；v1 迁移期警告/v2 严格双档，manifest 升 v2 时全强制（合同 §5 同步点）",
       "mainline": "C1",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
+        "sections": [
+          "5"
+        ],
         "rounds": [
-          "R226"
+          "R226",
+          "R227"
         ],
         "docs": []
       }
@@ -10436,17 +10439,18 @@
       "priority": "P0",
       "topic": "路径安全",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "◐ R226 规格定稿（safety-gate-contract §7：templatePath 白名单形状/64KB 上限//templates/ 前缀断言/失败审计/三通道回归矩阵 7 用例；现状两通道 `..` 直拼未拦截已源码核对；代码守卫挂 quickgate 批）：template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。",
+      "text": "template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。 → ✅ R226 规格（safety-gate §7）+R227 实现（quickgate 1be02ba）：src/services/path-guard.ts 白名单形状/≤200 字符/内容 ≤64KB（不截断执行），NDJSON（bridge-service）与内核路由（kernel-ops）双入口共用=MCP 全覆盖；tests/path-guard.test.ts 9 条（§7 矩阵七用例×双通道+内容上限+合法放行）；失败审计=NDJSON/广播通道 rejected 落 audit（零 PII 只记 args 键名）——内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 L627 收口跟踪）",
       "mainline": "C6",
-      "evidence": "E3",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "7"
         ],
         "rounds": [
-          "R226"
+          "R226",
+          "R227"
         ],
         "docs": []
       }

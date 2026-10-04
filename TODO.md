@@ -592,7 +592,7 @@
 - [ ] 【R77-P0·版本协商】打卡要求 protocol 与 apiVersion≥5，人脉要求 protocol===1 且 capabilities 完整，雷切校验宿主能力，闪卡校验 Gateway kind/capabilities；future major、unknown minor、缺能力均有测试。
 - [ ] 【R77-P0·握手字段】打卡 adapter 严格校验 `protocol:"siyuan-checkin"`、apiVersion major、descriptor 和 capability；修正 `protocolName`/`protocol` 类型漂移，未知桥不得当成打卡桥。
 - [x] 【R77-P0·事件治理】事件白名单只接收 available 且 ingestion=implemented 的能力；每个事件登记 schema、版本、幂等、source、保留和删除语义；闪卡/考试/拾遗未有物化路径前不得出现在 events.list。 → ✅ R140 eventWhitelist 收紧（移除 stable 旁路，白名单 8→2，observed 只观察不消费；ingestion=implemented 字段 manifest 暂无，事件扩面时随 manifest 演进）——真机复核 ✓（petal 热加载）
-- [ ] 【R77-P1·类型门禁】◐ R226 半交付（契约+schema+校验器=设计仓库侧已落，TS 类型/CI 门禁挂 quickgate 批）：将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。
+- [x] 【R77-P1·类型门禁】将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。 → ✅ R226+R227 全链交付：R226=C9 合同+schema.json+设计仓库校验器（本仓库 scripts/validate-ecosystem-manifest.mjs）；R227（quickgate 1be02ba）=EcosystemManifest 接口补齐 v2 字段（events/sourceOfTruth/ingestion/minProtocol/eventNamespace/capabilitySchemas/updatedAt）+六处 `as unknown` 断言全部移除+`check:manifest` 入 check 链（CI ci.yml 首步 run check=契约违规阻断发布）；v1 迁移期警告/v2 严格双档，manifest 升 v2 时全强制（合同 §5 同步点）
 - [x] 【R77-P1·权威矩阵】明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。 → ✅ R226 交付：ecosystem-manifest-contract §2 权威矩阵（8 数据域 × source of truth × 契约面 × 快门角色/禁止项 + 三不变量）
 - [ ] 【R77-P1·投影】复核雷切 checkin projection 只消费打卡 v5 的 bounded calendar/summary；跨插件月历、streak、heatmap 不得自行重算，覆盖日期格式、跨月和 owner 版本漂移回归。
 - [ ] 【R77-P1·部分成功】workflow 每步返回 status、owner、idempotencyKey、started/finished、sideEffect、retryable、已写入和待补偿列表；contacts.ensure 批量先预览去重，再执行。
@@ -625,7 +625,7 @@
 - [ ] 【R78-P0·可见内容】源码仓库 README 与安装包 README 分层，工具/MCP 配置指向源码仓库；包内 action.png、preview.png 和安装说明做安装后最小显示回归。
 - [ ] 【R78-P0·证据】为每项能力记录验证环境、日期、版本、通道、证据级别（单测/冒烟/真机/真 AI host），MCP 代理→Kernel 冒烟不能表述为 Claude/Cursor 完整会话已支持。
 - [ ] 【R78-P0·写防线】核对 MCP `template.new` 是否绕过前端 confirmExec、audit、processed ledger；若保留 Kernel 路由，必须有显式写开关、幂等键、审计和跨通道安全回归，否则移出 KERNEL_OPS。
-- [ ] 【R78-P0·路径安全】◐ R226 规格定稿（safety-gate-contract §7：templatePath 白名单形状/64KB 上限//templates/ 前缀断言/失败审计/三通道回归矩阵 7 用例；现状两通道 `..` 直拼未拦截已源码核对；代码守卫挂 quickgate 批）：template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。
+- [x] 【R78-P0·路径安全】template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。 → ✅ R226 规格（safety-gate §7）+R227 实现（quickgate 1be02ba）：src/services/path-guard.ts 白名单形状/≤200 字符/内容 ≤64KB（不截断执行），NDJSON（bridge-service）与内核路由（kernel-ops）双入口共用=MCP 全覆盖；tests/path-guard.test.ts 9 条（§7 矩阵七用例×双通道+内容上限+合法放行）；失败审计=NDJSON/广播通道 rejected 落 audit（零 PII 只记 args 键名）——内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 L627 收口跟踪）
 - [ ] 【R78-P0·plugin.api】按插件公开契约登记 method 白名单、参数 schema、危险级别、单独确认和审计；拒绝原型链属性、`constructor` 等动态方法，三通道一致测试。
 - [ ] 【R78-P1·错误分类】Kernel getFileText/桥读取区分 404 缺失、401/403 鉴权、5xx/网络不可达和空文件；UI、诊断和指标不得把所有异常显示成“没有文件”。
 - [ ] 【R78-P1·HTTP契约】Kernel API 明确 `Content-Type: application/json`、响应 content-type、最大响应体和超时；2xx+业务 code 非零、非 JSON、空文件、401/403/404/5xx 分开计数和文案。
