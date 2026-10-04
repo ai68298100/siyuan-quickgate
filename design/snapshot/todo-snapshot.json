@@ -1,26 +1,26 @@
 {
-  "generatedAt": "2026-10-04T19:45:01.045Z",
+  "generatedAt": "2026-10-04T19:54:10.653Z",
   "source": "TODO.md",
   "counts": {
     "total": 1398,
     "checkboxes": 1398,
     "byStatus": {
-      "done": 1173,
-      "pending": 153
+      "done": 1174,
+      "pending": 152
     },
     "byMainline": {
       "C7": 279,
-      "C8": 213,
+      "C8": 212,
       "C4": 112,
-      "C6": 509,
+      "C6": 510,
       "C2": 123,
       "C1": 79,
       "C3": 73,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1028,
-      "E0": 242,
+      "E4": 1029,
+      "E0": 241,
       "E2": 74,
       "E3": 27,
       "E1": 26,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 64,
-      "dev": 153,
+      "dev": 152,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -4867,20 +4867,23 @@
       "priority": null,
       "topic": "条件",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "若思源官方落地移动端闪念速记（issue #14414，落 `~/.config/siyuan/shortcuts/shorthands/*.md`）：快门监听该目录 → 物化 events/file 载体新数据源【等上游】",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "若思源官方落地移动端闪念速记（issue #14414，落 `~/.config/siyuan/shortcuts/shorthands/*.md`）：快门监听该目录 → 物化 events/file 载体新数据源【等上游】 → ✅ R237 调研闭环（前提证伪+改道裁定，docs/10-生态调研-R3.md）：上游已落地（3.7.0 移动端速记），但本地速记由**内核自身自动消费**（kernel/model/shortcuts.go MoveLocalShorthands：读取 util.ShortcutsPath/shorthands→转文档→移入用户配置笔记本，源码实证）——快门监听目录会与内核消费者竞争同一目录（文件被移走、时序不确定），**方案否决**；改道=速记消费终点是普通文档，既有 SQL/events 面天然覆盖，无需新数据源。附：思源内置 MCP 已有 inbox 工具（云端收集箱，需订阅）——快门不做（红线：不自带云服务），边界已入 L561 对比矩阵轻注",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R2",
           "R3",
           "R5",
-          "R6"
+          "R6",
+          "R237"
         ],
-        "docs": []
+        "docs": [
+          "docs/10"
+        ]
       }
     },
     {

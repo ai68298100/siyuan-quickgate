@@ -330,7 +330,7 @@
 - [x] 【R7】events 多事件订阅：`checkin:event-deleted` 已接入物化（event+deletedEvents 均物化，`:deleted` 幂等后缀，v0.5.4）；**analytics-updated 决策不订阅**（D-0011：高频会挤占 200 行滚动窗口）；契约草稿补删除语义（append-only 标记行配对规则）
 - [x] 【R7】雷切 0.44 新能力评估（docs/10 §3.7）：get-document-outline/home-adapter-diagnostics 不接入（内核 SQL 与 diagnostics.report 已覆盖），restore-document-set 走既有 commands.run 零成本——零新 op
 - [x] 【R7·循环C】移动捕获社区实证：「Siyuan速记」动作验证 668+iOS 快捷指令链路（P2-10 可行性确认，差异化 noted）；思源官方闪念速记 issue #14414 记录——docs/10 §3.8
-- [ ] 【R7·条件】若思源官方落地移动端闪念速记（issue #14414，落 `~/.config/siyuan/shortcuts/shorthands/*.md`）：快门监听该目录 → 物化 events/file 载体新数据源【等上游】
+- [x] 【R7·条件】若思源官方落地移动端闪念速记（issue #14414，落 `~/.config/siyuan/shortcuts/shorthands/*.md`）：快门监听该目录 → 物化 events/file 载体新数据源【等上游】 → ✅ R237 调研闭环（前提证伪+改道裁定，docs/10-生态调研-R3.md）：上游已落地（3.7.0 移动端速记），但本地速记由**内核自身自动消费**（kernel/model/shortcuts.go MoveLocalShorthands：读取 util.ShortcutsPath/shorthands→转文档→移入用户配置笔记本，源码实证）——快门监听目录会与内核消费者竞争同一目录（文件被移走、时序不确定），**方案否决**；改道=速记消费终点是普通文档，既有 SQL/events 面天然覆盖，无需新数据源。附：思源内置 MCP 已有 inbox 工具（云端收集箱，需订阅）——快门不做（红线：不自带云服务），边界已入 L561 对比矩阵轻注
 - [x] 【R7·循环A】docs/06 §5.3 设置页实装现状同步（v0.5.x 面板行清单）；docs/12 FAQ 补诊断包/生态清单两条排障入口
 - [x] 【R8·循环A】内核路由可测化（v0.5.5）：kernel-ops.ts 抽出（依赖注入）+ **补齐 events.list op**（v0.5.0 文档声称支持但从未实现，实际回"未知 op"）+ events.pull 对齐前端 idempotencyKey 去重契约 + 7 组单测
 - [x] 【R8·循环A】plugin.api 窗口桥映射 manifest 驱动（windowBridge 字段，替硬编码三元）+ plugin.api 首批单测（开关/名单/映射/缺失四态）——此前该安全敏感 op 零测试覆盖
