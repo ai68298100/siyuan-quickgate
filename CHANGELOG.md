@@ -2,12 +2,14 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
-## Unreleased（R227：template.new 路径安全 + 写 op 统一审计 + manifest 类型门禁）
+## Unreleased（R227：template.new 路径安全 + 写 op 统一审计 + manifest 类型门禁；R230：README 分层 + 搜索别名 + 设置验收补齐 + 热重载接管布防）
 
 ### Security
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
 
 ### Added
+- **安装包 README 分层（TODO L625）**：新增 `docs/package-readme.md`（安装导向），经 vite 拷贝为包内 `README.md`（`rename:{stripBase,name}`——踩坑：vite-static-copy 的 rename 保留源相对目录，缺 stripBase 时会误覆盖包内 docs/README.md）；开发者版双语 README 不再进包；`check-links.mjs` 增 icon/preview.png 资产回归（存在性+PNG magic 头）；FAQ「错误语义」链接改指 api.md 真实锚点。
+- **热重载接管布防（bug#15 候选防御层）**：插件构造器设全局所有权令牌（新实例接管时停旧实例轮询与 SSE）+ 3s 延迟自检「onload 是否执行」，未执行则加载设置并按开关自愈启动桥循环；onunload 置 tornDown 防停用后复活。实测接管尚未被 push_reload 路径触发（需 DevTools 确认实例语义），作为防御层保留。
 - **设置面板验收补齐（TODO L502/L503/L513/L514 · R73 快赢批）**：①「恢复默认设置」按钮（列出影响+确认；保留 deviceName 本机身份，恢复后重开面板反映默认值）；②plugin.api 启用前确认框（列出将授权的名单/留痕/可逆性，取消回滚开关）；③审计对话框升级——关键词(op/状态/插件)+日期双筛选、单条复制 JSON（20 条窗口内不做分页/虚拟化：数据量不支撑，裁剪声明；审计条目无 device 字段=该筛选不适用）。
 - **命令搜索别名映射（TODO L471）**：`services/search-alias.ts` 中英/拼音别名表 + `expandSearchKeyword`——「打卡/daka/checkin」「摘录/捕获/capture」「人脉/contacts」「闪卡/review」等互达；交叉命中即设计行为（跨语言广撒网）。裁剪声明：不做全量拼音引擎（依赖重收益薄，高频词走别名表）；raw op 本就不进命令注册表，仅诊断面可见。回归：tests/search-alias.test.ts 5 条。
 - **plugin.api 允许名单设置页编辑器（TODO L458）**：设置项审计结论落地——13 个设置字段中 7 个已有 UI；允许名单此前无编辑入口但文档承诺「新插件由用户手动加入」（承诺无法履行），现补 textarea 编辑器（默认=三个已完成契约审计的插件）；`backoffMaxMs`/`auditMax`/`bridgeBasePath`/`deviceName` 裁定为代码默认/自动管理，设置页不暴露（类型注释与 api.md 已注记）。
