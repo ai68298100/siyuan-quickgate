@@ -43,6 +43,8 @@ const WRITE_OP_OWNER: Record<string, string> = {
     "template.new": "siyuan-quickgate",
     "workflow.execute": "siyuan-quickgate",
     "plugin.api": "siyuan-quickgate",
+    "favorites.add": "siyuan-quickgate",
+    "favorites.remove": "siyuan-quickgate",
 };
 
 /** 事件白名单条目形状（ecosystem-manifest-contract §1；v2 起 since/_eventNamespace 纳入漂移审计） */

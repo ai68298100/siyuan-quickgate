@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-04T19:54:10.653Z",
+  "generatedAt": "2026-10-04T20:00:59.332Z",
   "source": "TODO.md",
   "counts": {
     "total": 1398,
@@ -6970,7 +6970,7 @@
       "type": "unknown",
       "status": "等用户",
       "blockedBy": "user",
-      "text": "SiYuan 3.8.6 push_reload 与桥生命周期交互——`reloads=[siyuan-quickgate]`（petal toggle 触发前端 JS 重载）与 `dataChanges=[siyuan-quickgate]`（插件数据变更通知）之后，NDJSON 轮询循环静默死亡（待处理命令不再消费、无回执、文件不压缩），而旧实例 SSE 连接幸存（广播路径假活）——2026-10-05 真机证据：内核日志 02:23:54 `reloads=[...]`/02:23:55+02:24:35 `dataChanges=[...]`；探针矩阵=广播 ✓/NDJSON ✗（重放R230 恢复探针 12s 未消费）；桥死亡时间窗与部署/petal toggle 强相关（17:21 最后消费→17:45 R229 部署后死亡）。已布防：构造器热重载接管（全局所有权令牌+3s 自检 onload 未运行则自愈启桥；onunload/uninstall 置 tornDown 防停用后复活）——但实测接管未被触发（推断 reload 未重建实例或重建路径不同），需前端 DevTools 观察重载后 window.siyuan.ws.app.plugins 实例语义；恢复手段=重启思源窗口【等用户】",
+      "text": "SiYuan 3.8.6 push_reload 与桥生命周期交互——`reloads=[siyuan-quickgate]`（petal toggle 触发前端 JS 重载）与 `dataChanges=[siyuan-quickgate]`（插件数据变更通知）之后，NDJSON 轮询循环静默死亡（待处理命令不再消费、无回执、文件不压缩），而旧实例 SSE 连接幸存（广播路径假活）——2026-10-05 真机证据：内核日志 02:23:54 `reloads=[...]`/02:23:55+02:24:35 `dataChanges=[...]`；探针矩阵=广播 ✓/NDJSON ✗（重放R230 恢复探针 12s 未消费）；桥死亡时间窗与部署/petal toggle 强相关（17:21 最后消费→17:45 R229 部署后死亡）。已布防：构造器热重载接管（全局所有权令牌+3s 自检 onload 未运行则自愈启桥；onunload/uninstall 置 tornDown 防停用后复活）——但实测接管未被触发（推断 reload 未重建实例或重建路径不同），需前端 DevTools 观察重载后 window.siyuan.ws.app.plugins 实例语义；恢复手段=重启思源窗口【等用户】；**R238 追加实证**：①每次 index.js 部署都复现桥死亡（部署→push_reload→轮询死，两轮观察一致）；②用户重启后桥复活（6/6），随后一次部署再度杀死——bug#15 确认为**部署工作流的必然代价**；③广播幸存者运行的是**旧 bundle**：bridge.ping 有回执而 favorites.*（R231 新 op）完全无产出（连 rejected/未知 op 回执都没有）——证明 push_reload 后实际执行代码=旧实例，磁盘新代码在真正应用重启前不生效；④结论：index.js 部署后必须重启思源窗口才能加载新前端（kernel.js 可热生效，前端不可）。部署纪律=批量部署+重启提示",
       "mainline": "C1",
       "evidence": "E0",
       "refs": {
@@ -6981,7 +6981,9 @@
           "R5",
           "R6",
           "R230",
-          "R229"
+          "R229",
+          "R238",
+          "R231"
         ],
         "docs": [
           "10-"
