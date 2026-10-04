@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-04T19:57:02.318Z",
+  "startedAt": "2026-10-04T20:02:57.638Z",
   "url": "http://127.0.0.1:14643",
   "checks": [
     {
@@ -14,8 +14,8 @@
     },
     {
       "name": "桥 ping",
-      "status": "fail",
-      "note": "8s 无回执（桥未开启或插件未加载）"
+      "status": "pass",
+      "note": "recorded（38ms）"
     },
     {
       "name": "内核路由",
@@ -33,7 +33,7 @@
       "note": "快门已加载"
     }
   ],
-  "failures": 2,
+  "failures": 0,
   "skipped": 0,
-  "finishedAt": "2026-10-04T19:57:22.448Z"
+  "finishedAt": "2026-10-04T20:03:14.938Z"
 }
