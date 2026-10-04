@@ -455,11 +455,18 @@ export class BridgeService {
                 return { status: "recorded", data: { ok: true, favorites: store.favorites.length }, message: `已收藏 ${plugin}/${command}` };
             }
             case "favorites.remove": {
+                const scope = a.scope === "recent" || a.scope === "both" ? a.scope : "favorite";
+                const store = await this.loadFavorites();
+                // L472 清除历史：{scope:"recent"} 不带 plugin/command = 一次清空全部最近使用（隐私清除）
+                if (a.clearRecent === true) {
+                    const cleared = store.recent.length;
+                    store.recent = [];
+                    await this.saveFavorites(store);
+                    return { status: "recorded", data: { ok: true, removed: cleared }, message: `已清空最近使用 ${cleared} 条` };
+                }
                 const plugin = typeof a.plugin === "string" ? a.plugin : "";
                 const command = typeof a.command === "string" ? a.command : "";
                 if (!plugin || !command) return this.reject("plugin/command 缺失");
-                const scope = a.scope === "recent" || a.scope === "both" ? a.scope : "favorite";
-                const store = await this.loadFavorites();
                 const removed = removeEntry(store, plugin, command, scope);
                 await this.saveFavorites(store);
                 return { status: "recorded", data: { ok: true, removed }, message: removed > 0 ? `已移除 ${removed} 条` : "未找到匹配条目" };

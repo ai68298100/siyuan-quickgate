@@ -119,6 +119,20 @@ describe("favorites dispatch 集成（L474）", () => {
         expect((rm.data as { removed: number }).removed).toBe(1);
     });
 
+    it("clearRecent=true：一次清空全部最近使用，无需 plugin/command（L472 清除历史）", async () => {
+        const mem = new MemKernel();
+        const svc = makeService(mem);
+        const dispatch = (svc as unknown as { dispatch: (cmd: { id: string; op: string; args?: object }) => Promise<{ status: string; data: unknown }> }).dispatch.bind(svc);
+        await dispatch({ id: "c0", op: "commands.run", args: { plugin: "siyuan-checkin", command: "record" } });
+        const before = await dispatch({ id: "c1", op: "favorites.list", args: {} });
+        expect((before.data as { recent: unknown[] }).recent).toHaveLength(1);
+        const clr = await dispatch({ id: "c2", op: "favorites.remove", args: { clearRecent: true } });
+        expect(clr.status).toBe("recorded");
+        expect((clr.data as { removed: number }).removed).toBe(1);
+        const after = await dispatch({ id: "c3", op: "favorites.list", args: {} });
+        expect((after.data as { recent: unknown[] }).recent).toHaveLength(0);
+    });
+
     it("缺参 rejected", async () => {
         const svc = makeService(new MemKernel());
         const dispatch = (svc as unknown as { dispatch: (cmd: { id: string; op: string; args?: object }) => Promise<{ status: string }> }).dispatch.bind(svc);

@@ -84,10 +84,11 @@
    "args": {
     "plugin": "string",
     "command": "string",
-    "scope": "'favorite'(默认)|'recent'|'both'"
+    "scope": "'favorite'(默认)|'recent'|'both'",
+    "clearRecent": "boolean?"
    },
    "effect": "write",
-   "note": "scope=recent 即最近使用隐私清除"
+   "note": "scope=recent 即最近使用隐私清除；clearRecent=true 清空全部最近使用（无需 plugin/command）"
   },
   {
    "op": "checkin.items",

@@ -62,11 +62,12 @@ const ARGS: Record<string, { properties: Record<string, { type: string; descript
     },
     "favorites.remove": {
         properties: {
-            plugin: { type: "string", description: "插件 id" },
-            command: { type: "string", description: "命令 langKey" },
+            plugin: { type: "string", description: "插件 id（clearRecent=true 时可省）" },
+            command: { type: "string", description: "命令 langKey（clearRecent=true 时可省）" },
             scope: { type: "string", description: "favorite（默认）| recent | both——recent 即隐私清除" },
+            clearRecent: { type: "boolean", description: "true=一次清空全部最近使用（L472 清除历史）" },
         },
-        required: ["plugin", "command"],
+        required: [],
     },
     "commands.run": {
         properties: {

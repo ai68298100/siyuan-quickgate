@@ -298,3 +298,7 @@
 ### Notes
 - 集市暂缓上架；当前唯一分发渠道为 GitHub Release（手动导入 package.zip）
 - M0 spike 九项待思源真机实证（docs/WALKTHROUGH.md）
+
+### Added（R241 续）
+- **favorites.remove 支持 `clearRecent:true`（TODO L472 清除历史）**：一次清空全部最近使用、无需逐条 plugin/command；契约 JSON/api.md/MCP schema 同步；+1 测试（158 全绿）。
+- **调研追加（docs/10-生态调研-R3.md §6）**：思源内置 CLI `serve` 安全评估（旗标齐全无后门，自托管场景不立项）；uTools-siyuan 同类对照（跨宿主泳道需求验证，单目的客户端，快门差异化守住编排层）。
