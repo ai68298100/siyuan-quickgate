@@ -4,7 +4,7 @@
 
 ## 这个仓库是什么
 
-思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 23 个 op 的公开契约。姊妹仓库 `D:\AI\思源笔记插件开发\quicksrer 动作`（设计文档+Quicker 动作蓝图，非代码）。
+思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 23 个 op 的公开契约。设计文档与总账本在本仓库 `design/` 目录（2026-10-05 起由原独立仓库 quicksrer 动作 subtree 并入，非代码）。
 
 ## 常用命令
 
@@ -48,7 +48,7 @@ gh workflow run ci-e2e-experiment.yml && gh run watch
 | Git Bash PATH 间歇断裂（unix 工具消失） | `export PATH="/c/Program Files/Git/cmd:/c/Program Files/Git/usr/bin:/c/Program Files/nodejs:$PATH"` |
 | Windows .ps1 含非 ASCII 必须 UTF-8 **with BOM**（否则 PS5.1 按 ANSI 误读） | 交付前 PSParser 语法验证 |
 | 内核按 plugin.json **`kernels`** 字段决定是否加载 kernel.js（缺字段=路由 404，bug#9） | 已补 `["all"]`，别删 |
-| 修改环境参数（端口/路径）后 | **全仓 grep 两个项目**（quickgate + quicksrer 动作），tools/e2e/docs 各有默认值 |
+| 修改环境参数（端口/路径）后 | **全仓 grep 本仓库两端**（源码根 + `design/`），tools/e2e/docs 各有默认值 |
 | 测试里硬编码日期 × 真实 Date.now() = 定时炸弹 | 一律固定时钟 `now: () => 固定值` |
 | 并行会话可能活跃于共享文件（README/TODO） | 改前 `git status/diff` 核对归属；只追加不重构 |
 | SiYuan 容器化：v3.7.0+ 必须传 `serve` 子命令（缺=打印帮助 exit 0）；Docker 首启 `Conf.Bazaar.Trust` 默认 false → 内核插件禁用（预置 conf 补 `bazaar:{trust:true}`）；容器无 node（conf 解析 docker exec cat+宿主处理）；认证失败触发 429 限速（跨 restart 持久，等冷却或重建容器） | 见 .github/workflows/ci-e2e-experiment.yml（十轮诊断全记录） |
@@ -68,4 +68,4 @@ gh workflow run ci-e2e-experiment.yml && gh run watch
 - docs/DECISIONS.md — D-0001~D-0015 决策记录
 - docs/ROADMAP.md — M0~M3 路线与门槛
 - src/mcp/README.md — MCP 服务器（运行/配置/安全模型）
-- 上游：设计文档项目 `D:\AI\思源笔记插件开发\quicksrer 动作`（TODO 662 项账本 + docs/01~30）
+- 上游：`design/` 目录（TODO 662 项账本 + docs/01~30，同仓维护；历史设计提交见合并提交 f84f71b 第二父分支）
