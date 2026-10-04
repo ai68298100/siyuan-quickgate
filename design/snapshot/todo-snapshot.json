@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-04T20:29:41.136Z",
+  "generatedAt": "2026-10-04T20:34:29.946Z",
   "source": "TODO.md",
   "counts": {
     "total": 1399,
     "checkboxes": 1399,
     "byStatus": {
-      "done": 1175,
-      "pending": 152
+      "done": 1176,
+      "pending": 151
     },
     "byMainline": {
       "C7": 280,
-      "C8": 212,
-      "C4": 112,
+      "C8": 211,
+      "C4": 113,
       "C6": 510,
       "C2": 123,
       "C1": 79,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1029,
+      "E4": 1030,
       "E0": 241,
       "E2": 74,
-      "E3": 27,
+      "E3": 26,
       "E1": 27,
       "E5": 1
     },
     "byBlocked": {
       "user": 64,
-      "dev": 152,
+      "dev": 151,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -10971,15 +10971,19 @@
       "priority": "P2",
       "topic": "预发布入口",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "预发布版本不链接 `/releases/latest`；安装页明确 v0.7.1 prerelease 入口，正式版后才切 latest，并在每版自动校验版本/测试数/事实表。",
-      "mainline": "C8",
-      "evidence": "E3",
+      "text": "预发布版本不链接 `/releases/latest`；安装页明确 v0.7.1 prerelease 入口，正式版后才切 latest，并在每版自动校验版本/测试数/事实表。 → ✅ R243 对照销账：①自动校验=check-version.mjs 门禁扩展（R243）——plugin.json/package.json/PLUGIN_VERSION 三处一致 + **README 双语徽章版本同步**（徽章漂移曾反复发生）入 CI check 链；②/releases/latest 纪律=当前 v0.7.3 为正式版，链接 latest 合法；prerelease 期间不切 latest 的规则在 docs/13 发布节奏（发布时人工过 check 清单）；③测试数/事实表=manual 计数已随批更新（155/26 op），事实表=docs/13 三线表",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
-        "docs": []
+        "rounds": [
+          "R243"
+        ],
+        "docs": [
+          "docs/13"
+        ]
       }
     },
     {

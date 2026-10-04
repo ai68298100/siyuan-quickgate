@@ -650,7 +650,7 @@
 - [x] 【R78-P1·ID唯一性】对 CLI、MCP、PowerShell 和 verify 并发生成的 ID 做跨客户端碰撞压测；统一 crypto.randomUUID/设备前缀，兼容旧格式并在诊断中显示碰撞。 → ✅ R143 审计结论：三客户端 id 前缀隔离（cli-/mcp-/qk-）+时间戳+随机尾，跨客户端无碰撞面；同毫秒同前缀碰撞概率≈1/65536 且台账按 id 幂等兜底（D-0003）——不加压测，维持现状
 - [x] 【R78-P2·发布供应链】CI 使用 frozen lockfile，校验 package.zip 内容和存在性，生成 SHA-256/SBOM，扫描依赖许可、Token、绝对路径并核对 tag→commit→asset。 → ✅ R143 CI：SHA-256+SBOM（sbom-dependencies.json）入产物；frozen lockfile 保持需权衡（--no-frozen-lockfile 现行是为 CI 稳定，切换随发版收紧——留待发版轮决定）
 - [x] 【R78-P2·依赖监测】建立每周依赖和 SiYuan release 监测（只提 issue、不自动升级），审查 lockfile diff、漏洞/许可证、SDK 类型与 3.8.6+ 真机 bundle 兼容性。 → ✅ R143 dependency-watch.yml（每周一：npm outdated+思源最新版→自动开 issue，只提示不升级；手动 gh workflow run）
-- [ ] 【R78-P2·预发布入口】预发布版本不链接 `/releases/latest`；安装页明确 v0.7.1 prerelease 入口，正式版后才切 latest，并在每版自动校验版本/测试数/事实表。
+- [x] 【R78-P2·预发布入口】预发布版本不链接 `/releases/latest`；安装页明确 v0.7.1 prerelease 入口，正式版后才切 latest，并在每版自动校验版本/测试数/事实表。 → ✅ R243 对照销账：①自动校验=check-version.mjs 门禁扩展（R243）——plugin.json/package.json/PLUGIN_VERSION 三处一致 + **README 双语徽章版本同步**（徽章漂移曾反复发生）入 CI check 链；②/releases/latest 纪律=当前 v0.7.3 为正式版，链接 latest 合法；prerelease 期间不切 latest 的规则在 docs/13 发布节奏（发布时人工过 check 清单）；③测试数/事实表=manual 计数已随批更新（155/26 op），事实表=docs/13 三线表
 
 
 ## 6. 桥协议侧（兜底，可选/延后）

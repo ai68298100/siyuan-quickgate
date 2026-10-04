@@ -28,4 +28,11 @@ for (const [name, v] of [["plugin.json", plugin], ["package.json", pkg], ["src/i
 if (!(plugin === pkg && pkg === src)) {
     fail(`三处不一致：plugin.json=${plugin} / package.json=${pkg} / src/index.ts=${src}`);
 }
-console.log(`✅ 版本门禁通过：${plugin}（plugin.json / package.json / src/index.ts 三处一致${expected ? "，且等于期望值" : ""}）`);
+// L653：README 双语徽章版本同步（徽章漂移曾反复发生——counts/版本手改易漏）
+for (const readme of ["README.md", "README.zh-CN.md"]) {
+    const md = fs.readFileSync(path.join(root, readme), "utf8");
+    const b = md.match(/\[!\[Version\]\(https:\/\/img\.shields\.io\/badge\/version-([^)-]+)-blue\)/);
+    if (!b) fail(`${readme} 未找到 Version 徽章`);
+    else if (b[1] !== plugin) fail(`${readme} 徽章版本 ${b[1]} ≠ plugin.json ${plugin}`);
+}
+console.log(`✅ 版本门禁通过：${plugin}（plugin.json / package.json / src/index.ts 三处一致${expected ? "，且等于期望值" : ""}；README 双语徽章同步）`);
