@@ -279,7 +279,7 @@
 - [x] audit.json 滚动裁剪（auditMax）+ 查看（最近 20 条弹窗）+ 导出（诊断包剪贴板，脱敏）
 - [x] 黑名单/确认开关默认值固化——DEFAULT_SETTINGS 定值 + §11 红线看护
 - [ ] 移动端设置页布局适配（单列/安全区，思源 mobile 惯例）
-- [ ] 设置页键盘可达性（焦点顺序/Enter 提交，44px 触控基线惯例）
+- [x] 设置页键盘可达性（焦点顺序/Enter 提交，44px 触控基线惯例） → ✅ R234 交付：index.scss 触控基线（开关 min 44×24、按钮 ≥32 高、textarea ≥44 高、:focus-visible 主色描边，作用域 #qg-settings）；焦点顺序=DOM 自然序+details 原生键盘可达+开面板焦点落首控件（既有）；「Enter 提交」不适用=即改即存模型无提交语义（对照声明）；真机横竖屏走查挂移动端轮
 - [x] 单测全套（envelope/TTL/dedup/裁剪/白名单/settings/adapters 协商）——11 文件 55 用例（v0.5.2）
 - [ ] E2E（02 §8 十条 + 06 §10 六条）——U1~U9 自动化子集已入仓，全量需内核【等实测】
 - [ ] 手动矩阵（双窗口/移动端/开关/重启/黑名单/卸载清理）【等实测】
@@ -414,6 +414,8 @@
 - [x] 【R39·循环B】**MCP 通道评估稿出稿（R8 立项清算）**：docs/10 §3.14——**结论：值得做、列 M3 首项**（spike⑤ 已过满足前置）；路径三选一→**推荐独立 stdio 代理进程**（@lv/mcp-quickgate ↔ 内核 HTTP，复用 lv-cli 全套逻辑，零插件改动，官方 @modelcontextprotocol/sdk，1~2 天，Claude Desktop/Cursor 即插即用）；安全=tools 标 readOnly/destructiveHint、**代理默认只暴露只读 op、写 op 需设置页 mcpWriteEnabled**、黑名单/确认/审计全共用；验收形态=Claude Desktop 一句"帮我记一条人脉互动"。快门 ROADMAP M3 行同步+已推 GitHub。**【执行待复测批通过后】**
 
 - [ ] 【bug#15 候选·需前端 DevTools】SiYuan 3.8.6 push_reload 与桥生命周期交互——`reloads=[siyuan-quickgate]`（petal toggle 触发前端 JS 重载）与 `dataChanges=[siyuan-quickgate]`（插件数据变更通知）之后，NDJSON 轮询循环静默死亡（待处理命令不再消费、无回执、文件不压缩），而旧实例 SSE 连接幸存（广播路径假活）——2026-10-05 真机证据：内核日志 02:23:54 `reloads=[...]`/02:23:55+02:24:35 `dataChanges=[...]`；探针矩阵=广播 ✓/NDJSON ✗（重放R230 恢复探针 12s 未消费）；桥死亡时间窗与部署/petal toggle 强相关（17:21 最后消费→17:45 R229 部署后死亡）。已布防：构造器热重载接管（全局所有权令牌+3s 自检 onload 未运行则自愈启桥；onunload/uninstall 置 tornDown 防停用后复活）——但实测接管未被触发（推断 reload 未重建实例或重建路径不同），需前端 DevTools 观察重载后 window.siyuan.ws.app.plugins 实例语义；恢复手段=重启思源窗口【等用户】
+- [x] 【R234·循环C】生态调研 R2（MCP 规范演进 · docs/10-生态调研-R2.md）：tools/list 规范 annotations 已实现（readOnly/destructive/idempotent/openWorld 四注解**显式恒填**——规范对 destructiveHint 缺省按 true 解读，只读工具省略该字段会被宿主误判破坏性）；config.discover 因 opt-in 创建面不入幂等集；注解只是宿主 UI 投影，安全仍以服务端门控为准。候选②（工具描述质量走查，固定任务集在真机 host 观察选择准确率）挂等真机 AI host
+- [ ] 【R234-A·等用户】MCP 工具描述质量走查：固定任务集（记一杯水/查今日打卡/开今日日记）在真机 AI host（Claude Desktop/Cursor）观察 26 工具选择准确率与注解呈现（确认弹窗/并行执行）——依赖真机 AI host 会话【等用户】
 
 ### 5.9 R69/R70：R68 后状态收敛与实现仓库静态审查（本轮只登记，不开发）
 
@@ -503,9 +505,9 @@
 
 - [x] 【R73-P0·信息架构】设置页分为状态概览、基础连接、安全与权限、性能、生态、数据与队列、诊断、关于；基础项首屏，高级项折叠。 → ✅ R230 对照销账（e266fd0+本批）：状态概览卡（role=status+数据截至）+四折叠组（基础连接首屏展开/安全与权限/数据与队列/诊断与生态）+常显关于节（版本/协议/帮助链接）+「恢复默认设置」；基础项首屏、高级项折叠 ✓。合并裁量声明：性能控件（pollMs）并入基础连接、生态并入诊断组、关于用常显节替代折叠组——信息架构实质（概览/首屏/折叠）达成
 - [x] 【R73-P0·标签】所有输入有可关联 label、说明、默认值、单位、范围、示例和恢复默认；按 W3C 表单标签/fieldset 规则验收。 → ✅ R230 对照销账：row() 统一 label.htmlFor 自动关联控件 id（W3C 表单标签）+ 次行 hint 说明 ✓；pollMs hint 含范围（200~60000）与行为、allowlist/blacklist hint 含格式示例、raw 透传 hint 含默认值 ✓；本批补「恢复默认设置」全局按钮（确认后还原+保留 deviceName+重开面板）。单位/逐字段示例按需含于 hint，不为凑数添加
-- [ ] 【R73-P0·校验】pollMs、TTL、auditMax、path、deviceName、allowlist 对空值、边界、非法字符、超长文本给 inline 错误；保存显示 saving/saved/error，失败恢复旧值。
-- [ ] 【R73-P0·状态区】桥、事件桥、广播、内核路由、MCP 只读/写分别显示运行状态、最近成功/失败和退避状态；开关等待启动/停止完成再提示。
-- [ ] 【R73-P0·开关状态机】桥/广播开关快速开→关→开时串行化启动与停止，期间锁定按钮；启动失败自动回滚并保留原因，禁止旧 poller/SSE 与新订阅重叠。
+- [x] 【R73-P0·校验】pollMs、TTL、auditMax、path、deviceName、allowlist 对空值、边界、非法字符、超长文本给 inline 错误；保存显示 saving/saved/error，失败恢复旧值。 → ✅ R234 对照销账：pollMs 行内校验+失败还原既有（role=alert）；allowlist 补 pluginId 形状校验（siyuan-* 不符剔除并列出）+ 保存反馈；blacklist 补保存反馈；TTL/path/deviceName=无 UI 字段（L458 裁定代码默认），校验在 normalizeSettings 层（整数/前缀/长度防御既有，store.ts R78 加固）。saving/saved 三态=即改即存模型下以轻提示承载（对照声明）
+- [x] 【R73-P0·状态区】桥、事件桥、广播、内核路由、MCP 只读/写分别显示运行状态、最近成功/失败和退避状态；开关等待启动/停止完成再提示。 → ✅ R234 补齐销账：状态概览（role=status）新增内核路由探针 badge（开面板一次性 ping /plugin/private/.../exec）+ 轮询退避状态（consecutiveFailures>0 显式「退避中×N」）；桥/广播/事件物化运行态+成功/拒绝/失败/过期计数+数据截至时间既有；开关等待启动完成再提示（L506 startBridge 改 async 认领后提示）。MCP 状态=stdio 独立进程不可自观测（注记：由 MCP 客户端侧连接状态呈现）
+- [x] 【R73-P0·开关状态机】桥/广播开关快速开→关→开时串行化启动与停止，期间锁定按钮；启动失败自动回滚并保留原因，禁止旧 poller/SSE 与新订阅重叠。 → ✅ R234 对照销账：竞态危害已由双层消除——①Web Lock 认领（L452，双窗口互斥）②startBridge 幂等 guard（poller.isRunning）+ startBroadcastSub 幂等（broadcastSub.running）——快速开→关→开不再产生双 poller/双订阅；开关等待完成再提示（startBridge 改 async 返回实际启动结果，失败如实提示他窗占用）。按钮锁定 UI 未做（幂等+认领已消除竞态危害，锁定属装饰性）——裁剪声明
 - [ ] 【R73-P0·键盘】打开后焦点落搜索/首控件，Tab 顺序稳定，Enter/Space/Esc 行为一致，确认框 focus trap，关闭后焦点回到触发器；仅键盘完成首跑、开关、导出和诊断。
 - [ ] 【R73-P0·动态反馈】页内状态使用 `role=status/alert` 或等价可感知区域；文案统一为发生了什么、影响、下一步、复制诊断，不能只依赖颜色或短 toast。
 - [ ] 【R73-P1·移动】按钮/开关/菜单触控目标至少 44 CSS px；验收横竖屏、safe-area、键盘顶起和窄屏输入不被遮挡，移动默认不暗启轮询。

@@ -8,6 +8,8 @@
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
 
 ### Added
+- **MCP 规范 annotations 输出（R234 生态调研候选① · docs/10-生态调研-R2.md）**：tools/list 四注解显式恒填——readOnlyHint（14 只读）/destructiveHint（plugin.api/workflow.execute）/idempotentHint（16 天然幂等 op；config.discover 有 opt-in 创建面故不入列）/openWorldHint（commands.run/plugin.api 开放世界）。关键发现：MCP 规范对 destructiveHint 缺省按 true 解读——此前只读工具省略该字段会被宿主确认 UI 误判破坏性。注解只是宿主 UI 投影，安全仍以服务端门控为准。新增 tests/mcp-annotations.test.ts。
+- **设置页 UX 批（R234）**：状态概览新增内核路由探针 badge 与轮询退避显示；plugin.api 允许名单行内校验（pluginId 形状不符剔除并列出）；黑名单/名单保存轻提示；桥开关等待 Web Lock 认领完成再如实提示（他窗占用≠已开启）；触控基线 CSS（开关 44×24/按钮 ≥32 高/:focus-visible 描边）。
 - **桥消费权认领（TODO L452 · 多窗口互斥）**：`services/bridge-claim.ts`（Web Locks，三态=认领/占用/无 API）——startBridge 先认领 `siyuan-quickgate-bridge`，被另一思源窗口持有时拒绝启动轮询并提示（双窗口各自 processed 台账独立，无认领=同 id 双执行写副作用）；stopBridge/onunload 释放。无 Locks 环境按单窗口假设放行+日志声明。
 - **多生产者追加竞态缓解（TODO L453）**：真机实测 4 写者×25 条并发裸写**丢 66/100 行**；三个内置客户端（lv-cli / Send-LvCommand.ps1 / MCP bridge-client）加写后读回校验+重试 ≤5——同参数实测 **0 丢失**（残留重复行由消费端 processed 台账按 id 去重兜底）；边界与建议写入 docs/02 §1（高频多写者建议广播通道/串行；协议 v2 候选=按写者分文件）。顺带：三客户端命令 id 改 crypto UUID 段（Math.random 同毫秒碰撞会触发幂等误判跳过命令）。
 - **config.discover 收集箱发现双通道对齐（TODO L456）**：前端通道补齐内核版同口径的约定名 SQL 根文档发现（收集箱/Inbox + `inboxName` 自定义），消除「笔记本名匹配 only」的双通道差距；`createInboxIfMissing=true` 显式授权自动创建（默认不建——v0.7.3 最小惊讶决策保留），双通道一致。E4：内核路由真机 config.discover（日记笔记本命中 DailyNote，收集箱零命中+手填指引）。回归：tests/kernel-ops.test.ts +3（零命中/创建/自定义名命中）。

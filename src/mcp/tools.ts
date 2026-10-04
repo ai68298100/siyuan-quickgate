@@ -10,7 +10,7 @@ export interface McpToolDef {
     description: string;
     /** 宽松 schema：args 具体形状以 docs/api.md 为准（服务端原样转发，不在 MCP 层重复校验） */
     inputSchema: { type: "object"; properties: Record<string, unknown>; additionalProperties?: boolean };
-    annotations: { readOnlyHint: boolean; destructiveHint?: boolean };
+    annotations: { readOnlyHint: boolean; destructiveHint: boolean; idempotentHint: boolean; openWorldHint: boolean };
     /** true=副作用/写 op，需 mcpWriteEnabled 才暴露 */
     write: boolean;
 }
@@ -34,6 +34,17 @@ const READ_ONLY_OPS: ReadonlySet<string> = new Set([
 
 /** 破坏性（可删改数据）而非仅副作用：plugin.api 任意调用、workflow.execute 执行计划 */
 const DESTRUCTIVE_OPS: ReadonlySet<string> = new Set(["plugin.api", "workflow.execute"]);
+
+/** 幂等（同一调用重复执行无额外副作用；R234 调研候选①）——config.discover 有 opt-in 创建故不在列 */
+const IDEMPOTENT_OPS: ReadonlySet<string> = new Set([
+    "bridge.ping", "commands.list", "commands.search", "favorites.list", "favorites.add",
+    "checkin.items", "checkin.summary", "contacts.search",
+    "daily.status", "doc.open", "setting.open", "editor.context",
+    "registry.list", "diagnostics.report", "events.list", "events.pull",
+]);
+
+/** 开放世界（与任意宿主插件/命令交互，实体面不可枚举）——其余为封闭面 false */
+const OPEN_WORLD_OPS: ReadonlySet<string> = new Set(["commands.run", "plugin.api"]);
 
 /** 逐 op 参数 schema（形状对齐 docs/api.md；无参 op 为空 properties——纪律测试强制每 op 都登记） */
 const ARGS: Record<string, { properties: Record<string, { type: string; description: string }>; required?: string[] }> = {
@@ -178,9 +189,15 @@ export function buildToolDefs(): McpToolDef[] {
                 ...(argSpec.required ? { required: argSpec.required } : {}),
                 additionalProperties: true,
             },
-            annotations: readOnly
-                ? { readOnlyHint: true }
-                : { readOnlyHint: false, destructiveHint: destructive },
+            // MCP 规范 annotations（R234 调研候选①）：宿主 UI 建议——确认弹窗/并行执行等。
+            // 纪律：四字段**显式恒填**（规范对缺省值有危险假设：destructiveHint 缺省按 true 解读）；
+            // 注解只是投影，安全仍以服务端门控为准（safety-gate「防线在 dispatch 层」不变量）。
+            annotations: {
+                readOnlyHint: readOnly,
+                destructiveHint: !readOnly && destructive,
+                idempotentHint: IDEMPOTENT_OPS.has(op),
+                openWorldHint: OPEN_WORLD_OPS.has(op),
+            },
             write: !readOnly,
         };
     });

@@ -154,6 +154,8 @@ export default class QuickGatePlugin extends Plugin {
     /** 桥消费权认领（L452 多窗口互斥）：持有=本窗口跑轮询；null=他窗占用；undefined=无 Locks 环境（单窗口假设） */
     private bridgeClaim?: BridgeClaimHandle;
     private bridgeClaimer?: BridgeClaimer;
+    /** 内核路由探针结果（设置面板打开时一次性探测；undefined=未探测） */
+    private kernelRouteProbe?: boolean;
 
     private startEventBridge() {
         if (this.eventBridgeHandler) return;
@@ -257,40 +259,41 @@ export default class QuickGatePlugin extends Plugin {
         };
     }
 
-    private startBridge() {
+    /** 启动桥（L506：异步认领，返回是否实际启动；false=消费权被另一窗口持有） */
+    private async startBridge(): Promise<boolean> {
         if (this.poller?.isRunning) {
             this.startBroadcastSub(); // 桥已在跑、仅广播开关变化时也要接上订阅（幂等）
-            return;
+            return true;
         }
         const service = new BridgeService(this.deps());
         this.activeService = service;
         // L452：先认领桥消费权（Web Locks）——另一思源窗口已持锁时本窗口拒绝启动轮询
         // （双窗口各自 processed 台账独立，无认领会同 id 双执行）。无 Locks 环境=按单窗口假设放行并声明。
-        const beginPoll = (claimNote: string) => {
-            this.poller = new SingleFlightPoller({
-                intervalMs: this.settings.pollMs,
-                backoffMaxMs: this.settings.backoffMaxMs,
-                tick: () => service.tick(),
-                shouldRun: () => this.settings.bridgeEnabled,
-            });
-            this.poller.start();
-            this.startBroadcastSub();
-            console.info(`[${PLUGIN_NAME}] 桥已启动，间隔 ${this.settings.pollMs}ms${claimNote}`);
-        };
         if (!this.bridgeClaimer) {
-            beginPoll("（无 Locks 环境：单窗口假设）");
-            return;
+            this.beginPolling(service, "（无 Locks 环境：单窗口假设）");
+            return true;
         }
-        void this.bridgeClaimer.claim("siyuan-quickgate-bridge").then((handle) => {
-            if (handle === null) {
-                this.activeService = undefined;
-                console.warn(`[${PLUGIN_NAME}] 桥消费权被另一思源窗口持有——本窗口不启动轮询（防同 id 双执行）`);
-                showMessage("另一思源窗口正在运行外部命令桥，本窗口不重复启动", 4000, "info");
-                return;
-            }
-            this.bridgeClaim = handle ?? undefined;
-            beginPoll(handle ? "（Web Lock 认领）" : "（无 Locks 环境：单窗口假设）");
+        const handle = await this.bridgeClaimer.claim("siyuan-quickgate-bridge");
+        if (handle === null) {
+            this.activeService = undefined;
+            console.warn(`[${PLUGIN_NAME}] 桥消费权被另一思源窗口持有——本窗口不启动轮询（防同 id 双执行）`);
+            return false;
+        }
+        this.bridgeClaim = handle ?? undefined;
+        this.beginPolling(service, handle ? "（Web Lock 认领）" : "（无 Locks 环境：单窗口假设）");
+        return true;
+    }
+
+    private beginPolling(service: BridgeService, claimNote: string) {
+        this.poller = new SingleFlightPoller({
+            intervalMs: this.settings.pollMs,
+            backoffMaxMs: this.settings.backoffMaxMs,
+            tick: () => service.tick(),
+            shouldRun: () => this.settings.bridgeEnabled,
         });
+        this.poller.start();
+        this.startBroadcastSub();
+        console.info(`[${PLUGIN_NAME}] 桥已启动，间隔 ${this.settings.pollMs}ms${claimNote}`);
     }
 
     /** v1.5 广播快路径（独立开关，默认关）：SSE 订阅 qg-cmd 频道，毫秒级命令通道。幂等。 */
@@ -640,16 +643,27 @@ export default class QuickGatePlugin extends Plugin {
         const refreshStatus = () => {
             const st = this.activeService?.stats;
             const avg = st && st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null;
+            const backoff = this.poller && this.poller.consecutiveFailures > 0 ? `退避中×${this.poller.consecutiveFailures}` : null;
             statusLine.innerHTML = [
                 badge(!!this.poller?.isRunning, "桥 运行中", "桥 已停止"),
                 badge(!!this.broadcastSub?.running, "广播 运行中", "广播 关"),
                 badge(!!this.eventBridgeHandler, "事件物化 已接", "事件物化 未接"),
+                this.kernelRouteProbe === undefined ? null : badge(this.kernelRouteProbe, "内核路由 可用", "内核路由 不可达"),
                 st ? `本次运行 ${st.commands} 条（成功 ${st.ok} / 拒绝 ${st.rejected} / 失败 ${st.failed} / 过期 ${st.expired}）` : "服务未启动",
                 avg !== null ? `平均 ${avg}ms` : null,
+                backoff,
                 st?.lastActivityAt ? `数据截至 ${new Date(st.lastActivityAt).toLocaleTimeString()}` : null,
             ].filter(Boolean).join(" · ");
         };
         refreshStatus();
+        // L505：内核路由状态探针（开面板一次性；随 petal 启用即用，不经桥开关）
+        void (async () => {
+            try {
+                const r = await this.kernelApi.post<unknown>(`/plugin/private/${PLUGIN_NAME}/exec`, { op: "bridge.ping", args: {} });
+                this.kernelRouteProbe = !!r;
+            } catch { this.kernelRouteProbe = false; }
+            if (document.body.contains(root)) refreshStatus();
+        })();
         const statusTimer = window.setInterval(() => {
             if (!document.body.contains(root)) { window.clearInterval(statusTimer); return; }
             refreshStatus();
@@ -667,14 +681,16 @@ export default class QuickGatePlugin extends Plugin {
             this.store.settings = this.settings;
             await this.store.saveSettings();
             if (this.settings.bridgeEnabled && !this.isMobileGuard()) {
-                this.startBridge();
+                const started = await this.startBridge(); // L506：等认领完成再提示，如实反映结果
                 this.startEventBridge(); // 与 onload 配对：开启桥即接上事件物化，无需重启插件
-            } else {
-                this.stopBridge();
-                this.stopEventBridge(); // 与 onload 配对：关桥即退订，事件物化不得在桥关闭后继续写
+                refreshStatus();
+                showMessage(started ? "外部命令桥已开启（本窗口消费）" : "另一思源窗口正在运行外部命令桥，本窗口未重复启动", 4000, "info");
+                return;
             }
+            await this.stopBridge();
+            this.stopEventBridge(); // 与 onload 配对：关桥即退订，事件物化不得在桥关闭后继续写
             refreshStatus();
-            showMessage(`外部命令桥已${this.settings.bridgeEnabled ? "开启" : "关闭"}`, 3000);
+            showMessage("外部命令桥已关闭", 3000);
         };
         row(secBasic, "外部命令桥", enabledInput, "默认关；开启后外部程序（Quicker/CLI/MCP）可发命令");
 
@@ -788,9 +804,19 @@ export default class QuickGatePlugin extends Plugin {
         allowlistInput.rows = 2;
         allowlistInput.value = this.settings.rawApiAllowlist.join(", ");
         allowlistInput.onchange = async () => {
-            this.settings.rawApiAllowlist = allowlistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
+            // L504：行内校验——pluginId 形状（siyuan-*）不符的条目剔除并列出；合法条目照常保存
+            const raw = allowlistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
+            const invalid = raw.filter((s) => !/^siyuan-[a-z0-9-]+$/.test(s));
+            const valid = raw.filter((s) => /^siyuan-[a-z0-9-]+$/.test(s));
+            this.settings.rawApiAllowlist = [...new Set(valid)];
             this.store.settings = this.settings;
             await this.store.saveSettings();
+            allowlistInput.value = this.settings.rawApiAllowlist.join(", ");
+            if (invalid.length > 0) {
+                showMessage(`已保存合法条目；以下不符合 pluginId 形状（siyuan-*）被剔除：${invalid.join("、")}`, 5000, "error");
+            } else {
+                showMessage("允许名单已保存", 1500, "info");
+            }
         };
         row(secSec, "plugin.api 允许名单", allowlistInput, "逗号分隔的 pluginId；默认仅含已完成契约审计的三个插件（打卡/人脉/雷切）——新加入即授权透传其窗口桥，请先完成契约审计");
 
@@ -802,6 +828,7 @@ export default class QuickGatePlugin extends Plugin {
             this.settings.blacklist = blacklistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
             this.store.settings = this.settings;
             await this.store.saveSettings();
+            showMessage("黑名单已保存", 1500, "info"); // L504：保存反馈（轻提示，不打断）
         };
         row(secSec, "插件黑名单", blacklistInput, "逗号分隔；名单内插件不暴露命令");
 

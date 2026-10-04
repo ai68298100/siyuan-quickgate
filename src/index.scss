@@ -1,0 +1,25 @@
+/*
+ * 设置面板触控与可达性基线（L282 · R234）：
+ * - 开关/按钮触控目标 ≥44px 宽或 ≥32px 高（思源 b3-switch 原生 ~36×18，加高触达面）
+ * - 焦点可见（b3 主题默认 outline 在部分主题过淡，显式补强）
+ * 作用域限定 #qg-settings，不影响宿主其他面板。
+ */
+#qg-settings {
+  input[type="checkbox"].b3-switch {
+    min-width: 44px;
+    min-height: 24px;
+  }
+
+  button.b3-button {
+    min-height: 32px;
+  }
+
+  textarea.b3-text-field {
+    min-height: 44px;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--b3-theme-primary);
+    outline-offset: 1px;
+  }
+}
