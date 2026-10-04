@@ -302,3 +302,6 @@
 ### Added（R241 续）
 - **favorites.remove 支持 `clearRecent:true`（TODO L472 清除历史）**：一次清空全部最近使用、无需逐条 plugin/command；契约 JSON/api.md/MCP schema 同步；+1 测试（158 全绿）。
 - **调研追加（docs/10-生态调研-R3.md §6）**：思源内置 CLI `serve` 安全评估（旗标齐全无后门，自托管场景不立项）；uTools-siyuan 同类对照（跨宿主泳道需求验证，单目的客户端，快门差异化守住编排层）。
+
+### Added（R250 续）
+- **设置页「收藏与最近使用管理」（TODO L472 消费面）**：收藏列表（移除）/ 最近使用列表（单条移除 + 一键清空）——favorites.json 的完整 UI 管理入口，不再只有 CLI。

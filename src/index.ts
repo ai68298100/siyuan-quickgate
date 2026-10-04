@@ -16,6 +16,7 @@ import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
 import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted, planMaterialization } from "./services/eventbridge";
 import { IdempotencyRegistry } from "./services/idempotency";
+import { normalizeFavorites, FavoritesStore } from "./services/favorites";
 import { BridgeClaimHandle, BridgeClaimer, createNavigatorClaimer } from "./services/bridge-claim";
 import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
@@ -946,6 +947,55 @@ export default class QuickGatePlugin extends Plugin {
             });
         };
         row(secQueue, "审计日志（筛选+复制）", auditBtn, "按 op / 状态 / 插件关键词与日期过滤最近 20 条；单条可复制 JSON");
+
+        // —— 收藏与最近使用管理（L472 消费面 · R250）——
+        const favBtn = document.createElement("button");
+        favBtn.className = "b3-button b3-button--outline";
+        favBtn.textContent = "收藏与最近使用管理";
+        favBtn.onclick = () => {
+            const favPath = `/storage/petal/${PLUGIN_NAME}/favorites.json`;
+            const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+            const load = async () => {
+                try {
+                    const raw = await this.kernelApi.getFileText(favPath);
+                    return normalizeFavorites(raw ? JSON.parse(raw) : null);
+                } catch { return normalizeFavorites(null); }
+            };
+            const save = async (s: FavoritesStore) => {
+                await this.kernelApi.putFileText(favPath, JSON.stringify({ schemaVersion: 1, favorites: s.favorites, recent: s.recent }, null, 2));
+            };
+            const render = (s: FavoritesStore) => {
+                const favRows = s.favorites.map((f, i) =>
+                    `<div style="margin-bottom:2px">★ ${esc(`${f.plugin}/${f.command}`)}（${esc(f.title)}） <button class="b3-button b3-button--small" data-qg-fav-del="${i}">移除</button></div>`).join("")
+                    || '<div style="color:var(--b3-theme-on-surface)">暂无收藏——面板/CLI 经 favorites.add 添加</div>';
+                const recRows = s.recent.map((r, i) =>
+                    `<div style="margin-bottom:2px">${esc(r.at.slice(0, 16).replace("T", " "))} ${esc(`${r.plugin}/${r.command}`)} <button class="b3-button b3-button--small" data-qg-rec-del="${i}">移除</button></div>`).join("")
+                    || '<div style="color:var(--b3-theme-on-surface)">暂无最近使用</div>';
+                return `<div style="margin-bottom:6px"><b>收藏（${s.favorites.length}）</b></div>${favRows}` +
+                    `<div style="margin:8px 0 6px"><b>最近使用（${s.recent.length}）</b></div>${recRows}` +
+                    `<div style="margin-top:8px"><button class="b3-button b3-button--small" data-qg-rec-clear ${s.recent.length === 0 ? "disabled" : ""}>清空全部最近使用</button></div>`;
+            };
+            const d = new Dialog({ title: "收藏与最近使用", content: `<div style="padding:12px;font-size:12px"><div id="qg-fav-body">${render(normalizeFavorites(null))}</div></div>`, width: "640px" });
+            const refresh = async () => {
+                const body = d.element.querySelector("#qg-fav-body");
+                if (body) body.innerHTML = render(await load());
+            };
+            void refresh();
+            d.element.addEventListener("click", async (ev) => {
+                const t = ev.target as HTMLElement;
+                const delFav = t.closest("[data-qg-fav-del]") as HTMLElement | null;
+                const delRec = t.closest("[data-qg-rec-del]") as HTMLElement | null;
+                const clr = t.closest("[data-qg-rec-clear]") as HTMLElement | null;
+                if (!delFav && !delRec && !clr) return;
+                const s = await load();
+                if (delFav) s.favorites.splice(Number(delFav.dataset.qgFavDel), 1);
+                else if (delRec) s.recent.splice(Number(delRec.dataset.qgRecDel), 1);
+                else if (clr) s.recent = [];
+                await save(s);
+                await refresh();
+            });
+        };
+        row(secQueue, "收藏与最近使用", favBtn, "管理 favorites.json：移除收藏/单条最近/一键清空最近（命令面板动态组的数据源，L472）");
 
         const auditExportBtn = document.createElement("button");
         auditExportBtn.className = "b3-button b3-button--outline";
