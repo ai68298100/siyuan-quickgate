@@ -2,7 +2,7 @@
 
 > 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
-> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.6**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.7.1** 已部署至 `data/plugins/siyuan-quickgate/` 并启用；**外部命令桥与广播快路径已开启（R70 代开，用户可随时在设置页关回）**。下文 `$TOKEN` 即该值。
+> **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.6**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.7.3+（未发布构建随 R 轮部署）** 已部署至 `data/plugins/siyuan-quickgate/` 并启用；**外部命令桥与广播快路径已开启（R70 代开，用户可随时在设置页关回）**。下文 `$TOKEN` 即该值。
 > **M0 spike 复测收官（R70，2026-10-02）**：`npm run verify:restart` **9/9 全绿**——③桥 444ms / ⑩⓪ 401 / ⑩内核路由功能面（bug#9 修复后）/ ⑤广播 / **v1.5 真机 227ms** / MCP 内核路由 / §10-10 日志 +254B。唯余：⑪（需在打卡里记/删一条）、④多窗口与 ⑦blockId/①复核（DevTools 现场）。
 > **MCP 真 e2e 全链首次通过（R110，2026-10-03）**：三通道（广播快路径/内核路由/NDJSON）全部经真实前端消费——bridge.ping / registry.list / editor.context / daily.status 四 op 全 recorded。v0.7.2 解除 pre-release 转正式版。系统进入全功能验证态。
 > **CI 容器化内核侧验收上线（R105，2026-10-03）**：GitHub Actions ubuntu + b3log/siyuan docker（serve 子命令+bypass+预置 conf：api.token/bazaar trust）→ **⑩路由 kernel-sync/events.list/降级/MCP registry.list 301ms 全 recorded**（⑥⑧⑨ 内核侧事实在容器复现）；③⑤v1.5/⑪ 需前端环境（本机 verify:restart 覆盖）。手动触发：`gh workflow run ci-e2e-experiment.yml`。十轮诊断全记录见 workflow 文件与该分支历史。
