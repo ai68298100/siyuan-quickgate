@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { BridgeService } from "../src/services/bridge-service";
-import { KernelApi } from "../src/services/kernelApi";
-import { BridgeStore } from "../src/services/store";
 import { createKernelOpHandler, type KernelDeps } from "../src/kernel-ops";
 import type { EcosystemManifest } from "../src/services/bridge-service";
 import { validateTemplatePath, validateTemplateContent } from "../src/services/path-guard";
 import { AuditEntry } from "../src/types/bridge";
+import { MemKernel, makeTestService, testEnvelope } from "./helpers/test-env";
 
 /**
  * template.new 路径安全回归（safety-gate-contract §7 · TODO L628 R78-P0）。
@@ -84,54 +82,18 @@ describe("template.new 内核通道（kernel route）", () => {
     });
 });
 
-/** 内存文件系统（NDJSON 通道）——与 bridge-service.test.ts 同款最小假件 */
-class MemKernel {
-    files = new Map<string, string>();
-    api: KernelApi;
-    constructor() {
-        this.api = new KernelApi((async (url: RequestInfo | URL, init?: RequestInit) => {
-            const u = String(url);
-            const body = typeof init?.body === "string" ? JSON.parse(init.body) : {};
-            if (u === "/api/file/getFile") {
-                const text = this.files.get(body.path);
-                return { ok: text !== undefined, status: text !== undefined ? 200 : 404, text: async () => text ?? "" } as Response;
-            }
-            if (u === "/api/file/putFile") {
-                const form = init?.body as FormData;
-                this.files.set(String(form.get("path")), await (form.get("file") as File).text());
-                return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: null }) } as Response;
-            }
-            if (u === "/api/template/renderSprig") return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: `rendered:${body.template}` }) } as Response;
-            if (u === "/api/filetree/createDocWithMd") return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: "20260101120000-xyz" }) } as Response;
-            return { ok: false, status: 404, text: async () => "{}" } as Response;
-        }) as unknown as typeof fetch);
-    }
-}
+/** 内存文件系统（NDJSON 通道）——共享夹具 + renderSprig/createDocWithMd 函数值端点 */
+const makeMem = () => {
+    const mem = new MemKernel();
+    mem.jsonEndpoints.set("/api/template/renderSprig", (body: { template: string }) => `rendered:${body.template}`);
+    mem.jsonEndpoints.set("/api/filetree/createDocWithMd", "20260101120000-xyz");
+    return mem;
+};
 
-const settings = () => ({
-    schemaVersion: 1 as const, bridgeEnabled: true, pollMs: 500, backoffMaxMs: 10000,
-    confirmExec: false, blacklist: [] as string[], auditMax: 200,
-    rawApiEnabled: false, rawApiAllowlist: [] as string[],
-    bridgeBasePath: "/bridge", deviceName: "dev-a",
-});
-
-const envelope = (id: string, op: string, args: object) =>
-    JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString(), ttlMs: 60000 });
+const envelope = (id: string, op: string, args: object) => testEnvelope(id, op, args);
 
 function makeService(mem: MemKernel, audits: AuditEntry[]) {
-    const store = new BridgeStore({ load: async () => null, save: async () => {} });
-    const service = new BridgeService({
-        api: mem.api, store, settings,
-        pluginName: "siyuan-quickgate", pluginVersion: "0.1.0",
-        deviceName: () => "dev-a",
-        registry: () => ({ source: "fallback", plugins: [] }),
-        confirm: async () => true,
-        audit: (e) => audits.push(e),
-        editorContext: () => null,
-        dailyStatus: async () => ({ docId: null, exists: false }),
-        openDoc: () => {}, openSetting: () => {},
-        getCheckin: () => undefined, getContacts: () => undefined,
-    });
+    const service = makeTestService(mem, { audit: (e) => audits.push(e) });
     return { service };
 }
 
@@ -149,7 +111,7 @@ describe("template.new NDJSON 通道 + 写 op 审计", () => {
         }
     });
     it("合法路径：recorded + 审计；审计 command 只含 args 键名（零 PII）", async () => {
-        const mem = new MemKernel();
+        const mem = makeMem();
         mem.files.set("/templates/hello.md", "# hi");
         mem.files.set("/bridge/commands.ndjson", envelope("t2", "template.new", { notebook: "nb", hpath: "/a.md", templatePath: "hello.md" }) + "\n");
         const audits: AuditEntry[] = [];

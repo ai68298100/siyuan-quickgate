@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SEARCH_ALIASES, expandSearchKeyword } from "../src/services/search-alias";
-import { BridgeService } from "../src/services/bridge-service";
-import { KernelApi } from "../src/services/kernelApi";
-import { BridgeStore } from "../src/services/store";
+import { MemKernel, makeTestService } from "./helpers/test-env";
 
 describe("search-alias（命令搜索别名 · L471）", () => {
     it("条目验收词对：「打卡/daka/checkin」互达", () => {
@@ -27,32 +25,11 @@ describe("search-alias（命令搜索别名 · L471）", () => {
     });
 });
 
-/** 内存内核（commands.search 集成） */
-class MemKernel {
-    api: KernelApi;
-    constructor() {
-        this.api = new KernelApi((async () => ({ ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: null }) })) as unknown as typeof fetch);
-    }
-}
-
-const settings = () => ({
-    schemaVersion: 1 as const, bridgeEnabled: true, pollMs: 500, backoffMaxMs: 10000,
-    confirmExec: false, blacklist: [] as string[], auditMax: 200,
-    rawApiEnabled: false, rawApiAllowlist: [] as string[],
-    bridgeBasePath: "/bridge", deviceName: "dev-a",
-});
-
 function makeService(commands: Array<{ title: string; id: string; plugin: string }>) {
-    const store = new BridgeStore({ load: async () => null, save: async () => {} });
-    return new BridgeService({
-        api: new MemKernel().api, store, settings,
-        pluginName: "siyuan-quickgate", pluginVersion: "0.1.0",
-        deviceName: () => "dev-a",
+    // 共享夹具（tests/helpers/test-env.ts）：MemKernel 全端点 404 也能跑（registry 假件不走内核）
+    const mem = new MemKernel();
+    return makeTestService(mem, {
         registry: () => ({ source: "fallback", plugins: [{ name: "siyuan-checkin", displayName: "小驴打卡", commands }] }),
-        confirm: async () => true, audit: () => {}, editorContext: () => null,
-        dailyStatus: async () => ({ docId: null, exists: false }),
-        openDoc: () => {}, openSetting: () => {},
-        getCheckin: () => undefined, getContacts: () => undefined,
     });
 }
 

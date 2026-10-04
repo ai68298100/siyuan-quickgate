@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BridgeService } from "../src/services/bridge-service";
-import { KernelApi } from "../src/services/kernelApi";
-import { BridgeStore } from "../src/services/store";
 import { normalizeFavorites, pushRecent, upsertFavorite, removeEntry, FAVORITES_CAP, RECENT_CAP } from "../src/services/favorites";
+import { MemKernel, makeTestService, testEnvelope as envelope } from "./helpers/test-env";
 
 describe("favorites 纯逻辑（L474）", () => {
     it("upsert 去重前移；cap 截尾", () => {
@@ -35,51 +33,14 @@ describe("favorites 纯逻辑（L474）", () => {
     });
 });
 
-/** 内存文件系统（favorites 载体在插件存储根，不走 bridgeBasePath） */
-class MemKernel {
-    files = new Map<string, string>();
-    api: KernelApi;
-    constructor() {
-        this.api = new KernelApi((async (url: RequestInfo | URL, init?: RequestInit) => {
-            const u = String(url);
-            const body = typeof init?.body === "string" ? JSON.parse(init.body) : {};
-            if (u === "/api/file/getFile") {
-                const text = this.files.get(body.path);
-                return { ok: text !== undefined, status: text !== undefined ? 200 : 404, text: async () => text ?? "" } as Response;
-            }
-            if (u === "/api/file/putFile") {
-                const form = init?.body as FormData;
-                this.files.set(String(form.get("path")), await (form.get("file") as File).text());
-                return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: null }) } as Response;
-            }
-            return { ok: false, status: 404, text: async () => "{}" } as Response;
-        }) as unknown as typeof fetch);
-    }
-}
-
-const settings = () => ({
-    schemaVersion: 1 as const, bridgeEnabled: true, pollMs: 500, backoffMaxMs: 10000,
-    confirmExec: false, blacklist: [] as string[], auditMax: 200,
-    rawApiEnabled: false, rawApiAllowlist: [] as string[],
-    bridgeBasePath: "/bridge", deviceName: "dev-a",
-});
-
+/** 内存文件系统 + 服务组装：共享夹具（tests/helpers/test-env.ts），registry 特化在此注入 */
 function makeService(mem: MemKernel) {
-    const store = new BridgeStore({ load: async () => null, save: async () => {} });
-    return new BridgeService({
-        api: mem.api, store, settings,
-        pluginName: "siyuan-quickgate", pluginVersion: "0.1.0",
-        deviceName: () => "dev-a",
+    return makeTestService(mem, {
         registry: () => ({ source: "fallback", plugins: [{ name: "siyuan-checkin", displayName: "小驴打卡", commands: [{ title: "记一笔", id: "record", plugin: "siyuan-checkin", callback: async () => {} } as never] }] }),
-        confirm: async () => true, audit: () => {}, editorContext: () => null,
-        dailyStatus: async () => ({ docId: null, exists: false }),
-        openDoc: () => {}, openSetting: () => {},
-        getCheckin: () => undefined, getContacts: () => undefined,
     });
 }
 
-const envelope = (id: string, op: string, args: object) =>
-    JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString(), ttlMs: 60000 });
+const envelope = (id: string, op: string, args: object) => testEnvelope(id, op, args);
 
 describe("favorites dispatch 集成（L474）", () => {
     it("add→list→remove 全链；载体落在 /storage/petal/siyuan-quickgate/favorites.json", async () => {
