@@ -420,6 +420,10 @@
 
 - [ ] 【R236-A·挂L157】menu schema v3 实现（favorites 动态组）：thenMenu 枚举+thenMenuField/thenMenuItem+validate-menu 扩展+空态折叠——宿主前提=showmenu 列表变量生成菜单实测（L157）；桥在线门=quickgate-or-bridge 既有机制【等用户实测 L157】
 - [x] 【R242·循环A+R1 收口】生态调研 R1 新立项三项收口：① Capture 多目标变体=**SY-路由前缀解析已实现**（#前缀=目标文档ID 最长匹配+@人脉提名，reference 既有交付）；②③ 参数化链接动作/链接集=**本批交付** design/docs/11 使用手册「参数化 siyuan:// 链接集」附录（blocks/{id} 源码多源实证、SQL 先查 ID 组合用法、其余路由 E1 待复核不扩表）；另 WALKTHROUGH 头部部署版本时效修复（v0.7.1→未发布构建口径）
+- [x] 【R244·循环C】生态调研 R4（重大上游事件）：思源 3.8 内置 **Agent 运行时**（kernel/agent/* 源码实证：go-openai + 会话/决策/能力三层管控 + 外部 MCP 接入 `Conf.AI.MCP.Servers`→EnsureMCPConnected）——**L561「原生 MCP=竞品」口径改写：快门 MCP 可注册为内置 Agent 的能力扩展源（分发渠道级差异）**；外部工具受 Agent 白名单隔离但快门侧安全门照常生效（D-0013）。调研=docs/10-生态调研-R4.md
+
+- [ ] 【R244-A·等用户/等模型】快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】
+
 
 
 
