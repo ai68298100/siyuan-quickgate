@@ -1,0 +1,3109 @@
+[
+ {
+  "code": "59319580-ca25-414e-a7f0-08defe1126cc",
+  "name": "md转html",
+  "desc": "用于将思源笔记中的markdown语法转换为常规加粗等显示样式",
+  "author": "wenbocn",
+  "tail": [
+   "md转html 用于将思源笔记中的markdown语法转换为常规加粗等显示样式",
+   "wenbocn 2026-08-20 10:26",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "c380afc9-153d-4de3-2de8-08d9a28424de",
+  "name": "守藏使",
+  "desc": "复制信息到到思源如果是浏览器 添加来源网址 笔记本选中即搜 请看注释（思源专版）",
+  "author": "%E7%B1%B3%E9%9C%B2%E7%BC%87%E6%AC%A7",
+  "tail": [
+   "米露缇欧 2026-08-19 12:35",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "70",
+   "<10"
+  ]
+ },
+ {
+  "code": "ca73d6d2-c6b2-4954-a44e-08dbf16456ca",
+  "name": "思源网盘，启动！",
+  "desc": "通过思源笔记同步第三方文件",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2026-05-13 14:50",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "14",
+   "<10"
+  ]
+ },
+ {
+  "code": "d9cab944-b742-4d0b-d9c6-08de9917e55e",
+  "name": "Siyuan速记",
+  "desc": "配合iOS快捷指令，实现手机端打字，实时存入电脑端的思源笔记Inbox文件夹中，以实现灵感收集的功能。",
+  "author": "%E4%BD%95%E8%88%9C%E4%BA%BA",
+  "tail": [
+   "Siyuan速记 配合iOS快捷指令，实现手机端打字，实时存入电脑端的思源笔记...",
+   "何舜人 2026-04-14 13:23",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "c9cf4c2c-a603-4603-f171-08dd017145d1",
+  "name": "标题一键制卡",
+  "desc": "根据标题一键制作闪卡",
+  "author": "Runos",
+  "tail": [
+   "标题一键制卡 根据标题一键制作闪卡",
+   "Runos 2026-03-01 17:34",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "13",
+   "<10"
+  ]
+ },
+ {
+  "code": "28fc0d60-ec69-4458-e96a-08ddb7775a51",
+  "name": "置顶",
+  "desc": "置顶状态一眼识别，边框高亮更直观！",
+  "author": "Taitun",
+  "tail": [
+   "Taitun 2026-01-30 12:18",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "223",
+   "1966",
+   "331"
+  ]
+ },
+ {
+  "code": "fee759cb-8cfc-4666-fbf7-08ddee84b295",
+  "name": "超级卡片",
+  "desc": "构建个人的“知识卡片”网络，系统性地管理知识、深化理解并激发创新",
+  "author": "Taitun",
+  "tail": [
+   "Taitun 2026-01-29 09:49",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "51",
+   "196",
+   "<10"
+  ]
+ },
+ {
+  "code": "8dfe1e68-33f0-4329-14ae-08da4a84097c",
+  "name": "智能备份",
+  "desc": "笔记的最好伴侣，从此数据无忧",
+  "author": "%E9%A3%8E%E6%9C%AA%E7%9F%A5",
+  "tail": [
+   "风未知 2026-01-16 15:21",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "56",
+   "657",
+   "37"
+  ]
+ },
+ {
+  "code": "9736e7c1-c500-4588-ffa3-08dcb1b1f7f4",
+  "name": "添加豆瓣信息到思源数据库",
+  "desc": "支持书籍、电影、电视剧",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2026-01-16 10:09",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "61",
+   "<10"
+  ]
+ },
+ {
+  "code": "77e111ad-6f78-44a7-6d85-08dde9c16a10",
+  "name": "思源web签到",
+  "desc": "思源签到，兼容滑块验证",
+  "author": "DaveBoy",
+  "tail": [
+   "DaveBoy 2025-12-23 11:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "20",
+   "21"
+  ]
+ },
+ {
+  "code": "c476c187-8401-4f53-b99a-08de37f0ba43",
+  "name": "快查",
+  "desc": "在思源笔记（SiYuan-Note）中进行普通搜索或SQL搜索。",
+  "author": "%E5%AF%92Orz",
+  "tail": [
+   "快查 在思源笔记（SiYuan-Note）中进行普通搜索或SQL搜索。",
+   "寒Orz 2025-12-20 22:34",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "9",
+   "<10"
+  ]
+ },
+ {
+  "code": "9213f2f7-5d7d-4df5-b99b-08de37f0ba43",
+  "name": "快摘",
+  "desc": "把选中的文本、链接或图片直链，一键整理为 Markdown 并追加到思源笔记当日日记。",
+  "author": "%E5%AF%92Orz",
+  "tail": [
+   "快摘 把选中的文本、链接或图片直链，一键整理为 Markdown 并追加到思源...",
+   "寒Orz 2025-12-20 22:22",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "28",
+   "<10"
+  ]
+ },
+ {
+  "code": "f1cc5785-c68f-4bee-4729-08da2019a39f",
+  "name": "Zotero批注",
+  "desc": "支持Word、Onenote、SiYuan等多种笔记软件",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2025-11-23 10:18",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "97",
+   "3154",
+   "<10"
+  ]
+ },
+ {
+  "code": "40ed68da-0dd2-453f-381e-08de090665ba",
+  "name": "删除行",
+  "desc": "思源笔记 表格 删除行",
+  "author": "Poto",
+  "tail": [
+   "删除行 思源笔记 表格 删除行",
+   "Poto 2025-10-12 16:58",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "<10"
+  ]
+ },
+ {
+  "code": "3d004e01-c882-49b1-381c-08de090665ba",
+  "name": "表格插下行",
+  "desc": "思源笔记 表格 在下方插入一行",
+  "author": "Poto",
+  "tail": [
+   "表格插下行 思源笔记 表格 在下方插入一行",
+   "Poto 2025-10-12 16:44",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "957b8074-6082-4559-ec91-08ddbf06f7f5",
+  "name": "2Anki",
+  "desc": "发送思源卡片至anki",
+  "author": "mmjj",
+  "tail": [
+   "mmjj 2025-08-28 21:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "12",
+   "<10"
+  ]
+ },
+ {
+  "code": "ad377fd4-2e29-42f6-9ce0-08ddc5acfa0f",
+  "name": "思源段落合并",
+  "desc": "1",
+  "author": "%E5%A4%A9%E6%89%8D%E6%97%A0%E6%95%8C",
+  "tail": [
+   "思源段落合并 1",
+   "天才无敌 2025-07-18 22:57",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "18",
+   "<10"
+  ]
+ },
+ {
+  "code": "4075d8e7-bf7a-4c33-b30e-08ddc407f058",
+  "name": "思源笔记表格(单列) 转 列表",
+  "desc": "思源笔记的单列表格 转 列表形式（进阶用法：可以借助query挂件，将反链转为正链列表）",
+  "author": "%E7%94%A8%E6%88%B7JR0TzZK6BQA",
+  "tail": [
+   "思源笔记表格(单列) 转 列表 思源笔记的单列表格 转 列表形式（进阶用法...",
+   "用户JR0TzZK6BQA 2025-07-16 22:33",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "6327a351-91db-4492-9913-08ddac6ed895",
+  "name": "思源笔记单块分为多块",
+  "desc": "思源笔记从其他文本编辑器或者ocr识别过来的文本，如果中间没有空行的情况的，都是粘贴为一个块，但是有时候我们就是需要将它分开便于操作",
+  "author": "xrhhh",
+  "tail": [
+   "思源笔记单块分为多块 思源笔记从其他文本编辑器或者ocr识别过来的文本，...",
+   "xrhhh 2025-06-16 14:48",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "3e1c4e2b-57dd-419a-38a2-08dd82057ea1",
+  "name": "思源行级公式快速分割",
+  "desc": "将行级公式分割，方便对公式局部挖空。",
+  "author": "Pu1Kb44x",
+  "tail": [
+   "思源行级公式快速分割 将行级公式分割，方便对公式局部挖空。",
+   "Pu1Kb44x 2025-04-24 06:08",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "027c6cf1-e520-4d16-0638-08dd787f096d",
+  "name": "快速插入思源页号链接",
+  "desc": "先点击本脚本的右键菜单修改资源url，设置完成再选取要链接的页码，最后运行此脚本。用于手动粘贴pdf中的目录到文章中，点击脚本生成的页码链接跳转到内置pdf阅读器对应页。",
+  "author": "Pu1Kb44x",
+  "tail": [
+   "快速插入思源页号链接 先点击本脚本的右键菜单修改资源url，设置完成再选...",
+   "Pu1Kb44x 2025-04-11 21:20",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "6d79c551-9b24-440e-39af-08dd776c5a34",
+  "name": "查找思源笔记工作空间",
+  "desc": "使用everything全局查找所有思源笔记工作空间",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "查找思源笔记工作空间 使用everything全局查找所有思源笔记工作空间",
+   "浅沧 2025-04-09 23:48",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "990fd5b8-8e0c-4ffa-ba2c-08dba2f9bd4e",
+  "name": "ZoteroForSiyuan",
+  "desc": "基于Zoteo的思源笔记文献引用与管理插件第一版初步完成，完美实现了文献引用、更新、样式切换、插入文献列表等等。重现了word插件全部功能。",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2025-04-09 21:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "65",
+   "<10"
+  ]
+ },
+ {
+  "code": "86d570f0-4d38-4897-878e-08dd7586f3c6",
+  "name": "思源&#x1F517;外链",
+  "desc": "复制块链接，将其富文本改为当前时间，格式改为上标",
+  "author": "oneer",
+  "tail": [
+   "思源&#x1F517;外链 复制块链接，将其富文本改为当前时间，格式改为上标",
+   "oneer 2025-04-07 16:49",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "a9fc37af-9666-408d-178e-08db13055cfd",
+  "name": "标题编号",
+  "desc": "通过思源API实现标题编号，解决了笔记导出编号消失的问题。",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2025-04-05 22:49",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "8",
+   "99",
+   "<10"
+  ]
+ },
+ {
+  "code": "a65cd9c1-42fc-43fd-44d4-08dba7ba3b5d",
+  "name": "无效数据处理",
+  "desc": "查找、处理空文档、重复文档、未找到 ID 的块、未引用的数据库",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2025-03-08 16:51",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "97",
+   "<10"
+  ]
+ },
+ {
+  "code": "32d4e10a-e395-4f0c-9acc-08dd5c97ad3b",
+  "name": "灵感",
+  "desc": "可以快速添加灵感内容到思源笔记",
+  "author": "Emptylight",
+  "tail": [
+   "Emptylight 2025-03-07 19:16",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "30",
+   "<10"
+  ]
+ },
+ {
+  "code": "bd109126-eff3-4bac-d369-08da2f486788",
+  "name": "BookxNote &#x1F517; 思源",
+  "desc": "建立 BookxNote Pro 与 思源笔记 的双向链接",
+  "author": "shuoying",
+  "tail": [
+   "shuoying 2025-03-01 22:48",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "184",
+   "<10"
+  ]
+ },
+ {
+  "code": "cacde3bf-87cf-4d04-712c-08da09549333",
+  "name": "思源图片->sm",
+  "desc": "将思源文章中的单一本地图片导入到SuperMemo",
+  "author": "Spade7",
+  "tail": [
+   "Spade7 2025-01-26 18:39",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "26",
+   "<10"
+  ]
+ },
+ {
+  "code": "4c686e6f-af06-4c0f-a42f-08dd35be3a2f",
+  "name": "GPT公式标准化",
+  "desc": "格式化OpenAI ChatGPT输出的公式使其符合标准markdown语法。OpenAI ChatGPT输出的Markdown格式是\\[，而不是常用$$, 从而使得markdown软件无法正常渲染公式。选中或者复制ChatGPT输出文本，点击本动作，可以得到正常markdown笔记能够渲染的公式格式。",
+  "author": "duzh",
+  "tail": [
+   "GPT公式标准化 格式化OpenAI ChatGPT输出的公式使其符合标准markdown语法...",
+   "duzh 2025-01-21 20:01",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "79",
+   "<10"
+  ]
+ },
+ {
+  "code": "9422acd5-beb3-4762-4edf-08daa8ca3f89",
+  "name": "Zotero PDF &#x1F517; 思源",
+  "desc": "建立 Zotero PDF 与 思源笔记 的双向链接",
+  "author": "shuoying",
+  "tail": [
+   "shuoying 2024-12-22 01:09",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "12",
+   "157",
+   "<10"
+  ]
+ },
+ {
+  "code": "25e8e7ae-97a6-4df7-ec6a-08dd1fd8e628",
+  "name": "思源笔记批量添加删除线",
+  "desc": "思源笔记多选文档块时，批量添加删除线。",
+  "author": "Raymond2012",
+  "tail": [
+   "Raymond2012 2024-12-20 14:01",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "69b6de13-eab9-47e1-f1c3-08dd17617d76",
+  "name": "添加代码片段到思源笔记",
+  "desc": "从网页添加代码片段到思源笔记、管理已有代码片段",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-12-09 14:37",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "9",
+   "<10"
+  ]
+ },
+ {
+  "code": "5af0ef6a-19a3-433c-04ef-08dd0c331ec6",
+  "name": "Logseq导入思源笔记",
+  "desc": "对Logseq笔记进行处理，丝滑导入思源",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "Logseq导入思源笔记 对Logseq笔记进行处理，丝滑导入思源",
+   "浅沧 2024-12-03 19:12",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "29",
+   "<10"
+  ]
+ },
+ {
+  "code": "c98b3392-28bc-4e2c-9a43-08dc72f0e55e",
+  "name": "文字注释外链",
+  "desc": "选中文本，然后运行动作",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-11-27 08:49",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "39",
+   "<10"
+  ]
+ },
+ {
+  "code": "e7f30b34-5244-4859-c2fe-08dc74bc40ca",
+  "name": "截图注释外链",
+  "desc": "截图OCR并生成外链",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-11-27 08:48",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "23",
+   "<10"
+  ]
+ },
+ {
+  "code": "b4ac8c9e-a0a8-4ac6-e347-08dd0733f195",
+  "name": "SuperTag",
+  "desc": "将当前块添加到标签同名数据库",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-11-18 23:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "17",
+   "<10"
+  ]
+ },
+ {
+  "code": "f4668cfd-70d1-4d38-5022-08dcf7c36419",
+  "name": "思源笔记图片OCR",
+  "desc": "打开思源笔记，运行本动作",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-11-13 08:45",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "55",
+   "<10"
+  ]
+ },
+ {
+  "code": "6a934246-d7a7-4c2a-8712-08dceb3bdfc8",
+  "name": "字体颜色",
+  "desc": "修改思源字体颜色",
+  "author": "%E6%B0%B8%E6%81%92~%E6%98%9F%E7%A9%BA",
+  "tail": [
+   "字体颜色 修改思源字体颜色",
+   "永恒~星空 2024-10-14 13:20",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "37",
+   "<10"
+  ]
+ },
+ {
+  "code": "29ad6405-d79c-41b8-8710-08dceb3bdfc8",
+  "name": "块外框样式",
+  "desc": "修改思源块外框样式",
+  "author": "%E6%B0%B8%E6%81%92~%E6%98%9F%E7%A9%BA",
+  "tail": [
+   "块外框样式 修改思源块外框样式",
+   "永恒~星空 2024-10-14 12:52",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "12",
+   "<10"
+  ]
+ },
+ {
+  "code": "059667dd-0ecb-4387-b9d1-08dc7226251f",
+  "name": "虚拟驱动器管理",
+  "desc": "将文件夹映射为虚拟驱动器、删除虚拟驱动器",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-10-11 14:59",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "31",
+   "<10"
+  ]
+ },
+ {
+  "code": "7515ec0e-3dcb-4ef4-b0f4-08dc5b1ee596",
+  "name": "SY文档->SM",
+  "desc": "思源文档带本地图床导入supermemo",
+  "author": "Spade7",
+  "tail": [
+   "Spade7 2024-10-08 04:40",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "48",
+   "<10"
+  ]
+ },
+ {
+  "code": "3008304c-afbc-4cb9-fc10-08dcd8ffb2e2",
+  "name": "思源笔记-快速标记/跳转",
+  "desc": "思源笔记，实现类似IDEA的快速标记跳转",
+  "author": "%E7%94%A8%E6%88%B7l4XG5wFHBQA",
+  "tail": [
+   "思源笔记-快速标记/跳转 思源笔记，实现类似IDEA的快速标记跳转",
+   "用户l4XG5wFHBQA 2024-09-20 12:40",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "2a0205f1-e931-40b4-f854-08da38cccadf",
+  "name": "思源更新(简易版)",
+  "desc": "只做了比较版本和下载文件",
+  "author": "DaveBoy",
+  "tail": [
+   "思源更新(简易版) 只做了比较版本和下载文件",
+   "DaveBoy 2024-09-13 11:38",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "9c5deff5-970a-48b2-9aab-08dcd1153ca4",
+  "name": "思源同步感知与远程管理",
+  "desc": "使用quicker的推送服务进行思源笔记同步感知与远程管理",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "思源同步感知与远程管理 使用quicker的推送服务进行思源笔记同步感知与远...",
+   "浅沧 2024-09-11 14:30",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "c9205e3c-2432-4eed-06c2-08db4d58400e",
+  "name": "打开指定工作空间",
+  "desc": "启动思源时，打开指定工作空间",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "打开指定工作空间 启动思源时，打开指定工作空间",
+   "浅沧 2024-08-14 17:57",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "30",
+   "10"
+  ]
+ },
+ {
+  "code": "f0f0370b-2a2b-43ce-5349-08dcb4696e8b",
+  "name": "批量批注",
+  "desc": "支持Word、Onenote、SiYuan等多种笔记软件",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2024-08-06 11:28",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "88",
+   "<10"
+  ]
+ },
+ {
+  "code": "b186d1ef-143a-41a7-bafa-08da0a4333e6",
+  "name": "思源笔记插入本地文件链接",
+  "desc": "将选中的文件或者剪贴板中的文件插入思源笔记当前页面",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-08-06 09:14",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "355",
+   "11"
+  ]
+ },
+ {
+  "code": "b0a4ba7f-0c71-4e94-8593-08dcaae510d0",
+  "name": "复制为副本",
+  "desc": "为无序列表定制的合理操作",
+  "author": "%E6%8D%8F%E8%A7%81%E5%BD%B1",
+  "tail": [
+   "复制为副本 为无序列表定制的合理操作",
+   "捏见影 2024-07-23 16:10",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "e6dfe45c-c137-47a9-5790-08dc3eb8f95b",
+  "name": "开关虚拟引用",
+  "desc": "纯按键实现",
+  "author": "%E6%8D%8F%E8%A7%81%E5%BD%B1",
+  "tail": [
+   "捏见影 2024-07-21 23:19",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "10c6c646-e2d2-45db-95fc-08dca71b147e",
+  "name": "右开tab",
+  "desc": "右开tab并同步当前位置",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "右开tab 右开tab并同步当前位置",
+   "刘烟火 2024-07-19 21:58",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "256bc0c9-3478-4212-cfc0-08dca3549c75",
+  "name": "转为引用",
+  "desc": "一键将Zotero笔记链接转为Zotero官方域引用，实现无缝对接！",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2024-07-14 23:32",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "59",
+   "<10"
+  ]
+ },
+ {
+  "code": "765dfe52-d524-4a2e-02b5-08dc9af158a0",
+  "name": "向上选块",
+  "desc": "向上选块",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "向上选块 向上选块",
+   "刘烟火 2024-07-03 19:00",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "e3924294-fbf0-465b-3dc9-08dc93290ea3",
+  "name": "反链面板",
+  "desc": "目的地",
+  "author": "Safehouse5305",
+  "tail": [
+   "Safehouse5305 2024-06-24 11:34",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "39f0d45f-4eb0-49c4-3db9-08dc93290ea3",
+  "name": "前进",
+  "desc": "https://getquicker.net/Sharedaction?code=df9b487d-932d-440b-3db8-08dc93290ea3",
+  "author": "Safehouse5305",
+  "tail": [
+   "前进 https://getquicker.net/Sharedaction?code=df9b487d-932d-440b-3d...",
+   "Safehouse5305 2024-06-24 06:56",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "df9b487d-932d-440b-3db8-08dc93290ea3",
+  "name": "后退",
+  "desc": "https://getquicker.net/Sharedaction?code=623045c1-f0a1-4260-3db7-08dc93290ea3",
+  "author": "Safehouse5305",
+  "tail": [
+   "后退 https://getquicker.net/Sharedaction?code=623045c1-f0a1-4260-3db...",
+   "Safehouse5305 2024-06-24 06:56",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "<10"
+  ]
+ },
+ {
+  "code": "623045c1-f0a1-4260-3db7-08dc93290ea3",
+  "name": "左页签",
+  "desc": "切换",
+  "author": "Safehouse5305",
+  "tail": [
+   "左页签 切换",
+   "Safehouse5305 2024-06-24 06:54",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "f7be1d35-c837-49d2-3db6-08dc93290ea3",
+  "name": "右页签",
+  "desc": "切换 页",
+  "author": "Safehouse5305",
+  "tail": [
+   "右页签 切换 页",
+   "Safehouse5305 2024-06-24 06:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "1ff73cfd-09da-412e-3db5-08dc93290ea3",
+  "name": "全屏",
+  "desc": "全屏/还原切换",
+  "author": "Safehouse5305",
+  "tail": [
+   "全屏 全屏/还原切换",
+   "Safehouse5305 2024-06-24 06:52",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "c064a200-45d1-4ad1-594e-08db837051fc",
+  "name": "文献列表",
+  "desc": "基于Zotero实现了Siyuan笔记的文献管理",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2024-06-23 09:51",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "97",
+   "<10"
+  ]
+ },
+ {
+  "code": "c864bb72-b1dc-447e-594d-08db837051fc",
+  "name": "插入引用",
+  "desc": "基于Zotero实现了Siyuan笔记的文献管理",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2024-06-23 09:50",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "144",
+   "<10"
+  ]
+ },
+ {
+  "code": "451c8146-9948-419f-1267-08db84706690",
+  "name": "格式化",
+  "desc": "基于Zotero实现了Siyuan笔记的文献管理",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2024-06-23 09:01",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "74",
+   "<10"
+  ]
+ },
+ {
+  "code": "64aaa0c8-596d-4e65-ed8a-08db0dcace5d",
+  "name": "Zotero笔记",
+  "desc": "启动HTTP服务，实现语雀与Zotero的互联",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2024-06-16 20:55",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "9",
+   "546",
+   "<10"
+  ]
+ },
+ {
+  "code": "4b47b675-ccb2-4d7c-d5fa-08dc842a79c6",
+  "name": "下载所有网络图片",
+  "desc": "将所有文档中的网络图片下载到本地，完成后最好重启下思源。",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-06-11 19:17",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "53",
+   "<10"
+  ]
+ },
+ {
+  "code": "ee51b347-33af-4e0e-2843-08dc86d0f421",
+  "name": "思源块合并&#x2B;闪卡",
+  "desc": "1",
+  "author": "%E6%A2%A6%E8%89%AF%E8%A1%A3",
+  "tail": [
+   "思源块合并&#x2B;闪卡 1",
+   "梦良衣 2024-06-07 17:21",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "c5306f0f-dbc1-40dc-d9cc-08db2ba80230",
+  "name": "新建文件到assets文件夹",
+  "desc": "新建.xlsx.docx.pptx.txt.md文件到assets文件夹，并将链接插入文档",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-05-23 02:33",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "8",
+   "<10"
+  ]
+ },
+ {
+  "code": "a3840554-fd35-40cf-fa30-08dc40a10093",
+  "name": "表格文件转思源数据库",
+  "desc": "将csv、xls、xlsx等表格文件转换成思源数据库",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-05-23 01:28",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "9",
+   "200",
+   "<10"
+  ]
+ },
+ {
+  "code": "bbc75c62-60a2-4f92-a123-08dc6ffecc18",
+  "name": "上标文本*",
+  "desc": "思源笔记上标文本*",
+  "author": "%E6%A2%A6%E8%89%AF%E8%A1%A3",
+  "tail": [
+   "上标文本* 思源笔记上标文本*",
+   "梦良衣 2024-05-21 20:35",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "b3b69a03-6808-411a-8e66-08dc6685e603",
+  "name": "按<byd>拆分md",
+  "desc": "用于md文档按某一级标题拆分",
+  "author": "%E6%A9%99%E7%BA%A2%E8%89%B2%E5%A4%AA%E9%98%B3",
+  "tail": [
+   "橙红色太阳 2024-04-29 00:38",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "7da88374-c545-44ae-8da9-08dc64c8b533",
+  "name": "快速日志",
+  "desc": "快速打开思源的daily note, 使用Ctrl &#x2B; shift &#x2B; D快捷键亦可",
+  "author": "%E8%99%9A%E9%9D%92%E6%B5%B7",
+  "tail": [
+   "快速日志 快速打开思源的daily note, 使用Ctrl &#x2B; shift &#x2B; D快捷键亦可",
+   "虚青海 2024-04-25 17:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "d0c0c66d-e955-4bf2-de93-08dc5fed4e6b",
+  "name": "思源笔记修改笔记创建时间",
+  "desc": "siyuan思源笔记修改笔记创建时间",
+  "author": "%E8%B6%85%E7%BA%A7%E5%A4%A7%E5%B8%85%E6%AF%94",
+  "tail": [
+   "思源笔记修改笔记创建时间 siyuan思源笔记修改笔记创建时间",
+   "超级大帅比 2024-04-20 03:05",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "52c6587a-1530-40bd-88e2-08dc5a32504a",
+  "name": "打开思源笔记块内文件",
+  "desc": "获取思源笔记光标所在块内的文件，并打开",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-04-12 10:33",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "6",
+   "<10"
+  ]
+ },
+ {
+  "code": "e23888c1-80c7-41fd-e88b-08dc4af4df6f",
+  "name": "Daily Note",
+  "desc": "添加选中的或剪贴板中的文本到思源笔记 dailynote 中",
+  "author": "JeffreyChen",
+  "tail": [
+   "JeffreyChen 2024-04-01 23:20",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "37",
+   "<10"
+  ]
+ },
+ {
+  "code": "3f391af4-0717-4e49-256a-08dbb98079eb",
+  "name": "Markdown处理空行（附带思源笔记功能）",
+  "desc": "可以合并多个空行、把单个换行改为空行，适用于思源笔记、Markdown、纯文本",
+  "author": "JeffreyChen",
+  "tail": [
+   "JeffreyChen 2024-03-25 23:43",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "31",
+   "<10"
+  ]
+ },
+ {
+  "code": "cdac9f0b-1bd9-4e96-b873-08dad0f8d7c2",
+  "name": "思源SQL生成器",
+  "desc": "生成SQL查询语句，并在思源光标处插入嵌入块、数据库或Query挂件",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-03-15 17:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "310",
+   "<10"
+  ]
+ },
+ {
+  "code": "9b33e7e2-40b8-43c0-579a-08dc3eb8f95b",
+  "name": "去时间-行级代码",
+  "desc": "去时间-行级代码",
+  "author": "%E6%A2%A6%E8%89%AF%E8%A1%A3",
+  "tail": [
+   "去时间-行级代码 去时间-行级代码",
+   "梦良衣 2024-03-08 16:26",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "dc27d55c-f5b7-4d4e-688a-08dc353810b8",
+  "name": "插入子文档到数据库",
+  "desc": "在父文档中运行此动作",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-02-27 20:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "36",
+   "<10"
+  ]
+ },
+ {
+  "code": "58b18ec4-c080-4220-f92e-08dc32749ed3",
+  "name": "插入现有数据库",
+  "desc": "获取所有数据库，选择一个插入文档",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2024-02-21 16:43",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "22",
+   "<10"
+  ]
+ },
+ {
+  "code": "86b6e5a0-a05d-4945-2d54-08dc232d7e5b",
+  "name": "思源笔记隐私空间",
+  "desc": "把你的小秘密放到隐私空间，谁也找不到",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "思源笔记隐私空间 把你的小秘密放到隐私空间，谁也找不到",
+   "浅沧 2024-02-04 11:12",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "9",
+   "<10"
+  ]
+ },
+ {
+  "code": "ca509dc0-9e9f-4a3e-5d99-08dc207356cf",
+  "name": "思源超链接正则替换",
+  "desc": "1",
+  "author": "%E6%A2%A6%E8%89%AF%E8%A1%A3",
+  "tail": [
+   "思源超链接正则替换 1",
+   "梦良衣 2024-01-29 22:58",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "097e0e94-d9ff-41c6-1a45-08dbfbd5ce70",
+  "name": "引用预设",
+  "desc": "将常用引用加入预设，一次性引用多个块或文档",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-12-14 23:12",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "6",
+   "<10"
+  ]
+ },
+ {
+  "code": "36291f5d-9e18-4782-af87-08dbf52e8da5",
+  "name": "粘贴增强",
+  "desc": "获取剪贴板内容后进行特殊处理，然后模拟按键Ctrl&#x2B;V",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "粘贴增强 获取剪贴板内容后进行特殊处理，然后模拟按键Ctrl&#x2B;V",
+   "浅沧 2023-12-05 20:39",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "37",
+   "111"
+  ]
+ },
+ {
+  "code": "dbf41625-d2ed-427c-af88-08dbf52e8da5",
+  "name": "收集箱",
+  "desc": "发送文本内容到思源收集箱的当天条目中",
+  "author": "wenbocn",
+  "tail": [
+   "收集箱 发送文本内容到思源收集箱的当天条目中",
+   "wenbocn 2023-12-05 20:33",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "14",
+   "<10"
+  ]
+ },
+ {
+  "code": "6172a937-b860-4f87-a410-08dbf16456ca",
+  "name": "虚拟引用转引用",
+  "desc": "虚拟引用转引用",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2023-11-30 20:03",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "1421c95f-b3f5-4d86-a40f-08dbf16456ca",
+  "name": "打开虚拟引用",
+  "desc": "打开虚拟引用",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "打开虚拟引用 打开虚拟引用",
+   "刘烟火 2023-11-30 20:00",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "9b8b9cfc-256c-4d66-a6a6-08dbebc937c9",
+  "name": "隐藏所有dock",
+  "desc": "隐藏思源的所有dock",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2023-11-23 14:24",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "21549e20-5e38-40c0-b94d-08dbe7797a52",
+  "name": "粘贴为JPG",
+  "desc": "将剪贴板中的图片粘贴为JPG格式",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "粘贴为JPG 将剪贴板中的图片粘贴为JPG格式",
+   "浅沧 2023-11-17 22:34",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "31",
+   "<10"
+  ]
+ },
+ {
+  "code": "9df6c1ba-e013-4e8d-449d-08dbd9da7c9a",
+  "name": "完成并添加时间脚标",
+  "desc": "完成代办任务，并追加当前时间为脚标",
+  "author": "_%E7%94%A8%E6%88%B71493053276383089",
+  "tail": [
+   "完成并添加时间脚标 完成代办任务，并追加当前时间为脚标",
+   "_用户149305327... 2023-11-03 16:28",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "9",
+   "<10"
+  ]
+ },
+ {
+  "code": "2b163de1-950d-4e8d-d69e-08dbd1035d4f",
+  "name": "快速笔记",
+  "desc": "快速添加到思源笔记当前打开页(支持文本图片以及文件的选中)",
+  "author": "%E7%94%A8%E6%88%B7iD-QL3U9BAA",
+  "tail": [
+   "快速笔记 快速添加到思源笔记当前打开页(支持文本图片以及文件的选中)",
+   "用户iD-QL3U9BAA 2023-10-20 16:48",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "658b7956-c709-452a-2c17-08dbc131452a",
+  "name": "获取块ID",
+  "desc": "获取鼠标对应下的块的块ID（非快捷键方式）",
+  "author": "%E5%90%8C%E5%BF%83%E4%BA%BA",
+  "tail": [
+   "获取块ID 获取鼠标对应下的块的块ID（非快捷键方式）",
+   "同心人 2023-09-30 12:58",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "<10"
+  ]
+ },
+ {
+  "code": "0358a89c-b6fb-40e3-6844-08dbba6fe80e",
+  "name": "自动转义\\$",
+  "desc": "仅用于思源笔记，把动作快捷键设置为 Shift&#x2B;4 ，在输入法英文状态下按下快捷键即可输入 \\$",
+  "author": "JeffreyChen",
+  "tail": [
+   "自动转义\\$ 仅用于思源笔记，把动作快捷键设置为 Shift&#x2B;4 ，在输入法英文...",
+   "JeffreyChen 2023-09-22 10:16",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "17431575-ba63-48c7-8f4b-08dba9bf00b5",
+  "name": "辅助更新思源笔记",
+  "desc": "思源笔记软件下载更新包后，可以通过本动作直接安装更新包",
+  "author": "Ptrrr",
+  "tail": [
+   "辅助更新思源笔记 思源笔记软件下载更新包后，可以通过本动作直接安装更...",
+   "Ptrrr 2023-09-12 14:52",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "cf9e96e4-2d20-4223-b977-08dbab855bd1",
+  "name": "一键从bookxnote摘录至思源笔记",
+  "desc": "包括外部回链",
+  "author": "flow",
+  "tail": [
+   "一键从bookxnote摘录至思源笔记 包括外部回链",
+   "flow 2023-09-06 12:43",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "36",
+   "34"
+  ]
+ },
+ {
+  "code": "6c7eb7f2-6233-4d64-88a1-08da1d3e98c7",
+  "name": "flomo导入思源",
+  "desc": "flomo导入思源",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2023-09-05 17:23",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "31",
+   "<10"
+  ]
+ },
+ {
+  "code": "327ba534-e802-4b9b-b6dc-08db782fe3a2",
+  "name": "读取文件列表到思源笔记",
+  "desc": "测试",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-09-04 11:39",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "23",
+   "<10"
+  ]
+ },
+ {
+  "code": "f576fd18-04a9-407c-8f67-08dba9bf00b5",
+  "name": "表格操作",
+  "desc": "思源笔记表格快捷操作",
+  "author": "YotsubaAina",
+  "tail": [
+   "表格操作 思源笔记表格快捷操作",
+   "YotsubaAina 2023-09-01 09:18",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "19",
+   "<10"
+  ]
+ },
+ {
+  "code": "467cf1fd-ab90-481d-cc2a-08db4201e00e",
+  "name": "Excel&Word↔思源表格互转",
+  "desc": "将剪贴板中的EXCEL表格转换为思源表格并发送到窗口",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-08-03 16:23",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "280",
+   "<10"
+  ]
+ },
+ {
+  "code": "af0f4123-a2a0-4cd9-1b78-08da8ae0e8b9",
+  "name": "搜文档",
+  "desc": "搜文档",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2023-07-23 20:02",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "74",
+   "<10"
+  ]
+ },
+ {
+  "code": "d1ab267f-b2f3-495b-8e97-08db7ecb32b4",
+  "name": "交叉引用",
+  "desc": "实现了思源笔记图表公式的交叉引用",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2023-07-07 22:35",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "43",
+   "<10"
+  ]
+ },
+ {
+  "code": "78eeb15f-2722-4c54-44bb-08db6b278c19",
+  "name": "复制块超链接（Markdown）",
+  "desc": "复制块超链接（Markdown）",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "复制块超链接（Markdown） 复制块超链接（Markdown）",
+   "浅沧 2023-06-13 17:25",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "16",
+   "<10"
+  ]
+ },
+ {
+  "code": "355b2f3b-5035-42d5-fdf2-08db64cacbdf",
+  "name": "SendToZotero",
+  "desc": "发送Siyuan超级块链接到Zotero",
+  "author": "ttChen",
+  "tail": [
+   "ttChen 2023-06-05 19:45",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "951be404-fb7a-4ee0-d9cf-08db2ba80230",
+  "name": "打开一篇随机文档",
+  "desc": "选取一篇幸运文档，然后打开它",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "打开一篇随机文档 选取一篇幸运文档，然后打开它",
+   "浅沧 2023-06-04 10:09",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "eb4268f1-652e-468c-c140-08db62390742",
+  "name": "插入网页图片链接",
+  "desc": "复制图片链接，然后运行本动作",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "插入网页图片链接 复制图片链接，然后运行本动作",
+   "浅沧 2023-06-01 19:25",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "14",
+   "<10"
+  ]
+ },
+ {
+  "code": "805897a8-7328-4ec7-d044-08da12cc146a",
+  "name": "快速保存文件",
+  "desc": "将文件（图片、视频、文件）文件复制到指定位置",
+  "author": "%E4%BA%91%E9%B8%BF",
+  "tail": [
+   "云鸿 2023-05-17 17:51",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "39",
+   "<10"
+  ]
+ },
+ {
+  "code": "a9086a60-1fce-4519-0adf-08da11e9f14a",
+  "name": "创建文件路径",
+  "desc": "思源笔记assets文件夹中的文件建立路径用于在笔记中粘贴",
+  "author": "%E4%BA%91%E9%B8%BF",
+  "tail": [
+   "云鸿 2023-05-17 17:51",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "52",
+   "<10"
+  ]
+ },
+ {
+  "code": "10419574-5a21-4ad0-9272-08db45be918a",
+  "name": "标题编号",
+  "desc": "将当前文档中的所有标题进行编号",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-05-16 01:48",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "15",
+   "<10"
+  ]
+ },
+ {
+  "code": "6dd0da6a-4755-4330-d414-08dac6a39bb2",
+  "name": "从思源笔记复制文件",
+  "desc": "将当前块里的文件复制到剪贴板",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-05-16 01:33",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "16",
+   "<10"
+  ]
+ },
+ {
+  "code": "6cb3069d-33d6-431d-80b8-08db4f5d3928",
+  "name": "编辑图片",
+  "desc": "编辑选中的图片",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "编辑图片 编辑选中的图片",
+   "浅沧 2023-05-16 00:57",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "71",
+   "<10"
+  ]
+ },
+ {
+  "code": "2d65528f-98d5-435c-d04b-08da12cc146a",
+  "name": "快速保存图片",
+  "desc": "将剪贴板的图片复制到指定文件夹，并创建路径用于在笔记中粘贴",
+  "author": "%E4%BA%91%E9%B8%BF",
+  "tail": [
+   "云鸿 2023-05-15 16:56",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "85",
+   "<10"
+  ]
+ },
+ {
+  "code": "ce7dff82-e740-429f-b753-08d9e81e226b",
+  "name": "QuickAdd",
+  "desc": "快速添加内容至思源",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2023-05-09 16:09",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "27",
+   "365",
+   "<10"
+  ]
+ },
+ {
+  "code": "1ce666c5-f0f7-451c-6ac9-08db4c6b3ac9",
+  "name": "获取思源笔记列表",
+  "desc": "在资源管理器中，获取当前文件夹内的思源笔记列表",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-05-04 20:08",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "13",
+   "<10"
+  ]
+ },
+ {
+  "code": "e6a31173-9447-4b13-e777-08daf333f01e",
+  "name": "备份data",
+  "desc": "放到自动运行动作中定期备份data文件夹（记得定期删除）",
+  "author": "%E4%BA%91%E9%B8%BF",
+  "tail": [
+   "云鸿 2023-04-29 18:11",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "72",
+   "<10"
+  ]
+ },
+ {
+  "code": "d4ee678c-378f-4091-61b6-08db3b4d330b",
+  "name": "AI制卡",
+  "desc": "使用AI引擎自动制作闪卡",
+  "author": "booyakasha",
+  "tail": [
+   "booyakasha 2023-04-13 19:19",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "75",
+   "<10"
+  ]
+ },
+ {
+  "code": "a13353f1-78de-4c89-ba71-08db0423d7d9",
+  "name": "思源笔记一键签到",
+  "desc": "思源笔记现在可以拿积分换储存容量。整了个简单动作来实现一键打卡",
+  "author": "Ptrrr",
+  "tail": [
+   "Ptrrr 2023-04-09 08:38",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "55",
+   "<10"
+  ]
+ },
+ {
+  "code": "0b2e49a9-eb6a-46f0-5f92-08db2f870242",
+  "name": "合并多个列表块",
+  "desc": "合并多个列表块为一个",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-03-29 19:52",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "64",
+   "<10"
+  ]
+ },
+ {
+  "code": "02ed5443-2dc2-47a1-2ed0-08db2d92bfe7",
+  "name": "flomo 同步助手",
+  "desc": "同步 flomo 到思源笔记",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2023-03-26 13:36",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "33",
+   "<10"
+  ]
+ },
+ {
+  "code": "b05897b4-c5b3-40e3-a6e0-08db1c75a77c",
+  "name": "OneNote &#x1F517; 思源",
+  "desc": "建立 OneNote 与 思源笔记 之间的双向链接",
+  "author": "shuoying",
+  "tail": [
+   "shuoying 2023-03-17 18:00",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "46",
+   "<10"
+  ]
+ },
+ {
+  "code": "4b75a584-e9cd-436d-4ed3-08daa8ca3f89",
+  "name": "思源笔记插入本地文件链接",
+  "desc": "将选中的文件或者剪贴板中的文件插入思源笔记当前页面",
+  "author": "%E7%94%A8%E6%88%B7233818825591209",
+  "tail": [
+   "思源笔记插入本地文件链接 将选中的文件或者剪贴板中的文件插入思源笔记...",
+   "用户2338188255... 2023-03-03 01:52",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "440b4946-50a9-4c7e-e252-08db17903133",
+  "name": "代码块",
+  "desc": "无选择插入代码块，有选择转成代码块",
+  "author": "ccmaxzero",
+  "tail": [
+   "代码块 无选择插入代码块，有选择转成代码块",
+   "ccmaxzero 2023-02-26 13:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "16",
+   "<10"
+  ]
+ },
+ {
+  "code": "dda6e13e-697d-4bc2-b88b-08dad0f8d7c2",
+  "name": "思源提及→引用",
+  "desc": "将提及转换为反链",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "浅沧 2023-02-25 21:20",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "25",
+   "<10"
+  ]
+ },
+ {
+  "code": "db583512-bffc-4bf0-462c-08db159e6a6f",
+  "name": "下一天",
+  "desc": "返回思源daily note中的下一天（根据活动页面）",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "下一天 返回思源daily note中的下一天（根据活动页面）",
+   "刘烟火 2023-02-25 00:45",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "80c7ceea-8f1c-46b1-462b-08db159e6a6f",
+  "name": "上一天",
+  "desc": "返回思源daily note中的上一天（根据活动页面）",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "上一天 返回思源daily note中的上一天（根据活动页面）",
+   "刘烟火 2023-02-25 00:45",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "8",
+   "<10"
+  ]
+ },
+ {
+  "code": "6c7ad07a-ce4b-43fd-b40f-08db05106307",
+  "name": "字体样式",
+  "desc": "补充思源笔记无法快速更改字体样式的不足之处",
+  "author": "wangwa",
+  "tail": [
+   "字体样式 补充思源笔记无法快速更改字体样式的不足之处",
+   "wangwa 2023-02-04 16:32",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "33",
+   "<10"
+  ]
+ },
+ {
+  "code": "6bd62f23-a16c-4906-b3fd-08db05106307",
+  "name": "思源签到",
+  "desc": "通过接口的方式实现思源笔记签到，赚点积分兑换空间",
+  "author": "DaveBoy",
+  "tail": [
+   "DaveBoy 2023-02-03 11:42",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "57244abe-5df5-4cd2-1dd1-08db025ec460",
+  "name": "局部放大",
+  "desc": "仅放大思源 一个块中 选中的字",
+  "author": "wangwa",
+  "tail": [
+   "局部放大 仅放大思源 一个块中 选中的字",
+   "wangwa 2023-01-30 20:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "d2c1d5ff-ed06-4d8c-848c-08daf13f5a77",
+  "name": "简悦思源助手",
+  "desc": "一键同步简悦标注到思源",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2023-01-15 20:47",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "29",
+   "<10"
+  ]
+ },
+ {
+  "code": "89578130-2759-4bc6-bc59-08dada774bd4",
+  "name": "Cubox 思源助手",
+  "desc": "自动抓取并同步 Cubox 中的保存内容",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-12-10 14:25",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "40",
+   "<10"
+  ]
+ },
+ {
+  "code": "2fa14300-6f8a-4749-d039-08da12cc146a",
+  "name": "快速截图",
+  "desc": "截图并保存再指定文件夹，在笔记中粘贴。右键可设置是否自命名，自定义可设置保存位置",
+  "author": "%E4%BA%91%E9%B8%BF",
+  "tail": [
+   "云鸿 2022-12-02 14:13",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "77",
+   "147"
+  ]
+ },
+ {
+  "code": "51774b6b-db4e-41a6-70f6-08dacc3cc241",
+  "name": "思源样式文字",
+  "desc": "附加 CSS 到文字",
+  "author": "shawoger",
+  "tail": [
+   "思源样式文字 附加 CSS 到文字",
+   "shawoger 2022-11-22 20:11",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "<10"
+  ]
+ },
+ {
+  "code": "beec841c-e487-48ef-2a7a-08dacb59312b",
+  "name": "粘贴去除标注",
+  "desc": "转存百科内容的时候经常会有标注符号被保留下来，这些链接会丢失但是保持链接格式。使用本动作粘贴的时候加入段间换行，文本格式化并且去除如[1]这类标注。思源之外的界面也通用。",
+  "author": "Gaffey",
+  "tail": [
+   "粘贴去除标注 转存百科内容的时候经常会有标注符号被保留下来，这些链接...",
+   "Gaffey 2022-11-22 04:27",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "58ba6318-ff94-4b92-2a79-08dacb59312b",
+  "name": "块引用转超链接",
+  "desc": "通过正则表达式替换块引用转为超链接",
+  "author": "Gaffey",
+  "tail": [
+   "Gaffey 2022-11-22 04:13",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "7",
+   "<10"
+  ]
+ },
+ {
+  "code": "2f8ba851-6b15-4ebb-e992-08daca95c775",
+  "name": "汇总日记代办",
+  "desc": "在当前日记中汇总往前N天的未完成代办。天数可在右键菜单设置。",
+  "author": "%E6%B5%85%E6%B2%A7",
+  "tail": [
+   "汇总日记代办 在当前日记中汇总往前N天的未完成代办。天数可在右键菜单设...",
+   "浅沧 2022-11-20 20:45",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "<10"
+  ]
+ },
+ {
+  "code": "d6c34658-ce26-4ea3-e991-08daca95c775",
+  "name": "开关笔记本",
+  "desc": "开关思源笔记本",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "开关笔记本 开关思源笔记本",
+   "刘烟火 2022-11-20 19:24",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "<10"
+  ]
+ },
+ {
+  "code": "009c3042-38f6-4105-6c4b-08dac4a613f3",
+  "name": "导出父子文档",
+  "desc": "复制文档ID，通过右键菜单选择导出当前文档和子文档还是仅导出当前文档",
+  "author": "mdzz2048",
+  "tail": [
+   "导出父子文档 复制文档ID，通过右键菜单选择导出当前文档和子文档还是仅...",
+   "mdzz2048 2022-11-13 18:05",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "c9cf876a-4071-4a02-6bc9-08daba450974",
+  "name": "复制id(可选择)",
+  "desc": "复制块id，提供上级块选项",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "复制id(可选择) 复制块id，提供上级块选项",
+   "刘烟火 2022-11-07 12:28",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "1459754f-cb7b-49f0-6bc7-08daba450974",
+  "name": "复制引用(可选择)",
+  "desc": "复制块引用，提供上级块选项",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "复制引用(可选择) 复制块引用，提供上级块选项",
+   "刘烟火 2022-11-07 12:27",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "f45f284b-c29b-4c3d-6bc8-08daba450974",
+  "name": "复制嵌入块(可选择)",
+  "desc": "复制嵌入块，提供上级块选项",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "复制嵌入块(可选择) 复制嵌入块，提供上级块选项",
+   "刘烟火 2022-11-07 12:27",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "<10"
+  ]
+ },
+ {
+  "code": "ead62169-0928-4173-5d36-08da27ea037e",
+  "name": "发送至思源收集箱",
+  "desc": "发送至思源收集箱",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2022-11-04 19:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "27",
+   "<10"
+  ]
+ },
+ {
+  "code": "bcc14e1f-a4e9-4e71-f2bb-08da67a99d9b",
+  "name": "当前块到SM",
+  "desc": "将当前块作为SM卡片",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2022-10-25 20:41",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "38",
+   "<10"
+  ]
+ },
+ {
+  "code": "895aa12c-c864-4ab8-7b6e-08daa99f36bf",
+  "name": "时间专属 MD",
+  "desc": "用于思源笔记",
+  "author": "shawoger",
+  "tail": [
+   "时间专属 MD 用于思源笔记",
+   "shawoger 2022-10-10 10:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "cb523337-1380-43b7-0560-08daa6b64a87",
+  "name": "思源file://引用",
+  "desc": "文件路径拷贝到思源中时，自动添加file://引用",
+  "author": "%E6%B5%B7%E6%96%87%E4%B8%9C",
+  "tail": [
+   "思源file://引用 文件路径拷贝到思源中时，自动添加file://引用",
+   "海文东 2022-10-08 01:34",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "12",
+   "<10"
+  ]
+ },
+ {
+  "code": "a76ede78-895f-4050-0547-08daa6b64a87",
+  "name": "实时备份conf.json",
+  "desc": "实时备份conf.json",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "实时备份conf.json 实时备份conf.json",
+   "刘烟火 2022-10-06 02:03",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "44c4b6cf-c5f4-47b2-90a1-08da9878ddeb",
+  "name": "思源2XML",
+  "desc": "思源文档含==标记的文本转 XML",
+  "author": "mdzz2048",
+  "tail": [
+   "思源2XML 思源文档含==标记的文本转 XML",
+   "mdzz2048 2022-09-17 18:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "fc405923-3b09-4f98-614a-08da9785495b",
+  "name": "图片指定大小",
+  "desc": "更新思源图片大小",
+  "author": "mdzz2048",
+  "tail": [
+   "图片指定大小 更新思源图片大小",
+   "mdzz2048 2022-09-16 15:57",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "12",
+   "<10"
+  ]
+ },
+ {
+  "code": "75cd2b2b-1ab5-4e0f-ede7-08da95a0a305",
+  "name": "SY-link变动版",
+  "desc": "本地文件链接&#x2B;everything中的查找链接（供思源笔记使用）",
+  "author": "q%E5%B8%86%E9%A3%9Ep",
+  "tail": [
+   "SY-link变动版 本地文件链接&#x2B;everything中的查找链接（供思源笔记使用）",
+   "q帆飞p 2022-09-14 15:47",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "29",
+   "<10"
+  ]
+ },
+ {
+  "code": "c030e208-aa72-4913-4801-08da210a63ca",
+  "name": "导入写拉松",
+  "desc": "将思源中的卡片发送到写拉松",
+  "author": "mdzz2048",
+  "tail": [
+   "导入写拉松 将思源中的卡片发送到写拉松",
+   "mdzz2048 2022-09-09 18:50",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "4d659d79-2506-483a-94ac-08d9e6436b60",
+  "name": "划词搜索",
+  "desc": "选中文本或输入框输入，搜索思源匹配的块",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-09-09 09:00",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "149",
+   "43"
+  ]
+ },
+ {
+  "code": "51e29bd4-37de-4c14-b750-08d9e81e226b",
+  "name": "思源更新",
+  "desc": "用于思源一键下载最新安装包并打开",
+  "author": "Cesar",
+  "tail": [
+   "Cesar 2022-09-05 10:03",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "15",
+   "91",
+   "<10"
+  ]
+ },
+ {
+  "code": "363baa75-69c7-4bc3-01a5-08da8e94f9f1",
+  "name": "思源更新(快速版)",
+  "desc": "下载最新的github中的思源",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "思源更新(快速版) 下载最新的github中的思源",
+   "刘烟火 2022-09-05 09:07",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "28e9c89a-c3dd-4aa8-d054-08da12cc146a",
+  "name": "Markdown 图片内容搜索",
+  "desc": "截图 -] OCR -] 保存图片文件 -] 图片引用写入剪贴板",
+  "author": "shuoying",
+  "tail": [
+   "shuoying 2022-09-04 20:06",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "35",
+   "<10"
+  ]
+ },
+ {
+  "code": "bbbcabb8-d017-4c3c-a064-08da8515cad0",
+  "name": "悬浮草稿",
+  "desc": "悬浮草稿",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "悬浮草稿 悬浮草稿",
+   "刘烟火 2022-09-01 18:59",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "22",
+   "<10"
+  ]
+ },
+ {
+  "code": "70115df9-24c6-48d9-a229-08da79115989",
+  "name": "导出思源data",
+  "desc": "导出思源data  zip",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "导出思源data 导出思源data zip",
+   "刘烟火 2022-08-08 16:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "34",
+   "<10"
+  ]
+ },
+ {
+  "code": "7d459bfc-d95e-41b4-8cf1-08da7886c235",
+  "name": "打开反链块",
+  "desc": "打开该文档内所有反链块",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2022-08-08 02:22",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "892656bc-abe5-4068-aba0-08da2e557185",
+  "name": "思源划词内置搜索",
+  "desc": "思源划词内置搜索",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "思源划词内置搜索 思源划词内置搜索",
+   "刘烟火 2022-07-25 22:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "19",
+   "<10"
+  ]
+ },
+ {
+  "code": "5aadf567-bff4-4aea-b28a-08da6c6e93e6",
+  "name": "复制md链接",
+  "desc": "将思源块复制为markdown链接",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "复制md链接 将思源块复制为markdown链接",
+   "刘烟火 2022-07-23 18:52",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "70be5076-0318-4234-a140-08da64ce4f50",
+  "name": "示例：快速模板",
+  "desc": "示例：快速模板",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "示例：快速模板 示例：快速模板",
+   "刘烟火 2022-07-14 01:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "0a300c57-9578-4016-ee7d-08da63dc012d",
+  "name": "浏览器聚焦该块",
+  "desc": "浏览器聚焦该块",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "浏览器聚焦该块 浏览器聚焦该块",
+   "刘烟火 2022-07-12 20:02",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "<10"
+  ]
+ },
+ {
+  "code": "bd8b6393-7a21-4a7c-a0ea-08da5f190fd1",
+  "name": "浏览器打开该块",
+  "desc": "浏览器打开该块",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "浏览器打开该块 浏览器打开该块",
+   "刘烟火 2022-07-12 13:40",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "de6e9c58-e15f-444e-24df-08da6210a43f",
+  "name": "思源PDF带图标注(不选色)",
+  "desc": "操作截图一次，点两下鼠标完成粘贴思源PDF带图双链",
+  "author": "%E5%98%8E%E5%98%8E%E5%91%80",
+  "tail": [
+   "思源PDF带图标注(不选色) 操作截图一次，点两下鼠标完成粘贴思源PDF带图...",
+   "嘎嘎呀 2022-07-11 17:32",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "<10"
+  ]
+ },
+ {
+  "code": "b9d249d7-49c1-4be7-8b88-08da600ed657",
+  "name": "思源PDF带图标注",
+  "desc": "操作截图一次，点两下鼠标完成粘贴思源PDF带图双链",
+  "author": "%E5%98%8E%E5%98%8E%E5%91%80",
+  "tail": [
+   "嘎嘎呀 2022-07-10 23:07",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "9",
+   "<10"
+  ]
+ },
+ {
+  "code": "36bbc584-7456-4332-2f65-08da34085817",
+  "name": "思源API",
+  "desc": "思源部分API",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-07-06 19:09",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "44",
+   "<10"
+  ]
+ },
+ {
+  "code": "01e64782-6f77-4ea8-a0e9-08da5f190fd1",
+  "name": "复制思源id",
+  "desc": "复制思源id",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "复制思源id 复制思源id",
+   "刘烟火 2022-07-06 15:41",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "35",
+   "<10"
+  ]
+ },
+ {
+  "code": "5608406a-ec6b-4030-70fe-08da5e288137",
+  "name": "删除活动书签",
+  "desc": "删除活动书签",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "删除活动书签 删除活动书签",
+   "刘烟火 2022-07-06 11:36",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "<10"
+  ]
+ },
+ {
+  "code": "dc1911fb-1cb9-40b0-70fd-08da5e288137",
+  "name": "添加活动书签",
+  "desc": "添加活动书签",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "添加活动书签 添加活动书签",
+   "刘烟火 2022-07-06 11:35",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "05c9ac2b-a396-44eb-5e9b-08da1f2ef538",
+  "name": "思源悬浮书签",
+  "desc": "可搜索、添加的思源悬浮书签",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2022-07-06 11:35",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "29",
+   "<10"
+  ]
+ },
+ {
+  "code": "1aaeafcc-293d-4a93-d2df-08da5d563353",
+  "name": "开启脑图tab键",
+  "desc": "将思源中的tab键换成enter&#x2B;tab键",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "开启脑图tab键 将思源中的tab键换成enter&#x2B;tab键",
+   "刘烟火 2022-07-05 00:23",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "5",
+   "<10"
+  ]
+ },
+ {
+  "code": "7a86cc30-85b1-42ae-d2d6-08da5d563353",
+  "name": "合并段落",
+  "desc": "段落合并成一个，会删除原来几个段落的内容，重新合并成新的段落快",
+  "author": "shangwzhuany",
+  "tail": [
+   "合并段落 段落合并成一个，会删除原来几个段落的内容，重新合并成新的段...",
+   "shangwzhuany 2022-07-04 19:40",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "22",
+   "<10"
+  ]
+ },
+ {
+  "code": "10e625fd-f35c-4979-6350-08da57eda7b6",
+  "name": "复制块网页链接",
+  "desc": "用于从网页跳转到本地",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "复制块网页链接 用于从网页跳转到本地",
+   "刘烟火 2022-06-28 13:27",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "52e4713a-85fe-4c1a-5e9a-08da1f2ef538",
+  "name": "写拉松导入",
+  "desc": "通过ID或者标题获取写拉松卡片并导入思源DailyNote",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-06-05 15:50",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "22",
+   "<10"
+  ]
+ },
+ {
+  "code": "aba40334-0c99-4e47-da7a-08da46b1331b",
+  "name": "导入指定卡片",
+  "desc": "通过标题获取卡片",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-06-05 15:47",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "2dd3fbf2-9ccd-46d8-1f32-08da4504450e",
+  "name": "批量图宽",
+  "desc": "设置思源单个块多张图片的宽度百分比",
+  "author": "%E5%98%8E%E5%98%8E%E5%91%80",
+  "tail": [
+   "批量图宽 设置思源单个块多张图片的宽度百分比",
+   "嘎嘎呀 2022-06-03 12:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "19",
+   "<10"
+  ]
+ },
+ {
+  "code": "8447b984-ef2f-4b5b-7e18-08da43e01676",
+  "name": "自动链接",
+  "desc": "将形如[[]]的md链接转化为形如(())的内部链接",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-06-02 13:36",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "28",
+   "<10"
+  ]
+ },
+ {
+  "code": "1fe18688-2389-4599-e27b-08da36e2ef90",
+  "name": "思源脑图",
+  "desc": "思源笔记内容导入BookxNote",
+  "author": "mdzz2048",
+  "tail": [
+   "思源脑图 思源笔记内容导入BookxNote",
+   "mdzz2048 2022-05-24 19:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "21",
+   "<10"
+  ]
+ },
+ {
+  "code": "478edb74-bf98-48af-2fcc-08da39bb5336",
+  "name": "获取超链接",
+  "desc": "获取网页md格式超链接，选中内容后获取高亮链接",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-05-20 22:12",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "13",
+   "<10"
+  ]
+ },
+ {
+  "code": "47baef6c-0777-4c24-f829-08da38cccadf",
+  "name": "复制段落至下方",
+  "desc": "作为思源笔记自身添加该操作的快捷键之前的试行方法。",
+  "author": "thouce",
+  "tail": [
+   "复制段落至下方 作为思源笔记自身添加该操作的快捷键之前的试行方法。",
+   "thouce 2022-05-19 09:26",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "5ad1e6b0-3737-4528-f828-08da38cccadf",
+  "name": "复制段落至上方",
+  "desc": "作为思源笔记自身添加该操作的快捷键之前的试行方法。",
+  "author": "thouce",
+  "tail": [
+   "复制段落至上方 作为思源笔记自身添加该操作的快捷键之前的试行方法。",
+   "thouce 2022-05-19 09:25",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "1d8cddd3-25b7-4180-9786-08da331aea8d",
+  "name": "页(块)跳转 （弃）",
+  "desc": "功能：迅速跳转至指定的块(比如块里放自己的书签页‘超链接’)",
+  "author": "Jung3",
+  "tail": [
+   "页(块)跳转 （弃） 功能：迅速跳转至指定的块(比如块里放自己的书签页‘...",
+   "Jung3 2022-05-17 21:08",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "<10"
+  ]
+ },
+ {
+  "code": "aedabdfc-9561-495b-7a23-08da303de5f2",
+  "name": "思源嵌入块分页辅助",
+  "desc": "思源嵌入块分页辅助",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "思源嵌入块分页辅助 思源嵌入块分页辅助",
+   "刘烟火 2022-05-09 00:08",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "<10"
+  ]
+ },
+ {
+  "code": "ef8d0fd1-bc7d-4431-7a12-08da303de5f2",
+  "name": "快速字体",
+  "desc": "快速选择思源预设字体26种",
+  "author": "%E5%98%8E%E5%98%8E%E5%91%80",
+  "tail": [
+   "快速字体 快速选择思源预设字体26种",
+   "嘎嘎呀 2022-05-08 19:16",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "28",
+   "<10"
+  ]
+ },
+ {
+  "code": "b81c5fd4-b876-4005-0aeb-08da11e9f14a",
+  "name": "文件链接",
+  "desc": "链接本地文件",
+  "author": "%E4%BA%91%E9%B8%BF",
+  "tail": [
+   "云鸿 2022-05-06 18:51",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "47",
+   "<10"
+  ]
+ },
+ {
+  "code": "cffe7bc5-35b1-4a74-0381-08da2d65ae66",
+  "name": "OneDrive/思源",
+  "desc": "OneDrive与思源切换",
+  "author": "ifulou",
+  "tail": [
+   "ifulou 2022-05-04 20:25",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "9",
+   "<10"
+  ]
+ },
+ {
+  "code": "bb5ee874-93b3-406d-0373-08da2d65ae66",
+  "name": "自动生成思源文档目录",
+  "desc": "自动生成思源文档目录",
+  "author": "%E5%88%98%E7%83%9F%E7%81%AB",
+  "tail": [
+   "刘烟火 2022-05-04 16:24",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "67",
+   "<10"
+  ]
+ },
+ {
+  "code": "45d2300e-7e13-427e-d9aa-08da23f9e52f",
+  "name": "蓝色字体",
+  "desc": "补充思源笔记无法快速更改字体颜色的不足之处",
+  "author": "zxerath",
+  "tail": [
+   "蓝色字体 补充思源笔记无法快速更改字体颜色的不足之处",
+   "zxerath 2022-04-22 17:03",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "71",
+   "<10"
+  ]
+ },
+ {
+  "code": "c33f5a70-2fc4-42e2-d9a9-08da23f9e52f",
+  "name": "粉红色字体",
+  "desc": "补充思源笔记无法快速更改字体颜色的不足之处",
+  "author": "zxerath",
+  "tail": [
+   "粉红色字体 补充思源笔记无法快速更改字体颜色的不足之处",
+   "zxerath 2022-04-22 17:03",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "46",
+   "<10"
+  ]
+ },
+ {
+  "code": "2201a62d-27e2-4e45-d9a8-08da23f9e52f",
+  "name": "红色字体",
+  "desc": "补充思源笔记无法快速更改字体颜色的不足之处",
+  "author": "zxerath",
+  "tail": [
+   "红色字体 补充思源笔记无法快速更改字体颜色的不足之处",
+   "zxerath 2022-04-22 17:02",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "80",
+   "<10"
+  ]
+ },
+ {
+  "code": "637081d3-730c-4dc9-d9a6-08da23f9e52f",
+  "name": "橙色字体",
+  "desc": "补充思源笔记无法快速更改字体颜色的不足之处",
+  "author": "zxerath",
+  "tail": [
+   "橙色字体 补充思源笔记无法快速更改字体颜色的不足之处",
+   "zxerath 2022-04-22 17:00",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "65",
+   "<10"
+  ]
+ },
+ {
+  "code": "a205762f-a552-48a0-88ac-08da1d3e98c7",
+  "name": "列表转换成脑图",
+  "desc": "思源笔记的有序、无序、任务列表复制到剪贴板，运行此动作可转换成脑图",
+  "author": "%E8%B6%85%E5%A4%A9%E6%89%8DSVEN",
+  "tail": [
+   "超天才SVEN 2022-04-14 00:10",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "80",
+   "<10"
+  ]
+ },
+ {
+  "code": "3b72dadd-3ce8-4107-c0c3-08da1b59015d",
+  "name": "绿色标记",
+  "desc": "标题前插入绿色圆圈标记",
+  "author": "bengirl",
+  "tail": [
+   "绿色标记 标题前插入绿色圆圈标记",
+   "bengirl 2022-04-11 17:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "13",
+   "<10"
+  ]
+ },
+ {
+  "code": "a33df4dc-aee3-4744-c0c2-08da1b59015d",
+  "name": "橙色标记",
+  "desc": "在标题前端插入橙色圆圈标记",
+  "author": "bengirl",
+  "tail": [
+   "橙色标记 在标题前端插入橙色圆圈标记",
+   "bengirl 2022-04-11 17:48",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "9",
+   "<10"
+  ]
+ },
+ {
+  "code": "8fe3db48-366f-4fad-cc1e-08da178f9e86",
+  "name": "today",
+  "desc": "例： 2022-04-07，的时间戳，可自己重新对动作进行修改",
+  "author": "_%E7%94%A8%E6%88%B71493053276383089",
+  "tail": [
+   "today 例： 2022-04-07，的时间戳，可自己重新对动作进行修改",
+   "_用户149305327... 2022-04-07 16:16",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "29",
+   "<10"
+  ]
+ },
+ {
+  "code": "5ba7cdeb-4b3b-4a69-baed-08da0a4333e6",
+  "name": "思源笔记 pdf导入",
+  "desc": "「用于将思源笔记assets中的pdf文件改为指向pdf文件的硬链接，使用前需要编辑好思源笔记的data路径」",
+  "author": "%E7%94%A8%E6%88%B7233818825591209",
+  "tail": [
+   "用户2338188255... 2022-03-23 00:10",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "32",
+   "<10"
+  ]
+ },
+ {
+  "code": "298b5826-4103-4769-163f-08da0b389f59",
+  "name": "思源插入链接可直接跳转",
+  "desc": "复制链接（网站链接，外部回链）之后，直接用此脚本粘贴到思源内即可，粘贴后的链接直接点击可以跳转",
+  "author": "bengirl",
+  "tail": [
+   "思源插入链接可直接跳转 复制链接（网站链接，外部回链）之后，直接用此...",
+   "bengirl 2022-03-21 20:45",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "23",
+   "<10"
+  ]
+ },
+ {
+  "code": "67cb72c5-78ee-4269-714a-08da09549333",
+  "name": "思源复制图片",
+  "desc": "选择本地图片，直接复制成思源的图片链接，在思源里可以直接黏贴",
+  "author": "%E7%94%A8%E6%88%B7233818825591209",
+  "tail": [
+   "用户2338188255... 2022-03-20 14:13",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "20",
+   "<10"
+  ]
+ },
+ {
+  "code": "05e11aec-e02f-41e4-8528-08da03c992d9",
+  "name": "思源笔记\\n 保存行内公式",
+  "desc": "思源笔记的行内公式无法保留换行符，在行内公式的编辑窗口执行这个脚本，可以将换行符替换为\\text{}并保存，当重新打开行内公式编辑界面的时候，可以用这个脚本把公式还原成有换行符的排版形式",
+  "author": "%E7%94%A8%E6%88%B7233818825591209",
+  "tail": [
+   "思源笔记\\n 保存行内公式 思源笔记的行内公式无法保留换行符，在行内公式...",
+   "用户2338188255... 2022-03-12 18:06",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "4",
+   "<10"
+  ]
+ },
+ {
+  "code": "017acea8-c69e-4b00-2825-08da00c52080",
+  "name": "生成表格",
+  "desc": "输入行列值快速生成表格",
+  "author": "HumbleCoder",
+  "tail": [
+   "HumbleCoder 2022-03-08 16:18",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "98",
+   "<10"
+  ]
+ },
+ {
+  "code": "1ad62ca0-2c08-46ba-1468-08d9f54a7e1f",
+  "name": "rr流程对反链内容进行标记处理",
+  "desc": "如题",
+  "author": "bengirl",
+  "tail": [
+   "rr流程对反链内容进行标记处理 如题",
+   "bengirl 2022-02-23 16:36",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "6",
+   "<10"
+  ]
+ },
+ {
+  "code": "686c6ce8-732e-41ea-a085-08d9ac50b9f2",
+  "name": "Anki跳转思源",
+  "desc": "利用思源的块超链接，实现anki跳转思源的特定块，对链接有两种命名模式（自行在编辑里面看提示修改）",
+  "author": "bengirl",
+  "tail": [
+   "Anki跳转思源 利用思源的块超链接，实现anki跳转思源的特定块，对链接有...",
+   "bengirl 2022-02-12 12:05",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "33",
+   "<10"
+  ]
+ },
+ {
+  "code": "c67bdc3e-f362-4f8c-4ed1-08d9e2faabc2",
+  "name": "思源-批量替换",
+  "desc": "在动作中将那些要替换的字符自己改动一下就行了",
+  "author": "%E4%BD%B3%5E_%5E%E6%9E%97",
+  "tail": [
+   "思源-批量替换 在动作中将那些要替换的字符自己改动一下就行了",
+   "佳^_^林 2022-01-29 17:01",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "18",
+   "<10"
+  ]
+ },
+ {
+  "code": "37ae7cff-2fd7-45fd-df29-08d9db64e6a1",
+  "name": "工具书",
+  "desc": "便捷操作",
+  "author": "%E7%B1%B3%E9%9C%B2%E7%BC%87%E6%AC%A7",
+  "tail": [
+   "米露缇欧 2022-01-28 15:22",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "47",
+   "<10"
+  ]
+ },
+ {
+  "code": "ae07f60b-517c-476d-f16f-08d9df3505ca",
+  "name": "Zo4MD",
+  "desc": "文献引用插入，正在编辑这个动作，基本上可以了",
+  "author": "%E5%8D%8D",
+  "tail": [
+   "Zo4MD 文献引用插入，正在编辑这个动作，基本上可以了",
+   "卍 2022-01-25 11:20",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "27",
+   "<10"
+  ]
+ },
+ {
+  "code": "5ac84a22-e231-494e-5d4f-08d9cd216361",
+  "name": "思源->SM",
+  "desc": "实现从Siyuan笔记跳转到指定sm元素",
+  "author": "mdzz2048",
+  "tail": [
+   "mdzz2048 2022-01-17 09:23",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "60",
+   "<10"
+  ]
+ },
+ {
+  "code": "81d8468a-221b-408b-1669-08d953a475d9",
+  "name": "彩虹色标注",
+  "desc": "对选择的文字使用彩色样式，自行修改渐变颜色",
+  "author": "MorganWan",
+  "tail": [
+   "彩虹色标注 对选择的文字使用彩色样式，自行修改渐变颜色",
+   "MorganWan 2022-01-16 13:29",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "64",
+   "<10"
+  ]
+ },
+ {
+  "code": "47fa9d21-d225-4a14-99c6-08d9c6b06ad1",
+  "name": "向下新建子页面",
+  "desc": "通过分次输入块引用快捷键和子页面标题，修复原动作同时输入“((子页面标题”无法正常呼出块引用的问题。（原作说明：思源笔记在父页面，向下新建带引用的子页面。）",
+  "author": "Gaffey",
+  "tail": [
+   "向下新建子页面 通过分次输入块引用快捷键和子页面标题，修复原动作同时...",
+   "Gaffey 2021-12-25 02:05",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "13",
+   "<10"
+  ]
+ },
+ {
+  "code": "2ff468a9-5e7b-4f5a-991b-08d9c4e04470",
+  "name": "引用块",
+  "desc": "引用块",
+  "author": "GrayHard",
+  "tail": [
+   "引用块 引用块",
+   "GrayHard 2021-12-23 09:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "7e27cd6c-bfd8-498a-991a-08d9c4e04470",
+  "name": "查看历史",
+  "desc": "查看历史",
+  "author": "GrayHard",
+  "tail": [
+   "查看历史 查看历史",
+   "GrayHard 2021-12-23 09:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "8",
+   "<10"
+  ]
+ },
+ {
+  "code": "c6a562ee-b3db-4612-9919-08d9c4e04470",
+  "name": "代码块",
+  "desc": "思源笔记 代码块生成",
+  "author": "GrayHard",
+  "tail": [
+   "代码块 思源笔记 代码块生成",
+   "GrayHard 2021-12-23 09:03",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "20",
+   "<10"
+  ]
+ },
+ {
+  "code": "9d23d25d-672d-41a1-9910-08d9c4e04470",
+  "name": "插入代码块",
+  "desc": "在每行的最开始使用",
+  "author": "abjtxf",
+  "tail": [
+   "插入代码块 在每行的最开始使用",
+   "abjtxf 2021-12-22 21:27",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "8",
+   "<10"
+  ]
+ },
+ {
+  "code": "3a30523b-68a9-4072-d33f-08d9c02e0a44",
+  "name": "添加本地视频",
+  "desc": "该方法不会复制视频到工作空间，采用绝对路径访问视频文件",
+  "author": "HumbleCoder",
+  "tail": [
+   "HumbleCoder 2021-12-16 21:17",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "58",
+   "<10"
+  ]
+ },
+ {
+  "code": "6006aaab-0107-4dde-5f9d-08d9b92d74db",
+  "name": "康奈尔模版",
+  "desc": "康奈尔笔记模版，在编辑窗口选中使用。",
+  "author": "Bret",
+  "tail": [
+   "Bret 2021-12-07 22:55",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "112",
+   "<10"
+  ]
+ },
+ {
+  "code": "f2fe80f7-dddd-47ac-31bf-08d9b7012e2c",
+  "name": "大纲页",
+  "desc": "ALT&#x2B;2",
+  "author": "%E6%A0%A9%E6%A0%A9%E8%BF%BD%E9%A3%8E%E5%AE%A2",
+  "tail": [
+   "大纲页 ALT&#x2B;2",
+   "栩栩追风客 2021-12-05 01:13",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "16",
+   "<10"
+  ]
+ },
+ {
+  "code": "fdbc9d21-2af9-495b-31be-08d9b7012e2c",
+  "name": "文档树",
+  "desc": "ALT&#x2B;1",
+  "author": "%E6%A0%A9%E6%A0%A9%E8%BF%BD%E9%A3%8E%E5%AE%A2",
+  "tail": [
+   "文档树 ALT&#x2B;1",
+   "栩栩追风客 2021-12-05 01:13",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "13",
+   "<10"
+  ]
+ },
+ {
+  "code": "36ad34fe-ce56-47d6-31bb-08d9b7012e2c",
+  "name": "显示窗口",
+  "desc": "ALT&#x2B;M",
+  "author": "%E6%A0%A9%E6%A0%A9%E8%BF%BD%E9%A3%8E%E5%AE%A2",
+  "tail": [
+   "显示窗口 ALT&#x2B;M",
+   "栩栩追风客 2021-12-05 01:12",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "13",
+   "569"
+  ]
+ },
+ {
+  "code": "06dee6fc-ec49-4079-31bc-08d9b7012e2c",
+  "name": "关闭当前页",
+  "desc": "CTRL&#x2B;W",
+  "author": "%E6%A0%A9%E6%A0%A9%E8%BF%BD%E9%A3%8E%E5%AE%A2",
+  "tail": [
+   "关闭当前页 CTRL&#x2B;W",
+   "栩栩追风客 2021-12-05 01:12",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "29",
+   "174"
+  ]
+ },
+ {
+  "code": "4ac83149-259c-4ec7-31ba-08d9b7012e2c",
+  "name": "新建文档",
+  "desc": "CTRL&#x2B;N",
+  "author": "%E6%A0%A9%E6%A0%A9%E8%BF%BD%E9%A3%8E%E5%AE%A2",
+  "tail": [
+   "新建文档 CTRL&#x2B;N",
+   "栩栩追风客 2021-12-05 01:11",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "e2ce91a0-23a8-4c09-31b7-08d9b7012e2c",
+  "name": "【加粗】",
+  "desc": "给md文本加粗，并加上【】",
+  "author": "%E9%A3%8E%E6%B8%A1%E5%B7%9B",
+  "tail": [
+   "【加粗】 给md文本加粗，并加上【】",
+   "风渡巛 2021-12-04 20:41",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "25",
+   "<10"
+  ]
+ },
+ {
+  "code": "bcfbaf60-f7c9-4c48-31b5-08d9b7012e2c",
+  "name": "Markdown批量改为二级标题",
+  "desc": "为每行文字的开头添加或取消 ] 标记，Markdown操作",
+  "author": "%E9%A3%8E%E6%B8%A1%E5%B7%9B",
+  "tail": [
+   "Markdown批量改为二级标题 为每行文字的开头添加或取消 ] 标记，Markdown...",
+   "风渡巛 2021-12-04 20:37",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "10",
+   "<10"
+  ]
+ },
+ {
+  "code": "7248dac6-4102-4b03-626c-08d9a4c9f420",
+  "name": "字体&#x2B;",
+  "desc": "改变思源笔记行级元素的格式\\n1 SY加/改格式\\n2 格式刷\\n3 &#x2B;格式字典\\n4 删格式",
+  "author": "%E5%8D%8D",
+  "tail": [
+   "卍 2021-11-27 15:51",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "3",
+   "70",
+   "16"
+  ]
+ },
+ {
+  "code": "63dbc621-0be6-49ad-0fd6-08d9af1a5800",
+  "name": "思源笔记块拆分为多个块",
+  "desc": "将纯文本按段落拆分为多个块",
+  "author": "%E9%A3%8E%E6%B8%A1%E5%B7%9B",
+  "tail": [
+   "风渡巛 2021-11-25 14:04",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "151",
+   "<10"
+  ]
+ },
+ {
+  "code": "94cae8ad-13bf-49cb-0fd3-08d9af1a5800",
+  "name": "思源笔记多块合并到一个块",
+  "desc": "删除选中内容的空行或只包含空白字符行",
+  "author": "%E9%A3%8E%E6%B8%A1%E5%B7%9B",
+  "tail": [
+   "风渡巛 2021-11-25 13:50",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "168",
+   "<10"
+  ]
+ },
+ {
+  "code": "dfec1a26-0306-471f-9a31-08d9ab507a29",
+  "name": "SY浮窗切换",
+  "desc": "如果出现错乱，请在动作上右键→信息→删除动作数据",
+  "author": "%E5%8D%8D",
+  "tail": [
+   "卍 2021-11-21 03:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "31",
+   "<10"
+  ]
+ },
+ {
+  "code": "d1be436d-6aa6-487d-72fe-08d9aa624e96",
+  "name": "粘贴到SiYuan日记",
+  "desc": "粘贴文本、文件、文件夹到SiYuan日记",
+  "author": "(-_-)",
+  "tail": [
+   "粘贴到SiYuan日记 粘贴文本、文件、文件夹到SiYuan日记",
+   "(-_-) 2021-11-19 15:53",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "29",
+   "<10"
+  ]
+ },
+ {
+  "code": "af58fafa-9d54-499d-5eef-08d9a7cd983d",
+  "name": "记忆曲线模板（思源专用）",
+  "desc": "在【思源】编辑器中加入艾宾浩斯遗忘曲线和曲线日期标记。",
+  "author": "%E5%8D%9A%E9%9B%85%E5%85%88%E7%94%9F",
+  "tail": [
+   "记忆曲线模板（思源专用） 在【思源】编辑器中加入艾宾浩斯遗忘曲线和曲...",
+   "博雅先生 2021-11-15 18:54",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "55",
+   "<10"
+  ]
+ },
+ {
+  "code": "58a39249-9da1-4ac3-d552-08d9a3738f8c",
+  "name": "alias别名属性",
+  "desc": "批量修改思源笔记块的alias别名属性",
+  "author": "%E5%8D%8D",
+  "tail": [
+   "alias别名属性 批量修改思源笔记块的alias别名属性",
+   "卍 2021-11-10 00:33",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "11",
+   "<10"
+  ]
+ },
+ {
+  "code": "7d1c973e-9d34-4573-2e09-08d9a28424de",
+  "name": "icon4SY",
+  "desc": "icon4SYthemes，批量下载网站 icon，生成 themes 片段",
+  "author": "%E5%8D%8D",
+  "tail": [
+   "卍 2021-11-09 15:22",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "2",
+   "18",
+   "<10"
+  ]
+ },
+ {
+  "code": "f677c05b-b108-45c4-784d-08d99fa081d4",
+  "name": "字体4SY",
+  "desc": "辅助快速修改思源笔记字体",
+  "author": "%E5%8D%8D",
+  "tail": [
+   "字体4SY 辅助快速修改思源笔记字体",
+   "卍 2021-11-05 23:00",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "59",
+   "<10"
+  ]
+ },
+ {
+  "code": "81f108e5-f13b-4465-eaa6-08d993ab1ca0",
+  "name": "`clip`",
+  "desc": "将剪贴板内文本放在``内，然后粘贴到当前光标所在位置。解决思源笔记难以直接粘贴excel公式到笔记内的问题。",
+  "author": "ddda",
+  "tail": [
+   "`clip` 将剪贴板内文本放在``内，然后粘贴到当前光标所在位置。解决思源...",
+   "ddda 2021-10-24 18:44",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "7",
+   "<10"
+  ]
+ },
+ {
+  "code": "3200e7a0-2a58-4616-cb98-08d99614084e",
+  "name": "一键SY\\anki跳转",
+  "desc": "参考一键ob\\anki跳转",
+  "author": "%E7%B1%B3%E9%9C%B2%E7%BC%87%E6%AC%A7",
+  "tail": [
+   "一键SY\\anki跳转 参考一键ob\\anki跳转",
+   "米露缇欧 2021-10-24 13:02",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "25",
+   "<10"
+  ]
+ },
+ {
+  "code": "9dd10a21-1dc9-470d-cb9c-08d99614084e",
+  "name": "思源百科",
+  "desc": "选中或输入文字搜索思源笔记",
+  "author": "%E7%B1%B3%E9%9C%B2%E7%BC%87%E6%AC%A7",
+  "tail": [
+   "米露缇欧 2021-10-24 00:15",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "57",
+   "<10"
+  ]
+ },
+ {
+  "code": "b3ea0db2-3b4a-46a0-e161-08d98f69ed77",
+  "name": "向下新建子页面",
+  "desc": "思源笔记在父页面，向下新建带引用的子页面",
+  "author": "%E5%BC%8E%E8%83%96",
+  "tail": [
+   "向下新建子页面 思源笔记在父页面，向下新建带引用的子页面",
+   "弎胖 2021-10-15 11:23",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "17",
+   "<10"
+  ]
+ },
+ {
+  "code": "493f828c-fca0-4402-96ec-08d976ca5018",
+  "name": "PDF笔记助手",
+  "desc": "在思源中插入链接，可跳转zotero中的PDF",
+  "author": "%E7%94%A8%E6%88%B7504092476065448",
+  "tail": [
+   "PDF笔记助手 在思源中插入链接，可跳转zotero中的PDF",
+   "用户5040924760... 2021-09-15 17:54",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "40",
+   "<10"
+  ]
+ },
+ {
+  "code": "0b1b04d4-3292-47ae-9419-08d9620ff65a",
+  "name": "颜色标注",
+  "desc": "！！需自行修改各自主题中颜色对应的css字号！！此方案对应Dark Blue&Light Blue主题，需选中文本后执行操作",
+  "author": "MorganWan",
+  "tail": [
+   "颜色标注 ！！需自行修改各自主题中颜色对应的css字号！！此方案对应Dark...",
+   "MorganWan 2021-08-22 12:58",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "36",
+   "<10"
+  ]
+ },
+ {
+  "code": "118bd06e-2216-4833-c4f8-08d93053fb9f",
+  "name": "红色",
+  "desc": "因为思源笔记的快捷键不足,所以简单写了个quicker动作辅助快速改变文字颜色.",
+  "author": "%E6%9D%A8%E6%B2%90%E6%99%A8",
+  "tail": [
+   "红色 因为思源笔记的快捷键不足,所以简单写了个quicker动作辅助快速改变...",
+   "杨沐晨 2021-06-16 20:44",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "19",
+   "<10"
+  ]
+ },
+ {
+  "code": "fcfd00f5-4125-4e8f-c4f7-08d93053fb9f",
+  "name": "浅橙色",
+  "desc": "因为思源笔记的快捷键不足,所以简单写了个quicker动作辅助快速改变背景.",
+  "author": "%E6%9D%A8%E6%B2%90%E6%99%A8",
+  "tail": [
+   "杨沐晨 2021-06-16 20:43",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "63",
+   "<10"
+  ]
+ },
+ {
+  "code": "a3150f32-0de7-4f81-8ca4-08d92a2319fb",
+  "name": "精确嵌入文档块",
+  "desc": "用来在思源笔记里嵌入文档块",
+  "author": "%E7%94%A8%E6%88%B7365775556191407",
+  "tail": [
+   "精确嵌入文档块 用来在思源笔记里嵌入文档块",
+   "用户3657755561... 2021-06-08 10:30",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "29",
+   "<10"
+  ]
+ },
+ {
+  "code": "262e7a8b-5ff0-4033-c8f5-08d905a685e0",
+  "name": "复制粘贴到思源的日记中",
+  "desc": "复制粘贴到思源的日记中",
+  "author": "jellzone",
+  "tail": [
+   "复制粘贴到思源的日记中 复制粘贴到思源的日记中",
+   "jellzone 2021-04-23 12:26",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "49",
+   "<10"
+  ]
+ },
+ {
+  "code": "869f5c4e-08bb-4a5b-c8f6-08d905a685e0",
+  "name": "搜索思源文档",
+  "desc": "搜索思源文档",
+  "author": "jellzone",
+  "tail": [
+   "搜索思源文档 搜索思源文档",
+   "jellzone 2021-04-23 11:38",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "39",
+   "<10"
+  ]
+ },
+ {
+  "code": "5791f986-f409-4fb7-3894-08d8a3bf4992",
+  "name": "切换列表",
+  "desc": "将普通（或列表）文本转换为列表（或普通）文本",
+  "author": "%E5%BF%AB%E5%AE%A2_%E8%9A%95%E5%AD%90",
+  "tail": [
+   "快客_蚕子 2020-12-19 11:10",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "1",
+   "60",
+   "<10"
+  ]
+ },
+ {
+  "code": "22cbc756-2628-4312-3892-08d8a3bf4992",
+  "name": "划词搜索",
+  "desc": "划选文字后执行ctrl&#x2B;p搜索",
+  "author": "%E5%BF%AB%E5%AE%A2_%E8%9A%95%E5%AD%90",
+  "tail": [
+   "划词搜索 划选文字后执行ctrl&#x2B;p搜索",
+   "快客_蚕子 2020-12-19 10:59",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "30",
+   "<10"
+  ]
+ },
+ {
+  "code": "3bbfac0d-00ce-493b-3891-08d8a3bf4992",
+  "name": "#标签#",
+  "desc": "添加或去除#标签#符号",
+  "author": "%E5%BF%AB%E5%AE%A2_%E8%9A%95%E5%AD%90",
+  "tail": [
+   "#标签# 添加或去除#标签#符号",
+   "快客_蚕子 2020-12-19 10:54",
+   "点击预览动作定义\" data-html=\"true\" data-toggle=\"tooltip\">",
+   "47",
+   "<10"
+  ]
+ }
+]
