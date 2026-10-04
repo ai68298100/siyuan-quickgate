@@ -17,6 +17,7 @@ import {
     contactsSearch, contactsEnsure, contactsInteraction,
     BridgeResult,
 } from "./adapters";
+import { validateTemplatePath, validateTemplateContent } from "./path-guard";
 
 export interface EditorContextResult {
     docId: string | null;
@@ -25,9 +26,36 @@ export interface EditorContextResult {
     selectedText: string | null;
 }
 
-/** 生态清单（src/assets/ecosystem-manifests.json 的形状） */
+/**
+ * 写 op 统一审计面（safety-gate-contract §6 差距① · TODO L446）。
+ * commands.run 自审计（含目标插件与命令名）不在此列，避免双写；其余写 op 出口统一落 audit。
+ * audit 的 command 字段只记 args 键名，不记值（零 PII：note/正文/路径不进审计）。
+ */
+const WRITE_OP_OWNER: Record<string, string> = {
+    "checkin.record": "siyuan-checkin",
+    "contacts.ensure": "siyuan-contacts",
+    "contacts.interaction": "siyuan-contacts",
+    "template.new": "siyuan-quickgate",
+    "workflow.execute": "siyuan-quickgate",
+    "plugin.api": "siyuan-quickgate",
+};
+
+/** 事件白名单条目形状（ecosystem-manifest-contract §1；v2 起 since/_eventNamespace 纳入漂移审计） */
+export interface EcosystemEvent {
+    name: string;
+    status: "available" | "observed" | "design";
+    idempotency: string;
+    payload?: object;
+    /** 上游引入版本（v2·漂移审计用） */
+    since?: string;
+    note?: string;
+}
+
+/** 生态清单（src/assets/ecosystem-manifests.json 的形状；v2 新增字段=可缺省，合同 §1） */
 export interface EcosystemManifest {
     version: number;
+    updatedAt?: string;
+    note?: string;
     plugins: Array<{
         pluginId: string;
         displayName: string;
@@ -38,6 +66,17 @@ export interface EcosystemManifest {
         hubIntegration: string;
         /** 插件暴露在 window 上的公开桥全局名（如 siyuanCheckin）；无则缺省 */
         windowBridge?: string;
+        /** 快门接入的最低协议 major（如 "v5"）；命令面/未接入插件缺省（v2） */
+        minProtocol?: string | null;
+        /** 该插件权威的数据域（domain.sub，v2） */
+        sourceOfTruth?: string[];
+        /** 事件物化载体：none | eventFile | windowEvent（v2） */
+        ingestion?: "none" | "eventFile" | "windowEvent";
+        /** 事件名前缀（如 checkin、lv-cards）；有 events 必填（v2） */
+        eventNamespace?: string;
+        /** 逐能力参数 schema（v2·planned 逐能力补齐） */
+        capabilitySchemas?: Record<string, { required?: string[]; properties?: object }>;
+        events?: EcosystemEvent[];
     }>;
 }
 
@@ -172,6 +211,7 @@ export class BridgeService {
             if (result.status === "recorded") this.stats.ok += 1;
             else if (result.status === "rejected") this.stats.rejected += 1;
             else this.stats.failed += 1;
+            this.auditWriteOp(cmd, result.status, elapsed);
             if (cmd.reply !== false) {
                 receipts.push(this.makeReceipt({
                     id: cmd.id, op: cmd.op, status: result.status, data: result.data,
@@ -248,6 +288,7 @@ export class BridgeService {
         if (result.status === "recorded") this.stats.ok += 1;
         else if (result.status === "rejected") this.stats.rejected += 1;
         else this.stats.failed += 1;
+        this.auditWriteOp(cmd, result.status, elapsed);
 
         let receipt: BridgeReceipt | undefined;
         if (cmd.reply !== false) {
@@ -296,6 +337,19 @@ export class BridgeService {
 
     private reject(message: string): BridgeResult {
         return { status: "rejected", data: null, message };
+    }
+
+    /** 写 op 出口统一审计（NDJSON tick 与广播快路径共用；rejected/unsupported 也留痕） */
+    private auditWriteOp(cmd: BridgeCommand, status: string, elapsedMs: number): void {
+        const owner = WRITE_OP_OWNER[cmd.op];
+        if (!owner) return;
+        this.deps.audit({
+            time: new Date().toISOString(),
+            plugin: owner,
+            command: `${cmd.op} args(${Object.keys(cmd.args ?? {}).join(",")})`,
+            status,
+            elapsedMs,
+        });
     }
 
     private async dispatch(cmd: BridgeCommand): Promise<BridgeResult> {
@@ -392,7 +446,7 @@ export class BridgeService {
                 try {
                     petals = await this.deps.loadPetals();
                 } catch { /* 内核不可达时也返回 manifest 口径 */ }
-                const manifest = manifestJson as unknown as EcosystemManifest;
+                const manifest = manifestJson as EcosystemManifest;
                 const enabledMap = new Map<string, unknown>();
                 for (const p of petals) {
                     const name = (p as { name?: unknown }).name;
@@ -446,15 +500,19 @@ export class BridgeService {
                 return { status: "recorded", data: d, message: d.diaryNotebookId ? "已发现日记笔记本" : "未发现日记笔记本（回退手填）" };
             }
 
-            // ---- 模板（内核 renderSprig 渲染，支持 {{}} 语法）----
+            // ---- 模板（内核 renderSprig 渲染，支持 {{}} 语法；路径守卫=safety-gate §7）----
             case "template.new": {
                 const notebook = typeof a.notebook === "string" ? a.notebook : "";
                 const hpath = typeof a.hpath === "string" ? a.hpath : "";
                 if (!notebook || !hpath) return this.reject("notebook/hpath 缺失");
                 let content = typeof a.template === "string" ? a.template : "";
                 if (!content && typeof a.templatePath === "string") {
-                    content = (await this.deps.api.getFileText(`/templates/${a.templatePath.replace(/^\/+/, "")}`)) ?? "";
+                    const guard = validateTemplatePath(a.templatePath);
+                    if (!guard.ok) return this.reject(guard.reason);
+                    content = (await this.deps.api.getFileText(`/templates/${a.templatePath}`)) ?? "";
                 }
+                const contentGuard = validateTemplateContent(content);
+                if (!contentGuard.ok) return this.reject(contentGuard.reason);
                 if (!content) return this.reject("template/templatePath 均为空");
                 const rendered = await this.deps.api.post<string>("/api/template/renderSprig", { template: content });
                 const docId = await this.deps.api.post<string>("/api/filetree/createDocWithMd", { notebook, path: hpath, markdown: rendered });
@@ -463,13 +521,13 @@ export class BridgeService {
 
             // ---- 设计态契约（M2 实现：events 文件载体 + workflow 受控编排）----
             case "events.list": {
-                const manifest = manifestJson as unknown as EcosystemManifest;
+                const manifest = manifestJson as EcosystemManifest;
                 const wl = eventWhitelist(manifest);
                 const events = [...wl.entries()].map(([name, meta]) => ({ name, ...meta }));
                 return { status: "recorded", data: { events }, message: `白名单事件 ${events.length} 个` };
             }
             case "events.pull": {
-                const manifest = manifestJson as unknown as EcosystemManifest;
+                const manifest = manifestJson as EcosystemManifest;
                 const wl = eventWhitelist(manifest);
                 const files: string[] = [];
                 for (const source of new Set([...wl.values()].map((v) => v.source))) {
@@ -532,7 +590,7 @@ export class BridgeService {
                 const method = typeof a.method === "string" ? a.method : "";
                 if (!plugin || !method) return this.reject("plugin/method 缺失");
                 if (!s.rawApiAllowlist.includes(plugin)) return this.reject(`插件 ${plugin} 不在 plugin.api 允许名单`);
-                const manifest = manifestJson as unknown as EcosystemManifest;
+                const manifest = manifestJson as EcosystemManifest;
                 const globalName = manifest.plugins.find((m) => m.pluginId === plugin)?.windowBridge ?? "";
                 const w = globalThis as unknown as { window?: { [k: string]: unknown } };
                 const bridge = (globalName ? w.window?.[globalName] : null) as Record<string, unknown> | null | undefined;

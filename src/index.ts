@@ -786,7 +786,7 @@ export default class QuickGatePlugin extends Plugin {
         ecoBtn.textContent = "生态清单版本";
         ecoBtn.onclick = async () => {
             try {
-                const manifest = manifestJson as unknown as EcosystemManifest & { updatedAt?: string };
+                const manifest = manifestJson as EcosystemManifest;
                 let installed: Array<Record<string, unknown>> = [];
                 try {
                     installed = await this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() });

@@ -5,6 +5,7 @@
  */
 import { eventWhitelist, parseEventLine } from "./services/events";
 import type { EcosystemManifest } from "./services/bridge-service";
+import { validateTemplatePath, validateTemplateContent } from "./services/path-guard";
 import { FRONTEND_ONLY_OPS } from "./ops";
 
 export type Args = Record<string, unknown>;
@@ -186,17 +187,23 @@ export async function kernelConfigDiscover(deps: KernelDeps, args: Args = {}): P
 }
 
 export async function kernelTemplateNew(deps: KernelDeps, args: Args): Promise<Receipt> {
+    const rejected = (message: string): Receipt => ({ id: "kernel", op: "template.new", status: "rejected", data: null, message });
     const notebook = typeof args.notebook === "string" ? args.notebook : "";
     const hpath = typeof args.hpath === "string" ? args.hpath : "";
     if (!notebook || !hpath) {
-        return { id: "kernel", op: "template.new", status: "rejected", data: null, message: "notebook/hpath 缺失" };
+        return rejected("notebook/hpath 缺失");
     }
     let content = typeof args.template === "string" ? args.template : "";
     if (!content && typeof args.templatePath === "string") {
-        content = (await deps.getFileText(`/templates/${args.templatePath.replace(/^\/+/, "")}`)) ?? "";
+        // 路径守卫与 NDJSON 通道共用（safety-gate §7）：内核通道无 audit 载体，拒绝留痕由调用方回执承担
+        const guard = validateTemplatePath(args.templatePath);
+        if (!guard.ok) return rejected(guard.reason);
+        content = (await deps.getFileText(`/templates/${args.templatePath}`)) ?? "";
     }
+    const contentGuard = validateTemplateContent(content);
+    if (!contentGuard.ok) return rejected(contentGuard.reason);
     if (!content) {
-        return { id: "kernel", op: "template.new", status: "rejected", data: null, message: "template/templatePath 均为空" };
+        return rejected("template/templatePath 均为空");
     }
     const renderedText = await deps.kpost<string>("/api/template/renderSprig", { template: content });
     const docId = await deps.kpost<string>("/api/filetree/createDocWithMd", { notebook, path: hpath, markdown: renderedText });

@@ -2,6 +2,18 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## Unreleased（R227：template.new 路径安全 + 写 op 统一审计 + manifest 类型门禁）
+
+### Security
+- **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
+
+### Added
+- **写 op 统一审计面（TODO L446 差距① / safety-gate §6）**：`checkin.record`、`contacts.ensure/interaction`、`template.new`、`workflow.execute`、`plugin.api` 出口统一落 audit（NDJSON tick 与广播快路径共用；rejected 也留痕）；`command` 字段只记 args 键名（零 PII），commands.run 维持原自审计不双写。
+- **生态清单类型门禁（TODO L595 / C9 合同）**：`EcosystemManifest` 接口补齐 v2 字段（events/sourceOfTruth/ingestion/minProtocol/eventNamespace/capabilitySchemas/updatedAt），六处 `as unknown as` 断言移除；`scripts/validate-manifest.mjs` 以 `check:manifest` 入 check 链（CI 首步=契约违规阻断发布）。v1 迁移期警告、manifest 升 v2 后全强制。
+
+### Changed
+- 内核路由 `template.new` 拒绝路径现在返回结构化 `rejected` 回执（中文原因）；内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 TODO L627 收口）。
+
 ## v0.7.3 · 2026-10-03（R69 待办池 P0/P1 清账：八处正确性修复）
 
 ### Fixed

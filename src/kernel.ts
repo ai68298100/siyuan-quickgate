@@ -58,7 +58,7 @@ api.plugin.lifecycle.onload = async () => {
     const handleOp = createKernelOpHandler({
         kpost,
         getFileText,
-        manifest: manifestJson as unknown as EcosystemManifest,
+        manifest: manifestJson as EcosystemManifest,
         pluginName: PLUGIN_NAME,
     });
     api.server.private.http.handler = async (req) => {
