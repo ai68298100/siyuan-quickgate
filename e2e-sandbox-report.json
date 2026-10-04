@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-04T22:01:56.142Z",
+  "ws": "C:\\Users\\sunku\\AppData\\Local\\Temp\\qg-sandbox-1791151124048",
+  "results": [
+    {
+      "name": "内核就绪（首跑）",
+      "pass": true,
+      "note": "http://127.0.0.1:14711"
+    },
+    {
+      "name": "bazaar 信任/插件开关",
+      "pass": true,
+      "note": "trust=true, petalDisabled=false"
+    },
+    {
+      "name": "内核就绪（重启后）",
+      "pass": false,
+      "note": ""
+    }
+  ]
+}

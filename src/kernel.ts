@@ -72,7 +72,13 @@ api.plugin.lifecycle.onload = async () => {
         if (agent?.registerCapability) {
             const wrap = (r: { text: string; data?: unknown; isError?: boolean }) =>
                 ({ content: [{ type: "text", text: r.text }], structuredContent: r.data, isError: r.isError === true });
-            await agent.registerCapability("quickgate_ping", {
+            // 火后即忘（R257 教训）：无头内核里注册 Promise 可能永不落定，await 会阻塞内核启动序列
+            const registered: string[] = [];
+            const reg = (name: string, config: unknown, handler: (args: Record<string, unknown>) => Promise<unknown>) =>
+                agent.registerCapability(name, config, handler)
+                    .then(() => { registered.push(name); })
+                    .catch((e: unknown) => console.warn(`[${PLUGIN_NAME}] Agent 能力 ${name} 注册失败：${e instanceof Error ? e.message : String(e)}`));
+            void reg("quickgate_ping", {
                 title: "QuickGate Ping",
                 description: "快门健康探针（内核同步通道连通性）",
                 inputSchema: { type: "object", properties: {} },
@@ -81,7 +87,7 @@ api.plugin.lifecycle.onload = async () => {
                 const r = await kernelPing(agentDeps);
                 return { content: [{ type: "text", text: r.message }], structuredContent: r.data };
             });
-            await agent.registerCapability("quickgate_discover", {
+            void reg("quickgate_discover", {
                 title: "QuickGate 生态发现",
                 description: "发现日记笔记本与收集箱文档（只读；createInboxIfMissing=true 授权自动创建收集箱）",
                 inputSchema: {
@@ -93,7 +99,7 @@ api.plugin.lifecycle.onload = async () => {
                 },
                 effects: { localRead: true, localWrite: false },
             }, async (args) => wrap(await kernelAgentDiscover(agentDeps, args ?? {})));
-            await agent.registerCapability("quickgate_capture", {
+            void reg("quickgate_capture", {
                 title: "QuickGate 快速捕获",
                 description: "把一句话追加到今日日记（- HH:mm 格式；要求某笔记本配置了日记保存路径）",
                 inputSchema: {
@@ -103,7 +109,9 @@ api.plugin.lifecycle.onload = async () => {
                 },
                 effects: { localWrite: true },
             }, async (args) => wrap(await kernelAgentCapture(agentDeps, args ?? {})));
-            await api.logger.info(`[${PLUGIN_NAME}] 内置 Agent 能力已注册（ping/discover/capture）`);
+            setTimeout(() => {
+                void api.logger.info(`[${PLUGIN_NAME}] 内置 Agent 能力注册完成：${registered.length}/3（${registered.join(", ") || "无"}）`);
+            }, 5000);
         } else {
             await api.logger.info(`[${PLUGIN_NAME}] 内核无 siyuan.agent API——跳过 Agent 能力注册`);
         }
