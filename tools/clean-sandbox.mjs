@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 /**
- * clean-sandbox —— 干净沙箱内核验证（R257 · bug#15 的架构性绕道）
+ * clean-sandbox —— 干净沙箱内核验证（实验态 · R257）
  *
- * 动机：push_reload + Electron 模块缓存使「工作空间插件目录」的前端新代码在完全重启前不生效（bug#15），
- * 且重启依赖用户。本工具改用思源自带 `SiYuan-Kernel.exe serve` 在**临时工作区**起一个独立内核：
- *   - 与用户实例零接触（独立端口/独立数据目录/用后即焚）
- *   - 验证的是**磁盘上的当前构建**（kernel.js 加载、私有路由、Agent 能力注册、首跑空存储路径）
- * 范围：内核侧（kernel.js + 路由 op + Agent 注册）。前端 index.js 仍需真窗口（沙箱无渲染进程）。
+ * 动机：bug#15 使前端新代码在完全重启前不生效；本工具用思源 `SiYuan-Kernel.exe serve --workspace <临时>`
+ * 起独立内核做全新工作区的内核侧验证（与用户实例零接触）。
  *
- * 用法：node tools/clean-sandbox.mjs [--keep]   # --keep 保留沙箱目录供检查
+ * 现状（实验态，未达稳定）：阶段一（首跑生成 conf）✓ 稳定；阶段二（打 bazaar 信任开关后重启）**挂起**——
+ * 现象=数据库重初始化后内核静默（无日志无监听），无插件/有插件均复现（机制级，与快门代码无关）；
+ * 已排除：旗标名（--workspace 非 --wd）、petals.json 形状、我们的代码（--no-plugin 同现）、TLS（显式关闭仍复现）。
+ * 已获得的确凿知识（见 docs/10-生态调研-R4.md §7）：全新工作区默认 pets 禁用+bazaar 不信任，需 conf 打开；
+ * 首跑持久化会开本地 TLS；petal 启用状态存 data/storage/petal/petals.json。
+ * 续做线索：无头内核的数据库重初始化阻塞（或与 filelock/交互式初始化有关）；备选=改用 docker 容器版。
+ *
+ * 用法：node tools/clean-sandbox.mjs [--keep] [--no-plugin]   # --keep 保留沙箱目录供检查
  * 退出码：0=全过 1=有失败
  */
 import fs from "node:fs";
