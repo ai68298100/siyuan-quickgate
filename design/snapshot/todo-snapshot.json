@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-04T17:10:11.087Z",
+  "generatedAt": "2026-10-04T17:40:02.995Z",
   "source": "TODO.md",
   "counts": {
     "total": 1393,
     "checkboxes": 1393,
     "byStatus": {
-      "done": 1145,
-      "pending": 179
+      "done": 1146,
+      "pending": 178
     },
     "byMainline": {
       "C7": 277,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1004,
+      "E4": 1005,
       "E0": 255,
-      "E2": 78,
+      "E2": 77,
       "E3": 29,
       "E1": 26,
       "E5": 1
     },
     "byBlocked": {
       "user": 61,
-      "dev": 179,
+      "dev": 178,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -9937,17 +9937,18 @@
       "priority": "P1",
       "topic": "幂等身份",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "◐ R226 设计定稿（ecosystem-manifest-contract §3：桥/事件/工作流/跨插件四域键形状+TTL+四规则；统一注册表实现挂 quickgate 批）：统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。",
+      "text": "统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。 → ✅ R226 设计定稿（合同 §3 四域键形状+TTL+四规则）+ R229 实现（quickgate c455610）：事件域 IdempotencyRegistry（idempotency.json，键=<pluginId>:<idempotencyKey>，TTL 30 天+LRU 2000）接入物化写入侧——events.ndjson 滚动裁剪后重放不重复落行；先写后记账（putFile 失败不 mark 防事件丢失）、持久化 fail-open；桥命令域=processed 台账（既有）、工作流域=内存计划池（既有）；跨插件衍生记录域维持设计态（L619）。回归 tests/idempotency.test.ts 8 条，141 全绿",
       "mainline": "C7",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [
           "3"
         ],
         "rounds": [
-          "R226"
+          "R226",
+          "R229"
         ],
         "docs": []
       }

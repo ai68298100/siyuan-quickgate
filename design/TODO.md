@@ -596,7 +596,7 @@
 - [x] 【R77-P1·权威矩阵】明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。 → ✅ R226 交付：ecosystem-manifest-contract §2 权威矩阵（8 数据域 × source of truth × 契约面 × 快门角色/禁止项 + 三不变量）
 - [ ] 【R77-P1·投影】复核雷切 checkin projection 只消费打卡 v5 的 bounded calendar/summary；跨插件月历、streak、heatmap 不得自行重算，覆盖日期格式、跨月和 owner 版本漂移回归。
 - [ ] 【R77-P1·部分成功】workflow 每步返回 status、owner、idempotencyKey、started/finished、sideEffect、retryable、已写入和待补偿列表；contacts.ensure 批量先预览去重，再执行。
-- [ ] 【R77-P1·幂等身份】◐ R226 设计定稿（ecosystem-manifest-contract §3：桥/事件/工作流/跨插件四域键形状+TTL+四规则；统一注册表实现挂 quickgate 批）：统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。
+- [x] 【R77-P1·幂等身份】统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。 → ✅ R226 设计定稿（合同 §3 四域键形状+TTL+四规则）+ R229 实现（quickgate c455610）：事件域 IdempotencyRegistry（idempotency.json，键=<pluginId>:<idempotencyKey>，TTL 30 天+LRU 2000）接入物化写入侧——events.ndjson 滚动裁剪后重放不重复落行；先写后记账（putFile 失败不 mark 防事件丢失）、持久化 fail-open；桥命令域=processed 台账（既有）、工作流域=内存计划池（既有）；跨插件衍生记录域维持设计态（L619）。回归 tests/idempotency.test.ts 8 条，141 全绿
 - [ ] 【R77-P1·时间身份】源 eventId/externalRef/occurredAt/localDate/source 与快门 ingestedAt 分开；补卡、跨午夜按 owner 日期归属，删除 tombstone 按同源 eventId 配对，不能用 item/time 或接收时间猜。
 - [ ] 【R77-P1·超时取消】为每个 source 定义 ready/read/write budget；晨间/晚间聚合并行请求并按源超时，取消只取消未开始步骤，已发生副作用必须回执说明。
 - [ ] 【R77-P1·可解释导出】联合总结 Markdown/JSON 带 source plugin/version、protocol、queriedAt、时区、范围、过滤条件、missing/timeout/truncated、脱敏 event IDs/externalRefs；未知/失败不能写成 0。
