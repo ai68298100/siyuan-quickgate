@@ -48,7 +48,11 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 [`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 26 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，这是任何内置 MCP server 都没有覆盖的能力面（差异化论证见项目文档 docs/10 §3.14）。
 
-- **默认只暴露 13 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
+- **默认只暴露 14 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
+
+### 思源内置 Agent 集成（自动，零配置）
+
+思源 ≥3.8.6 下，插件经 `siyuan.agent.registerCapability` 向**内置 AI Agent** 原生注册三个能力：`quickgate_ping`（健康探针）、`quickgate_discover`（日记笔记本+收集箱发现）、`quickgate_capture`（一句话追加今日日记）——Agent 侧可见为 `plugin__siyuan-quickgate__*` 工具并带效果声明，无需任何配置。也可把 Agent 的外部 MCP 设置指向本仓库的 MCP stdio 服务获得全部 26 工具面（详见 docs/10-生态调研-R4.md）。
 - `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
 - 快门侧防线全部共用：确认门控、黑名单、审计日志、plugin.api 允许名单
 

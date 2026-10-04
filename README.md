@@ -48,7 +48,11 @@ Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tr
 
 [`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 26 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, a surface no built-in MCP server covers (see project design docs, docs/10 §3.14, for the rationale).
 
-- **13 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
+- **14 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
+
+### Built-in SiYuan Agent integration (automatic, no config)
+
+On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **built-in AI Agent** via `siyuan.agent.registerCapability`: `quickgate_ping` (health), `quickgate_discover` (diary notebook + inbox discovery) and `quickgate_capture` (append a line to today's daily note). They appear to the Agent as `plugin__siyuan-quickgate__*` tools with declared effects — nothing to configure. Alternatively, point the Agent's external-MCP settings at this repo's MCP stdio server for the full 26-tool surface (see docs/10-生态调研-R4.md).
 - `plugin.api` / `workflow.execute` additionally carry the `destructiveHint` annotation
 - All QuickGate-side defenses still apply: confirm dialogs, blacklist, audit log, plugin.api allowlist
 
