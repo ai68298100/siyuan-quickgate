@@ -2,7 +2,9 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
-## Unreleased（R227：template.new 路径安全 + 写 op 统一审计 + manifest 类型门禁；R230：README 分层 + 搜索别名 + 设置验收补齐 + 热重载接管布防）
+## v0.7.4 · 2026-10-05（R231~R258：安全修复 + 收藏全链 + 思源 Agent 原生集成 + 并发正确性）
+
+> 十四个 R 轮的聚合发布。头两项为安全修复，建议所有用户更新；完整明细见下方分级清单与 docs/10-生态调研-R2~R5。
 
 ### Security
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
