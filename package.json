@@ -19,7 +19,7 @@
     "check:types": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "check:version": "node --no-warnings ./scripts/check-version.mjs",
     "check:manifest": "node --no-warnings ./scripts/validate-manifest.mjs",
-    "check:release": "node --no-warnings ./scripts/check-release.mjs dist",
+    "check:release": "node --no-warnings ./scripts/check-release.mjs dist && node --no-warnings ./scripts/check-links.mjs dist",
     "check:svelte": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",

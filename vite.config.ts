@@ -83,6 +83,7 @@ export default defineConfig((buildTarget === "kernel" ? {
                 ...packageImageTargets,
                 { src: "./README*.md", dest: "./" },
                 { src: "./docs/*.md", dest: "./docs", rename: { stripBase: true } },
+                { src: "./docs/contracts/*.json", dest: "./docs/contracts", rename: { stripBase: true } },
                 { src: "./asset/*", dest: "./asset", rename: { stripBase: true } },
                 { src: "./plugin.json", dest: "./" },
             ],

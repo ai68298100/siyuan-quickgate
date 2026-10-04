@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-[![Version](https://img.shields.io/badge/version-0.7.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.7.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（23 个 op）——
 
@@ -42,11 +42,11 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 信封：`{v:1, id, op, args, createdAt, ttlMs?, reply?, device?}`；回执按 `id` 对应，`status ∈ recorded|duplicate|rejected|failed|unsupported|expired`。完整契约见 [docs/api.md](./docs/api.md)，机器可读版 [docs/contracts/quickgate-api-v1.json](./docs/contracts/quickgate-api-v1.json)（op 面由 `src/ops.ts` 单一来源 + 一致性测试强制对齐）。
 
-[`tools/`](./tools) 内置两个零依赖客户端（node CLI：`ping/send/run/events/exec/fast`；PowerShell：`-Exec` 直呼内核路由、`-Fast` 走广播）；Quicker 子程序走同一信封。
+[`tools/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/tools) 内置两个零依赖客户端（node CLI：`ping/send/run/events/exec/fast`；PowerShell：`-Exec` 直呼内核路由、`-Fast` 走广播）；Quicker 子程序走同一信封。
 
 ### 面向 AI 助手：MCP
 
-[`src/mcp/`](./src/mcp) 把 23 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，这是任何内置 MCP server 都没有覆盖的能力面（差异化论证见项目文档 docs/10 §3.14）。
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 23 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，这是任何内置 MCP server 都没有覆盖的能力面（差异化论证见项目文档 docs/10 §3.14）。
 
 - **默认只暴露 13 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
 - `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
@@ -84,4 +84,4 @@ corepack pnpm make-link  # 软链进工作空间联调
 
 部署并重启思源后，跑 `npm run verify:restart`（可加 `SIYUAN_LOG=<工作空间>/temp/siyuan.log` 附产日志增长读数）——一次产出完整验收数据：桥端到端延迟、内核路由 op、事件物化计数、广播存活、v1.5 快路径延迟、MCP 内核路由、内核日志增长。
 
-许可证：[MIT](./LICENSE) · 作者：[@ai68298100](https://github.com/ai68298100)
+许可证：[MIT](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) · 作者：[@ai68298100](https://github.com/ai68298100)

@@ -2,7 +2,7 @@
 
 [中文文档](./README.zh-CN.md)
 
-[![Version](https://img.shields.io/badge/version-0.7.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](./LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.7.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (23 ops):
 
@@ -42,11 +42,11 @@ events.ndjson     # public host-event stream (materialized by QuickGate on behal
 
 Envelope: `{v:1, id, op, args, createdAt, ttlMs?, reply?, device?}` — receipts echo `id` with `status ∈ recorded|duplicate|rejected|failed|unsupported|expired`. Full contract: [docs/api.md](./docs/api.md) · machine-readable: [docs/contracts/quickgate-api-v1.json](./docs/contracts/quickgate-api-v1.json) (the op face is enforced against `src/ops.ts` by a consistency test).
 
-Clients included in [`tools/`](./tools): zero-dependency node CLI (`ping/send/run/events/exec/fast`) and a PowerShell script (`-Exec` kernel route, `-Fast` broadcast). Quicker subprograms use the same envelope.
+Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/tools): zero-dependency node CLI (`ping/send/run/events/exec/fast`) and a PowerShell script (`-Exec` kernel route, `-Fast` broadcast). Quicker subprograms use the same envelope.
 
 ### MCP for AI assistants
 
-[`src/mcp/`](./src/mcp) exposes all 23 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, a surface no built-in MCP server covers (see [docs/10 §3.14](../../../AI/思源笔记插件开发/quicksrer%20动作/docs/10-生态调研-R1.md) in the project docs for the rationale).
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 23 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, a surface no built-in MCP server covers (see project design docs, docs/10 §3.14, for the rationale).
 
 - **13 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
 - `plugin.api` / `workflow.execute` additionally carry the `destructiveHint` annotation
@@ -85,4 +85,4 @@ corepack pnpm make-link  # symlink into your workspace for dev
 
 After restarting SiYuan with the plugin deployed, run `npm run verify:restart` (add `SIYUAN_LOG=<workspace>/temp/siyuan.log` for the log-growth readout) — it produces the full acceptance dataset: bridge e2e latency, kernel-route ops, event materialization counts, broadcast liveness, v1.5 fast-path latency, MCP kernel-route, kernel log growth.
 
-License: [MIT](./LICENSE) · Author: [@ai68298100](https://github.com/ai68298100)
+License: [MIT](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) · Author: [@ai68298100](https://github.com/ai68298100)
