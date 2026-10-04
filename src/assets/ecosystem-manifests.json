@@ -1,7 +1,7 @@
 {
-  "version": 1,
-  "updatedAt": "2026-10-02",
-  "note": "小驴生态能力清单（docs/09 审查口径）。maturity: stable=已发布公开契约, design=设计态, unlocated=未定位。design/unlocated 只进 manifest 与诊断，不注册可执行 adapter。2026-10-02 R6 按各仓库远端 main 校准（雷切 0.44.1 +3 能力/打卡 18.16.0 +7 事件/人脉 0.4.1 桥不变）。",
+  "version": 2,
+  "updatedAt": "2026-10-05",
+  "note": "小驴生态能力清单（docs/09 审查口径；C9 合同 v2 形状=docs/contracts/ecosystem-manifest-contract.md）。maturity: stable=已发布公开契约, design=设计态(已定位未定契约), unlocated=未定位。design/unlocated 只进 manifest 与诊断，不注册可执行 adapter。校准溯源：2026-10-02 R6 对照各仓库远端 main（雷切 0.44.1 +3 能力/打卡 18.16.0 +7 事件/人脉 0.4.1 桥不变）；2026-10-05 R228 真机校准（E4：loadPetals + data/plugins/*/plugin.json）修正三处 ID/版本漂移——闪卡 siyuan-flashcards→siyuan-lv-cards 0.154.0、拾遗 siyuan-shiyi(未定位)→siyuan-glean 1.1.0(design)、管家 siyuan-butler→siyuan-home 0.2.0；考试真机未安装。v2 新增字段：minProtocol（stable∧window.* 必填）/sourceOfTruth/ingestion/eventNamespace（有 events 必填）。",
   "plugins": [
     {
       "pluginId": "siyuan-speed-switch",
@@ -9,6 +9,9 @@
       "maturity": "stable",
       "version": "0.44.1",
       "protocol": "agent-capabilities + commands",
+      "minProtocol": null,
+      "sourceOfTruth": ["navigation.context"],
+      "ingestion": "none",
       "capabilities": ["navigation-state", "search-documents", "workspace-context", "open-document", "open-documents", "create-document", "append-to-journal", "update-task-status", "home-widget-snapshot", "workspace-plan", "execute-workspace-plan", "get-document-outline", "home-adapter-diagnostics", "restore-document-set"],
       "hubIntegration": "commands.run 走命令面板条目；不持有其他插件业务主数据"
     },
@@ -18,7 +21,11 @@
       "maturity": "stable",
       "version": "18.16.0",
       "protocol": "window.siyuanCheckin v5",
+      "minProtocol": "v5",
       "windowBridge": "siyuanCheckin",
+      "sourceOfTruth": ["checkin.items", "checkin.events", "checkin.summary"],
+      "ingestion": "windowEvent",
+      "eventNamespace": "checkin",
       "capabilities": ["items.read", "items.query", "events.read", "events.range.read", "events.record", "events.record.batch", "summary.read", "analytics.read", "metrics.read", "export.json", "export.csv", "calendar.read"],
       "events": [
         { "name": "checkin:event-recorded", "status": "available", "idempotency": "source+externalRef", "payload": { "type": "event-recorded", "event": { "itemId": "string", "value": "number", "occurredAt": "string" } }, "note": "快门已订阅物化（window CustomEvent，v0.5.2 通道修正）" },
@@ -38,30 +45,40 @@
       "maturity": "stable",
       "version": "0.4.1",
       "protocol": "window.LvContacts v1",
+      "minProtocol": "v1",
       "windowBridge": "LvContacts",
+      "sourceOfTruth": ["contacts.people", "contacts.interactions"],
+      "ingestion": "none",
       "capabilities": ["searchPeople", "getPerson", "ensurePerson", "recordInteraction"],
       "hubIntegration": "contacts.search/ensure/interaction 透传适配器"
     },
     {
-      "pluginId": "siyuan-butler",
+      "pluginId": "siyuan-home",
       "displayName": "小驴管家",
       "maturity": "design",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "protocol": "规划中（home RPC / 归档关联）",
+      "minProtocol": null,
+      "sourceOfTruth": [],
+      "ingestion": "none",
       "capabilities": [],
-      "hubIntegration": "仅 manifest/诊断；不进入默认工作流"
+      "hubIntegration": "已定位（R228 真机：siyuan-home 0.2.0 已安装启用）；公开契约待定义（L583）；仅 manifest/诊断，不进入默认工作流"
     },
     {
-      "pluginId": "siyuan-flashcards",
+      "pluginId": "siyuan-lv-cards",
       "displayName": "小驴闪卡",
       "maturity": "design",
-      "version": "0.5.0",
+      "version": "0.154.0",
       "protocol": "规划中（Gateway / lv-cards:* 事件）",
+      "minProtocol": null,
+      "sourceOfTruth": [],
+      "ingestion": "none",
+      "eventNamespace": "lv-cards",
       "capabilities": [],
       "events": [
         { "name": "lv-cards:reviewed", "status": "design", "idempotency": "sessionId+cardId" }
       ],
-      "hubIntegration": "仅 manifest/诊断"
+      "hubIntegration": "已定位（R228 真机：siyuan-lv-cards 0.154.0 已安装启用）；Gateway 契约与 sessionId/completedAt 稳定前维持 design（L580/L617）；仅 manifest/诊断"
     },
     {
       "pluginId": "siyuan-exam",
@@ -69,17 +86,23 @@
       "maturity": "design",
       "version": "0.1.0",
       "protocol": "规划中",
+      "minProtocol": null,
+      "sourceOfTruth": [],
+      "ingestion": "none",
       "capabilities": [],
-      "hubIntegration": "仅 manifest/诊断"
+      "hubIntegration": "真机未安装（R228 校准 2026-10-05）；descriptor/getStats bounded projection 待上游公开（L616）；仅 manifest/诊断"
     },
     {
-      "pluginId": "siyuan-shiyi",
+      "pluginId": "siyuan-glean",
       "displayName": "小驴拾遗",
-      "maturity": "unlocated",
-      "version": null,
+      "maturity": "design",
+      "version": "1.1.0",
       "protocol": null,
+      "minProtocol": null,
+      "sourceOfTruth": [],
+      "ingestion": "none",
       "capabilities": [],
-      "hubIntegration": "仓库未定位；只显示能力缺失诊断，不注册 adapter"
+      "hubIntegration": "已定位（R228 真机：siyuan-glean 1.1.0 已安装启用；R228 前误记 siyuan-shiyi/unlocated）；公开读写桥与 whenReady 待定义（L615）；仅 manifest/诊断，不注册 adapter"
     }
   ]
 }

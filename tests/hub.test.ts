@@ -88,7 +88,7 @@ async function run(mem: MemKernel, service: BridgeService) {
 describe("生态中枢 op（R1）", () => {
     it("registry.list 合并 manifest 与 loadPetals", async () => {
         const mem = new MemKernel();
-        mem.petals = [{ name: "siyuan-checkin", version: "18.9.0", enabled: true }];
+        mem.petals = [{ name: "siyuan-checkin", version: "18.9.0", enabled: true }, { name: "siyuan-glean", version: "1.1.0", enabled: true }];
         send(mem, "r1", "registry.list");
         const [receipt] = await run(mem, make(mem));
         expect(receipt.status).toBe("recorded");
@@ -96,8 +96,10 @@ describe("生态中枢 op（R1）", () => {
         expect(checkin.installed).toBe(true);
         expect(checkin.installedVersion).toBe("18.9.0");
         expect(checkin.maturity).toBe("stable");
-        const shiyi = receipt.data.plugins.find((p: { pluginId: string }) => p.pluginId === "siyuan-shiyi");
-        expect(shiyi.maturity).toBe("unlocated");
+        // R228 真机校准：拾遗已定位=siyuan-glean（design），design 态不进 adapter
+        const glean = receipt.data.plugins.find((p: { pluginId: string }) => p.pluginId === "siyuan-glean");
+        expect(glean.maturity).toBe("design");
+        expect(glean.installed).toBe(true);
     });
 
     it("diagnostics.report 脱敏快照", async () => {
