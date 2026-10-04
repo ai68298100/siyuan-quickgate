@@ -49,10 +49,10 @@
 | 打卡记录 / 事项 / summary | `siyuan-checkin` | `window.siyuanCheckin v5`（items.read / events.record / summary.read …） | 透传 adapter；**禁止**自行重算 streak/heatmap/月历（L597） |
 | 人脉人物 / 互动 | `siyuan-contacts` | `window.LvContacts v1`（searchPeople / getPerson / ensurePerson / recordInteraction） | 透传；生日/久未联系提醒必须由 owner 公开 bounded projection 提供（L582），**禁止** SQL 猜业务口径 |
 | 导航 / 工作区上下文 | `siyuan-speed-switch` | `agent-capabilities + commands`（14 能力） | 仅经 `commands.run` 命令面板条目调用 |
-| 闪卡调度 / revlog | `siyuan-flashcards`（design） | 规划中（Gateway / `lv-cards:*`） | 等稳定 sessionId/completedAt/validCount/durationMs 才设计学习打卡（L580/L617）；**不读 revlog** |
-| 考试题目 / 作答 / 统计 | `siyuan-exam`（design） | 规划中（descriptor + `getStats()` bounded projection） | 一次性 `lv-exam:stats` **不得**驱动晚间总结或打卡（L616） |
-| 拾遗状态 / 读库 | `siyuan-shiyi`（unlocated） | 未定位 | 不注册 adapter，只显示能力缺失诊断 |
-| 聚合 / 待办提醒 | `siyuan-butler`（design） | 待契约 | 先定位仓库与主数据再定义只读 projection（L583）；不复制打卡 occasions / 人脉 birthday |
+| 闪卡调度 / revlog | `siyuan-lv-cards`（design；R228 真机校准前误记 siyuan-flashcards） | 规划中（Gateway / `lv-cards:*`） | 等稳定 sessionId/completedAt/validCount/durationMs 才设计学习打卡（L580/L617）；**不读 revlog** |
+| 考试题目 / 作答 / 统计 | `siyuan-exam`（design；R228 真机未安装） | 规划中（descriptor + `getStats()` bounded projection） | 一次性 `lv-exam:stats` **不得**驱动晚间总结或打卡（L616） |
+| 拾遗状态 / 读库 | `siyuan-glean`（design；R228 真机校准前误记 siyuan-shiyi/unlocated） | 待定义（L615：读写桥+whenReady 定型前维持 design） | 不注册 adapter，只显示能力缺失诊断 |
+| 聚合 / 待办提醒 | `siyuan-home`（design；R228 真机校准前误记 siyuan-butler） | 待契约 | 先定位仓库与主数据再定义只读 projection（L583）；不复制打卡 occasions / 人脉 birthday |
 | 日记 / 块 / 文件树 | **思源内核** | `/api/filetree` `/api/block` `/api/template` 等 | 唯一非插件权威域；快门直呼内核 |
 
 不变量：
@@ -67,7 +67,7 @@
 | 域 | 键形状 | 例 | 载体与 TTL | 现状 |
 |---|---|---|---|---|
 | 桥命令 | 调用方生成的命令 `id` | `mcp-20261005-…` / Quicker id | processed 台账（`Record<id, ts>`，LRU=auditMax） | ✅ 已实现（NDJSON+广播共用） |
-| 事件 | manifest `events[].idempotency` 派生 | `checkin:<eventId>`；删除=`<id>:deleted` 后缀配对 | events.ndjson 追加载体 + 消费侧台账；TTL 30 天（跨设备回放窗口） | ◐ 消费侧按 idempotencyKey 去重已实现，统一注册表 planned |
+| 事件 | manifest `events[].idempotency` 派生 | `checkin:<eventId>`；删除=`<id>:deleted` 后缀配对 | `IdempotencyRegistry`（idempotency.json，键=`<pluginId>:<idempotencyKey>`，TTL 30 天+LRU 2000）+ events.ndjson 追加载体 | ✅ R229 实装（写入侧去重：滚动裁剪后重放不重复落行；先写后记账 fail-open） |
 | 工作流 | `planId + 步序` | `wf-<ts>#2` | 内存计划池 5 分钟 | ✅ 已实现（不持久化） |
 | 跨插件衍生记录 | 声明式 externalRef | `lv-cards:<sessionId>` / `exam:<sessionId>` / `glean:<docId>:<date>` | 目标 owner 台账；快门只携带不登记 | 设计态（L619） |
 

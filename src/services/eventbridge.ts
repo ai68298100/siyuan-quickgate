@@ -87,6 +87,27 @@ export function appendEventLine(existingText: string, event: HubEvent, cap = 200
 }
 
 /**
+ * 物化去重计划（纯函数 · L599/C9 合同 §3）：同一用户动作只记一次。
+ * seen=false 的事件进 toAppend；toMark 仅在载体写入成功后交注册表记账
+ * （先写后记账：putFile 失败时不得记账，否则事件永久丢失）。
+ */
+export function planMaterialization(
+    events: HubEvent[],
+    seen: (key: string) => boolean,
+    keyOf: (event: HubEvent) => string,
+): { toAppend: HubEvent[]; toMark: string[] } {
+    const toAppend: HubEvent[] = [];
+    const toMark: string[] = [];
+    for (const e of events) {
+        const key = keyOf(e);
+        if (seen(key)) continue;
+        toAppend.push(e);
+        toMark.push(key);
+    }
+    return { toAppend, toMark };
+}
+
+/**
  * single-flight 串行队列（R69-P1）：物化是"读→改→写"三步，并发触发时后任务
  * 会读到旧文本覆盖前任务写入（丢更新）。队列保证前一任务落定（成功或失败）后
  * 才启动下一任务；单任务失败不阻塞后续。

@@ -14,7 +14,8 @@ import manifestJson from "./assets/ecosystem-manifests.json";
 import { SingleFlightPoller } from "./services/poller";
 import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
-import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted } from "./services/eventbridge";
+import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted, planMaterialization } from "./services/eventbridge";
+import { IdempotencyRegistry } from "./services/idempotency";
 import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
@@ -40,6 +41,7 @@ function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], ser
 export default class QuickGatePlugin extends Plugin {
     private isMobile: boolean = false;
     private store = new BridgeStore(this.asDataIO());
+    private idempotency = new IdempotencyRegistry(this.asDataIO());
     private kernelApi = new KernelApi();
     private poller?: SingleFlightPoller;
     private activeService?: BridgeService;
@@ -50,6 +52,7 @@ export default class QuickGatePlugin extends Plugin {
         this.isMobile = getFrontend() === "mobile" || getFrontend() === "browser-mobile";
         await this.store.loadAll();
         this.settings = this.store.settings;
+        await this.idempotency.load(); // L599：事件域幂等记账（滚动裁剪后重放不重复落行）
         this.auditLog = await this.store.loadAudit(this.settings.auditMax); // R47 修复：恢复上次审计历史（此前只写不读，重启即静默销毁）
         await this.ensureDeviceName();
 
@@ -132,12 +135,22 @@ export default class QuickGatePlugin extends Plugin {
     private async doMaterialize(events: HubEvent[]) {
         try {
             const path = "/storage/petal/siyuan-checkin/bridge/events.ndjson";
+            // 写入侧幂等（L599/C9 合同 §3）：滚动裁剪后的重放事件不重复落行；
+            // 先写后记账——putFile 失败时不 mark，避免事件永久丢失
+            const plan = planMaterialization(
+                events,
+                (key) => this.idempotency.seen(key),
+                (e) => IdempotencyRegistry.keyOf(e.source, e.idempotencyKey),
+            );
+            if (plan.toAppend.length === 0) return;
             const old = (await this.kernelApi.getFileText(path)) ?? "";
             let text = old;
-            for (const e of events) {
+            for (const e of plan.toAppend) {
                 text = appendEventLine(text, e);
             }
             await this.kernelApi.putFileText(path, text);
+            for (const key of plan.toMark) this.idempotency.mark(key);
+            await this.idempotency.save();
         } catch (err) {
             console.warn(`[${PLUGIN_NAME}] 事件物化失败：`, err);
         }
