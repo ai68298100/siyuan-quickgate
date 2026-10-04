@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-04T21:10:08.328Z",
+  "generatedAt": "2026-10-04T21:22:08.753Z",
   "source": "TODO.md",
   "counts": {
     "total": 1402,
     "checkboxes": 1402,
     "byStatus": {
-      "done": 1178,
-      "pending": 151
+      "done": 1179,
+      "pending": 150
     },
     "byMainline": {
       "C7": 280,
@@ -19,8 +19,8 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1031,
-      "E0": 241,
+      "E4": 1032,
+      "E0": 240,
       "E2": 74,
       "E3": 26,
       "E1": 29,
@@ -28,7 +28,7 @@
     },
     "byBlocked": {
       "user": 65,
-      "dev": 151,
+      "dev": 150,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -8065,14 +8065,18 @@
       "priority": "P0",
       "topic": "目录",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "设计能力目录视图：显示来源插件/版本、读写属性、前置条件、确认要求、预估等待、当前状态、缺失原因和安装/诊断入口；缺插件、禁用、版本不兼容、桥关闭各有空态。",
+      "text": "设计能力目录视图：显示来源插件/版本、读写属性、前置条件、确认要求、预估等待、当前状态、缺失原因和安装/诊断入口；缺插件、禁用、版本不兼容、桥关闭各有空态。 → ✅ R251 交付（设置页生态对话框升级为能力目录视图）：逐插件卡片=状态四态（已安装启用/未安装/版本漂移/已停用，颜色+文字双编码）+ 清单/实装版本对照 + 协议与能力数 + hubIntegration + **缺失原因与入口**（未安装→GitHub Releases 链接；漂移→可校准提示；停用→插件列表指引）+ 诊断入口（导出诊断包/verify:bg）。读写属性=经 adapter 能力协商（卡片注明），清单级 effects 下沉维持 C3 §4 planned。manifest 来源/校准日期=标题承载（清单 vX · 校准日期）。162 tests 全绿",
       "mainline": "C2",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
-        "rounds": [],
+        "sections": [
+          "4"
+        ],
+        "rounds": [
+          "R251"
+        ],
         "docs": []
       }
     },
