@@ -10,8 +10,10 @@
 ### Added
 - **写 op 统一审计面（TODO L446 差距① / safety-gate §6）**：`checkin.record`、`contacts.ensure/interaction`、`template.new`、`workflow.execute`、`plugin.api` 出口统一落 audit（NDJSON tick 与广播快路径共用；rejected 也留痕）；`command` 字段只记 args 键名（零 PII），commands.run 维持原自审计不双写。
 - **生态清单类型门禁（TODO L595 / C9 合同）**：`EcosystemManifest` 接口补齐 v2 字段（events/sourceOfTruth/ingestion/minProtocol/eventNamespace/capabilitySchemas/updatedAt），六处 `as unknown as` 断言移除；`scripts/validate-manifest.mjs` 以 `check:manifest` 入 check 链（CI 首步=契约违规阻断发布）。v1 迁移期警告、manifest 升 v2 后全强制。
+- **发布包链接检查门（TODO L624）**：`scripts/check-links.mjs` 扫描发布包全部 Markdown——相对链接须落包内真实文件、禁止盘符绝对路径泄露、禁止指向源码专属目录（src/tools/tests/e2e/scripts）的相对链接；挂入 `check:release` 链（CI 构建后阻断）。首轮扫描抓出 10 处违规并修复：README 双语 6 处（LICENSE/tools/src-mcp 改 GitHub permalink、移除指向设计仓库工作区的跨仓库相对链接）、契约 JSON 改为随包分发（vite 补 docs/contracts 拷贝）。
 
 ### Changed
+- **manifest 升 v2（R228 E4 真机校准，2026-10-05）**：修正三处 ID/版本漂移——闪卡 `siyuan-flashcards`→`siyuan-lv-cards` 0.154.0、拾遗 `siyuan-shiyi`(未定位)→`siyuan-glean` 1.1.0（unlocated→design）、管家 `siyuan-butler`→`siyuan-home` 0.2.0；考试真机未安装；stable 三件（雷切/打卡/人脉）零漂移。v2 字段（minProtocol/sourceOfTruth/ingestion/eventNamespace）全量填充；minProtocol 强制面收敛为 stable∧`window.*` 协议（命令面插件=null）。
 - 内核路由 `template.new` 拒绝路径现在返回结构化 `rejected` 回执（中文原因）；内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 TODO L627 收口）。
 
 ## v0.7.3 · 2026-10-03（R69 待办池 P0/P1 清账：八处正确性修复）
