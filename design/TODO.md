@@ -416,6 +416,10 @@
 - [ ] 【bug#15 候选·需前端 DevTools】SiYuan 3.8.6 push_reload 与桥生命周期交互——`reloads=[siyuan-quickgate]`（petal toggle 触发前端 JS 重载）与 `dataChanges=[siyuan-quickgate]`（插件数据变更通知）之后，NDJSON 轮询循环静默死亡（待处理命令不再消费、无回执、文件不压缩），而旧实例 SSE 连接幸存（广播路径假活）——2026-10-05 真机证据：内核日志 02:23:54 `reloads=[...]`/02:23:55+02:24:35 `dataChanges=[...]`；探针矩阵=广播 ✓/NDJSON ✗（重放R230 恢复探针 12s 未消费）；桥死亡时间窗与部署/petal toggle 强相关（17:21 最后消费→17:45 R229 部署后死亡）。已布防：构造器热重载接管（全局所有权令牌+3s 自检 onload 未运行则自愈启桥；onunload/uninstall 置 tornDown 防停用后复活）——但实测接管未被触发（推断 reload 未重建实例或重建路径不同），需前端 DevTools 观察重载后 window.siyuan.ws.app.plugins 实例语义；恢复手段=重启思源窗口【等用户】
 - [x] 【R234·循环C】生态调研 R2（MCP 规范演进 · docs/10-生态调研-R2.md）：tools/list 规范 annotations 已实现（readOnly/destructive/idempotent/openWorld 四注解**显式恒填**——规范对 destructiveHint 缺省按 true 解读，只读工具省略该字段会被宿主误判破坏性）；config.discover 因 opt-in 创建面不入幂等集；注解只是宿主 UI 投影，安全仍以服务端门控为准。候选②（工具描述质量走查，固定任务集在真机 host 观察选择准确率）挂等真机 AI host
 - [ ] 【R234-A·等用户】MCP 工具描述质量走查：固定任务集（记一杯水/查今日打卡/开今日日记）在真机 AI host（Claude Desktop/Cursor）观察 26 工具选择准确率与注解呈现（确认弹窗/并行执行）——依赖真机 AI host 会话【等用户】
+- [x] 【R236·设计批】两份 design note 落档：①protocol-v2-per-writer-eval.md——按写者分文件裁定**暂不立项**（R232 读回重试已 0 丢失；v2 最大障碍=SiYuan 文件 API 无目录列举；三条触发条件在案）；②menu-v3-favorites-design.md——收藏消费面设计（thenMenu 第四枚举 favorites + 行模板通用化；实现挂 L157 动态菜单实测门）
+
+- [ ] 【R236-A·挂L157】menu schema v3 实现（favorites 动态组）：thenMenu 枚举+thenMenuField/thenMenuItem+validate-menu 扩展+空态折叠——宿主前提=showmenu 列表变量生成菜单实测（L157）；桥在线门=quickgate-or-bridge 既有机制【等用户实测 L157】
+
 
 ### 5.9 R69/R70：R68 后状态收敛与实现仓库静态审查（本轮只登记，不开发）
 
