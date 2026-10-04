@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-04T21:22:08.753Z",
+  "generatedAt": "2026-10-04T23:31:47.061Z",
   "source": "TODO.md",
   "counts": {
     "total": 1402,
     "checkboxes": 1402,
     "byStatus": {
-      "done": 1179,
-      "pending": 150
+      "done": 1180,
+      "pending": 149
     },
     "byMainline": {
       "C7": 280,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1032,
+      "E4": 1033,
       "E0": 240,
       "E2": 74,
       "E3": 26,
-      "E1": 29,
+      "E1": 28,
       "E5": 1
     },
     "byBlocked": {
       "user": 65,
-      "dev": 150,
+      "dev": 149,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -7154,7 +7154,7 @@
       "type": "unknown",
       "status": "等用户",
       "blockedBy": "user",
-      "text": "快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】；**版本要求修正（R249 调研 R5）**：3.8.6 的内置 MCP 客户端有连接 bug（#19998，2026-07-28 协议无 tool list notification 的服务器连不上，alpha.4 修复）——接入指南要求内核 **≥3.8.7-alpha.4 或等稳定版**",
+      "text": "快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】；**版本要求修正（R249 调研 R5）**：3.8.6 的内置 MCP 客户端有连接 bug（#19998，2026-07-28 协议无 tool list notification 的服务器连不上，alpha.4 修复）——接入指南要求内核 **≥3.8.7-alpha.4 或等稳定版**；**Agent 侧审批语义补充（R252 源码实证）**：能力调用授权=用户可配置审批策略（Conf.AI.Agent.ApprovalPolicy 按 capabilityID+action，缺省按风险分级）——快门注册时的 effects 声明是风险判定输入（R245 如实声明有安全意义）；接入后用户在 AI 设置按 plugin__siyuan-quickgate__* 配置放行/询问/拒绝",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
@@ -7164,7 +7164,9 @@
           "R3",
           "R5",
           "R6",
-          "R249"
+          "R249",
+          "R252",
+          "R245"
         ],
         "docs": [
           "07-"
@@ -7373,16 +7375,18 @@
       "priority": null,
       "topic": "发布门禁",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "依据官方 Kernel Plugin 规范，增加 `plugin.json.kernels` 与 `kernel.js` 的 `package.zip` 解包静态断言；缺字段、缺文件或 `if-no-files-found: ignore` 时 CI 必须失败。",
+      "text": "依据官方 Kernel Plugin 规范，增加 `plugin.json.kernels` 与 `kernel.js` 的 `package.zip` 解包静态断言；缺字段、缺文件或 `if-no-files-found: ignore` 时 CI 必须失败。 → ✅ R261 交付：scripts/check-package.mjs 挂入 check:release 链——三道断言=①dist/plugin.json kernels 字段（bug#9 直接回归，缺失即失败并点名）②kernel.js/index.js 存在且非空 ③package.zip 解包级（PowerShell ZipFile 落盘脚本执行，规避引号地狱）——zip 内真实含 plugin.json（含 kernels 内容断言）+kernel.js+index.js。**负向验证咬合**：临时剪掉 dist kernels → 正确报「bug#9 复发」。R253 一致性抽查发现的漏网项",
       "mainline": "C8",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R69",
-          "R68"
+          "R68",
+          "R261",
+          "R253"
         ],
         "docs": []
       }

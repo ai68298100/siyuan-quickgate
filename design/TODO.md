@@ -443,7 +443,7 @@
 
 #### 5.9.2 上游规范与分发调研转为验收项
 
-- [ ] 【R70·发布门禁】依据官方 Kernel Plugin 规范，增加 `plugin.json.kernels` 与 `kernel.js` 的 `package.zip` 解包静态断言；缺字段、缺文件或 `if-no-files-found: ignore` 时 CI 必须失败。
+- [x] 【R70·发布门禁】依据官方 Kernel Plugin 规范，增加 `plugin.json.kernels` 与 `kernel.js` 的 `package.zip` 解包静态断言；缺字段、缺文件或 `if-no-files-found: ignore` 时 CI 必须失败。 → ✅ R261 交付：scripts/check-package.mjs 挂入 check:release 链——三道断言=①dist/plugin.json kernels 字段（bug#9 直接回归，缺失即失败并点名）②kernel.js/index.js 存在且非空 ③package.zip 解包级（PowerShell ZipFile 落盘脚本执行，规避引号地狱）——zip 内真实含 plugin.json（含 kernels 内容断言）+kernel.js+index.js。**负向验证咬合**：临时剪掉 dist kernels → 正确报「bug#9 复发」。R253 一致性抽查发现的漏网项
 - [x] 【R70·版本门禁】补齐 `plugin.json`、`package.json`、`src/index.ts` 的版本一致性检查，并让 `update_version` 不再遗漏 `PLUGIN_VERSION`；发布包、tag、CHANGELOG、README 版本同步纳入同一检查表。 → ✅ v0.7.3 续6（check-version.mjs 门禁进 CI check 链；update_version 同步 PLUGIN_VERSION；CHANGELOG/tag/README 同步待发布工具链统一——门禁已可加期望值参数校验）
 - [ ] 【R70·生命周期】验证 `kernel-plugin-state-change` 就绪时序、禁用/重新启用/热加载、多窗口 frontend 与 Kernel RPC 的竞态，形成可重复验收步骤。
 - [x] 【R70·兼容性】建立 SiYuan 3.8.4（最低版本）、3.8.6（当前实测）、3.8.7-alpha/下一稳定版的兼容矩阵，覆盖 `kernels:["all"]`、私有路由、broadcast、petal 和内置 MCP 共存。 → ✅ R226 交付：docs/13 增「SiYuan 内核兼容矩阵」节（3.8.4/3.8.6/next × 7 能力面逐格证据等级 + 升级复核程序四步）
