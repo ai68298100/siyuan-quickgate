@@ -13,6 +13,19 @@
 
 内核通道用法：`POST {SY_URL}/plugin/private/siyuan-quickgate/exec`，头 `Authorization: Token <思源Token>`，体 `{"op":"…","args":{…}}`，响应 `data.data` 为与 NDJSON 同形状的回执。前端专属 op 回 `unsupported`。**无 Token 请求必须被 401/403 拒绝**（spike⑩⓪ 负向探针；该头是 localhost 通道唯一 CSRF 防线）。
 
+### 可用性等级（L470 · 统一口径）
+
+| 等级 | 含义 | 覆盖 |
+|---|---|---|
+| **随插件可用** | 插件启用即生效，无需任何开关 | 内核路由七 op（bridge.ping/registry.list/diagnostics.report/events.list·pull/config.discover/template.new） |
+| **需开桥** | 需在设置开启「外部命令桥」（默认关，Token 鉴权） | 全部前端 op 的 NDJSON 通道 |
+| **需广播开关** | 需另开「广播快路径」（默认关；毫秒级） | 全部前端 op 的广播通道 |
+| **需上游插件** | 需安装并启用对应小驴插件（能力协商，缺=unsupported） | checkin.*、contacts.*、commands.*（宿主命令） |
+| **需授权** | 需显式开关/名单/环境变量 | plugin.api（开关+名单）、MCP 写工具（LV_MCP_WRITE=1）、workflow.execute（确认） |
+| **仅桌面 / 待真机** | 依赖桌面 DOM 或尚未真机验证 | editor.context、setting.open（桌面）；标注「实验」的能力（manifest maturity=design 不注册） |
+
+设置页状态概览实时呈现桥/广播/事件物化/内核路由四路状态；本表为静态口径，两者冲突时以状态概览为准。
+
 **参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec|fast>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼、`fast` 广播快路径）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec] [-Fast]`。**AI 客户端**：`src/mcp/`（MCP stdio 代理，26 op→tools，默认 14 只读，详见其 README）。
 
 ## 通用

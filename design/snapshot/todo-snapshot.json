@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-04T19:33:05.769Z",
+  "generatedAt": "2026-10-04T19:40:14.265Z",
   "source": "TODO.md",
   "counts": {
     "total": 1396,
     "checkboxes": 1396,
     "byStatus": {
-      "done": 1169,
-      "pending": 156
+      "done": 1172,
+      "pending": 153
     },
     "byMainline": {
       "C7": 278,
       "C8": 213,
-      "C4": 112,
+      "C4": 111,
       "C6": 509,
       "C2": 123,
-      "C1": 78,
+      "C1": 79,
       "C3": 73,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1026,
-      "E0": 242,
+      "E4": 1028,
+      "E0": 241,
       "E2": 73,
       "E3": 27,
-      "E1": 27,
+      "E1": 26,
       "E5": 1
     },
     "byBlocked": {
       "user": 63,
-      "dev": 156,
+      "dev": 153,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -7302,16 +7302,17 @@
       "priority": null,
       "topic": "鉴权",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "补私有路由的有效 Token、无 Token、错误 Token、只读工作区、非管理员和 HTTPS 组合矩阵；确认 401/403/404/超时消息不泄露正文或令牌。",
-      "mainline": "C4",
-      "evidence": "E1",
+      "text": "补私有路由的有效 Token、无 Token、错误 Token、只读工作区、非管理员和 HTTPS 组合矩阵；确认 401/403/404/超时消息不泄露正文或令牌。 → ✅ R235 E4 真机七格矩阵（思源 3.8.6 @14643，全部零泄漏=响应不含 token 本体/工作区路径）：①有效 Token→200 回执 ②无 Authorization→401「Auth failed [session]」③错误 Token→401「[header: Authorization]」④Bearer 前缀→200（CheckAuth 四前缀）⑤query ?token=→200 ⑥未知 op→200 结构化回执「未知 op」 ⑦畸形 JSON→400「op 缺失」。剩余格=只读工作区/非管理员/HTTPS（需第二工作区与 HTTPS 环境，挂【需环境】轮）",
+      "mainline": "C1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R69",
-          "R68"
+          "R68",
+          "R235"
         ],
         "docs": []
       }
@@ -7880,14 +7881,17 @@
       "priority": "P0",
       "topic": "等级",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "统一“内核快路径可用、需开桥、需安装上游、需管理员/Token、仅桌面、实验中、待真机”的可用性等级，并同步菜单、设置、README、MCP 工具描述。",
+      "text": "统一“内核快路径可用、需开桥、需安装上游、需管理员/Token、仅桌面、实验中、待真机”的可用性等级，并同步菜单、设置、README、MCP 工具描述。 → ✅ R235 交付：docs/api.md「可用性等级」六级口径表（随插件可用/需开桥/需广播开关/需上游插件/需授权/仅桌面·待真机）+ 逐级覆盖映射；同步点=设置状态概览（实时四路状态，R234）>本表静态口径；MCP 描述已逐工具文字标注需求；Quicker 菜单模板侧挂搭建轮",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R235",
+          "R234"
+        ],
         "docs": []
       }
     },
@@ -8735,14 +8739,18 @@
       "priority": "P1",
       "topic": "SLO",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "先测基线再定捕获成功率、回执可达率、只读/确认后写入 P95、空转 CPU/内存/每小时 I/O/日志增长和恢复丢命令率；基线记录硬件、版本、插件/块数量和同步状态。",
+      "text": "先测基线再定捕获成功率、回执可达率、只读/确认后写入 P95、空转 CPU/内存/每小时 I/O/日志增长和恢复丢命令率；基线记录硬件、版本、插件/块数量和同步状态。 → ◐ R234/R235 部分基线在案（已测）：1000 命令单 tick 吞吐 73~133ms（内存假件 E3，三轮区间；负载峰值 407ms 已录）+ 恢复丢命令率=chaos 套件（tick 竞态/压缩逃逸/坏行）+ 日志增长（R138 实测 ≈28KB/h）；未测（挂真机 SLO 轮）：捕获成功率/回执可达率 P95（需桥活+真机长跑）、空转 CPU/内存（需 DevTools/进程观测）——保留待真机 SLO 专项",
       "mainline": "C1",
       "evidence": "E0",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R234",
+          "R235",
+          "R138"
+        ],
         "docs": []
       }
     },

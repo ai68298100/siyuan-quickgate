@@ -8,6 +8,8 @@
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
 
 ### Added
+- **私有路由鉴权七格矩阵 E4 实测（TODO L434）**：思源 3.8.6 真机——有效 Token/Bearer/query token 均 200 回执；无 Authorization/错误 Token 均 401（消息只泄露失败位置不泄露令牌）；未知 op 结构化回执；畸形 JSON 400。七格全部零泄漏（响应不含令牌本体/工作区路径）。剩余格（只读工作区/非管理员/HTTPS）需专用环境，挂后续轮。
+- **可用性等级口径表（TODO L470）**：docs/api.md 六级口径（随插件可用/需开桥/需广播开关/需上游插件/需授权/仅桌面·待真机）+ 逐级覆盖映射；与设置页实时状态区的优先级关系明确（实时态优先于静态表）。
 - **MCP 规范 annotations 输出（R234 生态调研候选① · docs/10-生态调研-R2.md）**：tools/list 四注解显式恒填——readOnlyHint（14 只读）/destructiveHint（plugin.api/workflow.execute）/idempotentHint（16 天然幂等 op；config.discover 有 opt-in 创建面故不入列）/openWorldHint（commands.run/plugin.api 开放世界）。关键发现：MCP 规范对 destructiveHint 缺省按 true 解读——此前只读工具省略该字段会被宿主确认 UI 误判破坏性。注解只是宿主 UI 投影，安全仍以服务端门控为准。新增 tests/mcp-annotations.test.ts。
 - **设置页 UX 批（R234）**：状态概览新增内核路由探针 badge 与轮询退避显示；plugin.api 允许名单行内校验（pluginId 形状不符剔除并列出）；黑名单/名单保存轻提示；桥开关等待 Web Lock 认领完成再如实提示（他窗占用≠已开启）；触控基线 CSS（开关 44×24/按钮 ≥32 高/:focus-visible 描边）。
 - **桥消费权认领（TODO L452 · 多窗口互斥）**：`services/bridge-claim.ts`（Web Locks，三态=认领/占用/无 API）——startBridge 先认领 `siyuan-quickgate-bridge`，被另一思源窗口持有时拒绝启动轮询并提示（双窗口各自 processed 台账独立，无认领=同 id 双执行写副作用）；stopBridge/onunload 释放。无 Locks 环境按单窗口假设放行+日志声明。
