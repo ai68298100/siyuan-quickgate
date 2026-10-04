@@ -1059,23 +1059,46 @@ export default class QuickGatePlugin extends Plugin {
                     installed = await this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() });
                 } catch { /* 内核不可达 → 只展示 manifest 口径 */ }
                 const instMap = new Map(installed.map((p) => [String(p.name), p]));
-                const lines = manifest.plugins.map((m) => {
-                    const inst = instMap.get(m.pluginId) as { version?: unknown } | undefined;
-                    const iv = typeof inst?.version === "string" ? inst.version : "未安装";
-                    const stale = typeof inst?.version === "string" && m.version && inst.version !== m.version ? "（与清单不一致，可校准）" : "";
-                    return `${m.displayName}：清单 ${m.version ?? "-"} · 实装 ${iv}${stale} · ${m.maturity}`;
-                });
                 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+                // L471 能力目录视图：状态 / 版本对照 / 缺失原因 / 入口，逐插件卡片
+                const cards = manifest.plugins.map((m) => {
+                    const inst = instMap.get(m.pluginId) as { version?: unknown; enabled?: unknown } | undefined;
+                    const iv = typeof inst?.version === "string" ? inst.version : null;
+                    const enabled = inst ? inst.enabled !== false : false;
+                    const stale = iv !== null && m.version !== null && iv !== m.version;
+                    let status: string;
+                    let reason = "";
+                    if (iv === null) {
+                        status = `<span style="color:var(--b3-theme-on-surface)">● 未安装</span>`;
+                        reason = m.maturity === "stable" ? "缺失原因：未安装（集市暂缓，<a class=\"b3-link\" target=\"_blank\" href=\"https://github.com/ai68298100/siyuan-quickgate/releases\">GitHub Releases</a> 获取上游；或用本页诊断核对环境）" : "";
+                    } else if (stale) {
+                        status = `<span style="color:var(--b3-theme-warning, #d97706)">● 版本漂移</span>`;
+                        reason = `缺失原因：实装 ${iv} ≠ 清单基准 ${m.version}（能力面可能变化，可校准清单）`;
+                    } else if (!enabled) {
+                        status = `<span style="color:var(--b3-theme-warning, #d97706)">● 已停用</span>`;
+                        reason = "缺失原因：插件在思源插件列表中已停用";
+                    } else {
+                        status = `<span style="color:var(--b3-theme-primary)">● 已安装启用</span>`;
+                    }
+                    const maturityBadge = m.maturity === "stable" ? "stable" : m.maturity === "design" ? "design（无公开契约，不接入）" : "unlocated";
+                    const caps = m.capabilities.length > 0 ? `能力 ${m.capabilities.length} 项（读写属性经 adapter 能力协商）` : "能力 0 项";
+                    return `<div class="b3-card" style="padding:8px 12px;margin-bottom:6px">` +
+                        `<div><b>${esc(m.displayName)}</b> <span style="color:var(--b3-theme-on-surface);font-size:11px">${m.pluginId} · ${maturityBadge}</span></div>` +
+                        `<div>状态：${status} · 清单 ${m.version ?? "-"} / 实装 ${iv ?? "-"}</div>` +
+                        `<div style="color:var(--b3-theme-on-surface)">${esc(m.protocol ?? "协议未定义")} · ${caps}</div>` +
+                        `<div style="color:var(--b3-theme-on-surface)">${esc(m.hubIntegration)}${reason ? " · " + reason : ""}</div>` +
+                        `</div>`;
+                }).join("");
                 new Dialog({
-                    title: `生态清单（校准 ${manifest.updatedAt ?? "未知"}）`,
-                    content: `<div class="b3-typography" style="padding:12px;white-space:pre-wrap;font-size:12px">${esc(lines.join("\n"))}</div>`,
-                    width: "560px",
+                    title: `生态能力目录（清单 v${manifest.version} · 校准 ${manifest.updatedAt ?? "未知"}）`,
+                    content: `<div style="padding:12px;font-size:12px">${cards}<div style="margin-top:6px;color:var(--b3-theme-on-surface)">诊断入口：本页「导出诊断包」/ 仓库 tools（verify:bg）</div></div>`,
+                    width: "620px",
                 });
             } catch (e) {
                 showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
         };
-        row(secDiag, "生态", ecoBtn);
+        row(secDiag, "生态", ecoBtn, "能力目录视图：状态/版本对照/缺失原因/入口（L471）");
 
         // —— 关于（常显 + 帮助链接，超出原型「帮助入口」要求）——
         const about = document.createElement("div");
