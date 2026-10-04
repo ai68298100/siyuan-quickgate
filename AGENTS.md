@@ -4,17 +4,18 @@
 
 ## 这个仓库是什么
 
-思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 23 个 op 的公开契约。设计文档与总账本在本仓库 `design/` 目录（2026-10-05 起由原独立仓库 quicksrer 动作 subtree 并入，非代码）。
+思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 26 个 op 的公开契约。设计文档与总账本在本仓库 `design/` 目录（2026-10-05 起由原独立仓库 quicksrer 动作 subtree 并入，非代码）。
 
 ## 常用命令
 
 ```bash
 corepack pnpm install
 corepack pnpm check        # tsc + svelte-check（提交前必跑）
-corepack pnpm accept       # 验收门：单测(99) + MCP 协议冒烟(6)——无内核可跑
+corepack pnpm accept       # 验收门：单测(162) + MCP 协议冒烟(7)——无内核可跑
 corepack pnpm build        # dist/ + package.zip
 corepack pnpm build:mcp    # dist-mcp/（MCP 独立分发物）
 corepack pnpm verify:restart  # 真机九类数据（需思源运行+桥开启；SIYUAN_LOG 可选）
+corepack pnpm verify:bg       # 后台真机走查 7 项（含「前端 bundle 判别」——部署 index.js 后必须完全退出重启思源再跑）
 # CI 容器化内核侧验收（GitHub Actions 手动触发；ubuntu+siyuan docker，无需本机）
 gh workflow run ci-e2e-experiment.yml && gh run watch
 ```
