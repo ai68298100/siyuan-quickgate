@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-10-04T17:40:02.995Z",
+  "generatedAt": "2026-10-04T17:43:52.801Z",
   "source": "TODO.md",
   "counts": {
     "total": 1393,
     "checkboxes": 1393,
     "byStatus": {
-      "done": 1146,
-      "pending": 178
+      "done": 1147,
+      "pending": 177
     },
     "byMainline": {
       "C7": 277,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1005,
+      "E4": 1006,
       "E0": 255,
-      "E2": 77,
+      "E2": 76,
       "E3": 29,
       "E1": 26,
       "E5": 1
     },
     "byBlocked": {
       "user": 61,
-      "dev": 178,
+      "dev": 177,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -7679,16 +7679,18 @@
       "priority": "P2",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "核对设置页实际可配置项与文档承诺（bridgeBasePath、backoffMaxMs、auditMax、deviceName、rawApiAllowlist），决定补 UI、迁移 schema 或明确“代码默认不可配置”。",
+      "text": "核对设置页实际可配置项与文档承诺（bridgeBasePath、backoffMaxMs、auditMax、deviceName、rawApiAllowlist），决定补 UI、迁移 schema 或明确\"代码默认不可配置\"。 → ✅ R229 审计+落地（quickgate 本批）：13 设置字段中 7 个已有 UI（bridge/mobile/broadcast 开关、pollMs、confirmExec、blacklist、rawApiEnabled）；**rawApiAllowlist 补 textarea 编辑器**（此前文档承诺「用户手动加入」但无入口=承诺无法履行；默认=三个已完成契约审计插件，hint 注明审计责任）；**backoffMaxMs/auditMax/bridgeBasePath/deviceName 裁定代码默认/自动管理不暴露**（类型注释+api.md plugin.api 行已注记：退避为内部鲁棒参数、auditMax 默认 200 上限 2000、桥路径=R138 迁移裁定不迁的预案字段、deviceName 自动生成持久化 storage/local）；schemaVersion=内部迁移版本本就不应有 UI",
       "mainline": "C4",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R229",
+          "R138"
         ],
         "docs": []
       }

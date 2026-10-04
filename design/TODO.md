@@ -455,7 +455,7 @@
 - [x] 【R69-P1】把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。 → ✅ R134 mobileBridgeEnabled 显式字段（默认关+设置页开关+旧后缀加载迁移显式优先+守卫双保险）；移动端真机行为待 M1.5
 - [ ] 【R69-P2】补 `config.discover` 的收集箱文档发现、自动创建和手填兜底；当前 `inboxDocId:null` 不能与“配置发现”承诺并列。
 - [x] 【R69-P2】审查未使用的 `src/api.ts` 与 `services/kernelApi.ts` 重复实现，移除或隔离其中的 SQL 字符串插值路径，避免死代码和注入维护债。 → ✅ v0.7.3 续5（整文件删除：全仓零引用+SQL 插值面清除，113 单测/构建全过）
-- [ ] 【R69-P2】核对设置页实际可配置项与文档承诺（bridgeBasePath、backoffMaxMs、auditMax、deviceName、rawApiAllowlist），决定补 UI、迁移 schema 或明确“代码默认不可配置”。
+- [x] 【R69-P2】核对设置页实际可配置项与文档承诺（bridgeBasePath、backoffMaxMs、auditMax、deviceName、rawApiAllowlist），决定补 UI、迁移 schema 或明确"代码默认不可配置"。 → ✅ R229 审计+落地（quickgate 本批）：13 设置字段中 7 个已有 UI（bridge/mobile/broadcast 开关、pollMs、confirmExec、blacklist、rawApiEnabled）；**rawApiAllowlist 补 textarea 编辑器**（此前文档承诺「用户手动加入」但无入口=承诺无法履行；默认=三个已完成契约审计插件，hint 注明审计责任）；**backoffMaxMs/auditMax/bridgeBasePath/deviceName 裁定代码默认/自动管理不暴露**（类型注释+api.md plugin.api 行已注记：退避为内部鲁棒参数、auditMax 默认 200 上限 2000、桥路径=R138 迁移裁定不迁的预案字段、deviceName 自动生成持久化 storage/local）；schemaVersion=内部迁移版本本就不应有 UI
 
 ### 5.10 R71：产品定位、能力发现与命令入口（本轮只登记，不开发）
 

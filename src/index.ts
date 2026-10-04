@@ -643,6 +643,18 @@ export default class QuickGatePlugin extends Plugin {
         };
         row(secSec, "plugin.api 高级透传", rawInput, "默认关；配合允许名单使用（见下方黑名单）");
 
+        // 允许名单编辑器（L458：api.md §11 承诺「新插件由用户手动加入」——此前无入口，承诺无法履行）
+        const allowlistInput = document.createElement("textarea");
+        allowlistInput.className = "b3-text-field fn__block";
+        allowlistInput.rows = 2;
+        allowlistInput.value = this.settings.rawApiAllowlist.join(", ");
+        allowlistInput.onchange = async () => {
+            this.settings.rawApiAllowlist = allowlistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
+            this.store.settings = this.settings;
+            await this.store.saveSettings();
+        };
+        row(secSec, "plugin.api 允许名单", allowlistInput, "逗号分隔的 pluginId；默认仅含已完成契约审计的三个插件（打卡/人脉/雷切）——新加入即授权透传其窗口桥，请先完成契约审计");
+
         const blacklistInput = document.createElement("textarea");
         blacklistInput.className = "b3-text-field fn__block";
         blacklistInput.rows = 2;

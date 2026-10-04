@@ -65,17 +65,26 @@ export interface QuickGateSettings {
     schemaVersion: 1;
     bridgeEnabled: boolean;
     pollMs: number;
+    /**
+     * 断线退避上限（代码默认 10000，设置页不暴露——L458 核对裁定：内部鲁棒性参数，无用户调优场景）
+     */
     backoffMaxMs: number;
     confirmExec: boolean;
     /** 不暴露命令的插件名单 */
     blacklist: string[];
+    /**
+     * 审计条数上限（代码默认 200、合法上限 2000，设置页不暴露——L458 裁定：默认值覆盖常规审计回溯）
+     */
     auditMax: number;
-    /** 高级透传 plugin.api：独立开关 + 允许名单 */
+    /** 高级透传 plugin.api：独立开关 + 允许名单（名单默认=三个已完成契约审计的插件；设置页可编辑，L458 补） */
     rawApiEnabled: boolean;
     rawApiAllowlist: string[];
-    /** 桥目录基路径（spike⑨ 后可迁 storage/local） */
+    /**
+     * 桥目录基路径（代码默认 /storage/petal/siyuan-quickgate/bridge，设置页不暴露——
+     * spike⑨ 迁移裁定=不迁（R138：device 路由已解多设备），字段仅为迁移预案保留）
+     */
     bridgeBasePath: string;
-    /** 本机设备名（device 路由） */
+    /** 本机设备名（device 路由；自动生成并持久化 storage/local，设置页不暴露编辑——L458 裁定：自动管理） */
     deviceName: string;
     /** v1.5 广播快路径：前端 SSE 订阅 /es/broadcast/subscribe?channel=qg-cmd（新外部面，默认关） */
     broadcastEnabled: boolean;
