@@ -44,6 +44,18 @@ for (const file of files) {
         const raw = m[1] ?? m[2];
         if (!raw) continue;
         links += 1;
+        // 同仓库 permalink 幽灵检测（R247）：blob|tree main/<path> 的 <path> 必须在仓库中真实存在
+        // （此前 GETTING-STARTED.md 从未存在却被三处链接——外链跳过了文件级校验，幽灵只能靠这层抓）
+        const repoPerma = raw.match(/^https?:\/\/github\.com\/ai68298100\/siyuan-quickgate\/(blob|tree)\/main\/([^?#]+)/);
+        if (repoPerma) {
+            const repoPath = decodeURIComponent(repoPerma[2]).replace(/\/$/, "");
+            try {
+                await stat(join(root, "..", repoPath));
+            } catch {
+                violations.push(`${rel}: 同仓库 permalink 指向不存在的仓库文件 → ${raw}`);
+            }
+            continue;
+        }
         if (/^(https?:|mailto:|#)/i.test(raw)) continue;
         const [targetRaw, anchor] = raw.split("#");
         if (targetRaw === "" && anchor !== undefined) continue; // 纯页内锚点
