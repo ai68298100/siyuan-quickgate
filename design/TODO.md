@@ -449,8 +449,8 @@
 - [x] 【R69-P1】统一 `plugin.api` 的 `args` 形状：实现当前只接受数组，而 MCP schema/契约存在对象声明；先定契约再补对象/数组/非法值测试。 → ✅ v0.7.3 三处钉死（数组=位置参数/对象=options 实参/其他 rejected）+三形状回归测试
 - [x] 【R69-P1】修复设置页开启广播时 `startBridge()` 的早退路径，确保已运行桥随后打开广播也会创建 `BroadcastSubscriber`，并补设置页集成测试。 → ✅ v0.7.3 抽出幂等 startBroadcastSub()（集成测试待真机）
 - [x] 【R69-P0】核对桥开关与事件订阅生命周期：设置页打开桥后必须调用 `startEventBridge`，关闭桥必须退订；覆盖首次开启、重复开关、重载和关闭后不再物化事件。 → ✅ v0.7.3 与 onload 配对（开桥即接上/关桥即退订；真机验证待 ⑪ 收官）
-- [ ] 【R69-P1】为多窗口桥增加真实互斥/命令认领机制（Web Lock、独立锁文件或等价方案）；当前单飞只保证单个 frontend 实例，不能证明两个窗口不会重复消费。
-- [ ] 【R69-P1】验证 CLI、PowerShell、MCP 多生产者同时 `getFile→append→putFile` 时不会互相覆盖命令；若无法保证，明确串行化或改为独立命令文件/内核追加服务。
+- [x] 【R69-P1】为多窗口桥增加真实互斥/命令认领机制（Web Lock、独立锁文件或等价方案）；当前单飞只保证单个 frontend 实例，不能证明两个窗口不会重复消费。 → ✅ R232 交付：src/services/bridge-claim.ts（Web Locks 认领，三态语义=handle/null/undefined，锁依赖可注入）；startBridge 先认领 `siyuan-quickgate-bridge`——被占用则本窗口拒绝启动轮询并提示（防双窗口同 id 双执行：各窗口 processed 台账独立，无认领=写副作用双执行）；stopBridge/onunload 释放锁。无 Locks 环境=按单窗口假设放行+日志声明（诚实边界）。回归 tests/bridge-claim.test.ts 2 条（三态+双窗口互斥/接管），155 全绿
+- [x] 【R69-P1】验证 CLI、PowerShell、MCP 多生产者同时 `getFile→append→putFile` 时不会互相覆盖命令；若无法保证，明确串行化或改为独立命令文件/内核追加服务。 → ✅ R232 实测+缓解：真机竞态探针（4 写者×25 条并发 read-modify-write）——裸写丢 66/100 行（无法保证，坐实）；缓解=三个内置客户端（lv-cli/Send-LvCommand.ps1/MCP bridge-client）写后读回校验本行仍在、丢失基于最新内容重试 ≤5——同参数实测 **0 丢失**（残留 7 条重复行，消费端 processed 台账按 id 去重兜底）；残余窗口=最后一次写竞态，高频多写者建议广播通道/调用方串行，协议 v2 候选=按写者分文件（docs/02 §1 边界声明已更新）。顺带：三客户端命令 id 改 crypto UUID 段（Math.random 同毫秒碰撞会触发幂等误判跳过命令——Mimosa 提示采纳）
 - [x] 【R69-P1】诊断包使用当前活动 `BridgeService` 的统计或持久化统计；禁止每次导出新建服务导致计数归零。 → ✅ v0.7.3 续（activeService 优先，桥关才回落新实例）
 - [x] 【R69-P1】为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。 → ✅ v0.7.3 续4（createSingleFlight 串行队列+20 并发/失败不阻塞回归）
 - [x] 【R69-P1】对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。 → ✅ R134 确定性混沌 3 测：丢行窗口实证/同 id 重发台账去重恢复/压缩不吞并发追加（单写者约定+补发=系统性恢复，结论入测试头注）

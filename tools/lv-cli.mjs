@@ -61,19 +61,26 @@ async function diagnose(res, api) {
 }
 
 function genId() {
+    // id 承载幂等语义（processed 台账按键去重）——用 crypto UUID 段，杜绝同毫秒碰撞
     const d = new Date();
     const p = (n, l = 2) => String(n).padStart(l, "0");
-    const rand = Math.random().toString(16).slice(2, 6);
-    return `cli-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}-${rand}`;
+    return `cli-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
 async function send(plugin, op, args, ttlMs) {
     const id = genId();
     const envelope = JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString(), ...(ttlMs ? { ttlMs } : {}) });
     const path = `/storage/petal/${plugin}/bridge/commands.ndjson`;
-    const old = (await kernelPost("/api/file/getFile", { path })) ?? "";
-    await putText(path, (old.replace(/\n+$/, "")) + "\n" + envelope);
-    return id;
+    // L453：多生产者 read-modify-write 并发会互相覆盖（实测 4 写者丢 66/100）——
+    // 写后读回校验本行仍在，不在则基于最新内容重试（残窗=最后一次写竞态；高并发建议广播通道）
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const old = (await kernelPost("/api/file/getFile", { path })) ?? "";
+        await putText(path, (old.replace(/\n+$/, "")) + (old.trim() ? "\n" : "") + envelope);
+        const back = (await kernelPost("/api/file/getFile", { path })) ?? "";
+        if (back.includes(`"id":"${id}"`)) return id;
+        await new Promise((r) => setTimeout(r, 60 + Math.floor(Math.random() * 120)));
+    }
+    throw new Error("追加重试 5 次仍未持久化（多写者竞争过于激烈）");
 }
 
 async function receipt(plugin, id, maxWaitMs) {

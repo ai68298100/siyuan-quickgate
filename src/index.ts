@@ -16,6 +16,7 @@ import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
 import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted, planMaterialization } from "./services/eventbridge";
 import { IdempotencyRegistry } from "./services/idempotency";
+import { BridgeClaimHandle, BridgeClaimer, createNavigatorClaimer } from "./services/bridge-claim";
 import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 
@@ -99,6 +100,7 @@ export default class QuickGatePlugin extends Plugin {
         await this.store.loadAll();
         this.settings = this.store.settings;
         await this.idempotency.load(); // L599：事件域幂等记账（滚动裁剪后重放不重复落行）
+        this.bridgeClaimer = createNavigatorClaimer();
         this.auditLog = await this.store.loadAudit(this.settings.auditMax); // R47 修复：恢复上次审计历史（此前只写不读，重启即静默销毁）
         await this.ensureDeviceName();
 
@@ -133,6 +135,8 @@ export default class QuickGatePlugin extends Plugin {
         this.poller = undefined;
         void this.broadcastSub?.stop();
         this.broadcastSub = undefined;
+        void this.bridgeClaim?.release(); // 释放桥消费权（L452）
+        this.bridgeClaim = undefined;
         this.stopEventBridge();
         this.flushAudit();
         showMessage("小驴快门已停用；其桥目录随插件数据一并保留/清理", 3000, "info");
@@ -147,6 +151,9 @@ export default class QuickGatePlugin extends Plugin {
      */
     private eventBridgeHandler?: (e: Event) => void;
     private broadcastSub?: BroadcastSubscriber;
+    /** 桥消费权认领（L452 多窗口互斥）：持有=本窗口跑轮询；null=他窗占用；undefined=无 Locks 环境（单窗口假设） */
+    private bridgeClaim?: BridgeClaimHandle;
+    private bridgeClaimer?: BridgeClaimer;
 
     private startEventBridge() {
         if (this.eventBridgeHandler) return;
@@ -257,15 +264,33 @@ export default class QuickGatePlugin extends Plugin {
         }
         const service = new BridgeService(this.deps());
         this.activeService = service;
-        this.poller = new SingleFlightPoller({
-            intervalMs: this.settings.pollMs,
-            backoffMaxMs: this.settings.backoffMaxMs,
-            tick: () => service.tick(),
-            shouldRun: () => this.settings.bridgeEnabled,
+        // L452：先认领桥消费权（Web Locks）——另一思源窗口已持锁时本窗口拒绝启动轮询
+        // （双窗口各自 processed 台账独立，无认领会同 id 双执行）。无 Locks 环境=按单窗口假设放行并声明。
+        const beginPoll = (claimNote: string) => {
+            this.poller = new SingleFlightPoller({
+                intervalMs: this.settings.pollMs,
+                backoffMaxMs: this.settings.backoffMaxMs,
+                tick: () => service.tick(),
+                shouldRun: () => this.settings.bridgeEnabled,
+            });
+            this.poller.start();
+            this.startBroadcastSub();
+            console.info(`[${PLUGIN_NAME}] 桥已启动，间隔 ${this.settings.pollMs}ms${claimNote}`);
+        };
+        if (!this.bridgeClaimer) {
+            beginPoll("（无 Locks 环境：单窗口假设）");
+            return;
+        }
+        void this.bridgeClaimer.claim("siyuan-quickgate-bridge").then((handle) => {
+            if (handle === null) {
+                this.activeService = undefined;
+                console.warn(`[${PLUGIN_NAME}] 桥消费权被另一思源窗口持有——本窗口不启动轮询（防同 id 双执行）`);
+                showMessage("另一思源窗口正在运行外部命令桥，本窗口不重复启动", 4000, "info");
+                return;
+            }
+            this.bridgeClaim = handle ?? undefined;
+            beginPoll(handle ? "（Web Lock 认领）" : "（无 Locks 环境：单窗口假设）");
         });
-        this.poller.start();
-        this.startBroadcastSub();
-        console.info(`[${PLUGIN_NAME}] 桥已启动，间隔 ${this.settings.pollMs}ms`);
     }
 
     /** v1.5 广播快路径（独立开关，默认关）：SSE 订阅 qg-cmd 频道，毫秒级命令通道。幂等。 */
@@ -289,6 +314,8 @@ export default class QuickGatePlugin extends Plugin {
             await this.broadcastSub.stop();
             console.info(`[${PLUGIN_NAME}] 广播快路径已停止`);
         }
+        await this.bridgeClaim?.release(); // 释放桥消费权（L452），其他窗口可接管
+        this.bridgeClaim = undefined;
     }
 
     /**

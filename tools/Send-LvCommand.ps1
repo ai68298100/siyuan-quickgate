@@ -28,16 +28,27 @@ function Invoke-KernelPost([string]$Endpoint, [object]$Payload) {
 
 function Send-LvCommand {
     param([string]$TargetPlugin, [string]$Op, [string]$Args, [int]$TtlMs = 60000)
-    $id = "ps-{0}-{1}" -f (Get-Date -Format "yyyyMMdd-HHmmss"), ("{0:x4}" -f (Get-Random -Maximum 65535))
+    # id 承载幂等语义（processed 台账按键去重）——GUID 段杜绝同秒碰撞
+    $id = "ps-{0}-{1}" -f (Get-Date -Format "yyyyMMdd-HHmmss"), ([guid]::NewGuid().ToString("N").Substring(0, 8))
     $envelope = @{ v = 1; id = $id; op = $Op; args = ($Args | ConvertFrom-Json); createdAt = (Get-Date).ToString("o"); ttlMs = $TtlMs } | ConvertTo-Json -Depth 10 -Compress
     $path = "/storage/petal/$TargetPlugin/bridge/commands.ndjson"
-    $old = ""
-    try { $old = Invoke-KernelPost "/api/file/getFile" @{ path = $path } } catch { $old = "" }
-    $merged = ($old -replace "`r", "" -replace "`n+$", "") + "`n" + $envelope
-    # putFile 为 multipart：用 -Form（PowerShell 7+）
-    $form = @{ path = $path; isDir = "false"; file = $merged }
-    Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/file/putFile" -Headers @{ Authorization = "Token $Token" } -Form $form | Out-Null
-    return $id
+    # L453：多生产者 read-modify-write 并发会互相覆盖（实测 4 写者丢 66/100）——
+    # 写后读回校验本行仍在，丢失则基于最新内容重试 ≤5 次（残窗=最后一次写竞态；高并发建议广播通道）
+    for ($attempt = 0; $attempt -lt 5; $attempt++) {
+        $old = ""
+        try { $old = Invoke-KernelPost "/api/file/getFile" @{ path = $path } } catch { $old = "" }
+        $merged = ($old -replace "`r", "" -replace "`n+$", "")
+        if ($merged) { $merged = $merged + "`n" }
+        $merged = $merged + $envelope
+        # putFile 为 multipart：用 -Form（PowerShell 7+）
+        $form = @{ path = $path; isDir = "false"; file = $merged }
+        Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/file/putFile" -Headers @{ Authorization = "Token $Token" } -Form $form | Out-Null
+        $back = ""
+        try { $back = Invoke-KernelPost "/api/file/getFile" @{ path = $path } } catch { $back = "" }
+        if ($back -match [regex]::Escape("`"id`":`"$id`""))) { return $id }
+        Start-Sleep -Milliseconds (60 + (Get-Random -Maximum 120))
+    }
+    throw "追加重试 5 次仍未持久化（多写者竞争过于激烈）"
 }
 
 function Wait-LvReceipt {

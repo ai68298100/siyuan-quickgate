@@ -26,10 +26,10 @@ export class KernelBridgeClient {
     }
 
     genId(): string {
+        // id 承载幂等语义（processed 台账按键去重）——用 crypto UUID 段，杜绝同毫秒碰撞
         const d = new Date();
         const p = (n: number, l = 2) => String(n).padStart(l, "0");
-        const rand = Math.random().toString(16).slice(2, 6);
-        return `mcp-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}-${rand}`;
+        return `mcp-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}-${crypto.randomUUID().slice(0, 8)}`;
     }
 
     private async kernelPost(endpoint: string, payload: unknown): Promise<unknown> {
@@ -71,9 +71,16 @@ export class KernelBridgeClient {
         const id = this.genId();
         const envelope = JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString() });
         const path = `/storage/petal/${this.plugin}/bridge/commands.ndjson`;
-        const old = (await this.getText(path)).replace(/\n+$/, "");
-        await this.putText(path, old + "\n" + envelope);
-        return id;
+        // L453：多生产者 read-modify-write 并发会互相覆盖（实测 4 写者丢 66/100）——
+        // 写后读回校验本行仍在，丢失则基于最新内容重试 ≤5 次（残窗=最后一次写竞态）
+        for (let attempt = 0; attempt < 5; attempt++) {
+            const old = (await this.getText(path)).replace(/\n+$/, "");
+            await this.putText(path, (old ? old + "\n" : "") + envelope);
+            const back = await this.getText(path);
+            if (back.includes(`"id":"${id}"`)) return id;
+            await new Promise((r) => setTimeout(r, 60 + Math.floor(Math.random() * 120)));
+        }
+        throw new Error("追加重试 5 次仍未持久化（多写者竞争过于激烈）");
     }
 
     /** 广播快路径：postMessage 推信封（毫秒级；回执仍走 results.ndjson） */
