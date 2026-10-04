@@ -178,6 +178,32 @@ export async function kernelConfigDiscover(deps: KernelDeps, args: Args = {}): P
                 notes.push(`收集箱：发现 ${docs.length} 个同名根文档，取最早创建的「${first.content ?? ""}」（笔记本 ${first.box ?? "?"}）；如需指定其它，请手填收集箱文档ID`);
             }
         } else {
+            // opt-in 自动创建（L456）：默认不建（v0.7.3 最小惊讶决策）；显式 createInboxIfMissing 才建
+            if (args.createInboxIfMissing) {
+                const name = names[0];
+                let notebook = diaryNotebookId;
+                if (!notebook) {
+                    try {
+                        const resp = await deps.kpost<{ notebooks?: Array<{ id: string; closed: boolean }> } | Array<{ id: string; closed: boolean }>>("/api/notebook/lsNotebooks", {});
+                        const nbs = Array.isArray(resp) ? resp : resp?.notebooks ?? [];
+                        notebook = nbs.find((nb) => !nb.closed)?.id ?? null;
+                    } catch { /* notebook 保持 null */ }
+                }
+                if (notebook) {
+                    try {
+                        const created = await deps.kpost<string>("/api/filetree/createDocWithMd", { notebook, path: `/${name}`, markdown: "" });
+                        if (created) {
+                            notes.push(`收集箱不存在，已按 createInboxIfMissing 在笔记本 ${notebook} 创建「${name}」`);
+                            return { id: "kernel", op: "config.discover", status: "recorded", data: { diaryNotebookId, inboxDocId: created, notes }, message: "内核侧发现完成（含创建）" };
+                        }
+                        notes.push(`创建「${name}」未返回文档 ID（可能同名已存在——请手填收集箱文档ID）`);
+                    } catch (e) {
+                        notes.push(`创建收集箱失败：${e instanceof Error ? e.message : String(e)}（回退手填）`);
+                    }
+                } else {
+                    notes.push("无打开的笔记本，无法按 createInboxIfMissing 创建收集箱");
+                }
+            }
             notes.push(`未发现收集箱根文档（约定名${nameArg ? "：" + nameArg : "：收集箱/Inbox"}）——可在思源建一个名为「收集箱」的顶层文档，或手填收集箱文档ID`);
         }
     } catch (e) {

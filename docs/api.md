@@ -30,7 +30,10 @@
 | `bridge.ping` | `{}` | `{protocol:1, plugin, version, pollMs, bridgeEnabled}` | 协商与健康探测 |
 | `commands.list` | `{plugin?}` | `{plugins:[{name,displayName,commands[]}], source}` | 每插件 ≤100 条，总 ≤100 插件；黑名单插件不返回；命令含 id(=langKey)/title/accelerator/focusOnly，accelerator 优先级 customHotkey（宿主生效键）> hotkey > hotkeys[]（v0.6.3） |
 | `commands.search` | `{keyword}` | `{commands:[…]}` | 内存过滤 ≤50 条 |
-| `commands.run` | `{plugin, command}` | `{ok:true}` | 默认确认门控（30s 超时拒绝）+ 审计 |
+| `commands.run` | `{plugin, command}` | `{ok:true}` | 默认确认门控（30s 超时拒绝）+ 审计；成功记最近使用（favorites.json，只记元数据） |
+| `favorites.list` | `{}` | `{favorites:[…], recent:[…]}` | 收藏 ≤100（去重前移）+ 最近 ≤20（命令面板体验，L474；载体=快门存储 favorites.json） |
+| `favorites.add` | `{plugin, command, title?}` | `{ok, favorites}` | 去重前移；缺省 title=command |
+| `favorites.remove` | `{plugin, command, scope?}` | `{ok, removed}` | scope=favorite（默认）/recent/both——recent 即最近使用隐私清除 |
 | `checkin.items` | `{includeArchived?, limit?≤200}` | `{items:[{id,name,kind,unit,archived}]}` | 走打卡 v5 `items.read` |
 | `checkin.record` | `{itemId, value?, unit?, note?, occurredAt?}` | 打卡桥返回；带 `occurredAt` 时走批量接口 | 走 `events.record`；`source=api`（v0.5.7——上游 source 白名单无 quickgate，会静默归一 api），幂等身份=externalRef；**occurredAt 单条接口不接受**（会被静默记成当前时间），带值时路由 `recordEventsBatch` |
 | `checkin.summary` | `{}` | `{today:{range,startDate,endDate,items,totalEvents,completedItems,scheduledItems}, streaks:{itemId:当前连击}, streaksLongest:{itemId:最长连击}}` | 走 `summary.read`；由 `getSummaryContext("day")+getStreaks` 组合（v0.5.6——上游公开面无 getSummary，此前静默返回空数据的缺陷已修）；streaks 由上游数组行归一为映射（v0.5.7） |

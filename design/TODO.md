@@ -455,7 +455,7 @@
 - [x] 【R69-P1】为 events 物化增加 single-flight/锁或等价并发策略，验证连续 CustomEvent、重启恢复、坏行、裁剪和多端写入不会丢事件。 → ✅ v0.7.3 续4（createSingleFlight 串行队列+20 并发/失败不阻塞回归）
 - [x] 【R69-P1】对 commands/results 全文件读改写队列做真实多写者混沌测试；若仍有 stale-writer 窗口，确定锁、版本或 CAS 方案。 → ✅ R134 确定性混沌 3 测：丢行窗口实证/同 id 重发台账去重恢复/压缩不吞并发追加（单写者约定+补发=系统性恢复，结论入测试头注）
 - [x] 【R69-P1】把移动端桥 opt-in 从 `deviceName` 的 `:mobile-on` 隐式后缀改成显式设置项，验证默认关闭、持久化、提示和重启行为。 → ✅ R134 mobileBridgeEnabled 显式字段（默认关+设置页开关+旧后缀加载迁移显式优先+守卫双保险）；移动端真机行为待 M1.5
-- [ ] 【R69-P2】补 `config.discover` 的收集箱文档发现、自动创建和手填兜底；当前 `inboxDocId:null` 不能与“配置发现”承诺并列。
+- [x] 【R69-P2】补 `config.discover` 的收集箱文档发现、自动创建和手填兜底；当前 `inboxDocId:null` 不能与“配置发现”承诺并列。 → ✅ R231 交付：前端通道补齐内核同口径的约定名 SQL 根文档发现（收集箱/Inbox + inboxName 自定义）——双通道不再分叉；createInboxIfMissing=true 显式授权自动创建（默认不建=v0.7.3 最小惊讶决策保留；无笔记本/同名冲突均诚实回 notes）；手填兜底指引双通道一致。E4：内核路由真机 config.discover（日记笔记本=DailyNote 命中；收集箱零命中+指引正确）。回归 tests/kernel-ops.test.ts +3
 - [x] 【R69-P2】审查未使用的 `src/api.ts` 与 `services/kernelApi.ts` 重复实现，移除或隔离其中的 SQL 字符串插值路径，避免死代码和注入维护债。 → ✅ v0.7.3 续5（整文件删除：全仓零引用+SQL 插值面清除，113 单测/构建全过）
 - [x] 【R69-P2】核对设置页实际可配置项与文档承诺（bridgeBasePath、backoffMaxMs、auditMax、deviceName、rawApiAllowlist），决定补 UI、迁移 schema 或明确"代码默认不可配置"。 → ✅ R229 审计+落地（quickgate 本批）：13 设置字段中 7 个已有 UI（bridge/mobile/broadcast 开关、pollMs、confirmExec、blacklist、rawApiEnabled）；**rawApiAllowlist 补 textarea 编辑器**（此前文档承诺「用户手动加入」但无入口=承诺无法履行；默认=三个已完成契约审计插件，hint 注明审计责任）；**backoffMaxMs/auditMax/bridgeBasePath/deviceName 裁定代码默认/自动管理不暴露**（类型注释+api.md plugin.api 行已注记：退避为内部鲁棒参数、auditMax 默认 200 上限 2000、桥路径=R138 迁移裁定不迁的预案字段、deviceName 自动生成持久化 storage/local）；schemaVersion=内部迁移版本本就不应有 UI
 
@@ -471,7 +471,7 @@
 - [ ] 【R71-P0·目录】设计能力目录视图：显示来源插件/版本、读写属性、前置条件、确认要求、预估等待、当前状态、缺失原因和安装/诊断入口；缺插件、禁用、版本不兼容、桥关闭各有空态。
 - [ ] 【R71-P0·事实】建立 capability manifest 事实表，区分稳定、实验、设计态和未定位插件；manifest 的来源 commit、校准日期和漂移告警必须可追踪。
 - [x] 【R71-P1·搜索】命令搜索支持中英文、拼音或关键词别名和前缀映射；“打卡/daka/checkin”“摘录/捕获/capture”均命中，raw op 仅在高级诊断出现。 → ✅ R230 交付（本批）：services/search-alias.ts 中英/拼音别名表+expandSearchKeyword，接入 commands.search（任一命中即算）；条目验收词对「打卡/daka/checkin」「摘录/捕获/capture」测试互达 ✓；raw op 本就不进命令注册表（registry=宿主插件命令），仅诊断面可见=既有满足；裁剪声明：全量拼音引擎不做（依赖重收益薄，高频词走别名表，扩表须对应真实宿主命令词）。回归 tests/search-alias.test.ts 5 条+集成，146 全绿
-- [ ] 【R71-P1·历史】加入收藏、最近使用、按场景置顶和失败后重新执行；支持清除历史和隐私开关，最近失败项展示原因而非只显示名称。
+- [x] 【R71-P1·历史】加入收藏、最近使用、按场景置顶和失败后重新执行；支持清除历史和隐私开关，最近失败项展示原因而非只显示名称。 → ✅ R231 交付（收藏/最近使用 ops 全链）：favorites.list/add/remove（前端专属，载体=快门存储 favorites.json）——收藏 ≤100 去重前移、最近 ≤20；commands.run 成功自动记最近使用（只记元数据，title 取自注册表）；favorites.remove scope=recent=隐私清除；失败原因展示由回执 message 承载（runCommand 失败即带中文原因，既有）。全链同步=契约 JSON 23→26 op/MCP 14 只读/26 tools/api.md/README 计数。裁剪声明：按场景置顶属超级面板 UI（Quicker 侧搭建轮）；失败后重新执行=面板以新 id 重发即支持（幂等台账兜底）。回归 tests/favorites.test.ts 6 条，153 全绿；真机 e2e 待思源窗口重启（bug#15 push_reload 桥死亡态）
 - [ ] 【R71-P1·无匹配】空结果提供“检查插件状态、打开设置、运行诊断、查看安装说明”等动作；至少一个主操作和三个辅助操作，Esc/Back 返回搜索。
 - [ ] 【R71-P1·动作面板】每个命令提供执行、查看说明、配置/快捷键、复制 CLI/MCP 示例、收藏；写命令先展示目标和影响并标注 destructive。
 - [ ] 【R71-P1·焦点】按 Quicker `showmenu` 的 `useFocus` 语义验收鼠标和键盘入口：Enter 执行、Esc 返回、鼠标抬起不误关、场景切换后重新检查快捷键冲突。

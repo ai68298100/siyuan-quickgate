@@ -20,7 +20,7 @@
 | 黑名单插件 | ✅ | ✅ 同 dispatch | ✅ 共用 | ✅ 共用 | ✅ |
 | 审计日志（跨重启） | ✅ | — | ✅ 共用 | ✅ 共用 | ✅ |
 | 允许名单 | — | — | — | ✅ LV_MCP_WRITE 门控 | ✅ rawApiAllowlist |
-| 只读默认 | — | — | — | ✅ 13/23 工具 | 默认关 |
+| 只读默认 | — | — | — | ✅ 14/26 工具 | 默认关 |
 
 不变量：
 1. **MCP 只是消费通道，不新增特权**（D-0013）——任何 MCP 可达的操作，等价于同 op 的 NDJSON 调用。
@@ -31,7 +31,7 @@
 
 | 门 | 规则 |
 |---|---|
-| 工具投影 | 默认 13 只读；写工具在 `LV_MCP_WRITE=1` 前不进 tools/list |
+| 工具投影 | 默认 14 只读；写工具在 `LV_MCP_WRITE=1` 前不进 tools/list |
 | 调用拒绝 | 未授权写工具的 tools/call → isError=true + 指引文本，**不产生桥命令** |
 | destructiveHint | `plugin.api`/`workflow.execute` 标注；宿主据此二次确认 |
 | schema 门 | 逐 op 参数 schema 纪律测试强制（tools 集合===ALL_OPS） |

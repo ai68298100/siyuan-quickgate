@@ -19,6 +19,10 @@ import {
 } from "./adapters";
 import { validateTemplatePath, validateTemplateContent } from "./path-guard";
 import { expandSearchKeyword } from "./search-alias";
+import {
+    FavoritesStore, normalizeFavorites, upsertFavorite, removeEntry, pushRecent,
+    emptyFavorites, FAVORITES_CAP, RECENT_CAP,
+} from "./favorites";
 
 export interface EditorContextResult {
     docId: string | null;
@@ -106,8 +110,8 @@ export interface BridgeServiceDeps {
     loadPetals: () => Promise<Array<Record<string, unknown>>>;
     /** 业务执行可观测上限 ms（缺省 15000；commands.run 不受此限） */
     execTimeoutMs?: () => number;
-    /** 日记笔记本/收集箱自动发现（spike⑧ 校准前 best-effort） */
-    discoverConfig: () => Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }>;
+    /** 日记笔记本/收集箱自动发现（与内核通道同口径：约定名 SQL 根文档发现；args 透传 inboxName/createInboxIfMissing） */
+    discoverConfig: (args?: { inboxName?: unknown; createInboxIfMissing?: unknown }) => Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }>;
     /** 公开桥获取器 */
     getCheckin: () => unknown;
     getContacts: () => unknown;
@@ -140,6 +144,23 @@ export class BridgeService {
             commands: `${base}/commands.ndjson`,
             results: `${base}/results.ndjson`,
         };
+    }
+
+    /** 收藏/最近使用载体（快门自身存储根，非桥载体；L474） */
+    private favoritesPath() {
+        return `/storage/petal/${this.deps.pluginName}/favorites.json`;
+    }
+
+    private async loadFavorites(): Promise<FavoritesStore> {
+        try {
+            const raw = await this.deps.api.getFileText(this.favoritesPath());
+            return raw ? normalizeFavorites(JSON.parse(raw)) : emptyFavorites();
+        } catch { return emptyFavorites(); }
+    }
+
+    private async saveFavorites(store: FavoritesStore): Promise<void> {
+        const text = JSON.stringify({ schemaVersion: 1, favorites: store.favorites.slice(0, FAVORITES_CAP), recent: store.recent.slice(0, RECENT_CAP) }, null, 2);
+        await this.deps.api.putFileText(this.favoritesPath(), text);
     }
 
     /** 处理过的 id 集合（含本次新增） */
@@ -404,9 +425,42 @@ export class BridgeService {
                     status: r.status, elapsedMs: r.elapsedMs,
                 });
                 if (r.status === "recorded") {
+                    // L474：成功执行记最近使用（只记 plugin/command/title 元数据，不记参数值）
+                    try {
+                        const store = await this.loadFavorites();
+                        const title = this.deps.registry().plugins.find((p) => p.name === plugin)?.commands.find((c) => c.id === command)?.title ?? command;
+                        pushRecent(store, { plugin, command, title });
+                        await this.saveFavorites(store);
+                    } catch { /* 最近使用失败不阻断命令结果 */ }
                     return { status: "recorded", data: { ok: r.ok }, message: r.message };
                 }
                 return { status: r.status, data: null, message: r.message };
+            }
+
+            // ---- 收藏与最近使用（L474；前端专属，载体=插件存储 favorites.json）----
+            case "favorites.list": {
+                const store = await this.loadFavorites();
+                return { status: "recorded", data: { favorites: store.favorites, recent: store.recent }, message: `收藏 ${store.favorites.length} 条 / 最近 ${store.recent.length} 条` };
+            }
+            case "favorites.add": {
+                const plugin = typeof a.plugin === "string" ? a.plugin : "";
+                const command = typeof a.command === "string" ? a.command : "";
+                if (!plugin || !command) return this.reject("plugin/command 缺失");
+                const title = typeof a.title === "string" && a.title ? a.title : command;
+                const store = await this.loadFavorites();
+                upsertFavorite(store, { plugin, command, title, addedAt: "" });
+                await this.saveFavorites(store);
+                return { status: "recorded", data: { ok: true, favorites: store.favorites.length }, message: `已收藏 ${plugin}/${command}` };
+            }
+            case "favorites.remove": {
+                const plugin = typeof a.plugin === "string" ? a.plugin : "";
+                const command = typeof a.command === "string" ? a.command : "";
+                if (!plugin || !command) return this.reject("plugin/command 缺失");
+                const scope = a.scope === "recent" || a.scope === "both" ? a.scope : "favorite";
+                const store = await this.loadFavorites();
+                const removed = removeEntry(store, plugin, command, scope);
+                await this.saveFavorites(store);
+                return { status: "recorded", data: { ok: true, removed }, message: removed > 0 ? `已移除 ${removed} 条` : "未找到匹配条目" };
             }
 
             // ---- 数据透传（checkin.* / contacts.*）----
@@ -498,7 +552,7 @@ export class BridgeService {
                 };
             }
             case "config.discover": {
-                const d = await this.deps.discoverConfig();
+                const d = await this.deps.discoverConfig({ inboxName: a.inboxName, createInboxIfMissing: a.createInboxIfMissing });
                 return { status: "recorded", data: d, message: d.diaryNotebookId ? "已发现日记笔记本" : "未发现日记笔记本（回退手填）" };
             }
 

@@ -118,6 +118,41 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
         expect((r2.data as { notes: string[] }).notes.join()).toContain("未发现");
     });
 
+    it("config.discover：收集箱按约定名 SQL 发现；createInboxIfMissing 零命中时创建（默认不建）", async () => {
+        // 零命中 + 未授权创建 → null + 手填指引
+        const { deps: d0 } = makeDeps({
+            kpostScript: new Map([
+                ["/api/notebook/lsNotebooks", { notebooks: [{ id: "n1", name: "笔记", closed: false }] }],
+                ["/api/query/sql", { data: [] }],
+            ]),
+        });
+        const r0 = await createKernelOpHandler(d0)("config.discover", {});
+        expect((r0.data as { inboxDocId: string | null }).inboxDocId).toBeNull();
+        expect((r0.data as { notes: string[] }).notes.join()).toContain("收集箱");
+
+        // 零命中 + createInboxIfMissing → 在唯一打开笔记本创建并返回 ID
+        const { deps: d1 } = makeDeps({
+            kpostScript: new Map([
+                ["/api/notebook/lsNotebooks", { notebooks: [{ id: "n1", name: "笔记", closed: false }] }],
+                ["/api/query/sql", { data: [] }],
+                ["/api/filetree/createDocWithMd", "20261005-inbox-id"],
+            ]),
+        });
+        const r1 = await createKernelOpHandler(d1)("config.discover", { createInboxIfMissing: true });
+        expect((r1.data as { inboxDocId: string | null }).inboxDocId).toBe("20261005-inbox-id");
+        expect((r1.data as { notes: string[] }).notes.join()).toContain("createInboxIfMissing");
+
+        // 自定义约定名命中 → 直接发现
+        const { deps: d2 } = makeDeps({
+            kpostScript: new Map([
+                ["/api/notebook/lsNotebooks", { notebooks: [{ id: "n1", name: "笔记", closed: false }] }],
+                ["/api/query/sql", { data: [{ id: "doc-x", content: "收件箱", box: "n1" }] }],
+            ]),
+        });
+        const r2 = await createKernelOpHandler(d2)("config.discover", { inboxName: "收件箱" });
+        expect((r2.data as { inboxDocId: string | null }).inboxDocId).toBe("doc-x");
+    });
+
     it("config.discover R25 实证场景：默认模板多数派+自定义模板一个 → 自定义者直接命中（无需等今日日记）", async () => {
         const DEFAULT_T = `/daily note/{{now | date "2006/01"}}/{{now | date "2006-01-02"}}`;
         const calls: Array<{ endpoint: string; payload: Record<string, unknown> }> = [];

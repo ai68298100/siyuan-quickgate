@@ -430,7 +430,7 @@ export default class QuickGatePlugin extends Plugin {
      * 日记笔记本/收集箱自动发现（spike⑧ 已实证 3.8.5：字段为 dailyNoteSavePath 驼峰；
      * 默认模板三个笔记本同值——需二级消歧，逻辑与 kernel-ops.kernelConfigDiscover 保持一致；永不抛错）
      */
-    private async discoverConfig(): Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }> {
+    private async discoverConfig(args: { inboxName?: unknown; createInboxIfMissing?: unknown } = {}): Promise<{ diaryNotebookId: string | null; inboxDocId: string | null; notes: string[] }> {
         const notes: string[] = [];
         let diaryNotebookId: string | null = null;
         let inboxDocId: string | null = null;
@@ -495,6 +495,51 @@ export default class QuickGatePlugin extends Plugin {
             notes.push(`发现失败：${e instanceof Error ? e.message : String(e)}`);
         }
         if (!diaryNotebookId) notes.push("未发现日记笔记本（回退手填）");
+
+        // 收集箱发现（与内核通道同口径 · L456）：SQL 按约定名找根级文档；零命中可 opt-in 创建（默认不建，v0.7.3 决策）
+        try {
+            const nameArg = typeof args.inboxName === "string" && args.inboxName.trim() ? args.inboxName.trim() : "";
+            const names = nameArg ? [nameArg] : ["收集箱", "Inbox", "inbox"];
+            if (!inboxDocId) {
+                const inList = names.map((n) => "'" + n.replace(/'/g, "''") + "'").join(",");
+                const r = await this.kernelApi.post<{ data?: unknown }>("/api/query/sql", {
+                    stmt: `SELECT id, content, box FROM blocks WHERE type='d' AND parent_id='' AND content IN (${inList}) ORDER BY id LIMIT 10`,
+                });
+                const rows = (r && typeof r === "object" ? (r as { data?: unknown }).data ?? r : r) as unknown[];
+                const docs = Array.isArray(rows) ? rows : [];
+                if (docs.length === 1) {
+                    const doc = docs[0] as { id?: string; content?: string; box?: string };
+                    if (doc.id) {
+                        inboxDocId = doc.id;
+                        notes.push(`收集箱（按约定名发现）：${doc.content ?? ""}（笔记本 ${doc.box ?? "?"}）`);
+                    }
+                } else if (docs.length > 1) {
+                    const first = docs[0] as { id?: string; content?: string; box?: string };
+                    if (first.id) {
+                        inboxDocId = first.id;
+                        notes.push(`收集箱：发现 ${docs.length} 个同名根文档，取最早创建的「${first.content ?? ""}」（笔记本 ${first.box ?? "?"}）；如需指定其它，请手填收集箱文档ID`);
+                    }
+                }
+            }
+            if (!inboxDocId && args.createInboxIfMissing) {
+                const name = names[0];
+                const notebook = diaryNotebookId ?? (await this.kernelApi.post<{ notebooks?: Array<{ id: string; closed: boolean }> }>("/api/notebook/lsNotebooks", {})).notebooks?.find((nb) => !nb.closed)?.id ?? null;
+                if (notebook) {
+                    const created = await this.kernelApi.post<string>("/api/filetree/createDocWithMd", { notebook, path: `/${name}`, markdown: "" });
+                    if (created) {
+                        inboxDocId = created;
+                        notes.push(`收集箱不存在，已按 createInboxIfMissing 在笔记本 ${notebook} 创建「${name}」`);
+                    } else {
+                        notes.push(`创建「${name}」未返回文档 ID（可能同名已存在但未被 SQL 命中——请手填收集箱文档ID）`);
+                    }
+                } else {
+                    notes.push("无打开的笔记本，无法按 createInboxIfMissing 创建收集箱");
+                }
+            }
+            if (!inboxDocId) notes.push(`未发现收集箱根文档（约定名${nameArg ? "：" + nameArg : "：收集箱/Inbox"}）——可在思源建一个名为「收集箱」的顶层文档，或手填收集箱文档ID（或以 createInboxIfMissing=true 授权自动创建）`);
+        } catch (e) {
+            notes.push(`收集箱发现失败：${e instanceof Error ? e.message : String(e)}（回退手填）`);
+        }
         return { diaryNotebookId, inboxDocId, notes };
     }
 

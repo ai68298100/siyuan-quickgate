@@ -19,6 +19,7 @@ const READ_ONLY_OPS: ReadonlySet<string> = new Set([
     "bridge.ping",
     "commands.list",
     "commands.search",
+    "favorites.list",
     "checkin.items",
     "checkin.summary",
     "contacts.search",
@@ -38,7 +39,24 @@ const DESTRUCTIVE_OPS: ReadonlySet<string> = new Set(["plugin.api", "workflow.ex
 const ARGS: Record<string, { properties: Record<string, { type: string; description: string }>; required?: string[] }> = {
     "bridge.ping": { properties: {} },
     "commands.list": { properties: { plugin: { type: "string", description: "可选，仅列出该插件" } } },
-    "commands.search": { properties: { keyword: { type: "string", description: "关键词（内存过滤 ≤50 条）" } }, required: ["keyword"] },
+    "commands.search": { properties: { keyword: { type: "string", description: "关键词（内存过滤 ≤50 条；支持中英/拼音别名，L471）" } }, required: ["keyword"] },
+    "favorites.list": { properties: {} },
+    "favorites.add": {
+        properties: {
+            plugin: { type: "string", description: "插件 id" },
+            command: { type: "string", description: "命令 langKey" },
+            title: { type: "string", description: "可选展示名（缺省=command）" },
+        },
+        required: ["plugin", "command"],
+    },
+    "favorites.remove": {
+        properties: {
+            plugin: { type: "string", description: "插件 id" },
+            command: { type: "string", description: "命令 langKey" },
+            scope: { type: "string", description: "favorite（默认）| recent | both——recent 即隐私清除" },
+        },
+        required: ["plugin", "command"],
+    },
     "commands.run": {
         properties: {
             plugin: { type: "string", description: "命令所属插件 id，如 siyuan-checkin" },
@@ -134,7 +152,10 @@ const DESCRIPTIONS: Record<string, string> = {
     "editor.context": "当前编辑器上下文（docId/rootTitle/blockId/selectedText，无焦点全 null）",
     "registry.list": "小驴生态注册表：七插件安装/协议/能力对照",
     "diagnostics.report": "脱敏诊断快照（不含 Token/正文/个人路径）",
-    "config.discover": "日记笔记本/收集箱自动发现（失败回 null+notes）",
+    "config.discover": "日记笔记本/收集箱自动发现（失败回 null+notes；createInboxIfMissing=true 授权自动创建）",
+    "favorites.list": "收藏与最近使用清单（命令面板体验，L474）",
+    "favorites.add": "加收藏（plugin+command 去重前移）",
+    "favorites.remove": "移除收藏/清最近使用（scope=recent 即隐私清除）",
     "template.new": "从模板建文档（需指定笔记本）",
     "events.list": "事件白名单目录",
     "events.pull": "拉取物化事件（含 event-deleted 删除标记，幂等键配对由调用方做）",

@@ -10,6 +10,8 @@ export const ALL_OPS = [
     "bridge.ping",
     // 命令注册表
     "commands.list", "commands.search", "commands.run",
+    // 收藏与最近使用（L474 命令面板体验；前端专属——需存储写）
+    "favorites.list", "favorites.add", "favorites.remove",
     // 数据透传
     "checkin.items", "checkin.record", "checkin.summary",
     "contacts.search", "contacts.ensure", "contacts.interaction",

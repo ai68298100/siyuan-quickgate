@@ -8,6 +8,8 @@
 - **P0·template.new 路径穿越（TODO L628 / safety-gate §7）**：前端与内核两通道此前把 `templatePath` 仅去前导斜杠后直拼进 `/templates/` 读取——`..` 回溯、反斜杠、NUL、绝对路径均可触达模板目录之外。新增 `src/services/path-guard.ts` 白名单守卫（形状 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`、≤200 字符、内容 ≤64KB 不截断执行），NDJSON（bridge-service）与内核同步路由（kernel-ops）双入口共用（MCP 经由这两通道=全覆盖）。回归：tests/path-guard.test.ts 按 safety-gate §7 矩阵七用例×双通道。
 
 ### Added
+- **config.discover 收集箱发现双通道对齐（TODO L456）**：前端通道补齐内核版同口径的约定名 SQL 根文档发现（收集箱/Inbox + `inboxName` 自定义），消除「笔记本名匹配 only」的双通道差距；`createInboxIfMissing=true` 显式授权自动创建（默认不建——v0.7.3 最小惊讶决策保留），双通道一致。E4：内核路由真机 config.discover（日记笔记本命中 DailyNote，收集箱零命中+手填指引）。回归：tests/kernel-ops.test.ts +3（零命中/创建/自定义名命中）。
+- **收藏与最近使用 ops（TODO L474）**：新增 `favorites.list/add/remove`（前端专属，载体=快门存储 favorites.json）——收藏 ≤100 去重前移、最近 ≤20 去重前移；`commands.run` 成功自动记最近使用（只记 plugin/command/title 元数据，title 取自注册表）；`favorites.remove scope=recent` 即隐私清除。全链同步：ops.ts/契约 JSON（23→26 op）/MCP tools（14 只读/26 总）/api.md/README 计数。回归：tests/favorites.test.ts 6 条（纯逻辑+dispatch 集成）。裁剪：按场景置顶挂超级面板轮（L472 关联）。
 - **安装包 README 分层（TODO L625）**：新增 `docs/package-readme.md`（安装导向），经 vite 拷贝为包内 `README.md`（`rename:{stripBase,name}`——踩坑：vite-static-copy 的 rename 保留源相对目录，缺 stripBase 时会误覆盖包内 docs/README.md）；开发者版双语 README 不再进包；`check-links.mjs` 增 icon/preview.png 资产回归（存在性+PNG magic 头）；FAQ「错误语义」链接改指 api.md 真实锚点。
 - **热重载接管布防（bug#15 候选防御层）**：插件构造器设全局所有权令牌（新实例接管时停旧实例轮询与 SSE）+ 3s 延迟自检「onload 是否执行」，未执行则加载设置并按开关自愈启动桥循环；onunload 置 tornDown 防停用后复活。实测接管尚未被 push_reload 路径触发（需 DevTools 确认实例语义），作为防御层保留。
 - **设置面板验收补齐（TODO L502/L503/L513/L514 · R73 快赢批）**：①「恢复默认设置」按钮（列出影响+确认；保留 deviceName 本机身份，恢复后重开面板反映默认值）；②plugin.api 启用前确认框（列出将授权的名单/留痕/可逆性，取消回滚开关）；③审计对话框升级——关键词(op/状态/插件)+日期双筛选、单条复制 JSON（20 条窗口内不做分页/虚拟化：数据量不支撑，裁剪声明；审计条目无 device 字段=该筛选不适用）。

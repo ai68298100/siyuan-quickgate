@@ -74,16 +74,16 @@ describe("MCP stdio 服务器核心", () => {
         expect(((r!.result as Record<string, unknown>).serverInfo as Record<string, unknown>).name).toBe("lv-quickgate");
     });
 
-    it("tools/list 在 writeEnabled=false 时不返回写工具；=true 时 23 个全暴露", async () => {
+    it("tools/list 在 writeEnabled=false 时不返回写工具；=true 时 26 个全暴露", async () => {
         const ro = createMcpServer(fakeClient(), { writeEnabled: false, version: "0.6.5" });
         const roList = ((await ro.handleRequest({ jsonrpc: "2.0", id: 1, method: "tools/list" }))!.result as { tools: { name: string }[] }).tools;
         expect(roList.length).toBeGreaterThan(0);
-        expect(new Set(ALL_OPS).size).toBe(23);
-        expect(roList.length).toBeLessThan(23);
+        expect(new Set(ALL_OPS).size).toBe(26);
+        expect(roList.length).toBeLessThan(26);
 
         const rw = createMcpServer(fakeClient(), { writeEnabled: true, version: "0.6.5" });
         const rwList = ((await rw.handleRequest({ jsonrpc: "2.0", id: 1, method: "tools/list" }))!.result as { tools: { name: string }[] }).tools;
-        expect(rwList.length).toBe(23);
+        expect(rwList.length).toBe(26);
     });
 
     it("tools/call 只读工具走 fast 通道、写工具在 writeEnabled=false 时被拒（known 提示）", async () => {
