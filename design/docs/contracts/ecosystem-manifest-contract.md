@@ -24,7 +24,7 @@
 | `maturity` | enum | ✅ | 不变 | `stable`（已发布公开契约）/ `design`（设计态）/ `unlocated`（仓库未定位）；design/unlocated 只进 manifest 与诊断，**不注册可执行 adapter** |
 | `version` | string\|null | ✅ | 不变 | 上游校准基准版本（对照远端 main；null=未定位） |
 | `protocol` | string\|null | ✅ | 不变 | 公开契约面，如 `window.siyuanCheckin v5` |
-| `minProtocol` | string\|null | — | **新增** | 快门接入的最低协议版本（如 `v5`）；null=未接入（design/unlocated 恒 null）。future major→unsupported，unknown minor→兼容（R77 测试矩阵口径） |
+| `minProtocol` | string\|null | — | **新增** | 快门接入的最低协议版本（如 `v5`）；**stable ∧ `protocol` 以 `window.` 开头时必填**，命令面插件（agent-capabilities + commands）与未接入插件=null（版本协商走 loadPetals version 比对）。future major→unsupported，unknown minor→兼容（R77 测试矩阵口径） |
 | `windowBridge` | string | ✅ 可选 | 不变 | window 公开桥全局名（仅 hubIntegration 插件） |
 | `sourceOfTruth` | string[] | — | **新增** | 该插件权威的数据域列表（§2 矩阵的机器面），域格式 `domain.sub` |
 | `ingestion` | enum | — | **新增** | 事件物化载体：`none` / `eventFile`（`storage/petal/<id>/bridge/events.ndjson`）/ `windowEvent`（window CustomEvent）。快门 events.pull 只消费 `eventFile` |
@@ -130,7 +130,9 @@ node scripts/validate-ecosystem-manifest.mjs --file <你的条目JSON>   # 本�
 `scripts/validate-ecosystem-manifest.mjs`（零依赖，仿 validate-menu.mjs）：
 
 - 接受 `--file <path>`；默认依次校验本仓库模板 + quickgate `src/assets/ecosystem-manifests.json`（存在即校验）。
-- 规则：顶层 `version` 整数 ≥1；`plugins` 非空且 pluginId 唯一；maturity 枚举；`idempotency` 非空（available 强制，其余建议）；`ingestion` 枚举且 stable 插件不得为 `none`（有事件却 `none`=fail）；`sourceOfTruth` 域格式 `domain.sub`；**v2 必填字段（sourceOfTruth/ingestion/minProtocol/eventNamespace）在 `version ≥ 2` 时强制、v1 宽容为迁移期警告**（schema.json 为 v2 目标形状，无迁移宽容——CI 严格门与 manifest 升 v2 同步生效）。
+- 规则：顶层 `version` 整数 ≥1；`plugins` 非空且 pluginId 唯一；maturity 枚举；`idempotency` 非空（available 强制，其余建议）；`ingestion` 枚举且 stable 插件不得为 `none`（有事件却 `none`=fail）；`sourceOfTruth` 域格式 `domain.sub`；**v2 必填字段（sourceOfTruth/ingestion/minProtocol/eventNamespace）在 `version ≥ 2` 时强制、v1 宽容为迁移期警告**（schema.json 为 v2 目标形状，无迁移宽容——CI 严格门与 manifest 升 v2 同步生效）。minProtocol 强制面=stable ∧ `window.*` 协议（R228 修订：命令面插件填 null）。
+
+> **v2 已生效（R228）**：quickgate manifest 已升 `version: 2` 并补齐全部 v2 字段；同步完成三处 ID 漂移修正（E4 真机校准，见 manifest note 溯源）。两仓库校验器均以严格档运行。
 - 阻断点：本仓库=手工/评审门；quickgate=**planned**（`check:manifest` 进 package.json + CI，v2 字段补齐后开严格门）。
 
 ## 6. 追溯与差距

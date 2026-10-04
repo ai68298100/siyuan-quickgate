@@ -59,7 +59,7 @@ function validatePlugin(p, ctx, manifestVersion) {
         if (!Array.isArray(p.sourceOfTruth)) fail(`${at}: v2 必填 sourceOfTruth（数组，可空）`);
         else for (const d of p.sourceOfTruth) if (!DOMAIN.test(d)) fail(`${at}: sourceOfTruth 域 ${JSON.stringify(d)} 须为 domain.sub 格式`);
         if (!INGESTION.has(p.ingestion)) fail(`${at}: v2 必填 ingestion ∈ none|eventFile|windowEvent`);
-        if (p.maturity === "stable" && !(typeof p.minProtocol === "string" && PROTOCOL_V.test(p.minProtocol))) fail(`${at}: stable 插件 v2 必填 minProtocol（如 v5）`);
+        if (p.maturity === "stable" && typeof p.protocol === "string" && p.protocol.startsWith("window.") && !(typeof p.minProtocol === "string" && PROTOCOL_V.test(p.minProtocol))) fail(`${at}: stable 插件（window.* 协议）v2 必填 minProtocol（如 v5）；命令面插件=null`);
     }
     if (p.ingestion !== undefined && !INGESTION.has(p.ingestion)) fail(`${at}: ingestion ${JSON.stringify(p.ingestion)} 非法`);
     if (p.minProtocol !== undefined && p.minProtocol !== null && !(typeof p.minProtocol === "string" && PROTOCOL_V.test(p.minProtocol))) fail(`${at}: minProtocol 须为 v<N> 或 null`);

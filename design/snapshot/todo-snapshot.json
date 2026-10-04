@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-04T17:43:52.801Z",
+  "generatedAt": "2026-10-04T17:49:15.626Z",
   "source": "TODO.md",
   "counts": {
     "total": 1393,
     "checkboxes": 1393,
     "byStatus": {
-      "done": 1147,
-      "pending": 177
+      "done": 1150,
+      "pending": 174
     },
     "byMainline": {
       "C7": 277,
-      "C8": 220,
+      "C8": 218,
       "C4": 113,
-      "C6": 503,
+      "C6": 504,
       "C2": 123,
       "C1": 77,
-      "C3": 70,
+      "C3": 71,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1006,
-      "E0": 255,
-      "E2": 76,
+      "E4": 1009,
+      "E0": 254,
+      "E2": 74,
       "E3": 29,
       "E1": 26,
       "E5": 1
     },
     "byBlocked": {
       "user": 61,
-      "dev": 177,
+      "dev": 174,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -9472,15 +9472,20 @@
       "priority": "P0",
       "topic": "清单校准",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "从各插件真实 `plugin.json` 校准 pluginId、version、minAppVersion、protocol、loadPetals name；当前闪卡/考试/拾遗清单存在 ID/版本漂移，必须有 source commit、日期和告警。",
-      "mainline": "C8",
-      "evidence": "E2",
+      "text": "从各插件真实 `plugin.json` 校准 pluginId、version、minAppVersion、protocol、loadPetals name；当前闪卡/考试/拾遗清单存在 ID/版本漂移，必须有 source commit、日期和告警。 → ✅ R228 E4 真机校准（loadPetals + data/plugins/*/plugin.json，2026-10-05，思源 3.8.6 @14643）：修正三处 ID/版本漂移——闪卡 siyuan-flashcards(0.5.0)→**siyuan-lv-cards 0.154.0**、拾遗 siyuan-shiyi(未定位)→**siyuan-glean 1.1.0**（unlocated→design）、管家 siyuan-butler(0.1.0)→**siyuan-home 0.2.0**；考试真机未安装（manifest 注记）；stable 三件零漂移。溯源与告警写入 manifest note（quickgate 4dfb9d2）；R229 重放（原 40472b7 因合并基线偏旧丢失）",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
-        "docs": []
+        "rounds": [
+          "R228",
+          "R229"
+        ],
+        "docs": [
+          "10-"
+        ]
       }
     },
     {
@@ -9491,14 +9496,17 @@
       "priority": "P0",
       "topic": "能力边界",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "把打卡 v5、人脉 v1、雷切稳定能力、拾遗设计态、闪卡事件草案、考试一次性 stats 和未定位管家分别标为稳定/草案/不可用，不得把未定位模块列入默认流程。",
+      "text": "把打卡 v5、人脉 v1、雷切稳定能力、拾遗设计态、闪卡事件草案、考试一次性 stats 和未定位管家分别标为稳定/草案/不可用，不得把未定位模块列入默认流程。 → ✅ R228 落位：打卡 v5/人脉 v1/雷切=stable（minProtocol v5/v1/null+命令面）；拾遗=design（已定位已启用、无公开桥契约，L615 门禁维持）；闪卡=design+事件草案（lv-cards:reviewed）；考试=design（真机未安装注记）；管家=design（siyuan-home 已定位、契约待定义）——design 态全部不进 adapter/默认工作流（events-workflow 测试维持白名单=stable∧available）；R229 重放（原 40472b7 丢失）",
       "mainline": "C8",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R228",
+          "R229"
+        ],
         "docs": []
       }
     },
@@ -9856,7 +9864,7 @@
       "type": "unknown",
       "status": "done",
       "blockedBy": null,
-      "text": "将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。 → ✅ R226+R227 全链交付：R226=C9 合同+schema.json+设计仓库校验器（本仓库 scripts/validate-ecosystem-manifest.mjs）；R227（quickgate 1be02ba）=EcosystemManifest 接口补齐 v2 字段（events/sourceOfTruth/ingestion/minProtocol/eventNamespace/capabilitySchemas/updatedAt）+六处 `as unknown` 断言全部移除+`check:manifest` 入 check 链（CI ci.yml 首步 run check=契约违规阻断发布）；v1 迁移期警告/v2 严格双档，manifest 升 v2 时全强制（合同 §5 同步点）",
+      "text": "将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。 → ✅ R226+R227 全链交付：R226=C9 合同+schema.json+设计仓库校验器（本仓库 scripts/validate-ecosystem-manifest.mjs）；R227（quickgate 1be02ba）=EcosystemManifest 接口补齐 v2 字段（events/sourceOfTruth/ingestion/minProtocol/eventNamespace/capabilitySchemas/updatedAt）+六处 `as unknown` 断言全部移除+`check:manifest` 入 check 链（CI ci.yml 首步 run check=契约违规阻断发布）；v1 迁移期警告/v2 严格双档，manifest 升 v2 时全强制（合同 §5 同步点）；R228 manifest 已升 version=2 且 v2 字段全量填充（E4 真机校准同步完成），两仓库校验器严格档运行、迁移期警告清零；R229 重放（原 40472b7 丢失）",
       "mainline": "C1",
       "evidence": "E4",
       "refs": {
@@ -9865,7 +9873,9 @@
         ],
         "rounds": [
           "R226",
-          "R227"
+          "R227",
+          "R228",
+          "R229"
         ],
         "docs": []
       }
@@ -10366,14 +10376,17 @@
       "priority": "P0",
       "topic": "打包链接",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "解包扫描 README、docs/api、WALKTHROUGH 和双语文档内部链接；禁止工作区绝对路径、缺失文件和只在源码仓库存在的 `src/ops.ts` 链接，发布包改用包内文件或固定 GitHub permalink。",
-      "mainline": "C8",
-      "evidence": "E0",
+      "text": "解包扫描 README、docs/api、WALKTHROUGH 和双语文档内部链接；禁止工作区绝对路径、缺失文件和只在源码仓库存在的 `src/ops.ts` 链接，发布包改用包内文件或固定 GitHub permalink。 → ✅ R228 交付（quickgate 7a40564）：scripts/check-links.mjs 扫描发布包全部 md（相对链接须落包内真实文件/盘符绝对路径零容忍/src·tools·tests·e2e·scripts 专属目录禁相对引用），挂入 check:release 链=CI 构建后阻断；首轮抓出 10 处违规并全修——README 双语 LICENSE/tools/src-mcp 改 GitHub permalink、移除指向设计仓库工作区的跨仓库相对链接（../../../AI/...）、契约 JSON 随包分发（vite 补 docs/contracts 拷贝）；终态 14 md/50 链接零违规；R229 重放（原 40472b7 丢失）",
+      "mainline": "C6",
+      "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R228",
+          "R229"
+        ],
         "docs": []
       }
     },
@@ -10444,7 +10457,7 @@
       "type": "unknown",
       "status": "done",
       "blockedBy": null,
-      "text": "template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。 → ✅ R226 规格（safety-gate §7）+R227 实现（quickgate 1be02ba）：src/services/path-guard.ts 白名单形状/≤200 字符/内容 ≤64KB（不截断执行），NDJSON（bridge-service）与内核路由（kernel-ops）双入口共用=MCP 全覆盖；tests/path-guard.test.ts 9 条（§7 矩阵七用例×双通道+内容上限+合法放行）；失败审计=NDJSON/广播通道 rejected 落 audit（零 PII 只记 args 键名）——内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 L627 收口跟踪）",
+      "text": "template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。 → ✅ R226 规格（safety-gate §7）+R227 实现（quickgate 1be02ba）：src/services/path-guard.ts 白名单形状/≤200 字符/内容 ≤64KB（不截断执行），NDJSON（bridge-service）与内核路由（kernel-ops）双入口共用=MCP 全覆盖；tests/path-guard.test.ts 9 条（§7 矩阵七用例×双通道+内容上限+合法放行）；失败审计=NDJSON/广播通道 rejected 落 audit（零 PII 只记 args 键名）——内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 L627 收口跟踪）；R228 E4 真机探针：部署新构建后内核路由六用例（../conf、多层回溯触及桥台账、反斜杠、NUL、绝对路径、超长 301 字符）**6/6 rejected**（e2e-report.json 落盘），registry.list 同步证实 manifestVersion=2 新 bundle 已生效；R229 重放（原 40472b7 丢失）",
       "mainline": "C6",
       "evidence": "E4",
       "refs": {
@@ -10453,7 +10466,9 @@
         ],
         "rounds": [
           "R226",
-          "R227"
+          "R227",
+          "R228",
+          "R229"
         ],
         "docs": []
       }

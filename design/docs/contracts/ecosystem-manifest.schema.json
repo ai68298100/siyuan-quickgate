@@ -83,7 +83,7 @@
       "plugins": {
         "items": {
           "required": ["sourceOfTruth", "ingestion"],
-          "if": { "properties": { "maturity": { "const": "stable" } } },
+          "if": { "properties": { "maturity": { "const": "stable" }, "protocol": { "type": "string", "pattern": "^window\\." } } },
           "then": {
             "properties": { "minProtocol": { "type": "string" } },
             "required": ["minProtocol"]

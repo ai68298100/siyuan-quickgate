@@ -52,6 +52,7 @@
 
 ## 5. 追溯
 
-- manifest 校准：R20（对照远端 main）、R35（上游零漂移复核）
+- manifest 校准：R20（对照远端 main）、R35（上游零漂移复核）、**R228（E4 真机校准：loadPetals + data/plugins/*/plugin.json——修正三处 ID/版本漂移：闪卡→siyuan-lv-cards 0.154.0、拾遗→siyuan-glean 1.1.0（unlocated→design）、管家→siyuan-home 0.2.0；考试真机未安装）**
+- 形状：**v2 已生效（R228，见 ecosystem-manifest-contract）**；v1→v2 迁移=追加字段，不改既有语义
 - 形状实证：spike⑥ loadPetals（name/version/enabled/incompatible/js）
 - 消费测试：tests/contract-consistency（ops 面）、tests/events-workflow（白名单=stable∧available）
