@@ -63,9 +63,20 @@ for (const file of files) {
     }
 }
 
+// 安装后最小显示回归（L625 后半）：集市/设置面板按固定名读取 icon.png 与 preview.png——存在且为真 PNG
+for (const asset of ["icon.png", "preview.png"]) {
+    try {
+        const buf = await readFile(join(root, asset));
+        const isPng = buf.length > 8 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47;
+        if (!isPng) violations.push(`发布包资产：${asset} 不是有效 PNG（magic 头不符）`);
+    } catch {
+        violations.push(`发布包资产：${asset} 缺失（安装后集市/设置面板显示回归会失败）`);
+    }
+}
+
 if (violations.length > 0) {
     console.error(`✗ 发布包链接检查：${violations.length} 处违规（扫描 ${files.length} 个 md / ${links} 条链接）`);
     for (const v of violations) console.error(`  - ${v}`);
     process.exit(1);
 }
-console.log(`✓ 发布包链接检查通过（${files.length} 个 md / ${links} 条链接，绝对路径 0 / 包外引用 0）`);
+console.log(`✓ 发布包链接检查通过（${files.length} 个 md / ${links} 条链接，绝对路径 0 / 包外引用 0，icon/preview PNG ✓）`);

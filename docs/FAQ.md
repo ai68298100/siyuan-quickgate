@@ -1,6 +1,6 @@
 # FAQ — 故障排查（症状 → 原因 → 解法）
 
-> 口径：错误状态遵循[契约](../README.md#error-semantics) `unsupported/rejected/failed/expired/duplicate`；
+> 口径：错误状态遵循[契约](./api.md#错误语义) `unsupported/rejected/failed/expired/duplicate`；
 > 本文每条都来自真实踩坑（bug#1~13 与真机联调），不是理论清单。
 > 自助顺序：先对症状 → 试解法 → 仍不行跑 `npm run verify:restart`（九/十项一键复测）把失败项带去提 issue。
 

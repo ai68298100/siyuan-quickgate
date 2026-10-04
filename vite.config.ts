@@ -81,8 +81,10 @@ export default defineConfig((buildTarget === "kernel" ? {
         viteStaticCopy({
             targets: [
                 ...packageImageTargets,
-                { src: "./README*.md", dest: "./" },
-                { src: "./docs/*.md", dest: "./docs", rename: { stripBase: true } },
+                // L625 README 分层：安装包用安装导向的 package-readme（改名为 README.md）；
+                // 面向开发者的仓库 README 不进包（工具/MCP 配置经包内链接指向源码仓库）
+                { src: "./docs/package-readme.md", dest: "./", rename: { stripBase: true, name: "README.md" } },
+                { src: ["./docs/*.md", "!./docs/package-readme.md"], dest: "./docs", rename: { stripBase: true } },
                 { src: "./docs/contracts/*.json", dest: "./docs/contracts", rename: { stripBase: true } },
                 { src: "./asset/*", dest: "./asset", rename: { stripBase: true } },
                 { src: "./plugin.json", dest: "./" },

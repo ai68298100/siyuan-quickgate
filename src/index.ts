@@ -47,6 +47,52 @@ export default class QuickGatePlugin extends Plugin {
     private activeService?: BridgeService;
     private settings: QuickGateSettings = { ...DEFAULT_SETTINGS };
     private auditLog: AuditEntry[] = [];
+    /** 正常生命周期完成标记（onload 末尾置位；热重载接管用） */
+    private lifecycleBooted = false;
+    /** 卸载标记：停用后构造器自愈不得复活后台循环 */
+    private tornDown = false;
+
+    /**
+     * 热重载接管（bug#15 候选 · SiYuan 3.8.6 push_reload 实证）：
+     * 插件目录数据变更（部署/开关持久化等）触发内核 push_reload——重建插件实例但**不走完整
+     * 卸载/加载生命周期**：onload 不再执行，旧实例的轮询循环随之丢失（NDJSON 桥静默死亡），
+     * 而其 SSE 连接幸存（广播假活）。本构造器在重载重建实例时同样执行：
+     * ①全局所有权令牌——新实例接管时停掉旧实例的轮询与 SSE（防双实例双消费；命令幂等台账兜底）；
+     * ②延迟自检 onload 是否被调用，未被调用即自愈（加载设置+按开关重启桥循环）。
+     * 自愈失败仅记日志不抛出（构造器抛错会被宿主吞掉且更难诊断）。
+     */
+    constructor(...args: ConstructorParameters<typeof Plugin>) {
+        super(...args);
+        const g = globalThis as unknown as { __qgActiveInstance?: QuickGatePlugin };
+        const prev = g.__qgActiveInstance;
+        g.__qgActiveInstance = this;
+        if (prev && prev !== this) {
+            try {
+                void prev.stopBridge();
+                prev.stopEventBridge();
+            } catch { /* 旧实例可能已半失效 */ }
+        }
+        setTimeout(() => void this.selfHealAfterHotReload(), 3000);
+    }
+
+    private async selfHealAfterHotReload() {
+        if (this.lifecycleBooted || this.tornDown) return;
+        if (this.poller?.isRunning) return; // 已有循环在跑（并发自愈防护）
+        try {
+            this.isMobile = getFrontend() === "mobile" || getFrontend() === "browser-mobile";
+            await this.store.loadAll();
+            this.settings = this.store.settings;
+            await this.idempotency.load();
+            this.auditLog = await this.store.loadAudit(this.settings.auditMax);
+            console.warn(`[${PLUGIN_NAME}] 检测到热重载（onload 未执行）——自愈启动后台循环`);
+            if (this.settings.bridgeEnabled && !this.isMobileGuard()) {
+                this.startBridge();
+                this.startEventBridge();
+            }
+        } catch (e) {
+            console.error(`[${PLUGIN_NAME}] 热重载自愈失败：`, e);
+        }
+    }
 
     async onload() {
         this.isMobile = getFrontend() === "mobile" || getFrontend() === "browser-mobile";
@@ -73,6 +119,7 @@ export default class QuickGatePlugin extends Plugin {
             this.startBridge();
             this.startEventBridge();
         }
+        this.lifecycleBooted = true; // 正常生命周期完成——构造器的热重载自检不再介入
     }
 
     onLayoutReady() {
@@ -81,6 +128,7 @@ export default class QuickGatePlugin extends Plugin {
 
     onunload() {
         // 优雅停机：单飞循环在当前 tick 结束后退出，不撕正在进行的写；广播订阅同步停止
+        this.tornDown = true; // 停用后构造器的热重载自愈不得复活后台循环
         this.poller?.stop();
         this.poller = undefined;
         void this.broadcastSub?.stop();

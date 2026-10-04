@@ -413,6 +413,8 @@
 - [x] 【R38·循环A】**docs/02 桥协议两处真漂移修正**：①§9 仍写"广播通道…spike⑤ 通过才做"——**v0.6.0 已实现**（且端点写的是推测的 /ws/broadcast，实际为 postMessage+/es/broadcast/subscribe）——改写为已实现现状：qg-cmd 频道/预留语义双通道幂等/默认关/三客户端；②§8.8 "33KB args 整行 rejected"→">32KB（32768 字节）"（§3 与契约 JSON 本就正确，仅验收清单笔误）；50 行上限与代码 slice(0,50) 核对一致
 - [x] 【R39·循环B】**MCP 通道评估稿出稿（R8 立项清算）**：docs/10 §3.14——**结论：值得做、列 M3 首项**（spike⑤ 已过满足前置）；路径三选一→**推荐独立 stdio 代理进程**（@lv/mcp-quickgate ↔ 内核 HTTP，复用 lv-cli 全套逻辑，零插件改动，官方 @modelcontextprotocol/sdk，1~2 天，Claude Desktop/Cursor 即插即用）；安全=tools 标 readOnly/destructiveHint、**代理默认只暴露只读 op、写 op 需设置页 mcpWriteEnabled**、黑名单/确认/审计全共用；验收形态=Claude Desktop 一句"帮我记一条人脉互动"。快门 ROADMAP M3 行同步+已推 GitHub。**【执行待复测批通过后】**
 
+- [ ] 【bug#15 候选·需前端 DevTools】SiYuan 3.8.6 push_reload 与桥生命周期交互——`reloads=[siyuan-quickgate]`（petal toggle 触发前端 JS 重载）与 `dataChanges=[siyuan-quickgate]`（插件数据变更通知）之后，NDJSON 轮询循环静默死亡（待处理命令不再消费、无回执、文件不压缩），而旧实例 SSE 连接幸存（广播路径假活）——2026-10-05 真机证据：内核日志 02:23:54 `reloads=[...]`/02:23:55+02:24:35 `dataChanges=[...]`；探针矩阵=广播 ✓/NDJSON ✗（重放R230 恢复探针 12s 未消费）；桥死亡时间窗与部署/petal toggle 强相关（17:21 最后消费→17:45 R229 部署后死亡）。已布防：构造器热重载接管（全局所有权令牌+3s 自检 onload 未运行则自愈启桥；onunload/uninstall 置 tornDown 防停用后复活）——但实测接管未被触发（推断 reload 未重建实例或重建路径不同），需前端 DevTools 观察重载后 window.siyuan.ws.app.plugins 实例语义；恢复手段=重启思源窗口【等用户】
+
 ### 5.9 R69/R70：R68 后状态收敛与实现仓库静态审查（本轮只登记，不开发）
 
 #### 5.9.1 状态与文档边界
@@ -622,7 +624,7 @@
 ### 5.17 R78：发布包、证据级别与事实一致性（本轮只登记，不开发）
 
 - [x] 【R78-P0·打包链接】解包扫描 README、docs/api、WALKTHROUGH 和双语文档内部链接；禁止工作区绝对路径、缺失文件和只在源码仓库存在的 `src/ops.ts` 链接，发布包改用包内文件或固定 GitHub permalink。 → ✅ R228 交付（quickgate 7a40564）：scripts/check-links.mjs 扫描发布包全部 md（相对链接须落包内真实文件/盘符绝对路径零容忍/src·tools·tests·e2e·scripts 专属目录禁相对引用），挂入 check:release 链=CI 构建后阻断；首轮抓出 10 处违规并全修——README 双语 LICENSE/tools/src-mcp 改 GitHub permalink、移除指向设计仓库工作区的跨仓库相对链接（../../../AI/...）、契约 JSON 随包分发（vite 补 docs/contracts 拷贝）；终态 14 md/50 链接零违规；R229 重放（原 40472b7 丢失）
-- [ ] 【R78-P0·可见内容】源码仓库 README 与安装包 README 分层，工具/MCP 配置指向源码仓库；包内 action.png、preview.png 和安装说明做安装后最小显示回归。
+- [x] 【R78-P0·可见内容】源码仓库 README 与安装包 README 分层，工具/MCP 配置指向源码仓库；包内 action.png、preview.png 和安装说明做安装后最小显示回归。 → ✅ R230 交付：docs/package-readme.md（安装导向）经 vite 拷贝为包内 README.md（rename+stripBase，踩坑=vite-static-copy 的 rename 保留相对目录须 stripBase）；开发版双语 README 不再进包，工具/MCP 配置经 permalink 指向源码仓库；docs/*.md 拷贝排除 package-readme 防重复；check-links.mjs 增 icon/preview.png 资产回归（存在+PNG magic 头）；FAQ 错误语义链接改指 api.md 真实锚点；check:release 全绿（13 md/30 链接/资产 ✓）+ 工作区部署
 - [ ] 【R78-P0·证据】为每项能力记录验证环境、日期、版本、通道、证据级别（单测/冒烟/真机/真 AI host），MCP 代理→Kernel 冒烟不能表述为 Claude/Cursor 完整会话已支持。
 - [ ] 【R78-P0·写防线】核对 MCP `template.new` 是否绕过前端 confirmExec、audit、processed ledger；若保留 Kernel 路由，必须有显式写开关、幂等键、审计和跨通道安全回归，否则移出 KERNEL_OPS。
 - [x] 【R78-P0·路径安全】template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。 → ✅ R226 规格（safety-gate §7）+R227 实现（quickgate 1be02ba）：src/services/path-guard.ts 白名单形状/≤200 字符/内容 ≤64KB（不截断执行），NDJSON（bridge-service）与内核路由（kernel-ops）双入口共用=MCP 全覆盖；tests/path-guard.test.ts 9 条（§7 矩阵七用例×双通道+内容上限+合法放行）；失败审计=NDJSON/广播通道 rejected 落 audit（零 PII 只记 args 键名）——内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 L627 收口跟踪）；R228 E4 真机探针：部署新构建后内核路由六用例（../conf、多层回溯触及桥台账、反斜杠、NUL、绝对路径、超长 301 字符）**6/6 rejected**（e2e-report.json 落盘），registry.list 同步证实 manifestVersion=2 新 bundle 已生效；R229 重放（原 40472b7 丢失）
