@@ -41,7 +41,7 @@
 - 附：§10-10 同批复测内核日志增长仅 +254~2163B——**500ms 轮询不刷屏内核日志**（决策 §10-10 数据到手）
 - 结论：✅；用户可随时在设置页关回（默认关红线不变）
 
-## ④ Web Lock 多窗口单消费 ⬜
+## ④ Web Lock 多窗口单消费 ◐（R232：单窗口认领已实现——startBridge 先认领 siyuan-quickgate-bridge，被占用拒绝启动；双窗口实测待两开验证）
 - 计划：同工作空间开两个思源窗口（多窗口模式），两窗口都启用快门 → `lv-cli.mjs ping` 连发 3 条
 - 验收：每条命令只被一个窗口消费（回执仅一份、无重复执行）
 - 结论：（待填）
@@ -88,6 +88,11 @@
 - 结论：✅ **内核路由功能面收官**（v0.5.0 实验通道转正依据成立）；前端中继仍按 D-0010 暂缓
 
 ## ⑪ event-deleted 物化验证 ⬜（v0.5.4 新增订阅）
+
+## ⑫ 前端加载判别与热重载接管 ⬜（R234/R239 新增 · bug#15）
+- 判别式：NDJSON 发 favorites.list → recorded=新前端；「未知 op」=旧 bundle（Electron 模块缓存，**需托盘完全退出后重启**，窗口重开无效——进程实证主进程 16:06 起未退）
+- 已布防：构造器所有权令牌 + 3s onload 自检自愈（实测未被 push_reload 路径触发，机制待 DevTools）
+- 走查步骤：完全退出 → 重启 → 跑 e2e-bg（「前端 bundle 判别」项应 pass）→ favorites.add/list/remove 全链
 - 计划：装打卡 ≥18.16 → 打卡里删除一条打卡记录 → 检查
   `curl -s http://127.0.0.1:1568/api/file/getFile -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"path\":\"/storage/petal/siyuan-checkin/bridge/events.ndjson\"}"`
 - 验收：出现 `name:"checkin:event-deleted"` 行，幂等键以 `:deleted` 结尾；同时 `events.pull`（内核路由或 NDJSON）能拉到它

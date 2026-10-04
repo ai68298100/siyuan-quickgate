@@ -241,6 +241,38 @@ async function main() {
     } catch (e) { record("config.discover", "fail", e.message); report.failures++; }
     await gap();
 
+    // 4.6 前端 bundle 判别（bug#15：push_reload 后磁盘新代码不生效——favorites.list 应 recorded，旧 bundle 报未知 op）
+    try {
+        const r = await fetch(url + "/plugin/private/siyuan-quickgate/exec", { method: "POST", headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ op: "bridge.ping", args: {} }) });
+        void r;
+        const cmdPath = "/storage/petal/siyuan-quickgate/bridge/commands.ndjson";
+        const id = "disc-" + Date.now().toString(36);
+        const old = (await (async () => { const x = await fetch(url + "/api/file/getFile", { method: "POST", headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ path: cmdPath }) }); return x.ok ? await x.text() : ""; })()) ?? "";
+        const form = new FormData();
+        form.append("path", cmdPath); form.append("isDir", "false");
+        const newline = String.fromCharCode(10);
+        form.append("file", new Blob([(old.trimEnd() + (old.trim() ? newline : "")) + JSON.stringify({ v: 1, id, op: "favorites.list", args: {}, createdAt: new Date().toISOString() }) + newline], { type: "application/octet-stream" }), "file");
+        await fetch(url + "/api/file/putFile", { method: "POST", headers: { Authorization: `Token ${token}` }, body: form });
+        let verdict = "无回执（轮询未运行）", pass = false;
+        const dl = Date.now() + 9000;
+        while (Date.now() < dl) {
+            await sleep(700);
+            const rr = await fetch(url + "/api/file/getFile", { method: "POST", headers: { Authorization: `Token ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ path: "/storage/petal/siyuan-quickgate/bridge/results.ndjson" }) });
+            const txt = await rr.text();
+            const line = txt.split(/\r?\n/).reverse().find((l) => l.includes(`"id":"${id}"`));
+            if (line) {
+                const rc = JSON.parse(line);
+                if (rc.status === "recorded") { verdict = "新前端（favorites 可用）"; pass = true; }
+                else if ((rc.message ?? "").includes("未知")) verdict = "旧 bundle——需完全退出思源（托盘退出）后重启";
+                else { verdict = rc.status + "：" + (rc.message ?? ""); pass = true; }
+                break;
+            }
+        }
+        record("前端 bundle 判别", pass ? "pass" : "fail", verdict);
+        if (!pass) report.failures++;
+    } catch (e) { record("前端 bundle 判别", "fail", e.message); report.failures++; }
+    await gap();
+
     // 5. petal 加载（快门在装）
     try {
         // R214 校准：frontend="all" 返回空数组，真实 petals 按 frontend 枚举（desktop/mobile）
