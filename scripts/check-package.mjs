@@ -48,28 +48,38 @@ for (const js of ["kernel.js", "index.js"]) {
     }
 }
 
-// ---- 3. zip 解包级断言（PowerShell 落盘 .ps1 执行，规避引号地狱；Windows 目标环境）----
+// ---- 3. zip 解包级断言（PowerShell 落盘 .ps1 执行；跨平台：powershell(Win)→pwsh(Linux/mac)，都无则显式跳过）----
 const zipPath = path.join(root, "package.zip");
 if (!fs.existsSync(zipPath)) {
     fail("package.zip 不存在（build 应产出）");
 } else {
-    try {
-        const os = await import("node:os");
-        const psList = path.join(os.tmpdir(), "qg-zip-list.ps1");
-        fs.writeFileSync(psList, `
+    const findPS = () => {
+        for (const exe of ["powershell", "pwsh"]) {
+            try { execSync(`${exe} -NoProfile -Command "exit 0"`, { stdio: "ignore" }); return exe; } catch { /* 下一个 */ }
+        }
+        return null;
+    };
+    const psExe = findPS();
+    if (!psExe) {
+        console.warn("⚠ 环境无 PowerShell/pwsh——zip 解包级断言跳过（dist 级两道断言仍生效）");
+    } else {
+        try {
+            const os = await import("node:os");
+            const psList = path.join(os.tmpdir(), "qg-zip-list.ps1");
+            fs.writeFileSync(psList, `
 param([string]$zip)
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $z = [System.IO.Compression.ZipFile]::OpenRead($zip)
 try { $z.Entries | ForEach-Object { $_.FullName } } finally { $z.Dispose() }
 `);
-        const out = execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${psList}" "${zipPath}"`, { encoding: "utf8" });
-        const entries = new Set(out.split(/\r?\n/).filter(Boolean));
-        for (const n of ["plugin.json", "kernel.js", "index.js"]) {
-            if (![...entries].some((e) => e === n || e.endsWith("/" + n))) fail(`package.zip 缺 ${n}（打包静默漏拷——if-no-files-found 类事故）`);
-        }
-        // zip 内 plugin.json 的 kernels 字段（解包级内容断言）
-        const psRead = path.join(os.tmpdir(), "qg-zip-read.ps1");
-        fs.writeFileSync(psRead, `
+            const out = execSync(`${psExe} -NoProfile -ExecutionPolicy Bypass -File "${psList}" "${zipPath}"`, { encoding: "utf8" });
+            const entries = new Set(out.split(/\r?\n/).filter(Boolean));
+            for (const n of ["plugin.json", "kernel.js", "index.js"]) {
+                if (![...entries].some((e) => e === n || e.endsWith("/" + n))) fail(`package.zip 缺 ${n}（打包静默漏拷——if-no-files-found 类事故）`);
+            }
+            // zip 内 plugin.json 的 kernels 字段（解包级内容断言）
+            const psRead = path.join(os.tmpdir(), "qg-zip-read.ps1");
+            fs.writeFileSync(psRead, `
 param([string]$zip, [string]$entryName)
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $z = [System.IO.Compression.ZipFile]::OpenRead($zip)
@@ -78,11 +88,12 @@ try {
   if ($e) { $r = New-Object System.IO.StreamReader($e.Open()); $r.ReadToEnd() }
 } finally { $z.Dispose() }
 `);
-        const pjText = execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${psRead}" "${zipPath}" "plugin.json"`, { encoding: "utf8" });
-        const pj = JSON.parse(pjText);
-        if (!Array.isArray(pj.kernels) || pj.kernels.length === 0) fail(`package.zip 内 plugin.json 缺 kernels 字段（zip 与 dist 不同源？）`);
-    } catch (e) {
-        fail(`zip 解包断言异常：${String(e.message).slice(0, 160)}`);
+            const pjText = execSync(`${psExe} -NoProfile -ExecutionPolicy Bypass -File "${psRead}" "${zipPath}" "plugin.json"`, { encoding: "utf8" });
+            const pj = JSON.parse(pjText);
+            if (!Array.isArray(pj.kernels) || pj.kernels.length === 0) fail(`package.zip 内 plugin.json 缺 kernels 字段（zip 与 dist 不同源？）`);
+        } catch (e) {
+            fail(`zip 解包断言异常：${String(e.message).slice(0, 160)}`);
+        }
     }
 }
 
