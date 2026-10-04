@@ -77,7 +77,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # 验收门：单测(124) + MCP 协议冒烟(7)
+corepack pnpm accept  # 验收门：单测(155) + MCP 协议冒烟(7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # 软链进工作空间联调
 ```

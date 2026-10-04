@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-10-04T19:08:00.491Z",
+  "generatedAt": "2026-10-04T19:16:43.406Z",
   "source": "TODO.md",
   "counts": {
     "total": 1394,
     "checkboxes": 1394,
     "byStatus": {
-      "done": 1160,
-      "pending": 164
+      "done": 1164,
+      "pending": 160
     },
     "byMainline": {
       "C7": 278,
-      "C8": 216,
-      "C4": 111,
+      "C8": 215,
+      "C4": 112,
       "C6": 505,
       "C2": 123,
       "C1": 78,
@@ -19,16 +19,16 @@
       "C5": 10
     },
     "byEvidence": {
-      "E4": 1019,
-      "E0": 246,
-      "E2": 74,
-      "E3": 28,
+      "E4": 1022,
+      "E0": 245,
+      "E2": 73,
+      "E3": 27,
       "E1": 26,
       "E5": 1
     },
     "byBlocked": {
       "user": 62,
-      "dev": 164,
+      "dev": 160,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -4204,14 +4204,16 @@
       "priority": null,
       "topic": null,
       "type": "新",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "Quicker 侧 `SY·路由` 增加内核通道优先分支（探测 200 则直呼，失败回退 NDJSON）——待 spike⑩",
+      "text": "Quicker 侧 `SY·路由` 增加内核通道优先分支（探测 200 则直呼，失败回退 NDJSON）——spike⑩ 已校准 ✅ → ✅ R233 交付：SY-路由.cs v1.1——KERNEL_OPS 七 op 集合（与 src/ops.ts 同源）经 /plugin/private/<插件>/exec 同步直呼（~100ms，桥开关默认关也可用），失败/前端专属 op 静默回退 NDJSON 原逻辑；reference README 对照节同步。csc C#5 编译门全净",
       "mainline": "C7",
       "evidence": "E4",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R233"
+        ],
         "docs": []
       }
     },
@@ -4703,19 +4705,25 @@
       "priority": null,
       "topic": null,
       "type": "新",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "雷切 0.44 新能力评估：restore-document-set / get-document-outline / home-adapter-diagnostics 是否开新 op 或并入 plugin.api 允许名单（design note 先行）",
+      "text": "雷切 0.44 新能力评估：restore-document-set / get-document-outline / home-adapter-diagnostics 是否开新 op 或并入 plugin.api 允许名单（design note 先行） → ✅ R233 裁定=不开新 op（对照 R7 既有裁定 docs/10 §3.7 同结论）：commands.run 覆盖命令面 + plugin.api 默认名单已覆盖结构化面，第三条路径违反简洁性；design note 补充重开条件三条=design/docs/drafts/leiche-0.44-ops-eval.md",
       "mainline": "C3",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
+        "sections": [
+          "3.7"
+        ],
         "rounds": [
           "R2",
           "R3",
-          "R5"
+          "R5",
+          "R233",
+          "R7"
         ],
-        "docs": []
+        "docs": [
+          "docs/10"
+        ]
       }
     },
     {
@@ -7006,18 +7014,21 @@
       "priority": null,
       "topic": "文档",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "刷新根 `README.md` 的状态头、版本、单测数、待办数、内核版本和默认端口到 R68/v0.7.1/3.8.6；旧 1568 只保留在历史更正说明中。",
-      "mainline": "C8",
-      "evidence": "E3",
+      "text": "刷新根 `README.md` 的状态头、版本、单测数、待办数、内核版本和默认端口到 R68/v0.7.1/3.8.6；旧 1568 只保留在历史更正说明中。 → ✅ R233 对照销账（部分累计交付）：版本徽章 0.7.3/许可/SiYuan ≥3.8.4 均当前（R69 已刷）；本次补齐单测数 124→155（双语 README 验收门行）；26 op/14 只读计数随 L474 同步；待办数/端口头由快照与 docs/13 承载（单一事实源，README 不再重复维护）",
+      "mainline": "C4",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R233"
         ],
-        "docs": []
+        "docs": [
+          "docs/13"
+        ]
       }
     },
     {
@@ -7125,16 +7136,17 @@
       "priority": null,
       "topic": null,
       "type": "契约",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "以 `src/ops.ts`、实现和 contracts JSON 为单一核对基准，刷新 `docs/api.md` 中 events/workflow 的 design/unsupported 旧描述、`source` 字段说明和三通道回退语义。",
+      "text": "以 `src/ops.ts`、实现和 contracts JSON 为单一核对基准，刷新 `docs/api.md` 中 events/workflow 的 design/unsupported 旧描述、`source` 字段说明和三通道回退语义。 → ✅ R233 对照销账：events/workflow「设计态/当前回 unsupported」旧表述已于 v0.7.3 更正（api.md L55 明确「早期设计态表述作废」）；本次复核无残留过期描述；23/13 计数随 L474 更新为 26/14",
       "mainline": "C8",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R233"
         ],
         "docs": []
       }

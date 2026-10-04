@@ -78,7 +78,7 @@ Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # acceptance gate: unit tests (124) + MCP protocol smoke (7)
+corepack pnpm accept  # acceptance gate: unit tests (155) + MCP protocol smoke (7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # symlink into your workspace for dev
 ```

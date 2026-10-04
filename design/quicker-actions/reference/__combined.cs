@@ -3395,6 +3395,8 @@ public class __Snippet24 {
 //.cs 文件类型，便于外部编辑时使用
 // ============================================================================
 // SY·路由 —— 超级面板分发器总装（六分支 http/sql-url/url/bridge/cmd/act + 占位符 §5.1）
+// @version 1.1.0 · 2026-10-05 内核路由优先（L300）：KERNEL_OPS 七 op 直呼 /plugin/private/<插件>/exec（~100ms，桥开关默认关也可用），
+//                     失败/前端专属 op 回退 NDJSON 慢路径；1.0.0 首版
 // 蓝图：docs/05 §5/§5.1/§5.2 · 参考实现，Quicker C# 模块「普通模式v2」，后台线程（MTA）
 // 【目标模式】普通动作→「C# 脚本」模块（普通模式v2）；不是 Quicker 2.3+ 的「脚本动作」类型（该类型为语法子集：无 async/await、无 lock/Mutex，宿主上下文 API 面不同），误贴会编译或运行失败。
 // @version 1.0.0 · 2026-10-03 首版（对照 g2-capture.cs 的单文件总装模式）
@@ -3490,6 +3492,12 @@ public static void SqlUrlBranch(Quicker.Public.IStepContext context, string payl
 }
 
 // ---------------- bridge/cmd 分支：LV·发命令+取回执 单文件内联 ----------------
+// KERNEL_OPS（内核同步路由可用子集，与实现仓库 src/ops.ts 同源；docs/02 §9/§10）——
+// 直呼端点 /plugin/private/<插件>/exec，请求体 {"op","args"}，同步回执（~100ms，桥开关默认关也可用）
+public static readonly System.Collections.Generic.HashSet<string> KernelOps = new System.Collections.Generic.HashSet<string> {
+    "bridge.ping", "registry.list", "diagnostics.report",
+    "events.list", "events.pull", "config.discover", "template.new"
+};
 public static void BridgeBranch(Quicker.Public.IStepContext context, string argsJson)
 {
     var syUrl = (context.GetVarValue("sy_url") as string ?? "").TrimEnd('/');
@@ -3501,6 +3509,26 @@ public static void BridgeBranch(Quicker.Public.IStepContext context, string args
     // op 由菜单模板经 载荷op 变量写入；cmd 分支缺省= commands.run（bridge 特例）
     var op = context.GetVarValue("载荷op") as string;
     if (string.IsNullOrWhiteSpace(op)) op = "commands.run";
+
+    // —— 内核路由优先（L300 · spike⑩ 校准通过）：KERNEL_OPS 同步直呼，失败/前端专属 op 回退 NDJSON ——
+    if (KernelOps.Contains(op))
+    {
+        var kBody = "{\"op\":\"" + op + "\",\"args\":" + argsJson + "}";
+        var kResp = KernelPost(context, "/plugin/private/" + plugin + "/exec", kBody);
+        if (kResp.Success)
+        {
+            // 响应=HTTP 信封 {"code":0,"msg":"","data":{…回执…}}；status 首次出现即回执字段（信封无同名键）
+            var kStatus = ExtractJsonStringField(kResp.Text, "status");
+            if (kStatus == "recorded" || kStatus == "duplicate")
+            {
+                Ok(context, ExtractJsonStringField(kResp.Text, "message") ?? "完成", kResp.Text);
+                return;
+            }
+            if (kStatus != null) { Fail(context, "命令 " + kStatus + "：" + (ExtractJsonStringField(kResp.Text, "message") ?? "")); return; }
+            // status 解析失败（信封形态变化）→ 落到 NDJSON 回退，不硬失败
+        }
+        // 内核路由不可达/未放行 → 静默回退 NDJSON（下方原逻辑）
+    }
     var envelope = "{\"v\":1,\"id\":\"" + id + "\",\"op\":\"" + op + "\",\"args\":" + argsJson +
                    ",\"createdAt\":\"" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "\"}";
 

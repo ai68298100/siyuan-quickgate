@@ -297,7 +297,7 @@
 - [x] v2 内核同步路由：`POST /plugin/private/siyuan-quickgate/exec` 同步处理内核可处理 op 子集（ping/registry/diagnostics/events/config/template），前端专属 op 回结构化 unsupported（v0.5.0，实验性；spike 真机校准前不建议生产依赖）
 - [ ] 【R4·新】内核路由真机校准：exec 可达性/鉴权/请求体解析/内核自呼 loadPetals 行为（新增 spike⑩）
 - [x] 【R4·新】内核路由前端中继评估：**暂不实现**（D-0010——官方 API 仅单向 broadcast，无同步前端调用；中继可行但脆弱，NDJSON 已覆盖前端 op；重评触发=实测同步性痛点）
-- [ ] 【R4·新】Quicker 侧 `SY·路由` 增加内核通道优先分支（探测 200 则直呼，失败回退 NDJSON）——待 spike⑩
+- [x] 【R4·新】Quicker 侧 `SY·路由` 增加内核通道优先分支（探测 200 则直呼，失败回退 NDJSON）——spike⑩ 已校准 ✅ → ✅ R233 交付：SY-路由.cs v1.1——KERNEL_OPS 七 op 集合（与 src/ops.ts 同源）经 /plugin/private/<插件>/exec 同步直呼（~100ms，桥开关默认关也可用），失败/前端专属 op 静默回退 NDJSON 原逻辑；reference README 对照节同步。csc C#5 编译门全净
 
 ### 5.7 生命周期（✅ v0.3.0 已完成主体）
 - [x] onunload 优雅停机（stop 标志 + 审计终写）
@@ -324,7 +324,7 @@
 - [x] 【R6·循环A】事件订阅通道 bug 修复：v0.4.1 误订 app.eventBus（上游只走 window CustomEvent，永不触发）→ v0.5.2 改订 window + unwrapCheckinDetail 兼容包裹形状（D-0009 勘误）
 - [x] 【R6·循环A】生态清单校准（远端 main 实证）：雷切 0.44.1 +3 能力、打卡 18.16.0 契约 8 事件全登记 + calendar.read、人脉 0.4.1 桥 v1 不变
 - [x] 【R6·新】events 多事件订阅：**R7 完成**——event-deleted 已接入（v0.5.4），analytics-updated 决策不订阅（D-0011）
-- [ ] 【R6·新】雷切 0.44 新能力评估：restore-document-set / get-document-outline / home-adapter-diagnostics 是否开新 op 或并入 plugin.api 允许名单（design note 先行）
+- [x] 【R6·新】雷切 0.44 新能力评估：restore-document-set / get-document-outline / home-adapter-diagnostics 是否开新 op 或并入 plugin.api 允许名单（design note 先行） → ✅ R233 裁定=不开新 op（对照 R7 既有裁定 docs/10 §3.7 同结论）：commands.run 覆盖命令面 + plugin.api 默认名单已覆盖结构化面，第三条路径违反简洁性；design note 补充重开条件三条=design/docs/drafts/leiche-0.44-ops-eval.md
 - [x] 【R6·新】设置页显示生态清单版本提示：manifest 校准日期与各插件 installedVersion 差异（v0.5.3「生态清单版本」按钮，manifest×loadPetals 对照，内核不可达降级 manifest 口径）
 - [x] 【R6·循环C】快捕通道对标（flomo Webhook/Obsidian Advanced URI）结案：极简写入口设计获印证不另立项；「追加到指定标题」变体已补进 docs/03 P0-1（SQL 定位标题块→appendBlock，三级落点）——docs/10 §3.6
 - [x] 【R7】events 多事件订阅：`checkin:event-deleted` 已接入物化（event+deletedEvents 均物化，`:deleted` 幂等后缀，v0.5.4）；**analytics-updated 决策不订阅**（D-0011：高频会挤占 200 行滚动窗口）；契约草稿补删除语义（append-only 标记行配对规则）
@@ -420,12 +420,12 @@
 #### 5.9.1 状态与文档边界
 
 - [x] 【R69·账本】建立“设计仓库 `quicksrer 动作` ↔ 实现仓库 `siyuan-quickgate`”映射表：记录实现仓库路径、分支、tag、当前版本和权威文件，避免把两个仓库的统计混在一起。 → ✅ R218 交付 **docs/REPO-MAP.md**（仓库映射/权威文档映射/版本锚点三表——随版本更新）
-- [ ] 【R69·文档】刷新根 `README.md` 的状态头、版本、单测数、待办数、内核版本和默认端口到 R68/v0.7.1/3.8.6；旧 1568 只保留在历史更正说明中。
+- [x] 【R69·文档】刷新根 `README.md` 的状态头、版本、单测数、待办数、内核版本和默认端口到 R68/v0.7.1/3.8.6；旧 1568 只保留在历史更正说明中。 → ✅ R233 对照销账（部分累计交付）：版本徽章 0.7.3/许可/SiYuan ≥3.8.4 均当前（R69 已刷）；本次补齐单测数 124→155（双语 README 验收门行）；26 op/14 只读计数随 L474 同步；待办数/端口头由快照与 docs/13 承载（单一事实源，README 不再重复维护）
 - [x] 【R69·文档】重写或明确标注 `docs/09-本轮审查与收敛建议.md` 的 230 项/“无源码无 CI”内容为历史快照，并补当前 v0.7.1 实现仓库证据。 → ✅ R218 docs/09 头部加历史快照声明（过时表述已过时标注+指向 REPO-MAP）
 - [x] 【R69·文档】同步 `docs/13-版本与发布策略.md`、`quicker-actions/README.md`、`quicker-actions/reference/README.md` 的版本线、导出状态和六件参考件边界。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）
 - [x] 【R69·文档】同步实现仓库 `docs/PROGRESS.md`、`docs/ROADMAP.md`、`docs/WALKTHROUGH.md` 到 v0.7.1/R68/3.8.6：明确内核路由与 `registry.list` 冒烟已通过，③桥端到端、v1.5 延迟、⑪真实打卡仍待用户开桥/给数据。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）
 - [ ] 【R69·口径】清理 TODO 内部过期勾选和措辞（spike③、v1.5、spike⑩、registry frontend、雷切 0.44 等），重新按实际复核结果计算总项数；把“代理→内核路由冒烟通过”和“Claude/Cursor 真 MCP host 完整会话未验”分开记录，禁止把后者写成已完成。
-- [ ] 【R69·契约】以 `src/ops.ts`、实现和 contracts JSON 为单一核对基准，刷新 `docs/api.md` 中 events/workflow 的 design/unsupported 旧描述、`source` 字段说明和三通道回退语义。
+- [x] 【R69·契约】以 `src/ops.ts`、实现和 contracts JSON 为单一核对基准，刷新 `docs/api.md` 中 events/workflow 的 design/unsupported 旧描述、`source` 字段说明和三通道回退语义。 → ✅ R233 对照销账：events/workflow「设计态/当前回 unsupported」旧表述已于 v0.7.3 更正（api.md L55 明确「早期设计态表述作废」）；本次复核无残留过期描述；23/13 计数随 L474 更新为 26/14
 
 #### 5.9.2 上游规范与分发调研转为验收项
 

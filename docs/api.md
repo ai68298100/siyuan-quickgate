@@ -13,7 +13,7 @@
 
 内核通道用法：`POST {SY_URL}/plugin/private/siyuan-quickgate/exec`，头 `Authorization: Token <思源Token>`，体 `{"op":"…","args":{…}}`，响应 `data.data` 为与 NDJSON 同形状的回执。前端专属 op 回 `unsupported`。**无 Token 请求必须被 401/403 拒绝**（spike⑩⓪ 负向探针；该头是 localhost 通道唯一 CSRF 防线）。
 
-**参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec|fast>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼、`fast` 广播快路径）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec] [-Fast]`。**AI 客户端**：`src/mcp/`（MCP stdio 代理，23 op→tools，默认 13 只读，详见其 README）。
+**参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec|fast>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼、`fast` 广播快路径）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec] [-Fast]`。**AI 客户端**：`src/mcp/`（MCP stdio 代理，26 op→tools，默认 14 只读，详见其 README）。
 
 ## 通用
 
