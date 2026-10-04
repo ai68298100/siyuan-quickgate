@@ -1,34 +1,34 @@
 {
-  "generatedAt": "2026-10-04T15:53:33.226Z",
+  "generatedAt": "2026-10-04T16:48:57.941Z",
   "source": "TODO.md",
   "counts": {
     "total": 1393,
     "checkboxes": 1393,
     "byStatus": {
-      "done": 1137,
-      "pending": 187
+      "done": 1143,
+      "pending": 181
     },
     "byMainline": {
       "C7": 277,
-      "C8": 221,
+      "C8": 220,
       "C4": 113,
       "C6": 503,
       "C2": 123,
       "C1": 77,
-      "C3": 69,
+      "C3": 70,
       "C5": 10
     },
     "byEvidence": {
-      "E4": 996,
-      "E0": 257,
-      "E2": 81,
+      "E4": 1002,
+      "E0": 255,
+      "E2": 79,
       "E3": 30,
-      "E1": 28,
+      "E1": 26,
       "E5": 1
     },
     "byBlocked": {
       "user": 61,
-      "dev": 187,
+      "dev": 181,
       "environment": 4,
       "upstream": 2,
       "deferred": 2
@@ -7185,18 +7185,21 @@
       "priority": null,
       "topic": "兼容性",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "建立 SiYuan 3.8.4（最低版本）、3.8.6（当前实测）、3.8.7-alpha/下一稳定版的兼容矩阵，覆盖 `kernels:[\"all\"]`、私有路由、broadcast、petal 和内置 MCP 共存。",
+      "text": "建立 SiYuan 3.8.4（最低版本）、3.8.6（当前实测）、3.8.7-alpha/下一稳定版的兼容矩阵，覆盖 `kernels:[\"all\"]`、私有路由、broadcast、petal 和内置 MCP 共存。 → ✅ R226 交付：docs/13 增「SiYuan 内核兼容矩阵」节（3.8.4/3.8.6/next × 7 能力面逐格证据等级 + 升级复核程序四步）",
       "mainline": "C6",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R69",
-          "R68"
+          "R68",
+          "R226"
         ],
-        "docs": []
+        "docs": [
+          "docs/13"
+        ]
       }
     },
     {
@@ -7273,16 +7276,17 @@
       "priority": null,
       "topic": "Quicker",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "核对 Quicker 2.3「脚本动作」与现有普通 C# 模块的边界：脚本动作不支持 `async/await`、`lock` 等写法，六件参考件应明确目标运行模式，避免用户误粘贴到错误模块。",
+      "text": "核对 Quicker 2.3「脚本动作」与现有普通 C# 模块的边界：脚本动作不支持 `async/await`、`lock` 等写法，六件参考件应明确目标运行模式，避免用户误粘贴到错误模块。 → ✅ R226 交付：reference/README 增「目标运行模式」节（对照表：语法面/Mutex/宿主上下文/兼容性；核对结论=27 件零 async/await，SY-日志轮转 Mutex 需普通模式）+ 六件核心参考件文件头加【目标模式】标注；csc 编译门复跑全净",
       "mainline": "C7",
-      "evidence": "E1",
+      "evidence": "E4",
       "refs": {
         "sections": [],
         "rounds": [
           "R69",
-          "R68"
+          "R68",
+          "R226"
         ],
         "docs": []
       }
@@ -7405,16 +7409,20 @@
       "priority": "P1",
       "topic": null,
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "明确并统一所有写 op（checkin.record、contacts.ensure/interaction、template.new、commands.run、workflow.execute、plugin.api）的确认、审计、黑名单和 MCP 写开关策略。",
+      "text": "明确并统一所有写 op（checkin.record、contacts.ensure/interaction、template.new、commands.run、workflow.execute、plugin.api）的确认、审计、黑名单和 MCP 写开关策略。 → ✅ R226 交付：safety-gate-contract §6「写 op 统一策略表」（7 写 op × 确认/审计/黑名单/幂等/MCP 门 + 现状差距①审计全覆盖②内核旁路收口 + 五条统一策略；并修正 §2「内核子集无写命令」过时表述）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
+        "sections": [
+          "6",
+          "2"
+        ],
         "rounds": [
           "R70",
-          "R68"
+          "R68",
+          "R226"
         ],
         "docs": []
       }
@@ -9846,12 +9854,14 @@
       "type": "unknown",
       "status": "pending",
       "blockedBy": null,
-      "text": "将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。",
+      "text": "◐ R226 半交付（契约+schema+校验器=设计仓库侧已落，TS 类型/CI 门禁挂 quickgate 批）：将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。",
       "mainline": "C1",
       "evidence": "E2",
       "refs": {
         "sections": [],
-        "rounds": [],
+        "rounds": [
+          "R226"
+        ],
         "docs": []
       }
     },
@@ -9863,14 +9873,18 @@
       "priority": "P1",
       "topic": "权威矩阵",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。",
-      "mainline": "C8",
-      "evidence": "E2",
+      "text": "明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。 → ✅ R226 交付：ecosystem-manifest-contract §2 权威矩阵（8 数据域 × source of truth × 契约面 × 快门角色/禁止项 + 三不变量）",
+      "mainline": "C3",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
-        "rounds": [],
+        "sections": [
+          "2"
+        ],
+        "rounds": [
+          "R226"
+        ],
         "docs": []
       }
     },
@@ -9922,12 +9936,16 @@
       "type": "unknown",
       "status": "pending",
       "blockedBy": null,
-      "text": "统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。",
+      "text": "◐ R226 设计定稿（ecosystem-manifest-contract §3：桥/事件/工作流/跨插件四域键形状+TTL+四规则；统一注册表实现挂 quickgate 批）：统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。",
       "mainline": "C7",
       "evidence": "E2",
       "refs": {
-        "sections": [],
-        "rounds": [],
+        "sections": [
+          "3"
+        ],
+        "rounds": [
+          "R226"
+        ],
         "docs": []
       }
     },
@@ -10129,14 +10147,18 @@
       "priority": "P2",
       "topic": "作者接入包",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "为小驴插件作者提供 manifest 模板、能力/事件命名、版本协商、示例 adapter、诊断字段和最小联调脚本，提交前检查 ID/版本/事件漂移。",
+      "text": "为小驴插件作者提供 manifest 模板、能力/事件命名、版本协商、示例 adapter、诊断字段和最小联调脚本，提交前检查 ID/版本/事件漂移。 → ✅ R226 交付：ecosystem-manifest-contract §4 作者接入包全项 + templates/ecosystem-manifest-entry.template.json（可过校验的示例模板）+ scripts/validate-ecosystem-manifest.mjs（零依赖校验器，模板+quickgate v1 清单实跑通过，v1 迁移期警告/v2 严格双档）",
       "mainline": "C3",
-      "evidence": "E2",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
-        "rounds": [],
+        "sections": [
+          "4"
+        ],
+        "rounds": [
+          "R226"
+        ],
         "docs": []
       }
     },
@@ -10416,12 +10438,16 @@
       "type": "unknown",
       "status": "pending",
       "blockedBy": null,
-      "text": "template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。",
+      "text": "◐ R226 规格定稿（safety-gate-contract §7：templatePath 白名单形状/64KB 上限//templates/ 前缀断言/失败审计/三通道回归矩阵 7 用例；现状两通道 `..` 直拼未拦截已源码核对；代码守卫挂 quickgate 批）：template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。",
       "mainline": "C6",
       "evidence": "E3",
       "refs": {
-        "sections": [],
-        "rounds": [],
+        "sections": [
+          "7"
+        ],
+        "rounds": [
+          "R226"
+        ],
         "docs": []
       }
     },
@@ -10566,15 +10592,21 @@
       "priority": "P1",
       "topic": "通道口径",
       "type": "unknown",
-      "status": "pending",
+      "status": "done",
       "blockedBy": null,
-      "text": "核对 kernel route `{op,args}`、`id=kernel` 与 NDJSON/MCP 信封差异；在补齐 id/externalRef 前，文档不得宣称三通道共享完整幂等台账。",
+      "text": "核对 kernel route `{op,args}`、`id=kernel` 与 NDJSON/MCP 信封差异；在补齐 id/externalRef 前，文档不得宣称三通道共享完整幂等台账。 → ✅ R226 交付：docs/02 §10（四通道对照表：命令 id 来源/回执载体/processed 台账/重放去重 + 四条使用纪律；结论=形状同形成立、台账不共享）",
       "mainline": "C6",
-      "evidence": "E0",
+      "evidence": "E4",
       "refs": {
-        "sections": [],
-        "rounds": [],
-        "docs": []
+        "sections": [
+          "10"
+        ],
+        "rounds": [
+          "R226"
+        ],
+        "docs": [
+          "docs/02"
+        ]
       }
     },
     {

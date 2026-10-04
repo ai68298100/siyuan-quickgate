@@ -430,11 +430,11 @@
 - [ ] 【R70·发布门禁】依据官方 Kernel Plugin 规范，增加 `plugin.json.kernels` 与 `kernel.js` 的 `package.zip` 解包静态断言；缺字段、缺文件或 `if-no-files-found: ignore` 时 CI 必须失败。
 - [x] 【R70·版本门禁】补齐 `plugin.json`、`package.json`、`src/index.ts` 的版本一致性检查，并让 `update_version` 不再遗漏 `PLUGIN_VERSION`；发布包、tag、CHANGELOG、README 版本同步纳入同一检查表。 → ✅ v0.7.3 续6（check-version.mjs 门禁进 CI check 链；update_version 同步 PLUGIN_VERSION；CHANGELOG/tag/README 同步待发布工具链统一——门禁已可加期望值参数校验）
 - [ ] 【R70·生命周期】验证 `kernel-plugin-state-change` 就绪时序、禁用/重新启用/热加载、多窗口 frontend 与 Kernel RPC 的竞态，形成可重复验收步骤。
-- [ ] 【R70·兼容性】建立 SiYuan 3.8.4（最低版本）、3.8.6（当前实测）、3.8.7-alpha/下一稳定版的兼容矩阵，覆盖 `kernels:["all"]`、私有路由、broadcast、petal 和内置 MCP 共存。
+- [x] 【R70·兼容性】建立 SiYuan 3.8.4（最低版本）、3.8.6（当前实测）、3.8.7-alpha/下一稳定版的兼容矩阵，覆盖 `kernels:["all"]`、私有路由、broadcast、petal 和内置 MCP 共存。 → ✅ R226 交付：docs/13 增「SiYuan 内核兼容矩阵」节（3.8.4/3.8.6/next × 7 能力面逐格证据等级 + 升级复核程序四步）
 - [ ] 【R70·鉴权】补私有路由的有效 Token、无 Token、错误 Token、只读工作区、非管理员和 HTTPS 组合矩阵；确认 401/403/404/超时消息不泄露正文或令牌。
 - [ ] 【R70·多端】验证 `storage/local`、设备名、events 和命令/回执队列在同步与多设备 Kernel 实例之间的隔离策略，明确哪些状态禁止同步、如何防止重复消费。
 - [ ] 【R70·Quicker】在真实 Quicker V2 GUI 中验证 V1/V2 导出导入、暂存区写回、AI 修改说明、最低版本和配置脱敏，再生成 `.qa` 归档；参考件和 AI 骨架继续标为不可直接发布。
-- [ ] 【R70·Quicker】核对 Quicker 2.3「脚本动作」与现有普通 C# 模块的边界：脚本动作不支持 `async/await`、`lock` 等写法，六件参考件应明确目标运行模式，避免用户误粘贴到错误模块。
+- [x] 【R70·Quicker】核对 Quicker 2.3「脚本动作」与现有普通 C# 模块的边界：脚本动作不支持 `async/await`、`lock` 等写法，六件参考件应明确目标运行模式，避免用户误粘贴到错误模块。 → ✅ R226 交付：reference/README 增「目标运行模式」节（对照表：语法面/Mutex/宿主上下文/兼容性；核对结论=27 件零 async/await，SY-日志轮转 Mutex 需普通模式）+ 六件核心参考件文件头加【目标模式】标注；csc 编译门复跑全净
 
 #### 5.9.3 实现仓库代码审查新增缺口（按优先级排队）
 
@@ -443,7 +443,7 @@
 - [x] 【R69-P1】统一广播过期命令的 processed 台账语义，验证同一过期信封重放时不会重复产生 expired 回执或改变统计。 → ✅ v0.7.3 续（过期补 markProcessed + 重放回归测试）
 - [x] 【R69-P1】统一前端 `events.pull` 与 kernel `events.pull` 的文件扫描、idempotencyKey 去重、source 白名单、stable/available 判定和删除标记配对语义。 → ✅ v0.7.3 续2（逐文件入参+跨文件幂等键去重，与内核同口径+回归）
 - [x] 【R69-P1】为 `workflow.plan/execute` 补每个 op 的参数 schema、单步 15s 超时、失败停止回执和确认边界，避免工作流执行绕过普通 dispatch 的超时纪律。 → ✅ v0.7.3 续3（单步上限+外层不叠加；参数 schema 见 MCP ARGS 表既有）
-- [ ] 【R69-P1】明确并统一所有写 op（checkin.record、contacts.ensure/interaction、template.new、commands.run、workflow.execute、plugin.api）的确认、审计、黑名单和 MCP 写开关策略。
+- [x] 【R69-P1】明确并统一所有写 op（checkin.record、contacts.ensure/interaction、template.new、commands.run、workflow.execute、plugin.api）的确认、审计、黑名单和 MCP 写开关策略。 → ✅ R226 交付：safety-gate-contract §6「写 op 统一策略表」（7 写 op × 确认/审计/黑名单/幂等/MCP 门 + 现状差距①审计全覆盖②内核旁路收口 + 五条统一策略；并修正 §2「内核子集无写命令」过时表述）
 - [x] 【R69-P1】统一 `plugin.api` 的 `args` 形状：实现当前只接受数组，而 MCP schema/契约存在对象声明；先定契约再补对象/数组/非法值测试。 → ✅ v0.7.3 三处钉死（数组=位置参数/对象=options 实参/其他 rejected）+三形状回归测试
 - [x] 【R69-P1】修复设置页开启广播时 `startBridge()` 的早退路径，确保已运行桥随后打开广播也会创建 `BroadcastSubscriber`，并补设置页集成测试。 → ✅ v0.7.3 抽出幂等 startBroadcastSub()（集成测试待真机）
 - [x] 【R69-P0】核对桥开关与事件订阅生命周期：设置页打开桥后必须调用 `startEventBridge`，关闭桥必须退订；覆盖首次开启、重复开关、重载和关闭后不再物化事件。 → ✅ v0.7.3 与 onload 配对（开桥即接上/关桥即退订；真机验证待 ⑪ 收官）
@@ -592,11 +592,11 @@
 - [ ] 【R77-P0·版本协商】打卡要求 protocol 与 apiVersion≥5，人脉要求 protocol===1 且 capabilities 完整，雷切校验宿主能力，闪卡校验 Gateway kind/capabilities；future major、unknown minor、缺能力均有测试。
 - [ ] 【R77-P0·握手字段】打卡 adapter 严格校验 `protocol:"siyuan-checkin"`、apiVersion major、descriptor 和 capability；修正 `protocolName`/`protocol` 类型漂移，未知桥不得当成打卡桥。
 - [x] 【R77-P0·事件治理】事件白名单只接收 available 且 ingestion=implemented 的能力；每个事件登记 schema、版本、幂等、source、保留和删除语义；闪卡/考试/拾遗未有物化路径前不得出现在 events.list。 → ✅ R140 eventWhitelist 收紧（移除 stable 旁路，白名单 8→2，observed 只观察不消费；ingestion=implemented 字段 manifest 暂无，事件扩面时随 manifest 演进）——真机复核 ✓（petal 热加载）
-- [ ] 【R77-P1·类型门禁】将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。
-- [ ] 【R77-P1·权威矩阵】明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。
+- [ ] 【R77-P1·类型门禁】◐ R226 半交付（契约+schema+校验器=设计仓库侧已落，TS 类型/CI 门禁挂 quickgate 批）：将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。
+- [x] 【R77-P1·权威矩阵】明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。 → ✅ R226 交付：ecosystem-manifest-contract §2 权威矩阵（8 数据域 × source of truth × 契约面 × 快门角色/禁止项 + 三不变量）
 - [ ] 【R77-P1·投影】复核雷切 checkin projection 只消费打卡 v5 的 bounded calendar/summary；跨插件月历、streak、heatmap 不得自行重算，覆盖日期格式、跨月和 owner 版本漂移回归。
 - [ ] 【R77-P1·部分成功】workflow 每步返回 status、owner、idempotencyKey、started/finished、sideEffect、retryable、已写入和待补偿列表；contacts.ensure 批量先预览去重，再执行。
-- [ ] 【R77-P1·幂等身份】统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。
+- [ ] 【R77-P1·幂等身份】◐ R226 设计定稿（ecosystem-manifest-contract §3：桥/事件/工作流/跨插件四域键形状+TTL+四规则；统一注册表实现挂 quickgate 批）：统一 `source+externalRef`（例如 `lv-cards:<sessionId>`、`exam:<sessionId>`、`glean:<docId>:<date>`）注册表，覆盖桥、事件、工作流、跨设备回放和 TTL，保证同一用户动作只记一次。
 - [ ] 【R77-P1·时间身份】源 eventId/externalRef/occurredAt/localDate/source 与快门 ingestedAt 分开；补卡、跨午夜按 owner 日期归属，删除 tombstone 按同源 eventId 配对，不能用 item/time 或接收时间猜。
 - [ ] 【R77-P1·超时取消】为每个 source 定义 ready/read/write budget；晨间/晚间聚合并行请求并按源超时，取消只取消未开始步骤，已发生副作用必须回执说明。
 - [ ] 【R77-P1·可解释导出】联合总结 Markdown/JSON 带 source plugin/version、protocol、queriedAt、时区、范围、过滤条件、missing/timeout/truncated、脱敏 event IDs/externalRefs；未知/失败不能写成 0。
@@ -607,7 +607,7 @@
 - [ ] 【R77-P1·联动预览】会议多步、学习→打卡、晚间写日记、批量人脉写入先列将读/将写/来源/幂等键/目标文档，确认后执行，重试从失败步继续。
 - [ ] 【R77-P1·回执跳转】晨间/晚间聚合在移动窄屏纵向可折叠，写按钮≥44px；外部客户端回执能跳回正确插件 Tab、文档或人物，而不是只有 toast。
 - [ ] 【R77-P2·家族分工】统一宣传和入口术语：雷切负责导航/上下文，快门负责外部网关，数据插件负责业务真相，管家只在契约确定后做聚合，避免用户误以为快门保存业务数据。
-- [ ] 【R77-P2·作者接入包】为小驴插件作者提供 manifest 模板、能力/事件命名、版本协商、示例 adapter、诊断字段和最小联调脚本，提交前检查 ID/版本/事件漂移。
+- [x] 【R77-P2·作者接入包】为小驴插件作者提供 manifest 模板、能力/事件命名、版本协商、示例 adapter、诊断字段和最小联调脚本，提交前检查 ID/版本/事件漂移。 → ✅ R226 交付：ecosystem-manifest-contract §4 作者接入包全项 + templates/ecosystem-manifest-entry.template.json（可过校验的示例模板）+ scripts/validate-ecosystem-manifest.mjs（零依赖校验器，模板+quickgate v1 清单实跑通过，v1 迁移期警告/v2 严格双档）
 - [ ] 【R77-P1·实际 op】场景设计先对照 ALL_OPS：当前没有 contacts.get、glean/cards/exam/butler 专用 op；任何新增联动必须同步 ops.ts、bridge dispatch、Kernel KERNEL_OPS、contracts JSON、MCP schema、Quicker 菜单和降级验收，不能把 manifest capability 当成可调用接口。
 - [ ] 【R77-P1·工作流缺步】计划生成时标出 WORKFLOW_ALLOWED_OPS 尚不支持的批量记录、contacts.get、事件读取、task/append 和 commands.run 步骤，允许删步重算或人工接管；禁止用 plugin.api 绕过门禁，中断不重放已完成写步。
 - [ ] 【R77-P1·命令身份】为雷切 commands.run 建立稳定 action namespace、alias/deprecation、effect/read-write/focus/requiredFrontend 元数据；保存的工作流遇到 langKey 改名时给迁移提示，commands.list 只返回可外部执行且脱敏的元数据。
@@ -625,7 +625,7 @@
 - [ ] 【R78-P0·可见内容】源码仓库 README 与安装包 README 分层，工具/MCP 配置指向源码仓库；包内 action.png、preview.png 和安装说明做安装后最小显示回归。
 - [ ] 【R78-P0·证据】为每项能力记录验证环境、日期、版本、通道、证据级别（单测/冒烟/真机/真 AI host），MCP 代理→Kernel 冒烟不能表述为 Claude/Cursor 完整会话已支持。
 - [ ] 【R78-P0·写防线】核对 MCP `template.new` 是否绕过前端 confirmExec、audit、processed ledger；若保留 Kernel 路由，必须有显式写开关、幂等键、审计和跨通道安全回归，否则移出 KERNEL_OPS。
-- [ ] 【R78-P0·路径安全】template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。
+- [ ] 【R78-P0·路径安全】◐ R226 规格定稿（safety-gate-contract §7：templatePath 白名单形状/64KB 上限//templates/ 前缀断言/失败审计/三通道回归矩阵 7 用例；现状两通道 `..` 直拼未拦截已源码核对；代码守卫挂 quickgate 批）：template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。
 - [ ] 【R78-P0·plugin.api】按插件公开契约登记 method 白名单、参数 schema、危险级别、单独确认和审计；拒绝原型链属性、`constructor` 等动态方法，三通道一致测试。
 - [ ] 【R78-P1·错误分类】Kernel getFileText/桥读取区分 404 缺失、401/403 鉴权、5xx/网络不可达和空文件；UI、诊断和指标不得把所有异常显示成“没有文件”。
 - [ ] 【R78-P1·HTTP契约】Kernel API 明确 `Content-Type: application/json`、响应 content-type、最大响应体和超时；2xx+业务 code 非零、非 JSON、空文件、401/403/404/5xx 分开计数和文案。
@@ -633,7 +633,7 @@
 - [ ] 【R78-P1·运行记录】为多阶段 markProcessed→执行→写回执建模 pending/running/done/unknown，支持回执补写或 outbox；unknown 不能被伪装成 failed 后盲重试。
 - [ ] 【R78-P0·事件源隔离】验证多事件文件按 file→text 成对读取，跨打卡/cards/exam/glean 文件按 idempotencyKey 去重并保留准确 sourceFile；不得把拼接全文对每个文件重复扫描。
 - [ ] 【R78-P1·工作流ID】对 workflow.plan 并发生成唯一 planId/correlationId，避免同毫秒计划覆盖；回执、审计和子步骤保留关联链并覆盖多 MCP 请求冲突。
-- [ ] 【R78-P1·通道口径】核对 kernel route `{op,args}`、`id=kernel` 与 NDJSON/MCP 信封差异；在补齐 id/externalRef 前，文档不得宣称三通道共享完整幂等台账。
+- [x] 【R78-P1·通道口径】核对 kernel route `{op,args}`、`id=kernel` 与 NDJSON/MCP 信封差异；在补齐 id/externalRef 前，文档不得宣称三通道共享完整幂等台账。 → ✅ R226 交付：docs/02 §10（四通道对照表：命令 id 来源/回执载体/processed 台账/重放去重 + 四条使用纪律；结论=形状同形成立、台账不共享）
 - [ ] 【R78-P1·配置生效】验证 pollMs 等运行配置修改是否动态作用于已启动 poller；界面显示当前生效值，必要时明确需要重启，不能只更新存储值。
 - [ ] 【R78-P1·卸载一致性】热重载/禁用/崩溃前等待 audit、event bridge、broadcast subscriber 的 flush/stop 完成或超时，验证审计、事件和队列不会静默丢失，并在诊断记录关闭结果。
 - [x] 【R78-P2·边界输入】为 auditMax=0、NaN/Infinity、小数、UTF-8 字节、单行/总缓冲、op/device 长度、深嵌套 args 建立边界测试和错误文案。 → ✅ R143 整数语义加固（pollMs/backoffMaxMs/auditMax Number.isInteger，小数此前漏进持久化）+NaN/Infinity/小数/深嵌套 args 均有 chaos/契约测试覆盖

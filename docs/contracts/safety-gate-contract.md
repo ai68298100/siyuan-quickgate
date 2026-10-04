@@ -55,3 +55,34 @@ kernel/model/session.go CheckAuth 判定顺序：
 **CI 容器 registry.list 400 的定位**：认证层（1~3）已过（400≠401），400 在业务/私有路由层——kernelRegistryList 容器内自呼 loadPetals 或会话依赖，需容器内逐层调试（实验分支继续）。
 
 **本机直通 vs 容器 400 差异根因候选**：本机思源窗口存在已认证会话（浏览器 cookie）+ Sec-Fetch 头差异；容器纯 curl 无会话头。
+## 6. 写 op 统一策略表（R69-P1·L446 · R226 定稿）
+
+> 写 op 全集（7）：`checkin.record`、`contacts.ensure`、`contacts.interaction`、`template.new`、`commands.run`、`workflow.execute`、`plugin.api`（透传面）。
+> §2 防线矩阵「内核子集无写命令」的表述已过时——`template.new` 自入 KERNEL_OPS 起为内核路由可达写 op（L627 登记的旁路面），本表为修正基准。
+
+| 写 op | 确认门 | 审计 | 黑名单 | 幂等键 | MCP 写门 | 差距（现状→目标） |
+|---|---|---|---|---|---|---|
+| `commands.run` | ✅ confirmExec 开时 30s confirm（超时=拒绝） | ✅ 每次落 audit | ✅ settings.blacklist（插件级） | 无（执行类） | write=true | — |
+| `checkin.record` | 无（单条打卡低风险，数据归 owner） | ✗ | 不适用（能力协商担当） | ✅ externalRef=命令 id（v0.5.7 source 归一 api） | write=true | 审计缺失→差距① |
+| `contacts.ensure` / `contacts.interaction` | 无 | ✗ | 不适用 | ensure 幂等 ref 防重建（L578）；interaction ref=命令 id | write=true | 审计缺失→差距① |
+| `template.new` | 无（新建文档，不覆写） | ✗ | 不适用 | 无 id（每次新建） | write=true | 审计缺失→差距①②；路径安全→§7 |
+| `workflow.execute` | ✅ confirmAll（步骤摘要 30s） | 步级继承各 op | ✅ 继承各 op | planId+步序（内存 5min） | write=true + destructiveHint | — |
+| `plugin.api` | 无（读为主） | ✅ 共用 audit | ✅ rawApiAllowlist | 不适用 | write=true 且需 rawApiEnabled | — |
+
+统一策略（目标态；①②挂 quickgate 实现批）：
+1. **差距①（审计全覆盖）**：全部写 op 在 dispatch 出口统一 audit（status/elapsedMs/args 脱敏摘要），不依赖各 case 自律；rejected/unsupported 也留痕。
+2. **差距②（内核旁路收口）**：`template.new` 保留在 KERNEL_OPS 的前提 = §7 守卫+审计落地；未落地前 MCP 侧以 write 门+「实验」标注补偿（L627 合并裁定）。
+3. 确认门只设两档语义：`exec`（单命令确认）/ `all`（批量步骤摘要）；数据透传类写（checkin/contacts）默认无确认——依据「数据归 owner 插件」边界（ecosystem-manifest-contract §2），必须有幂等键。
+4. 黑名单只作用于执行面（commands.run / plugin.api）；数据透传类由能力协商担当（缺能力=unsupported，不得伪装 denied/failed，L618）。
+5. MCP 写门恒必须：write 标注=tools.ts 单一事实源，schema 门测试强制 tools 集合===ALL_OPS；`LV_MCP_WRITE=1` 才投影（§3 不变）。
+
+## 7. template.new 路径安全规格（R78-P0·L628 · R226 定稿）
+
+**现状（R226 源码核对）**：前端与内核两通道均为 `` `/templates/${templatePath.replace(/^\/+/, "")}` `` 直拼——`..` 回溯、反斜杠、NUL、绝对路径均未拦截；内容无大小上限；拒绝路径无审计。MCP 经内核路由同缺陷。
+
+**规格（三通道一致；quickgate 批实现+回归）**：
+1. `templatePath` 白名单形状：必须匹配 `^[A-Za-z0-9][A-Za-z0-9/_-]*\.(md|txt)$`；含 `..` 段、`\`、NUL、前导 `/`、`%`、控制字符 → `rejected`（中文 message 说明原因）。
+2. 长度/大小上限：`templatePath` ≤200 字符；`template` 内联与 templatePath 读取内容均 ≤64KB——超限 `rejected`，**不得截断后继续执行**。
+3. 目录限定：`getFileText` 只允许 `/templates/` 前缀（拼接前断言；禁止依赖 `replace` 兜底后逃出目录）。
+4. 失败审计：rejected 也写 audit（op、templatePath、原因；**不含模板内容**）。
+5. 回归矩阵（前端 NDJSON / 内核路由 / MCP 三通道各跑一遍）：`../conf/siyuan.json`、`a/../../storage/petal/x/bridge/results.ndjson`、`..\windows`、含 NUL、绝对路径 `/data/...`、301 字符超长、合法 `hello.md`（唯一应 `recorded` 的用例）。

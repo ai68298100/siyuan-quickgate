@@ -5,6 +5,7 @@
 // @version 1.0.0 · 2026-10-03 首版（编译验证通过；pending 语义不换 id 重试）
 //
 // 【模块设置】后台线程（MTA）。
+// 【目标模式】普通动作→「C# 脚本」模块（普通模式v2）；不是 Quicker 2.3+ 的「脚本动作」类型（该类型为语法子集：无 async/await、无 lock/Mutex，宿主上下文 API 面不同），误贴会编译或运行失败。
 // 【输入变量】桥插件(文本) 命令id(文本) 等待毫秒(数字；普通数据 op 8000 / commands.run 35000)
 // 【输出变量】回执状态(文本：recorded|rejected|failed|unsupported|expired|timeout)
 //             回执消息(文本) 回挂数据(文本，JSON) 回执原始行(文本)

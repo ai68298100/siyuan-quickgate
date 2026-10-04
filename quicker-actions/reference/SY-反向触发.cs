@@ -7,6 +7,7 @@
 // 【前置】Quicker 设置 → 软件连接 → HTTP/WebSocket 服务：启用 HTTP API 并生成令牌
 //         （默认端口 668，HTTPS 用 lan.quicker.cc 域名证书；本封装两种地址都支持）
 // 【模块设置】后台线程（MTA）。
+// 【目标模式】普通动作→「C# 脚本」模块（普通模式v2）；不是 Quicker 2.3+ 的「脚本动作」类型（该类型为语法子集：无 async/await、无 lock/Mutex，宿主上下文 API 面不同），误贴会编译或运行失败。
 // 【输入变量】qk_api_url(文本，如 https://127-0-0-1.lan.quicker.cc:668 或 http://127.0.0.1:668)
 //             qk_api_token(文本，设置页「生成令牌」) 目标动作(文本，动作 ID 或名称) 动作参数(文本，传给动作的输入，可空)
 //             等待完成(文本，"true"/"false"，默认 false) 超时ms(数字，默认 3000，上限 60000)

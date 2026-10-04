@@ -1,0 +1,40 @@
+{
+  "$comment": "小驴插件作者接入模板（C9 合同 §4 · docs/contracts/ecosystem-manifest-contract.md）。本文件本身可通过校验（示例值即合法形状）：node scripts/validate-ecosystem-manifest.mjs --file templates/ecosystem-manifest-entry.template.json。接入时复制到 quickgate src/assets/ecosystem-manifests.json 的 plugins[]，把 example 占位值替换为真实值并删除全部 $comment 字段（校验器忽略 $comment*）。",
+  "$comment-maturity": "stable=已发布公开契约且可与快门联调；design=设计态（只进 manifest 与诊断，不注册 adapter）；unlocated=仓库未定位",
+  "pluginId": "siyuan-example",
+  "displayName": "示例插件",
+  "maturity": "stable",
+  "version": "1.0.0",
+  "$comment-version": "上游 plugin.json 的 version；unlocated 插件填 null",
+  "protocol": "window.exampleBridge v1",
+  "$comment-protocol": "窗口桥格式 window.<BridgeName> v<Major>；命令面写 agent-capabilities + commands",
+  "minProtocol": "v1",
+  "$comment-minProtocol": "快门已验证的最低 major（v2 新增·stable 必填）；design/unlocated 填 null",
+  "windowBridge": "exampleBridge",
+  "$comment-windowBridge": "window 公开桥全局名；无窗口桥插件删除本字段",
+  "sourceOfTruth": ["example.data"],
+  "$comment-sourceOfTruth": "本插件权威的数据域（domain.sub 格式，v2 新增·必填数组，无则空数组）；对照合同 §2 权威矩阵",
+  "ingestion": "eventFile",
+  "$comment-ingestion": "eventFile=storage/petal/<pluginId>/bridge/events.ndjson（快门 events.pull 可消费）；windowEvent=window CustomEvent；none=无事件（stable 插件有 events 时不得为 none）",
+  "eventNamespace": "example",
+  "capabilities": ["example.read"],
+  "$comment-capabilities": "上游既有公开能力名优先；新命名用 domain.verb-noun",
+  "capabilitySchemas": {
+    "example.read": { "required": ["limit"], "properties": {} }
+  },
+  "$comment-capabilitySchemas": "optional（planned，逐能力补齐）；形状 { required?: string[], properties?: object }",
+  "events": [
+    {
+      "name": "example:done",
+      "status": "available",
+      "$comment-status": "available=快门已订阅物化（须有 payload）；observed=上游广播存在未消费；design=草案",
+      "idempotency": "source+externalRef",
+      "$comment-idempotency": "非空必填；推荐 source+externalRef 派生式（合同 §3）",
+      "payload": { "type": "done", "note": "字段形状摘要：refId=string, occurredAt=string" },
+      "since": "1.0.0",
+      "$comment-since": "上游引入版本（v2 新增·optional，漂移审计用）",
+      "note": "物化/订阅说明一句话"
+    }
+  ],
+  "hubIntegration": "示例：透传 adapter（源能力协商）；仅 manifest 诊断则写「仅 manifest/诊断」"
+}
