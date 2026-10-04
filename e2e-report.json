@@ -1,0 +1,34 @@
+{
+  "startedAt": "2026-10-04T15:51:37.054Z",
+  "url": "http://127.0.0.1:14643",
+  "checks": [
+    {
+      "name": "内核可达",
+      "status": "pass",
+      "note": "思源 3.8.6 @ http://127.0.0.1:14643"
+    },
+    {
+      "name": "令牌有效",
+      "status": "pass",
+      "note": "（经工作区端口自动发现）"
+    },
+    {
+      "name": "桥 ping",
+      "status": "pass",
+      "note": "recorded（0ms）"
+    },
+    {
+      "name": "内核路由",
+      "status": "pass",
+      "note": "pong（内核同步通道）"
+    },
+    {
+      "name": "petal 加载",
+      "status": "pass",
+      "note": "快门已加载"
+    }
+  ],
+  "failures": 0,
+  "skipped": 0,
+  "finishedAt": "2026-10-04T15:51:57.012Z"
+}

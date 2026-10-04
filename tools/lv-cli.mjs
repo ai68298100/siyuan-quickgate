@@ -42,7 +42,22 @@ async function putText(path, text) {
         headers: { Authorization: `Token ${token}` },
         body: form,
     });
-    if (!res.ok) throw new Error(`putFile HTTP ${res.status}`);
+    if (!res.ok) throw new Error(await diagnose(res, "putFile"));
+}
+
+/** R214 新增：429/401 精确诊断（多会话共享内核时高频踩坑） */
+async function diagnose(res, api) {
+    const retry = res.headers.get("Retry-After");
+    if (res.status === 429) {
+        const wait = retry ? `${retry}s（约 ${Math.ceil(retry / 60)} 分钟）` : "未知";
+        return `${api} 429 认证锁定：先前失败尝试触发防爆破——等待 ${wait} 后重试；期间勿再发请求（会刷新锁定）`;
+    }
+    if (res.status === 401) {
+        let body = "";
+        try { body = (await res.text()).slice(0, 120); } catch { }
+        return `${api} 401 令牌被拒：令牌可能已在其他会话/设备轮换——思源 设置→关于 复制新令牌更新 env；响应：${body}`;
+    }
+    return `${api} HTTP ${res.status}`;
 }
 
 function genId() {

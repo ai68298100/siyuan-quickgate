@@ -32,7 +32,8 @@
     "smoke:mcp": "node tools/mcp-smoke.mjs",
     "verify:restart": "node tools/verify-restart.mjs",
     "build:mcp": "node scripts/build-mcp.mjs",
-    "accept": "run-s test smoke:mcp"
+    "accept": "run-s test smoke:mcp",
+    "verify:bg": "node --no-warnings ./tools/e2e-bg.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
