@@ -2,14 +2,22 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
-## Unreleased（R261~：v0.7.4 后增量）
+## v0.7.5 · 2026-10-05（v0.7.4 后增量：发布链补强 + Agent 集成指南 + 运维工具）
 
 ### Added
 - **package.zip 解包静态断言**（check-package.mjs 入 check:release 链）：kernels 字段回归门（bug#9 预防）+ zip 内容三件套核验；跨平台（powershell→pwsh 探测，双无则显式跳过 zip 级）
-- REPO-MAP 重写为合并后单仓格局（运维事实表含部署纪律）；AGENTS.md 数字时效 + verify:bg 入口
+- **docs/agent-integration.md**：思源内置 Agent 集成指南——路径 A 原生三能力（零配置）/ 路径 B `ai.mcp.servers` 字段级 stdio 挂法 / 审批策略配置 / 四行排障表（README 双语与 GETTING-STARTED 已链接）
+- **tools/restart-siyuan.bat**：部署后一键安全重启思源（优雅终止→等待→重启→验证）——bug#15 的用户操作负担解除
+- 真机活体验证扩展至 20+ 项（收藏全链/别名搜索/workflow 计划/事件拉取/审计留痕/editor.context/contacts.search 等，v0.7.4 前端全量生效后完成）
+
+### Fixed
+- **bug#17 登记**（功能零影响）：内核 plugin.go:884 对 onrunning/onunload 可选钩子报「not bound」噪音（日志 62+ 条）——R245 noop 修复无效已回退（内核读取的 lifecycle 绑定路径与本 bundle 设置不同，goja 上下文差异），根因需 goja DevTools
+- 使用手册 §5 两处漂移：排障工具列全（审计/收藏管理/恢复默认/能力目录）+ MCP 14 只读/26 总 + Agent 指南链接
 
 ### Docs
-- v0.7.4 发版后文档线：使用手册「搭建顺序 × 参考件速查表」+「参数化 siyuan:// 链接集」附录；ROADMAP 刷新至当前事实；M2 视觉走查注记（IAB webview 无法启动思源 Web——需桌面端/独立 Playwright）
+- **README 双语重写**：修复 MCP/Agent 两节结构断裂（R246 插入错位）、op 清单补 favorites.*、安装节改 Releases 链接（prerelease 不链 /releases/latest，L643）+ 完全退出重启提示、状态段改里程碑表（补 v0.7.4/v0.7.5）、开发节补 verify:bg 与重启工具、测试数 155→162
+- REPO-MAP 重写为合并后单仓格局（运维事实表含部署纪律）；AGENTS.md 数字时效 + verify:bg 入口
+- 使用手册「搭建顺序 × 参考件速查表」+「参数化 siyuan:// 链接集」附录；ROADMAP 刷新至当前事实；M2 视觉走查注记（IAB webview 无法启动思源 Web——需桌面端/独立 Playwright）
 
 ## v0.7.4 · 2026-10-05（R231~R258：安全修复 + 收藏全链 + 思源 Agent 原生集成 + 并发正确性）
 

@@ -2,13 +2,14 @@
 
 [中文文档](./README.zh-CN.md)
 
-[![Version](https://img.shields.io/badge/version-0.7.4-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.7.5-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (26 ops):
 
-- `commands.*` — discover / search / run command-palette entries of any installed plugin (confirm-gated, audited)
+- `commands.*` — discover / search / run command-palette entries of any installed plugin (confirm-gated, audited; search understands zh/en/pinyin aliases — 打卡/daka/checkin all hit)
 - `checkin.*` / `contacts.*` — structured pass-through to the public bridges of Lv Check-in (API v5) and Lv Contacts (bridge v1)
-- `registry.list` / `diagnostics.report` / `config.discover` — Lv ecosystem manifest (7 plugins, maturity × installed version), sanitized diagnostics, daily-note notebook auto-discovery
+- `favorites.*` — favorites & recent usage (command-palette UX: dedupe-and-move-to-front, privacy clearing; stored separately from bridge files)
+- `registry.list` / `diagnostics.report` / `config.discover` — Lv ecosystem manifest (7 plugins, maturity × installed version), sanitized diagnostics, daily-note notebook + inbox auto-discovery
 - `events.list` / `events.pull` — whitelisted event stream (check-in record/deletion auto-materialized; deletions as `:deleted`-suffixed markers coexisting with originals)
 - `workflow.plan` / `workflow.execute` — controlled orchestration (≤8 steps, op whitelist, 30s total confirm, stop-on-failure)
 - `template.new` / `doc.open` / `daily.status` / `editor.context` / `setting.open` — doc-from-template, controlled navigation, editor context
@@ -22,13 +23,14 @@
 | Kernel sync route (v0.5.0) | ~100ms | kernel-capable subset (7 ops) | `POST /plugin/private/siyuan-quickgate/exec`; works with the bridge switch off |
 | Broadcast fast path (v1.5, v0.6.0) | ~10–100ms | all frontend ops | SSE on `qg-cmd` channel; off by default; reservation semantics against dual-channel replays |
 
-> **Marketplace status: deferred.** Install manually from GitHub Releases (import `package.zip` via SiYuan → Marketplace → Downloads → Install from package). This repo is the single distribution channel for now.
+> **Marketplace status: deferred.** GitHub Releases is the single distribution channel for now (see install below).
 
 ## Install (manual)
 
-1. Download `package.zip` from the [latest release](https://github.com/ai68298100/siyuan-quickgate/releases/latest).
+1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) (prerelease-marked = public testing; SHA-256 checksums included).
 2. SiYuan → Settings → Marketplace → Downloads → top-right menu → *Install from package* → pick the zip.
 3. Enable the plugin, open its settings, switch **External command bridge** on (default off by design).
+4. **After updating, fully quit SiYuan (tray → quit) and start it again** — reopening the window does not refresh plugin frontend code. Or just double-click `tools/restart-siyuan.bat`.
 
 ## Protocol
 
@@ -42,17 +44,13 @@ events.ndjson     # public host-event stream (materialized by QuickGate on behal
 
 Envelope: `{v:1, id, op, args, createdAt, ttlMs?, reply?, device?}` — receipts echo `id` with `status ∈ recorded|duplicate|rejected|failed|unsupported|expired`. Full contract: [docs/api.md](./docs/api.md) · machine-readable: [docs/contracts/quickgate-api-v1.json](./docs/contracts/quickgate-api-v1.json) (the op face is enforced against `src/ops.ts` by a consistency test).
 
-Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/tools): zero-dependency node CLI (`ping/send/run/events/exec/fast`) and a PowerShell script (`-Exec` kernel route, `-Fast` broadcast). Quicker subprograms use the same envelope.
+Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/tools): zero-dependency node CLI (`ping/send/run/events/exec/fast`), a PowerShell script (`-Exec` kernel route, `-Fast` broadcast) and `restart-siyuan.bat` (one-click safe restart after deploying). Quicker subprograms use the same envelope.
 
 ### MCP for AI assistants
 
 [`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 26 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, a surface no built-in MCP server covers (see project design docs, docs/10 §3.14, for the rationale).
 
 - **14 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
-
-### Built-in SiYuan Agent integration (automatic, no config)
-
-On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **built-in AI Agent** via `siyuan.agent.registerCapability`: `quickgate_ping` (health), `quickgate_discover` (diary notebook + inbox discovery) and `quickgate_capture` (append a line to today's daily note). They appear to the Agent as `plugin__siyuan-quickgate__*` tools with declared effects — nothing to configure. Alternatively, point the Agent's external-MCP settings at this repo's MCP stdio server for the full 26-tool surface — full guide: [docs/agent-integration.md](https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/agent-integration.md).
 - `plugin.api` / `workflow.execute` additionally carry the `destructiveHint` annotation
 - All QuickGate-side defenses still apply: confirm dialogs, blacklist, audit log, plugin.api allowlist
 
@@ -64,6 +62,10 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 } } }
 ```
 
+### Built-in SiYuan Agent integration (automatic, no config)
+
+On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **built-in AI Agent** via `siyuan.agent.registerCapability`: `quickgate_ping` (health), `quickgate_discover` (diary notebook + inbox discovery) and `quickgate_capture` (append a line to today's daily note). Verified live on the Agent's model-facing tool list (`/api/ai/lsCapabilities`) — nothing to configure. Alternatively, point the Agent's external-MCP settings at this repo's MCP stdio server for the full 26-tool surface — full guide (field-level `ai.mcp.servers` setup + approval policy): [docs/agent-integration.md](./docs/agent-integration.md).
+
 ## Safety
 
 - Bridge is **off by default**; `commands.run` shows a confirm dialog (30s timeout = deny) and everything is audited.
@@ -73,7 +75,13 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 
 ## Status & roadmap
 
-**v0.1.0** bridge core + adapters + settings + unit tests → **v0.2.0** ecosystem hub (manifest/registry/diagnostics) → **v0.3.0** reliability hardening (template.new, 15s cap, device name, diag package) → **v0.4.x** events/workflow + check-in host-event bridging → **v0.5.x** experimental kernel sync route, event-subscription channel fix (window CustomEvent), observability stats, manifest calibrated against remote mains, event-deleted materialization → **v0.6.x** deployed live on a real workspace (3.8.5) and enabled: config.discover calibrated against the live kernel (dailyNoteSavePath camelCase + non-default-template-first), v1.5 broadcast fast path (SSE millisecond-level command channel, default off, reservation semantics against dual-channel replays), frontend assumptions statically verified against the installed app bundle (editor.context docId fix, registry customHotkey effective key). → **v0.7.x** MCP stdio server for AI assistants (23 ops as tools, 13 read-only by default, subscription self-healing), kernel sync route live-verified on 3.8.6 (bug#9 kernels-field fix), acceptance entry points (npm run accept / verify:restart). → **v0.7.3** backlog cleanup (eight correctness fixes + version/release gates), real-device acceptance 10/10 (event materialization loop, v1.5 fast path 146ms), bug#11/12/13 (compaction escape / 202 error envelope / dynamic-import renderer crash), event governance tightening (whitelist 8→2)
+| Version | Milestones |
+|---|---|
+| v0.1–v0.3 | bridge core + adapters + settings + tests → ecosystem hub (manifest/registry/diagnostics) → reliability hardening (template.new, 15s cap, device name, diag package) |
+| v0.4–v0.6 | events/workflow + check-in host-event bridging → experimental kernel sync route → live deployment (3.8.5) + v1.5 broadcast fast path + bundle static verification |
+| v0.7.0–0.7.3 | MCP stdio server for AI assistants + kernel route live-verified on 3.8.6 (bug#9) + acceptance entry points → backlog cleanup (eight correctness fixes + version/release gates) + bug#11/12/13 |
+| **v0.7.4** | **template.new path-traversal security fix** (three-channel guard) + favorites/recents full chain + **built-in SiYuan Agent native capabilities** (zero config) + concurrency correctness (idempotency registry / bridge claim / multi-writer mitigation) + contract 23→26 ops + manifest v2 (live-calibrated) |
+| **v0.7.5** | release-chain hardening: package.zip unpack assertions (bug#9 regression gate) + Agent integration guide + restart tool + bug#17 documented (lifecycle hook noise, zero functional impact) |
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 
@@ -82,11 +90,14 @@ Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # acceptance gate: unit tests (155) + MCP protocol smoke (7)
+corepack pnpm accept  # acceptance gate: unit tests (162) + MCP protocol smoke (7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # symlink into your workspace for dev
 ```
 
-After restarting SiYuan with the plugin deployed, run `npm run verify:restart` (add `SIYUAN_LOG=<workspace>/temp/siyuan.log` for the log-growth readout) — it produces the full acceptance dataset: bridge e2e latency, kernel-route ops, event materialization counts, broadcast liveness, v1.5 fast-path latency, MCP kernel-route, kernel log growth.
+After deploying, restart SiYuan (or double-click `tools/restart-siyuan.bat`), then run:
+
+- `npm run verify:restart` (add `SIYUAN_LOG=<workspace>/temp/siyuan.log` for the log-growth readout) — full acceptance dataset: bridge e2e latency, kernel-route ops, event materialization counts, broadcast liveness, v1.5 fast-path latency, MCP kernel-route, kernel log growth.
+- `npm run verify:bg` — 7-check background walkthrough (including the "frontend bundle discriminator": after deploying index.js you must fully quit & restart SiYuan, and this check should pass).
 
 License: [MIT](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) · Author: [@ai68298100](https://github.com/ai68298100)
