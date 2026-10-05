@@ -659,7 +659,9 @@ export class BridgeService {
                 const globalName = manifest.plugins.find((m) => m.pluginId === plugin)?.windowBridge ?? "";
                 const w = globalThis as unknown as { window?: { [k: string]: unknown } };
                 const bridge = (globalName ? w.window?.[globalName] : null) as Record<string, unknown> | null | undefined;
-                const fn = bridge && typeof (bridge as Record<string, unknown>)[method] === "function" ? (bridge as Record<string, unknown>)[method] as () => unknown : undefined;
+                // L651：仅允许桥对象**自有属性**——`constructor`/`hasOwnProperty` 等原型链成员不得经透传调用
+                const isOwn = !!bridge && Object.prototype.hasOwnProperty.call(bridge, method);
+                const fn = bridge && isOwn && typeof (bridge as Record<string, unknown>)[method] === "function" ? (bridge as Record<string, unknown>)[method] as () => unknown : undefined;
                 if (!fn) return { status: "unsupported", data: null, message: "桥方法不存在" };
                 // args 形状（契约 v0.7.3 钉死）：数组=位置参数原样；对象=作为唯一 options 实参；
                 // 其他类型显式拒绝——不得静默丢弃参数后照常调用（未知不得改写为成功）

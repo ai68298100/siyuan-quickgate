@@ -2,6 +2,17 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## Unreleased（R283：P0 安全加固 + 路线索引）
+
+### Security
+- **plugin.api 原型链防护（TODO L651）**：`method` 此前直接索引桥对象——`constructor`/`hasOwnProperty` 等原型链成员可经透传调用；现要求**自有属性**（hasOwnProperty 检查），四成员回归测试（tests/plugin-api-guard.test.ts）
+
+### Fixed
+- **pollMs 热生效（TODO L659）**：修改轮询间隔此前只存设置、旧间隔持续到下次桥重启；现保存后自动重启轮询循环（Web Lock 认领重走防双窗口竞态），UI 提示即时生效
+
+### Added
+- **TODO §0.5 开发路线索引**：144 条 pending 按 P0 自主/P1 用户动作/P2 环境/P3 上游/P4 产品级五层重组；本轮核对销账 6 条（L298/L447/L488/L557/L566/L615）
+
 ## v0.7.5 · 2026-10-05（v0.7.4 后增量：发布链补强 + Agent 集成指南 + 运维工具）
 
 ### Added

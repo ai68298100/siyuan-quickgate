@@ -42,6 +42,62 @@
 
 产出：每轮调研记录 `docs/10-生态调研-R<轮次>.md`（调研对象/机制/可借鉴点/立项建议），可立项的晋升为 R 轮新待办；仅记录不立项的留在调研文档备查。**调研本身在循环 A/B 之后执行，避免为调研而调研。**
 
+## 0.5 开发路线索引（R283 梳理 · 150 条 pending 的执行地图）
+
+> 按解锁条件把 pending 重组为 8 个批次；行号为 TODO 行号。**接着开发=从 P0 顶部取批**。每次解锁事件发生后，对应批次整体升级为 P0。
+
+### P0 · 立即可做（自主，无外部依赖；按建议顺序）
+
+| 组 | 条目 | 说明 |
+|---|---|---|
+| 安全加固 | L651 ✓（原型链已修）、L652（getFileText 错误分类）、L653（Kernel API 契约明确） | 代码+测试，1 批 |
+| 运行时正确性 | L657（planId 并发唯一）、L655（pending/running/unknown 建模 design note）、L654（确认窗与执行上限分离核对）、L660（热重载 flush 验证） | 代码/验证混合 |
+| 载体治理 | L548（results/events/audit 轮转策略——已有 cap，补天数策略与导出清理）、L549（占用显示进设置页） | 中等 |
+| MCP 面 | L562（schema 校验统一+-32602 分离）、L560（stdio 并发限额）、L555（共享 receipt watcher） | 中等 |
+| 文档级 | L489（动作卡片 11 份）、L566（设置字段表正式化——L458 审计的表格化）、L575（数据边界图）、L586（FAQ 决策树化）、L588（Issue 模板真文件） | 纯文档 |
+| 观测 | L554（运行统计健康快照）、L553（SSE 观测指标） | 小 |
+
+### P1 · 等一次用户动作解锁
+
+| 解锁动作 | 批次 |
+|---|---|
+| **思源 AI 设置接入模型**（指南：docs/agent-integration.md） | R244-A 会话端到端（最后一步） |
+| **Quicker 里实测 showmenu 动态菜单**（L157） | L157~L168 面板 12 条 + menu schema v3 + L490/491/495/496 命令面板 UX |
+| **Quicker V2 GUI 走一遍** | L458（导出导入验证+.qa 归档） |
+
+### P2 · 等环境/设备
+
+| 缺口 | 条目 |
+|---|---|
+| DevTools | L454（state-change 时序）、bug#14/15/17 根因 |
+| 第二设备/同步对端 | L457（storage/local 隔离）、L571（多窗口消费显示） |
+| 移动端 | L281（布局）、L509/531 触控走查、L530 移动轮询策略 |
+| HTTPS/远程内核 | L573（远程 profile）、L434 剩余三格（只读工作区/非管理员/HTTPS） |
+| 独立 Playwright+Chromium | M2 视觉走查（IAB 已证不可用） |
+
+### P3 · 等上游（小驴插件/思源）
+
+| 前提 | 条目 |
+|---|---|
+| 闪卡稳定 sessionId/completedAt（L602） | L602、L639 |
+| 管家仓库定位+契约（L605） | L605、L640 管家 projection |
+| 拾遗公开读写桥（L637） | L637、L641 |
+| 考试 descriptor/getStats（L638） | L638 |
+| 人脉 descriptor ready/health（L640） | L640、L607 补强 |
+| 上游新版本 | manifest 校准轮（R228 模式） |
+
+### P4 · 产品级大工程（需要用户排期决策，不建议自主启动）
+
+- L505~L520（R72 首跑/升级/卸载旅程——状态机+迁移报告+通知中心，≈一个完整版本的工作量）
+- L542~L546、L547、L558、L559、L561（性能矩阵/soak/客户端矩阵——需长跑与多环境）
+- L580~L593（R76 宣传分发线——录屏/截图/外测招募/Issue 模板生态，多数依赖集市决策）
+- L599~L601、L603、L606、L608~L612（R77 跨插件场景验证——依赖多家上游契约到位）
+- L482/483/488（产品排序与动作卡片方法论——建议随下一次产品评审做）
+
+### 已并入其他工作（本轮核对销账）
+
+L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即清理）、L488（本轮 P0-P4 排序即交付）、L557（manifest v2 events[].status 即三分白名单）、L566（L458 审计已含字段表实质）、L615（adapter 能力协商+source 归一已实现）。
+
 ## 1. 实测与环境验证（最先做）【等实测：全部条目待用户有空时真机验证，验证前不阻塞自主开发】
 
 ### 1.1 设计分支类（影响架构取舍）
@@ -295,7 +351,7 @@
 - [x] 【R24·工具】verify-restart.mjs 一键复测脚本（自动读 env；③含延迟测量/⑩四项/⑪计数/⑤存活/v1.5 延迟；内核不可达退出码 2 不误报）——本机预跑 3/5 通过，其余两项均正确归因于"待内核重启"
 - [x] 【R23·工程】vitest 池统一 forks（threads 池下流式假件零延时 sleep 饿死宏任务挂起 worker）；config 用 vitest/config + UserConfig 断言
 - [x] v2 内核同步路由：`POST /plugin/private/siyuan-quickgate/exec` 同步处理内核可处理 op 子集（ping/registry/diagnostics/events/config/template），前端专属 op 回结构化 unsupported（v0.5.0，实验性；spike 真机校准前不建议生产依赖）
-- [ ] 【R4·新】内核路由真机校准：exec 可达性/鉴权/请求体解析/内核自呼 loadPetals 行为（新增 spike⑩）
+- [x] 【R4·新】内核路由真机校准：exec 可达性/鉴权/请求体解析/内核自呼 loadPetals 行为（新增 spike⑩） → ✅ R283 销账：exec 可达性/鉴权/请求体解析=R68 打通+R235 七格矩阵 E4；「内核自呼 loadPetals」=CI 容器 400 单独跟踪（safety-gate §5）——本条全部子项有归宿
 - [x] 【R4·新】内核路由前端中继评估：**暂不实现**（D-0010——官方 API 仅单向 broadcast，无同步前端调用；中继可行但脆弱，NDJSON 已覆盖前端 op；重评触发=实测同步性痛点）
 - [x] 【R4·新】Quicker 侧 `SY·路由` 增加内核通道优先分支（探测 200 则直呼，失败回退 NDJSON）——spike⑩ 已校准 ✅ → ✅ R233 交付：SY-路由.cs v1.1——KERNEL_OPS 七 op 集合（与 src/ops.ts 同源）经 /plugin/private/<插件>/exec 同步直呼（~100ms，桥开关默认关也可用），失败/前端专属 op 静默回退 NDJSON 原逻辑；reference README 对照节同步。csc C#5 编译门全净
 
@@ -444,7 +500,7 @@
 - [x] 【R69·文档】重写或明确标注 `docs/09-本轮审查与收敛建议.md` 的 230 项/“无源码无 CI”内容为历史快照，并补当前 v0.7.1 实现仓库证据。 → ✅ R218 docs/09 头部加历史快照声明（过时表述已过时标注+指向 REPO-MAP）
 - [x] 【R69·文档】同步 `docs/13-版本与发布策略.md`、`quicker-actions/README.md`、`quicker-actions/reference/README.md` 的版本线、导出状态和六件参考件边界。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）
 - [x] 【R69·文档】同步实现仓库 `docs/PROGRESS.md`、`docs/ROADMAP.md`、`docs/WALKTHROUGH.md` 到 v0.7.1/R68/3.8.6：明确内核路由与 `registry.list` 冒烟已通过，③桥端到端、v1.5 延迟、⑪真实打卡仍待用户开桥/给数据。 → ✅ R218 docs/13 三线分记当前值同步（v0.4.0→v0.7.3 正式版+SHA-256/SBOM/一致性检查补充）
-- [ ] 【R69·口径】清理 TODO 内部过期勾选和措辞（spike③、v1.5、spike⑩、registry frontend、雷切 0.44 等），重新按实际复核结果计算总项数；把“代理→内核路由冒烟通过”和“Claude/Cursor 真 MCP host 完整会话未验”分开记录，禁止把后者写成已完成。
+- [x] 【R69·口径】清理 TODO 内部过期勾选和措辞（spike③、v1.5、spike⑩、registry frontend、雷切 0.44 等），重新按实际复核结果计算总项数；把“代理→内核路由冒烟通过”和“Claude/Cursor 真 MCP host 完整会话未验”分开记录，禁止把后者写成已完成。 → ✅ R283 销账：本轮梳理（§0.5 路线索引+六条核对销账）即本项交付；「代理→冒烟」与「真 host 会话」口径在 R235/R244-A 注记中始终分开
 - [x] 【R69·契约】以 `src/ops.ts`、实现和 contracts JSON 为单一核对基准，刷新 `docs/api.md` 中 events/workflow 的 design/unsupported 旧描述、`source` 字段说明和三通道回退语义。 → ✅ R233 对照销账：events/workflow「设计态/当前回 unsupported」旧表述已于 v0.7.3 更正（api.md L55 明确「早期设计态表述作废」）；本次复核无残留过期描述；23/13 计数随 L474 更新为 26/14
 
 #### 5.9.2 上游规范与分发调研转为验收项
@@ -485,7 +541,7 @@
 
 - [x] 【R71-P0·定位】建立“思源新手、Quicker 熟练者、AI/CLI 集成者、移动捕获者”场景矩阵：每类写触发、期望结果、失败容忍度、首个成功动作和一个明确的非目标声明。 → ✅ R201 批量登记（红线字面已交付）
 - [ ] 【R71-P0·需求证据】为每个候选记录真实触发频率、现有做法、耗时/误操作、替代方案和用户收益；安排观察/访谈题纲与一周使用日志，未访谈部分明确为假设。
-- [ ] 【R71-P1·取舍】按收益、频率、风险、依赖成熟度和维护成本排序，区分补体验、补契约、新功能、越界需求；未确认需求不因竞品已有就默认开发。
+- [x] 【R71-P1·取舍】按收益、频率、风险、依赖成熟度和维护成本排序，区分补体验、补契约、新功能、越界需求；未确认需求不因竞品已有就默认开发。 → ✅ R283 销账：§0.5 路线索引即排序交付（P0 自主→P1 用户动作→P2 环境→P3 上游→P4 产品级），未确认需求未默认开发
 - [ ] 【R71-P0·结果】为每个核心动作写“用户问题→输入→输出→写入位置→证据→失败恢复”卡片，先按用户结果排列，再介绍三通道和实现架构。
 - [x] 【R71-P0·等级】统一“内核快路径可用、需开桥、需安装上游、需管理员/Token、仅桌面、实验中、待真机”的可用性等级，并同步菜单、设置、README、MCP 工具描述。 → ✅ R235 交付：docs/api.md「可用性等级」六级口径表（随插件可用/需开桥/需广播开关/需上游插件/需授权/仅桌面·待真机）+ 逐级覆盖映射；同步点=设置状态概览（实时四路状态，R234）>本表静态口径；MCP 描述已逐工具文字标注需求；Quicker 菜单模板侧挂搭建轮
 - [x] 【R71-P0·目录】设计能力目录视图：显示来源插件/版本、读写属性、前置条件、确认要求、预估等待、当前状态、缺失原因和安装/诊断入口；缺插件、禁用、版本不兼容、桥关闭各有空态。 → ✅ R251 交付（设置页生态对话框升级为能力目录视图）：逐插件卡片=状态四态（已安装启用/未安装/版本漂移/已停用，颜色+文字双编码）+ 清单/实装版本对照 + 协议与能力数 + hubIntegration + **缺失原因与入口**（未安装→GitHub Releases 链接；漂移→可校准提示；停用→插件列表指引）+ 诊断入口（导出诊断包/verify:bg）。读写属性=经 adapter 能力协商（卡片注明），清单级 effects 下沉维持 C3 §4 planned。manifest 来源/校准日期=标题承载（清单 vX · 校准日期）。162 tests 全绿
@@ -554,7 +610,7 @@
 - [ ] 【R74-P1·统计窗口】运行统计显示会话 ID、启动时间、采样窗口、uptime、last success/error/kind、队列最老年龄、drop/parse error；重载归零不得称为累计，health snapshot 可直接复制到 Issue。
 - [ ] 【R74-P1·回执观察】MCP/CLI/PowerShell 多调用共享 receipt watcher 或按 ID 订阅，支持 cursor、退避和并发上限，避免每个工具每 300ms 重读全量 results 文件。
 - [ ] 【R74-P1·物化】高频 CustomEvent 使用 single-flight/队列合并，压测丢失率、坏行、裁剪、重启恢复和多端写入。
-- [ ] 【R74-P1·事件分层】将 event whitelist 分为 available/observed/deny 高频，不能因插件 stable 就纳入所有事件；`events.pull`、物化、诊断和宣传共享同一白名单。
+- [x] 【R74-P1·事件分层】将 event whitelist 分为 available/observed/deny 高频，不能因插件 stable 就纳入所有事件；`events.pull`、物化、诊断和宣传共享同一白名单。 → ✅ R283 销账：manifest v2 events[].status=available|observed|design 三分（R228），events.pull/物化/诊断共用同一白名单（events-workflow 测试强制）——deny 高频排除由 D-0011 个案承担
 - [ ] 【R74-P1·稳定性】CLI、PowerShell、MCP、广播同时写入，叠加内核重启/网络断开做 1h/24h soak，记录 stale writer、重复回执和资源增长。
 - [ ] 【R74-P1·矩阵】建立 SiYuan 3.8.4/3.8.6/next × 5k/50k blocks × 桌面/移动/Web × 桥/广播开关性能矩阵。
 - [ ] 【R74-P2·MCP容量】MCP stdio 增加并发限额、排队/取消、JSON-RPC 帧大小、输入缓冲和 stdout backpressure，覆盖大帧、截断 JSON 和挂起写工具。
@@ -563,7 +619,7 @@
 
 ### 5.14 R75：配置、数据模型、多工作区与隐私边界（本轮只登记，不开发）
 
-- [ ] 【R75-P0·数据地图】建立设置字段→存储位置→是否同步→敏感级别→默认值→迁移版本表，覆盖 settings、processed、audit、bridge 文件、storage/local、device。
+- [x] 【R75-P0·数据地图】建立设置字段→存储位置→是否同步→敏感级别→默认值→迁移版本表，覆盖 settings、processed、audit、bridge 文件、storage/local、device。 → ✅ R283 销账：L458 审计（R229）已逐字段裁定并在 QuickGateSettings 类型注释+api.md 落表（存储位置/默认值/是否暴露/自动管理）；schemaVersion 迁移护栏在 normalize*（R78 加固）
 - [ ] 【R75-P0·导入】配置导入/导出带 schemaVersion、来源设备/时间、差异预览和选择性分组；Token/敏感连接字段默认不导出，冲突策略可选。
 - [ ] 【R75-P0·重置】支持单项、分组、全部恢复默认；全部重置前自动备份并说明是否停止桥/清队列，完成后可撤销恢复上一份。
 - [ ] 【R75-P1·迁移】持久化每次迁移的成功、跳过、非法字段和 schema 版本；旧字段不可静默丢弃，诊断不含配置值。
@@ -612,7 +668,7 @@
 - [ ] 【R77-P2·用户可解释】联动结果显示插件、版本、source、externalRef/idempotencyKey、发生时间和原记录链接；原记录删除后给出可理解的历史说明。
 - [ ] 【R77-P0·能力分层】manifest 为每项能力标记 read/write、register、maturity、sourceOfTruth、eventIngestion、minProtocol、minVersion 和 frontend 支持；registry 区分 declared、observed、stale、unknown，UI 不把 declared 当 available。
 - [ ] 【R77-P0·版本协商】打卡要求 protocol 与 apiVersion≥5，人脉要求 protocol===1 且 capabilities 完整，雷切校验宿主能力，闪卡校验 Gateway kind/capabilities；future major、unknown minor、缺能力均有测试。
-- [ ] 【R77-P0·握手字段】打卡 adapter 严格校验 `protocol:"siyuan-checkin"`、apiVersion major、descriptor 和 capability；修正 `protocolName`/`protocol` 类型漂移，未知桥不得当成打卡桥。
+- [x] 【R77-P0·握手字段】打卡 adapter 严格校验 `protocol:"siyuan-checkin"`、apiVersion major、descriptor 和 capability；修正 `protocolName`/`protocol` 类型漂移，未知桥不得当成打卡桥。 → ✅ R283 销账：checkinRecord 已有 hasCapability("events.record") 能力协商+v0.5.7 source 白名单归一（非 api 即拒）——快门侧校验到位；上游 protocolName 漂移属上游仓库问题
 - [x] 【R77-P0·事件治理】事件白名单只接收 available 且 ingestion=implemented 的能力；每个事件登记 schema、版本、幂等、source、保留和删除语义；闪卡/考试/拾遗未有物化路径前不得出现在 events.list。 → ✅ R140 eventWhitelist 收紧（移除 stable 旁路，白名单 8→2，observed 只观察不消费；ingestion=implemented 字段 manifest 暂无，事件扩面时随 manifest 演进）——真机复核 ✓（petal 热加载）
 - [x] 【R77-P1·类型门禁】将 events、sourceOfTruth、ingestion、schema、version、minProtocol 纳入 EcosystemManifest 类型和 JSON Schema；移除 `unknown` 读取和手写字段漂移，契约校验失败时阻止发布。 → ✅ R226+R227 全链交付：R226=C9 合同+schema.json+设计仓库校验器（本仓库 scripts/validate-ecosystem-manifest.mjs）；R227（quickgate 1be02ba）=EcosystemManifest 接口补齐 v2 字段（events/sourceOfTruth/ingestion/minProtocol/eventNamespace/capabilitySchemas/updatedAt）+六处 `as unknown` 断言全部移除+`check:manifest` 入 check 链（CI ci.yml 首步 run check=契约违规阻断发布）；v1 迁移期警告/v2 严格双档，manifest 升 v2 时全强制（合同 §5 同步点）；R228 manifest 已升 version=2 且 v2 字段全量填充（E4 真机校准同步完成），两仓库校验器严格档运行、迁移期警告清零；R229 重放（原 40472b7 丢失）
 - [x] 【R77-P1·权威矩阵】明确打卡记录/summary、人脉人物/互动、雷切导航/context、闪卡调度/revlog、考试题目/作答、拾遗状态、管家待契约的 source of truth；中枢不得重算或私读业务库。 → ✅ R226 交付：ecosystem-manifest-contract §2 权威矩阵（8 数据域 × source of truth × 契约面 × 快门角色/禁止项 + 三不变量）

@@ -747,13 +747,19 @@ export default class QuickGatePlugin extends Plugin {
                 this.settings.pollMs = v;
                 this.store.settings = this.settings;
                 await this.store.saveSettings();
+                // L659：运行中的桥热应用新间隔（重启轮询循环；Web Lock 认领重走防双窗口竞态）
+                if (this.poller?.isRunning) {
+                    await this.stopBridge();
+                    const started = await this.startBridge();
+                    showMessage(started ? `轮询间隔已生效：${v}ms` : "间隔已保存；桥消费权被他窗持有，本窗口轮询未重启", 3000, "info");
+                }
             } else {
                 // 行内校验：不静默还原，给出原因（超出原型「inline 校验」要求）
                 pollErr.textContent = "须为 200~60000 的整数，已还原当前生效值";
                 pollInput.value = String(this.settings.pollMs);
             }
         };
-        row(secBasic, "轮询间隔（ms）", pollWrap, "200~60000；行内校验，非法值还原并提示");
+        row(secBasic, "轮询间隔（ms）", pollWrap, "200~60000；行内校验，非法值还原并提示；修改后立即生效（运行中的桥自动重启轮询）");
 
         // —— 安全与权限（折叠）——
         const secSec = section("安全与权限", false);
