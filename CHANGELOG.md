@@ -2,6 +2,15 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## Unreleased（R261~：v0.7.4 后增量）
+
+### Added
+- **package.zip 解包静态断言**（check-package.mjs 入 check:release 链）：kernels 字段回归门（bug#9 预防）+ zip 内容三件套核验；跨平台（powershell→pwsh 探测，双无则显式跳过 zip 级）
+- REPO-MAP 重写为合并后单仓格局（运维事实表含部署纪律）；AGENTS.md 数字时效 + verify:bg 入口
+
+### Docs
+- v0.7.4 发版后文档线：使用手册「搭建顺序 × 参考件速查表」+「参数化 siyuan:// 链接集」附录；ROADMAP 刷新至当前事实；M2 视觉走查注记（IAB webview 无法启动思源 Web——需桌面端/独立 Playwright）
+
 ## v0.7.4 · 2026-10-05（R231~R258：安全修复 + 收藏全链 + 思源 Agent 原生集成 + 并发正确性）
 
 > 十四个 R 轮的聚合发布。头两项为安全修复，建议所有用户更新；完整明细见下方分级清单与 docs/10-生态调研-R2~R5。
