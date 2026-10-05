@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-04T23:58:28.675Z",
+  "generatedAt": "2026-10-05T00:03:58.697Z",
   "source": "TODO.md",
   "counts": {
     "total": 1403,
@@ -7178,7 +7178,7 @@
       "type": "unknown",
       "status": "等用户",
       "blockedBy": "user",
-      "text": "快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】；**版本要求修正（R249 调研 R5）**：3.8.6 的内置 MCP 客户端有连接 bug（#19998，2026-07-28 协议无 tool list notification 的服务器连不上，alpha.4 修复）——接入指南要求内核 **≥3.8.7-alpha.4 或等稳定版**；**Agent 侧审批语义补充（R252 源码实证）**：能力调用授权=用户可配置审批策略（Conf.AI.Agent.ApprovalPolicy 按 capabilityID+action，缺省按风险分级）——快门注册时的 effects 声明是风险判定输入（R245 如实声明有安全意义）；接入后用户在 AI 设置按 plugin__siyuan-quickgate__* 配置放行/询问/拒绝",
+      "text": "快门 MCP → 思源内置 Agent 接入验证：思源 AI 配置接模型提供方 + MCP servers 指向快门 stdio 服务 → Agent 会话跑「记一杯水」（checkin.record/favorites.add）→ 验证落库+审计+Agent 侧审批 UI；产出接入指南（GETTING-STARTED 附录）【等用户/等模型】；**版本要求修正（R249 调研 R5）**：3.8.6 的内置 MCP 客户端有连接 bug（#19998，2026-07-28 协议无 tool list notification 的服务器连不上，alpha.4 修复）——接入指南要求内核 **≥3.8.7-alpha.4 或等稳定版**；**Agent 侧审批语义补充（R252 源码实证）**：能力调用授权=用户可配置审批策略（Conf.AI.Agent.ApprovalPolicy 按 capabilityID+action，缺省按风险分级）——快门注册时的 effects 声明是风险判定输入（R245 如实声明有安全意义）；接入后用户在 AI 设置按 plugin__siyuan-quickgate__* 配置放行/询问/拒绝；**R266 接入指南已就绪**（docs/agent-integration.md：路径 A 原生三能力零配置 / 路径 B ai.mcp.servers stdio 挂法含 conf 字段级说明 / 审批策略配置 / 四行排障表——源码级 E2，README 双语与 GETTING-STARTED 已链接）。剩余=按指南在思源 AI 设置实际操作（接模型+挂 MCP）→ 会话端到端",
       "mainline": "C6",
       "evidence": "E1",
       "refs": {
@@ -7190,7 +7190,8 @@
           "R6",
           "R249",
           "R252",
-          "R245"
+          "R245",
+          "R266"
         ],
         "docs": [
           "07-"

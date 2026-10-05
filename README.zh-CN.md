@@ -52,7 +52,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 ### 思源内置 Agent 集成（自动，零配置）
 
-思源 ≥3.8.6 下，插件经 `siyuan.agent.registerCapability` 向**内置 AI Agent** 原生注册三个能力：`quickgate_ping`（健康探针）、`quickgate_discover`（日记笔记本+收集箱发现）、`quickgate_capture`（一句话追加今日日记）——Agent 侧可见为 `plugin__siyuan-quickgate__*` 工具并带效果声明，无需任何配置。也可把 Agent 的外部 MCP 设置指向本仓库的 MCP stdio 服务获得全部 26 工具面（详见 docs/10-生态调研-R4.md）。
+思源 ≥3.8.6 下，插件经 `siyuan.agent.registerCapability` 向**内置 AI Agent** 原生注册三个能力：`quickgate_ping`（健康探针）、`quickgate_discover`（日记笔记本+收集箱发现）、`quickgate_capture`（一句话追加今日日记）——Agent 侧可见为 `plugin__siyuan-quickgate__*` 工具并带效果声明，无需任何配置。也可把 Agent 的外部 MCP 设置指向本仓库的 MCP stdio 服务获得全部 26 工具面——完整指南：[docs/agent-integration.md](https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/agent-integration.md)。
 - `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
 - 快门侧防线全部共用：确认门控、黑名单、审计日志、plugin.api 允许名单
 

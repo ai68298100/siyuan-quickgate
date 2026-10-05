@@ -31,7 +31,7 @@ SIYUAN_URL=http://127.0.0.1:6806 SIYUAN_TOKEN=<你的Token> node tools/lv-cli.mj
 
 ## 4. 思源内置 AI Agent（≥3.8.6）
 
-插件启用后自动注册三个 Agent 能力（无需配置）：`quickgate_capture`（一句话记今日日记）、`quickgate_discover`（发现日记笔记本/收集箱）、`quickgate_ping`。在思源 AI 助手里说「用 quickgate_capture 记一杯水」即可验证。要给 Agent 更多能力（打卡/人脉/工作流），把它的外部 MCP 设置指向本仓库的 MCP stdio 服务。
+插件启用后自动注册三个 Agent 能力（无需配置）：`quickgate_capture`（一句话记今日日记）、`quickgate_discover`（发现日记笔记本/收集箱）、`quickgate_ping`。在思源 AI 助手里说「用 quickgate_capture 记一杯水」即可验证。要给 Agent 更多能力（打卡/人脉/工作流/收藏），见 [Agent 集成指南](./agent-integration.md)。
 
 ## 5. 安全边界（默认全关，逐项开启）
 
