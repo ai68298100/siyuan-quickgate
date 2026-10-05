@@ -54,7 +54,9 @@ async function getFileText(path: string): Promise<string | null> {
 /* ---------- 生命周期与私有路由 ---------- */
 
 api.plugin.lifecycle.onload = async () => {
-    api.plugin.lifecycle.onrunning = () => { /* 无操作——内核对该可选钩子的调用在未绑定时报 error 噪音（plugin.go:884，日志 62 次） */ };
+    // 已知外观问题（bug#17 候选 · 日志 62+ 条 error）：内核 plugin.go:884 调用 onrunning/onunload 可选钩子时
+    // 报「not bound」——内核读取的 lifecycle 路径与本 bundle 设置的 siyuan.plugin.lifecycle 不同（goja 上下文差异）。
+    // R245 noop 修复无效已回退；功能零影响（桥/路由/Agent 全部正常）。需 goja 插件机制 DevTools 才能根治。
     await api.logger.info(`[${PLUGIN_NAME}] kernel sync route loading (experimental v2)`);
     const agentDeps = {
         kpost,

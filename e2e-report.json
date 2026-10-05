@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-10-05T00:31:12.263Z",
+  "startedAt": "2026-10-05T00:45:20.051Z",
   "url": "http://127.0.0.1:14643",
   "checks": [
     {
@@ -14,8 +14,8 @@
     },
     {
       "name": "桥 ping",
-      "status": "fail",
-      "note": "8s 无回执（桥未开启或插件未加载）"
+      "status": "pass",
+      "note": "recorded（0ms）"
     },
     {
       "name": "内核路由",
@@ -29,8 +29,8 @@
     },
     {
       "name": "前端 bundle 判别",
-      "status": "fail",
-      "note": "无回执（轮询未运行）"
+      "status": "pass",
+      "note": "新前端（favorites 可用）"
     },
     {
       "name": "petal 加载",
@@ -38,7 +38,7 @@
       "note": "快门已加载"
     }
   ],
-  "failures": 4,
+  "failures": 0,
   "skipped": 0,
-  "finishedAt": "2026-10-05T00:31:46.239Z"
+  "finishedAt": "2026-10-05T00:45:32.177Z"
 }
