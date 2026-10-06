@@ -25,6 +25,14 @@
 
 > **Marketplace status: deferred.** GitHub Releases is the single distribution channel for now (see install below).
 
+## In-plugin UI (SiYuan side)
+
+Visual language follows [design/ui-prototype/mvp1.html](./design/ui-prototype/mvp1.html) (all `--b3-*` tokens, follows the host theme's light/dark mode, no hard-coded colors):
+
+- **Layered settings panel**: Status overview (health home: channel cards / run KPIs / next step / recent receipts) · First-run wizard (env check → bridge on → self-test, all real state) · Connections · Security · Queue & data (incl. **full backup/restore** and clear-queue preview) · Diagnostics & ecosystem · About; a top search bar filters settings **across groups**.
+- **Command palette** (`Ctrl+Alt+P`): search host commands (zh/en/pinyin aliases, favorites ★ / recents auto-pinned); "capability actions" run in two stages (fill params, then execute); empty-result fallback = one-line **quick capture** to today's daily note / inbox.
+- **Notification / Recovery / Results centers**: aggregated attention items (one-click jump to the handling surface) · manual disposition of unknown/failed/expired receipts (retry with a new id / dismiss with record / batch) · `results.ndjson` query (status/time filters, keyword, paging, CSV/JSON export).
+
 ## Install (manual)
 
 1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) (prerelease-marked = public testing; SHA-256 checksums included).
@@ -82,6 +90,7 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | v0.7.0–0.7.3 | MCP stdio server for AI assistants + kernel route live-verified on 3.8.6 (bug#9) + acceptance entry points → backlog cleanup (eight correctness fixes + version/release gates) + bug#11/12/13 |
 | **v0.7.4** | **template.new path-traversal security fix** (three-channel guard) + favorites/recents full chain + **built-in SiYuan Agent native capabilities** (zero config) + concurrency correctness (idempotency registry / bridge claim / multi-writer mitigation) + contract 23→26 ops + manifest v2 (live-calibrated) |
 | **v0.7.5** | release-chain hardening: package.zip unpack assertions (bug#9 regression gate) + Agent integration guide + restart tool + bug#17 documented (lifecycle hook noise, zero functional impact) |
+| **v0.7.5+ (working tree)** | in-plugin UI takes shape: layered settings + first-run wizard + health home · command palette / notification / recovery / results centers · full backup · prototype-aligned polish (border-box fix for KPI wrap / localized receipt times / dark-mode contrast / palette component styles) |
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 
@@ -90,7 +99,7 @@ Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # acceptance gate: unit tests (162) + MCP protocol smoke (7)
+corepack pnpm accept  # acceptance gate: unit tests (218) + MCP protocol smoke (7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # symlink into your workspace for dev
 ```

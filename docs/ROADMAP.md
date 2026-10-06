@@ -1,7 +1,7 @@
 # ROADMAP
 
 > 里程碑与验收对应项目主仓库 TODO §5；此处只列本仓库视角的顺序与门槛。
-> 状态（2026-10-05，v0.7.3 + 未发布构建随 R 轮部署）：**内核侧 spike 全部闭环**（⑥⑧⑨⓪⑤ 早期探针 + ③ R68 复测批 + ⑩ spike⑩ 真机全线 + ⑪ R230 事件物化 e2e）；前端 spike ①②⑦ bundle 静态核实；快门已部署真机工作空间并启用。剩余真机项：DevTools 现场三项（④双窗口/⑦blockId/⑪现场事件）+ **前端加载判别**（bug#15：index.js 部署后需完全退出重启，e2e-bg「前端 bundle 判别」应 pass）。
+> 状态（2026-10-05，源码版本 v0.7.5；远端 v0.7.5 为 prerelease，v0.7.2 为当前正式 Latest）：**内核侧 spike 全部闭环**（⑥⑧⑨⓪⑤ 早期探针 + ③ R68 复测批 + ⑩ spike⑩ 真机全线 + ⑪ R230 事件物化 e2e）；前端 spike ①②⑦ 已做 bundle 静态核实；快门已部署真机工作空间并启用。剩余真机项：DevTools 现场三项（④双窗口/⑦blockId/⑪现场事件）+ **前端加载判别**（bug#15：index.js 部署后需完全退出重启，e2e-bg「前端 bundle 判别」应 pass）。
 
 ## M0 spike（需思源真机，半天）→ 产出 docs/WALKTHROUGH.md（现为 11 项实操手册）
 ① 命令注册表形状 ✅bundle 静态核实（v0.6.3：i18n/displayName 挂载+customHotkey 回写机制；DevTools 可选复核）
@@ -26,7 +26,7 @@
 - ✅ 单测 25 文件 162 用例（含契约一致性强制 + path-guard/幂等/别名/认领回归）
 - ✅ E2E U1~U11 + e2e-bg 7 项（含前端 bundle 判别）
 - ⬜ Playwright 视觉走查、双窗口手动矩阵、大库联调（需真机；R270 实证：IAB webview 无法启动思源 Web 应用——boot 后即断连占位页，页面内 API 正常但应用 JS 崩溃——视觉走查需桌面端或独立 Playwright+Chromium）
-- ✅ Release 正式版 v0.7.3（当前 0.7.3+ 为未发布构建随 R 轮部署）
+- ✅ Release v0.7.2 正式版；v0.7.5 已有 GitHub prerelease 与校验资产，正式版升级仍需按发布清单完成
 - ✅ R231~R251 增量：路径安全守卫（L628）、写 op 统一审计（L446）、幂等注册表（L599）、桥消费权认领（L452）、命令搜索别名（L471）、收藏/最近使用 ops+UI（L472/474）、内置 Agent 原生能力（R245）、MCP 规范 annotations（R234）
 
 ## M3+（评估池，均有前置门槛）

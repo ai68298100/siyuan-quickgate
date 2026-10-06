@@ -20,6 +20,20 @@ export interface WorkflowPlan {
 export const WORKFLOW_MAX_STEPS = 8;
 export const PLAN_TTL_MS = 5 * 60 * 1000;
 
+/**
+ * L657（R78-P1）：planId 必须并发生成唯一——纯 `wf-${Date.now()}` 在同毫秒两个 plan
+ * （轮询与广播同 tick 各一条、selfPing 临时服务与常驻服务并发）时后者 plans.set 覆盖前者，
+ * 第一个计划静默丢失（execute 报"planId 不存在"）。模块级单调序号保证跨实例也不重号；
+ * 子步骤 id（`${planId}-${index}`）与回执/审计随 planId 继承关联链。
+ */
+export function createPlanIdFactory(): (now: number) => string {
+    let seq = 0;
+    return (now: number) => `wf-${now}-${(++seq).toString(36)}`;
+}
+
+/** 模块级单例：所有 BridgeService 实例（含 selfPing 的临时服务）共享，独立工厂各自从 1 起会重号 */
+export const nextWorkflowPlanId = createPlanIdFactory();
+
 /** 允许进工作流的 op（受控集：数据透传与导航/读写，不含 commands.run/meta op） */
 export const WORKFLOW_ALLOWED_OPS = new Set([
     "checkin.record", "checkin.items", "checkin.summary",

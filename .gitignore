@@ -21,3 +21,5 @@ audit.json
 dist-mcp/
 *.tmp
 bundle-err.txt
+output/
+e2e-report.json

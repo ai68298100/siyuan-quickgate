@@ -4,6 +4,92 @@
  */
 const PLUGIN = "siyuan-quickgate";
 
+/**
+ * 共享回执监视器（L555）：N 个并发 tools/call 只共享**一个** results.ndjson 读取循环，
+ * 按 id 分发解析结果——替代 v1 每调用各自 300ms 轮询（并发下内核getFile chatter 随调用数放大）。
+ * 全部等待者消失即停表；新订阅即时起表（保持 v1"先读一次再睡"的时延语义）。
+ */
+export class ReceiptHub {
+    // 注意：MCP 源码态经 node --experimental-strip-types 运行（不支持参数属性），字段须显式声明
+    private readLines: () => Promise<string[]>;
+    private intervalMs: number;
+    private waiters = new Map<string, Array<{ resolve: (r: Record<string, unknown>) => void; timer: ReturnType<typeof setTimeout> }>>();
+    private timer?: ReturnType<typeof setInterval>;
+    private ticking = false;
+
+    constructor(readLines: () => Promise<string[]>, intervalMs = 250) {
+        this.readLines = readLines;
+        this.intervalMs = intervalMs;
+    }
+
+    /** 等待指定 id 的回执；超时返回 timeout 形状（与 v1 契约一致） */
+    wait(id: string, maxMs: number, op?: string): Promise<Record<string, unknown>> {
+        return new Promise((resolve) => {
+            const timer = setTimeout(() => {
+                this.remove(id);
+                resolve({ id, op, status: "timeout", message: `等待 ${maxMs}ms 未收到回执` });
+            }, maxMs);
+            this.push(id, { resolve, timer });
+            this.ensureLoop();
+        });
+    }
+
+    /** 当前等待者数（观测用） */
+    get size() { return this.waiters.size; }
+
+    private push(id: string, w: { resolve: (r: Record<string, unknown>) => void; timer: ReturnType<typeof setTimeout> }) {
+        const list = this.waiters.get(id) ?? [];
+        list.push(w);
+        this.waiters.set(id, list);
+    }
+
+    private remove(id: string) {
+        const list = this.waiters.get(id);
+        if (!list) return;
+        for (const w of list) clearTimeout(w.timer);
+        this.waiters.delete(id);
+    }
+
+    private ensureLoop() {
+        if (this.timer) return;
+        this.timer = setInterval(() => void this.tick(), this.intervalMs);
+        void this.tick();
+    }
+
+    private stopLoop() {
+        if (this.timer) clearInterval(this.timer);
+        this.timer = undefined;
+    }
+
+    private async tick() {
+        if (this.ticking || this.waiters.size === 0) {
+            if (this.waiters.size === 0) this.stopLoop();
+            return;
+        }
+        this.ticking = true;
+        try {
+            const lines = await this.readLines();
+            for (const line of lines) {
+                const t = line.trim();
+                if (!t) continue;
+                let o: Record<string, unknown>;
+                try { o = JSON.parse(t) as Record<string, unknown>; } catch { continue; }
+                const id = String(o.id ?? "");
+                const list = this.waiters.get(id);
+                if (!list) continue;
+                this.waiters.delete(id);
+                for (const w of list) {
+                    clearTimeout(w.timer);
+                    w.resolve(o);
+                }
+            }
+        } catch { /* 读取失败下一轮重试 */ } finally {
+            this.ticking = false;
+            if (this.waiters.size === 0) this.stopLoop();
+        }
+    }
+}
+
 export interface McpBridgeClientOptions {
     url: string;
     token: string;
@@ -17,12 +103,17 @@ export class KernelBridgeClient {
     private readonly token: string;
     private readonly plugin: string;
     readonly maxWaitMs: number;
+    /** L553 观测指标：通道用量与回退/超时计数（诊断与测试用） */
+    readonly metrics = { sent: 0, sentFast: 0, fastHits: 0, fallbackResends: 0, timeouts: 0 };
+    private hub: ReceiptHub;
 
     constructor(opts: McpBridgeClientOptions) {
         this.url = opts.url.replace(/\/$/, "");
         this.token = opts.token;
         this.plugin = opts.plugin ?? PLUGIN;
         this.maxWaitMs = opts.maxWaitMs ?? 15000;
+        const resultsPath = `/storage/petal/${this.plugin}/bridge/results.ndjson`;
+        this.hub = new ReceiptHub(async () => (await this.getText(resultsPath)).replace(/\r/g, "").split("\n"));
     }
 
     genId(): string {
@@ -68,6 +159,7 @@ export class KernelBridgeClient {
 
     /** NDJSON 慢路径：追加信封到 commands.ndjson，返回命令 id */
     async send(op: string, args: Record<string, unknown>): Promise<string> {
+        this.metrics.sent += 1;
         const id = this.genId();
         const envelope = JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString() });
         const path = `/storage/petal/${this.plugin}/bridge/commands.ndjson`;
@@ -85,6 +177,7 @@ export class KernelBridgeClient {
 
     /** 广播快路径：postMessage 推信封（毫秒级；回执仍走 results.ndjson） */
     async sendFast(op: string, args: Record<string, unknown>, channel = "qg-cmd"): Promise<string> {
+        this.metrics.sentFast += 1;
         const id = this.genId();
         const envelope = JSON.stringify({ v: 1, id, op, args, createdAt: new Date().toISOString() });
         await this.kernelPost("/api/broadcast/postMessage", { channel, message: envelope });
@@ -111,22 +204,10 @@ export class KernelBridgeClient {
         return (json.data ?? {}) as Record<string, unknown>;
     }
 
-    /** 轮询 results.ndjson 等回执 */
+    /** 等回执（L555）：经共享监视器分发，多调用共享单一 results.ndjson 读取循环 */
     async waitReceipt(id: string, maxMs = this.maxWaitMs, op?: string): Promise<Record<string, unknown>> {
-        const path = `/storage/petal/${this.plugin}/bridge/results.ndjson`;
-        const deadline = Date.now() + maxMs;
-        while (Date.now() < deadline) {
-            const text = await this.getText(path);
-            for (const line of text.split("\n")) {
-                const t = line.trim();
-                if (!t) continue;
-                try {
-                    const o = JSON.parse(t) as Record<string, unknown>;
-                    if (o.id === id) return o;
-                } catch { /* 跳过坏行 */ }
-            }
-            await new Promise((r) => setTimeout(r, 300));
-        }
-        return { id, op, status: "timeout", message: `等待 ${maxMs}ms 未收到回执` };
+        const r = await this.hub.wait(id, maxMs, op);
+        if ((r as { status?: string }).status === "timeout") this.metrics.timeouts += 1;
+        return r;
     }
 }

@@ -149,8 +149,8 @@ describe("bridge-service 累计统计（可观测性）", () => {
         const store = new BridgeStore({ load: async () => null, save: async () => {} });
         let clock = 1000;
         let reads = 0;
-        // now() 调用序列（v0.6.0 预留语义）：①tick 基准 ②lastActivity ③mark(s1) ④t0(s1)+10 ⑤elapsed(s1)+40 ⑥mark(s2) ⑦t0(s2)+10 ⑧elapsed(s2)+10
-        const steps = [0, 0, 0, 10, 40, 0, 10, 10];
+        // now() 调用序列（L655 状态机）：①假死扫描 ②lastActivity ③tick 基准 ④reserve(s1) ⑤t0(s1)+10 ⑥elapsed(s1)+40 ⑦markDone(s1) ⑧reserve(s2) ⑨t0(s2)+10 ⑩elapsed(s2)+10 ⑪markDone(s2)
+        const steps = [0, 0, 0, 0, 10, 40, 0, 0, 10, 10, 0];
         const service = new BridgeService({
             api: mem.api,
             store,

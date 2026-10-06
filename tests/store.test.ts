@@ -3,10 +3,26 @@ import { normalizeProcessed, normalizeSettings, BridgeStore } from "../src/servi
 import { DEFAULT_SETTINGS } from "../src/types/bridge";
 
 describe("store.normalize（不兼容→缺省重建，永不抛错）", () => {
-    it("processed：坏数据回空台账", () => {
+    it("processed：坏数据回空台账；v1 数字时间戳迁移为 done 条目（L655 v2）", () => {
         expect(normalizeProcessed(null).processed).toEqual({});
         expect(normalizeProcessed({ schemaVersion: 9, processed: "x" }).processed).toEqual({});
-        expect(normalizeProcessed({ schemaVersion: 1, processed: { a: "x", b: 5 } }).processed).toEqual({ b: 5 });
+        expect(normalizeProcessed({ schemaVersion: 1, processed: { a: "x", b: 5 } }).processed).toEqual({
+            b: { ts: 5, state: "done" },
+        });
+        // v2 逐条校验：pending/done 保留，坏条目跳过
+        expect(normalizeProcessed({
+            schemaVersion: 2,
+            processed: {
+                p: { ts: 1, state: "pending", op: "doc.open" },
+                d: { ts: 2, state: "done", status: "recorded" },
+                bad: { ts: "x", state: "pending" },
+                n: 7,
+            },
+        }).processed).toEqual({
+            p: { ts: 1, state: "pending", op: "doc.open" },
+            d: { ts: 2, state: "done", status: "recorded" },
+            n: { ts: 7, state: "done" },
+        });
     });
 
     it("settings：逐字段校验范围", () => {
@@ -16,6 +32,13 @@ describe("store.normalize（不兼容→缺省重建，永不抛错）", () => {
         expect(s.bridgeBasePath).toBe(DEFAULT_SETTINGS.bridgeBasePath);
         expect(s.deviceName.length).toBe(64);
         expect(normalizeSettings(undefined)).toEqual(DEFAULT_SETTINGS);
+    });
+
+    it("settings：captureTarget 仅接受合法枚举（R301）", () => {
+        expect(normalizeSettings({ captureTarget: "inbox" }).captureTarget).toBe("inbox");
+        expect(normalizeSettings({ captureTarget: "daily" }).captureTarget).toBe("daily");
+        expect(normalizeSettings({ captureTarget: "whatever" }).captureTarget).toBe("daily");
+        expect(normalizeSettings({}).captureTarget).toBe("daily");
     });
 
     it("settings：移动端桥 opt-in 迁移（R69-P1）——显式字段优先，旧 :mobile-on 后缀迁移", () => {
@@ -73,5 +96,25 @@ describe("loadAudit（R47 修复候选 bug#8：审计历史跨重启恢复）", 
         expect(await new BridgeStore(io(null)).loadAudit(200)).toEqual([]);
         expect(await new BridgeStore(io("garbage")).loadAudit(200)).toEqual([]);
         expect(await new BridgeStore(io({ entries: "x" })).loadAudit(200)).toEqual([]);
+    });
+});
+
+describe("store.firstRun（R288 · G2-01 首跑判定）", () => {
+    const io = (data: unknown) => ({ load: async () => data, save: async () => {} });
+
+    it("缺失（null 或宿主 loadData 对缺失文件的空串）→ true", async () => {
+        for (const raw of [null, ""]) {
+            const store = new BridgeStore(io(raw));
+            await store.loadAll();
+            expect(store.firstRun).toBe(true);
+        }
+    });
+
+    it("已有设置（对象）→ false；空对象也算已存在（normalize 落默认不改变判定）", async () => {
+        for (const raw of [{ schemaVersion: 1, bridgeEnabled: true }, {}]) {
+            const store = new BridgeStore(io(raw));
+            await store.loadAll();
+            expect(store.firstRun).toBe(false);
+        }
     });
 });

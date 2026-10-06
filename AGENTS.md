@@ -11,7 +11,7 @@
 ```bash
 corepack pnpm install
 corepack pnpm check        # tsc + svelte-check（提交前必跑）
-corepack pnpm accept       # 验收门：单测(162) + MCP 协议冒烟(7)——无内核可跑
+corepack pnpm accept       # 验收门：单测(210) + MCP 协议冒烟(7)——无内核可跑
 corepack pnpm build        # dist/ + package.zip
 corepack pnpm build:mcp    # dist-mcp/（MCP 独立分发物）
 corepack pnpm verify:restart  # 真机九类数据（需思源运行+桥开启；SIYUAN_LOG 可选）
@@ -19,6 +19,39 @@ corepack pnpm verify:bg       # 后台真机走查 7 项（含「前端 bundle �
 # CI 容器化内核侧验收（GitHub Actions 手动触发；ubuntu+siyuan docker，无需本机）
 gh workflow run ci-e2e-experiment.yml && gh run watch
 ```
+
+## 冒烟/e2e 内核防呆与隔离靶场（R287 · 用户约定）
+
+本机内核常被多个插件项目和真实数据共用。触内核的自动化分两类：
+
+| 类别 | 判定 | 约束 |
+|---|---|---|
+| 只读走查 | 不调写 API、不改 petal 存储 | 可在在用工作区随时跑、可并发 |
+| 写型冒烟/e2e | 改 petal 存储 / 部署插件文件 / 建删笔记本 | **禁止直打在用工作区或与他人共用的内核** |
+
+危害：其他插件的事件监听把测试写入当真实事件反应；浏览器载体以 Web Lock 认领桥消费与真实前台互斥；部署式重写 index.js 触发 push_reload（Electron 前台即 bug#15 死桥序列）；同步开启的工作区被反复搅动。
+
+**本仓库脚本分类**：
+
+| 脚本 | 类别 | 防呆 |
+|---|---|---|
+| `e2e/e2e.mjs` | 写型（写桥载体） | resolveTarget + 清残留 + guardScratch + 靶场自动重置桥载体 |
+| `e2e/hot-reload-probe.mjs` | 写型（putFile 重写 index.js，最强形态） | 必须靶场，共享内核拒跑 |
+| `e2e/visual-walkthrough.mjs` | 走查（含写副作用） | 暗色翻转仅靶场/显式豁免；共享内核提示桥认领 |
+
+**三层防护**（共享件 `scripts/lib/smoke-kernel.mjs`，改自小驴考试 fa57d6a）：
+1. 目标参数化：argv > `SIYUAN_BASE_URL` > `SIYUAN_URL`（旧）+ `SIYUAN_TOKEN`；缺 token 即退出，绝不内置默认 token/工作区。
+2. 靶场防呆：启动 lsNotebooks，存在任何非 `siyuan-quickgate-smoke-` 前缀的笔记本 → 拒跑并给指引；`SIYUAN_E2E_ALLOW_SHARED=1` 显式豁免。
+3. 残留清扫：按前缀注册表只删自己的临时库；新冒烟脚本临时笔记本一律用 `siyuan-quickgate-smoke-*`。
+4. AI 外发默认关：向已配置模型真实发请求的检查步默认跳过，`SIYUAN_E2E_AI=1` 显式启用（`skipUnlessAi()`）。
+5. 退出码语义不因防呆改变：e2e.mjs 环境未就绪=2、失败=1。
+
+**运行约定**：
+- 写型一律打隔离靶场：`node scripts/smoke-range.mjs start [--with-frontend]`——独立 workspace（`tmp/smoke-range-ws`）起第二内核，端口 6807 起自动顺延，实例内只装快门；`--with-frontend` 加 headless Chromium 载体（桥类用例 U1~U10 需要；纯 serve 只有 U11 可测）。
+- 每个插件项目用自己的靶场 workspace，不跨项目共用；同一内核实例上的写型冒烟串行执行、不并发（清扫按前缀互认，混跑有互删风险）；只读走查可随时并发。
+- 靶场 token 与主工作区不同，`start` 完成后直接打印（等价于该实例 设置→关于）。
+- 收摊 `stop`；靶场 workspace 留在 tmp/（gitignore），删目录即重置。
+
 
 ## 发版流程（每版必经，缺一即回）
 

@@ -3,9 +3,26 @@
  * 纯请求→响应函数，无 IO——stdio 循环在 main.ts，单测直接打 handleRequest。
  * 安全（docs/10 §3.14）：writeEnabled=false 时写工具不进 tools/list，tools/call 调用也拒绝。
  */
-import { buildToolDefs, filterTools } from "./tools.ts";
+import { buildToolDefs, filterTools, validateArgs } from "./tools.ts";
 import type { McpToolDef } from "./tools.ts";
 import { KERNEL_OPS } from "../ops.ts";
+
+/** stdio 并发上限（L560）：超限立即回 -32000，防并发调用把 NDJSON 写者放大成队列竞争 */
+export const MCP_MAX_IN_FLIGHT = 4;
+
+/** 简易并发闸：granted 计数当前持有配额的任务；main.ts 的 stdio 循环据此拒超限请求 */
+export function createLimiter(max: number) {
+    let inFlight = 0;
+    return {
+        get inFlight() { return inFlight; },
+        tryAcquire(): boolean {
+            if (inFlight >= max) return false;
+            inFlight += 1;
+            return true;
+        },
+        release() { inFlight = Math.max(0, inFlight - 1); },
+    };
+}
 
 export interface BridgeClient {
     send(op: string, args: Record<string, unknown>): Promise<string>;
@@ -72,6 +89,10 @@ export function createMcpServer(client: BridgeClient, opts: { writeEnabled: bool
                     const known = allDefs.some((t) => t.name === name);
                     return result(id, `工具不可用：${name}${known ? "（写操作需 LV_MCP_WRITE=1 显式开启）" : "（未知工具）"}`, true);
                 }
+                // L562：schema 本地校验 → -32602（协议级 invalid params），与工具执行失败（isError）分离，
+                // 且不再消耗桥队列槽位等前端回执
+                const invalid = validateArgs(def, args);
+                if (invalid) return err(id, -32602, `参数校验失败：${invalid}`);
                 try {
                     const kernelOp = (KERNEL_OPS as readonly string[]).includes(name) && typeof client.callKernelRoute === "function";
                     if (kernelOp && client.callKernelRoute) {
@@ -91,10 +112,13 @@ export function createMcpServer(client: BridgeClient, opts: { writeEnabled: bool
                         // **同 id** 走 NDJSON 补发（D-0012 预留语义：先到者执行、后到者 duplicate，
                         // 不会双执行），订阅缺口自愈且毫秒级场景不受影响
                         const early = await client.waitReceipt(sent, 3000, name);
+                        const m = (client as { metrics?: { fastHits: number; fallbackResends: number } }).metrics;
                         if (early.status !== "timeout") {
+                            if (m) m.fastHits += 1;
                             const st = String(early.status ?? "");
                             return result(id, JSON.stringify(early, null, 2), !OK_STATUSES.has(st));
                         }
+                        else if (m) m.fallbackResends += 1;
                         sent = await client.send(name, args);
                     } else {
                         sent = await client.send(name, args);

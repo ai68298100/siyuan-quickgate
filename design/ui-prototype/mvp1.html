@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小驴快门 · MVP-1 UI 高保真原型（状态概览 / 首跑向导 / 分层设置 / 队列与回执）</title>
+<!--
+  设计令牌取自本机思源 daylight / midnight 主题实测值（--b3-* 同名令牌）。
+  插件内实现只用 var(--b3-*) ，亮暗由宿主主题自动适配；本页用 class=dark 模拟。
+  样例数据均为脱敏样例（20 号文档 §9 约定），不代表真机证据。
+-->
+<style>
+  :root, .light {
+    --b3-theme-primary: #3575f0;
+    --b3-theme-primary-light: rgba(53, 117, 240, .87);
+    --b3-theme-primary-lightest: rgba(53, 117, 240, .12);
+    --b3-theme-secondary: #ff9200;
+    --b3-theme-background: #fff;
+    --b3-theme-background-light: #f8f9fa;
+    --b3-theme-surface: #f6f6f6;
+    --b3-theme-surface-light: #e9e9e9;
+    --b3-theme-surface-lighter: rgba(0, 0, 0, .06);
+    --b3-theme-error: #d23f31;
+    --b3-theme-success: #65b84d;
+    --b3-theme-warning: #d97706;
+    --b3-theme-on-primary: #fff;
+    --b3-theme-on-background: #222;
+    --b3-theme-on-surface: #5f6368;
+    --b3-theme-on-surface-light: rgba(95, 99, 104, .68);
+    --b3-border-color: var(--b3-theme-surface-lighter);
+    --b3-list-hover: rgba(0, 0, 0, .075);
+    --b3-dialog-shadow: 0 8px 24px rgba(0,0,0,.16), 0 2px 6px rgba(0,0,0,.08);
+  }
+  .dark {
+    --b3-theme-primary: #3575f0;
+    --b3-theme-primary-lightest: rgba(53, 117, 240, .24);
+    --b3-theme-secondary: #f3a92f;
+    --b3-theme-background: #1e1e1e;
+    --b3-theme-background-light: #262626;
+    --b3-theme-surface: #2c2c2c;
+    --b3-theme-surface-light: #383838;
+    --b3-theme-surface-lighter: rgba(255, 255, 255, .08);
+    --b3-theme-error: #d23f31;
+    --b3-theme-success: #65b84d;
+    --b3-theme-warning: #f3a92f;
+    --b3-theme-on-primary: #fff;
+    --b3-theme-on-background: #dadada;
+    --b3-theme-on-surface: #9aa0a6;
+    --b3-theme-on-surface-light: rgba(154, 160, 166, .68);
+    --b3-border-color: #484848;
+    --b3-list-hover: rgba(255, 255, 255, .10);
+    --b3-dialog-shadow: 0 8px 24px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px 64px;
+    background: var(--b3-theme-surface);
+    color: var(--b3-theme-on-background);
+    font: 14px/1.6 -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    transition: background .2s, color .2s;
+  }
+  /* ===== 原型页工具条（非产品 UI） ===== */
+  .specbar {
+    max-width: 760px; margin: 0 auto 20px; display: flex; gap: 10px; align-items: center;
+    flex-wrap: wrap; font-size: 12px; color: var(--b3-theme-on-surface);
+  }
+  .specbar a { color: var(--b3-theme-primary); text-decoration: none; padding: 2px 8px; border-radius: 4px; }
+  .specbar a:hover { background: var(--b3-list-hover); }
+  .specbar .spacer { flex: 1; }
+  .toggle { cursor: pointer; user-select: none; border: 1px solid var(--b3-border-color); border-radius: 6px; padding: 3px 10px; }
+  .spec-note { max-width: 760px; margin: 0 auto 28px; font-size: 12px; color: var(--b3-theme-on-surface); }
+
+  /* ===== 对话框框架（思源 b3-dialog 形态） ===== */
+  .frame { max-width: 760px; margin: 0 auto 40px; scroll-margin-top: 16px; }
+  .frame > h2 { font-size: 15px; margin: 0 0 10px 2px; color: var(--b3-theme-on-surface); font-weight: 600; }
+  .dialog {
+    background: var(--b3-theme-background);
+    border-radius: 8px 8px 6px 6px;
+    box-shadow: var(--b3-dialog-shadow);
+    border: 1px solid var(--b3-border-color);
+    overflow: hidden;
+  }
+  .dialog-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px 12px; border-bottom: 1px solid var(--b3-border-color);
+  }
+  .dialog-header .logo {
+    width: 22px; height: 22px; border-radius: 5px; background: var(--b3-theme-primary);
+    color: var(--b3-theme-on-primary); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex: none;
+  }
+  .dialog-header .title { font-size: 15px; font-weight: 600; }
+  .dialog-header .ver { font-size: 11px; color: var(--b3-theme-on-surface); border: 1px solid var(--b3-border-color); padding: 0 6px; border-radius: 10px; }
+  .dialog-header .x { margin-left: auto; color: var(--b3-theme-on-surface); cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 4px; }
+  .dialog-header .x:hover { background: var(--b3-list-hover); }
+  .dialog-body { display: flex; min-height: 430px; }
+
+  /* ===== 侧导航 ===== */
+  .nav { width: 148px; flex: none; background: var(--b3-theme-surface); padding: 10px 8px; border-right: 1px solid var(--b3-border-color); }
+  .nav .item {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px; margin-bottom: 2px;
+    border-radius: 6px; color: var(--b3-theme-on-background); font-size: 13px; cursor: pointer;
+  }
+  .nav .item:hover { background: var(--b3-list-hover); }
+  .nav .item.active { background: var(--b3-theme-primary-lightest); color: var(--b3-theme-primary); font-weight: 600; }
+  .nav .item svg { width: 15px; height: 15px; flex: none; opacity: .85; }
+  .nav .dot { margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--b3-theme-success); }
+
+  /* ===== 内容区 ===== */
+  .content { flex: 1; padding: 16px 18px 14px; overflow: auto; max-height: 560px; }
+  .page-title { font-size: 13px; font-weight: 600; color: var(--b3-theme-on-surface); letter-spacing: .02em; margin: 0 0 10px; }
+  .card {
+    border: 1px solid var(--b3-border-color); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
+    background: var(--b3-theme-background);
+  }
+  .card .card-title { font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .stat-card { border: 1px solid var(--b3-border-color); border-radius: 8px; padding: 11px 13px; }
+  .stat-card .head { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
+  .stat-card .sub { font-size: 11px; color: var(--b3-theme-on-surface); margin-top: 3px; line-height: 1.5; }
+
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .dot.ok { background: var(--b3-theme-success); box-shadow: 0 0 0 3px rgba(101, 184, 77, .18); }
+  .dot.warn { background: var(--b3-theme-warning); box-shadow: 0 0 0 3px rgba(217, 119, 6, .16); }
+  .dot.off { background: var(--b3-theme-on-surface-light); box-shadow: none; }
+  .dot.err { background: var(--b3-theme-error); box-shadow: 0 0 0 3px rgba(210, 63, 49, .15); }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 1px 8px;
+    border-radius: 10px; line-height: 1.7;
+  }
+  .chip.ok { background: rgba(101, 184, 77, .13); color: #47893a; }
+  .chip.warn { background: rgba(217, 119, 6, .12); color: #b45309; }
+  .chip.err { background: rgba(210, 63, 49, .12); color: var(--b3-theme-error); }
+  .chip.info { background: var(--b3-theme-primary-lightest); color: var(--b3-theme-primary); }
+  .chip.mute { background: var(--b3-theme-surface); color: var(--b3-theme-on-surface); border: 1px solid var(--b3-border-color); }
+  .dark .chip.ok { color: #8fdc7e; } .dark .chip.warn { color: #f3c07b; }
+
+  /* ===== 设置行 ===== */
+  .row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--b3-border-color); }
+  .row:last-child { border-bottom: none; }
+  .row .ic { width: 28px; height: 28px; border-radius: 7px; background: var(--b3-theme-surface); display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px; }
+  .row .ic svg { width: 15px; height: 15px; color: var(--b3-theme-on-surface); }
+  .row .body { flex: 1; min-width: 0; }
+  .row .label { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .row .hint { font-size: 11px; color: var(--b3-theme-on-surface); margin-top: 2px; line-height: 1.55; }
+  .row .ctrl { flex: none; display: flex; align-items: center; gap: 8px; padding-top: 3px; }
+
+  /* ===== 控件 ===== */
+  .switch { width: 36px; height: 18px; border-radius: 9px; background: var(--b3-theme-surface-light); position: relative; cursor: pointer; flex: none; transition: background .15s; border: none; }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: left .15s; }
+  .switch.on { background: var(--b3-theme-primary); }
+  .switch.on::after { left: 20px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 5px 12px; border-radius: 6px;
+    border: 1px solid var(--b3-border-color); background: var(--b3-theme-background); color: var(--b3-theme-on-background); cursor: pointer;
+  }
+  .btn:hover { background: var(--b3-list-hover); }
+  .btn.primary { background: var(--b3-theme-primary); border-color: var(--b3-theme-primary); color: var(--b3-theme-on-primary); font-weight: 500; }
+  .btn.primary:hover { background: var(--b3-theme-primary-light); }
+  .btn.sm { padding: 2px 9px; font-size: 11px; }
+  .btn.danger { color: var(--b3-theme-error); border-color: rgba(210, 63, 49, .4); }
+  .btn.danger:hover { background: rgba(210, 63, 49, .08); }
+  .textfield {
+    font-size: 12px; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--b3-border-color);
+    background: var(--b3-theme-background); color: var(--b3-theme-on-background); outline: none; width: 90px;
+  }
+  .textfield:focus { border-color: var(--b3-theme-primary); box-shadow: 0 0 0 2px var(--b3-theme-primary-lightest); }
+  .textfield.block { width: 100%; font-family: ui-monospace, Consolas, monospace; }
+
+  /* ===== 步骤条（首跑） ===== */
+  .steps { display: flex; align-items: flex-start; margin: 4px 0 14px; }
+  .step { flex: 1; text-align: center; position: relative; font-size: 11px; color: var(--b3-theme-on-surface); }
+  .step::before { content: ""; position: absolute; top: 10px; left: -50%; width: 100%; height: 2px; background: var(--b3-border-color); }
+  .step:first-child::before { display: none; }
+  .step.done::before { background: var(--b3-theme-success); }
+  .step.current::before { background: var(--b3-theme-primary); }
+  .step .ball {
+    width: 21px; height: 21px; border-radius: 50%; margin: 0 auto 5px; position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center; font-size: 11px;
+    background: var(--b3-theme-surface); border: 2px solid var(--b3-border-color); color: var(--b3-theme-on-surface);
+  }
+  .step.done .ball { background: var(--b3-theme-success); border-color: var(--b3-theme-success); color: #fff; }
+  .step.current .ball { background: var(--b3-theme-background); border-color: var(--b3-theme-primary); color: var(--b3-theme-primary); box-shadow: 0 0 0 3px var(--b3-theme-primary-lightest); }
+  .step.current { color: var(--b3-theme-primary); font-weight: 600; }
+
+  /* ===== 表格（回执） ===== */
+  table.receipts { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.receipts th { text-align: left; font-weight: 500; color: var(--b3-theme-on-surface); font-size: 11px; padding: 4px 8px; border-bottom: 1px solid var(--b3-border-color); }
+  table.receipts td { padding: 5px 8px; border-bottom: 1px solid var(--b3-border-color); }
+  table.receipts tr:last-child td { border-bottom: none; }
+  table.receipts tr:hover td { background: var(--b3-list-hover); }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+
+  .kpi { display: flex; gap: 10px; margin-bottom: 10px; }
+  .kpi .kv { flex: 1; border: 1px solid var(--b3-border-color); border-radius: 8px; padding: 9px 12px; text-align: center; }
+  .kpi .kv b { display: block; font-size: 19px; font-weight: 600; }
+  .kpi .kv span { font-size: 11px; color: var(--b3-theme-on-surface); }
+
+  .footer { display: flex; gap: 12px; align-items: center; padding: 9px 18px; border-top: 1px solid var(--b3-border-color); font-size: 11px; color: var(--b3-theme-on-surface); flex-wrap: wrap; }
+  .footer a { color: var(--b3-theme-primary); text-decoration: none; }
+  .footer .sp { flex: 1; }
+  .empty { text-align: center; color: var(--b3-theme-on-surface); font-size: 12px; padding: 18px 0 8px; }
+
+  /* ===== 框架常驻：设置搜索条（跨分组过滤） ===== */
+  .searchbar { padding: 12px 18px 4px; }
+  .searchbar .textfield { width: 100%; background: var(--b3-theme-surface); border-color: transparent; }
+  .searchbar .textfield:focus { background: var(--b3-theme-background); }
+
+  /* ===== 下拉（设置行控件） ===== */
+  .select {
+    font-size: 12px; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--b3-border-color);
+    background: var(--b3-theme-background); color: var(--b3-theme-on-background); outline: none;
+  }
+  .select:focus { border-color: var(--b3-theme-primary); box-shadow: 0 0 0 2px var(--b3-theme-primary-lightest); }
+
+  /* ===== 命令面板 ===== */
+  .pal-search { font-size: 14px; padding: 8px 12px; width: 100%; }
+  .pal-list { padding: 2px 6px 8px; }
+  .pal-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; font-size: 13px; line-height: 20px; cursor: pointer; }
+  .pal-item:hover { background: var(--b3-list-hover); }
+  .pal-item.active { background: var(--b3-theme-primary-lightest); }
+  .pal-item.active .pal-title { color: var(--b3-theme-primary); font-weight: 600; }
+  .pal-mark { width: 16px; flex: none; text-align: center; font-size: 11px; color: var(--b3-theme-warning); }
+  .pal-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pal-sub { flex: none; font-size: 11px; color: var(--b3-theme-on-surface); }
+  .kbd {
+    flex: none; font-family: ui-monospace, Consolas, monospace; font-size: 10px; line-height: 16px;
+    color: var(--b3-theme-on-surface); border: 1px solid var(--b3-border-color); border-radius: 4px; padding: 0 5px;
+  }
+  .pal-star { flex: none; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; border: none; border-radius: 5px; background: transparent; color: var(--b3-theme-on-surface-light); font-size: 13px; cursor: pointer; }
+  .pal-item.active .pal-star { color: var(--b3-theme-primary); }
+  .pal-group {
+    font-size: 11px; font-weight: 600; color: var(--b3-theme-on-surface); letter-spacing: .02em;
+    padding: 10px 2px 4px; margin-top: 4px; border-top: 1px solid var(--b3-border-color);
+  }
+
+  /* ===== 通知 / 恢复 / 回执中心（裸对话框：内容区自绘头部） ===== */
+  .nhead { display: flex; align-items: center; gap: 8px; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--b3-border-color); }
+  .nhead .logo { width: 21px; height: 21px; border-radius: 5px; background: var(--b3-theme-primary); color: var(--b3-theme-on-primary); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex: none; }
+  .nhead .t { font-size: 13px; font-weight: 600; }
+  .nhead .sub { font-size: 11px; color: var(--b3-theme-on-surface-light); }
+  .nhead .sp { flex: 1; }
+  .ncard { border: 1px solid var(--b3-border-color); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; gap: 10px; align-items: flex-start; background: var(--b3-theme-background); }
+  .ncard.active { border-color: var(--b3-theme-primary); }
+  .ncard .body { flex: 1; min-width: 0; }
+  .ncard .t { font-size: 12px; font-weight: 500; }
+  .ncard .d { font-size: 12px; color: var(--b3-theme-on-surface); margin-top: 2px; line-height: 1.6; }
+  .filterbar { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .count-line { margin-top: 8px; font-size: 11px; color: var(--b3-theme-on-surface); }
+</style>
+</head>
+<body class="light">
+
+<div class="specbar">
+  <b>小驴快门 MVP-1 原型</b>
+  <a href="#f-home">① 状态概览（健康首页）</a>
+  <a href="#f-first">② 首跑向导</a>
+  <a href="#f-settings">③ 分层设置</a>
+  <a href="#f-queue">④ 队列与回执</a>
+  <a href="#f-palette">⑤ 命令面板</a>
+  <a href="#f-notify">⑥ 通知中心</a>
+  <a href="#f-recovery">⑦ 恢复中心</a>
+  <a href="#f-results">⑧ 回执中心</a>
+  <span class="spacer"></span>
+  <span class="toggle" onclick="document.body.classList.toggle('dark');document.body.classList.toggle('light')">🌗 亮 / 暗</span>
+</div>
+<p class="spec-note">
+  框架 = 思源 b3-dialog（设置入口仍为原生 Dialog，G2-04 约定）。全部颜色使用 --b3-* 令牌，亮暗由宿主主题自动适配；
+  本页样板值为 daylight / midnight 实测。所有数量、ID、时间为脱敏样例，不代表真机证据（20 号文档 §9）。
+  实现位置：src/index.ts openSettingPanel + src/index.scss（作用域 #qg-settings）。
+  新增屏实现：命令面板 src/command-palette.ts（#qg-palette）· 通知中心 src/notification-center-ui.ts（#qg-notify）·
+  恢复中心 src/recovery-center.ts（#qg-recovery）· 回执中心 src/results-center-ui.ts（#qg-results）。
+  v0.7.5 同步：设置搜索条为对话框框架常驻件（①③④ 同）；回执时间一律本地时区显示、耗时 ≥10s 升秒（30.0s）。
+</p>
+
+<!-- ══════════════ ① 状态概览（健康首页 G2-02） ══════════════ -->
+<div class="frame" id="f-home">
+  <h2>① 状态概览（健康首页）— 打开设置时的首屏</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">小驴快门</div>
+      <div class="ver">v0.7.5 · 协议 v1</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="searchbar"><input class="textfield block" placeholder="搜索设置（跨分组；清空恢复当前页）"></div>
+    <div class="dialog-body">
+      <div class="nav">
+        <div class="item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/></svg>状态概览<span class="dot"></span></div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>连接与通道</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>安全与权限</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>队列与数据</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>诊断与生态</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>关于</div>
+      </div>
+      <div class="content">
+        <p class="page-title">状态概览</p>
+        <div class="grid2">
+          <div class="stat-card">
+            <div class="head"><span class="dot ok"></span>外部命令桥<span class="chip ok" style="margin-left:auto">运行中</span></div>
+            <div class="sub">本窗口消费 · 轮询 500ms</div>
+          </div>
+          <div class="stat-card">
+            <div class="head"><span class="dot ok"></span>广播快路径<span class="chip ok" style="margin-left:auto">已开启</span></div>
+            <div class="sub">qg-cmd 频道 · 毫秒级</div>
+          </div>
+          <div class="stat-card">
+            <div class="head"><span class="dot ok"></span>事件物化<span class="chip ok" style="margin-left:auto">已接</span></div>
+            <div class="sub">白名单 2 源 · 幂等台账 42 条</div>
+          </div>
+          <div class="stat-card">
+            <div class="head"><span class="dot warn"></span>内核路由<span class="chip warn" style="margin-left:auto">探测中</span></div>
+            <div class="sub">/plugin/private 同步通道</div>
+          </div>
+        </div>
+        <div class="kpi">
+          <div class="kv"><b>7</b><span>本次运行命令</span></div>
+          <div class="kv"><b>6</b><span>成功</span></div>
+          <div class="kv"><b>1</b><span>拒绝</span></div>
+          <div class="kv"><b>0</b><span>失败 / 过期</span></div>
+          <div class="kv"><b>38<small style="font-size:11px">ms</small></b><span>平均耗时</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">下一步</div>
+          <div style="font-size:12px;color:var(--b3-theme-on-surface);margin-top:3px">
+            通道全部就绪。可从 Quicker / CLI 发第一条 <span class="mono">bridge.ping</span> 试一条命令；
+            或到「诊断与生态」核对小驴插件能力目录。
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn primary">桥自检（bridge.ping）</button>
+            <button class="btn">查看能力目录</button>
+            <button class="btn">命令面板</button>
+            <button class="btn">通知（4）</button>
+            <button class="btn">恢复中心（2）</button>
+          </div>
+        </div>
+        <div class="card" style="padding:0 14px 4px">
+          <div class="card-title" style="padding:10px 0 6px">最近回执 <span class="chip mute" style="margin-left:auto">数据截至 10:32:05</span></div>
+          <table class="receipts">
+            <tr><td><span class="chip ok">recorded</span></td><td class="mono">checkin.record</td><td>10:31:58</td><td>112ms</td></tr>
+            <tr><td><span class="chip ok">recorded</span></td><td class="mono">contacts.search</td><td>10:31:12</td><td>408ms</td></tr>
+            <tr><td><span class="chip warn">rejected</span></td><td class="mono">doc.open</td><td>10:30:47</td><td>2ms</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <span>帮助：<a>上手指南</a> · <a>故障排查 FAQ</a> · <a>隐私说明</a> · <a>op 契约</a></span>
+      <span class="sp"></span><span>数据流向与隐私边界见 PRIVACY.md（不外传任何数据）</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ② 首跑向导（G2-01） ══════════════ -->
+<div class="frame" id="f-first">
+  <h2>② 首跑向导 — 首次打开（无设置文件）时状态概览位置显示</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">小驴快门 · 欢迎</div>
+      <div class="ver">首次使用</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="dialog-body">
+      <div class="content" style="padding:20px 24px">
+        <p class="page-title" style="font-size:14px;color:var(--b3-theme-on-background)">
+          三步接通外部自动化<span style="font-weight:400;color:var(--b3-theme-on-surface)">　——　Quicker / 快捷指令 / CLI 复用同一条命令通道</span>
+        </p>
+        <div class="steps">
+          <div class="step done"><div class="ball">✓</div>环境检查</div>
+          <div class="step current"><div class="ball">2</div>开启通道</div>
+          <div class="step"><div class="ball">3</div>连通自检</div>
+          <div class="step"><div class="ball">4</div>完成</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot ok"></span>环境检查 <span class="chip ok" style="margin-left:auto">通过</span></div>
+          <div class="sub" style="font-size:12px;color:var(--b3-theme-on-surface);margin-top:4px;line-height:1.7">
+            思源 v3.8.6 ✓　插件已加载 ✓　存储目录可写 ✓　<span style="color:var(--b3-theme-on-surface-light)">（检查失败时会给出原因与修复按钮，不显示为空白）</span>
+          </div>
+        </div>
+        <div class="card" style="border-color:var(--b3-theme-primary);box-shadow:0 0 0 2px var(--b3-theme-primary-lightest)">
+          <div class="card-title">开启外部命令桥 <span class="chip info" style="margin-left:auto">默认关</span></div>
+          <div style="font-size:12px;color:var(--b3-theme-on-surface);margin:4px 0 8px;line-height:1.7">
+            开启后外部程序才能发命令进来。所有命令留审计、写操作有确认门控；随时可关。
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button class="switch on" aria-label="外部命令桥"></button>
+            <span style="font-size:12px">已开启（本窗口消费）</span>
+            <span class="sp" style="flex:1"></span>
+            <button class="btn primary">下一步：连通自检</button>
+          </div>
+        </div>
+        <div class="card" style="opacity:.62">
+          <div class="card-title">连通自检 <span class="chip mute" style="margin-left:auto">待上一步</span></div>
+          <div style="font-size:12px;color:var(--b3-theme-on-surface);margin-top:4px">
+            发一条 <span class="mono">bridge.ping</span> 并核对回执——通过后即可从外部客户端发第一条真实命令。
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:8px">
+          跳过向导，直接浏览<a style="color:var(--b3-theme-primary)">全部设置</a>　·　<a style="color:var(--b3-theme-primary)">一分钟上手指南</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ③ 分层设置（G2-04，展示「连接与通道」页） ══════════════ -->
+<div class="frame" id="f-settings">
+  <h2>③ 分层设置 — 左导航分组，行式控件（图示「连接与通道」页）</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">小驴快门 · 设置</div>
+      <div class="ver">v0.7.5</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="searchbar"><input class="textfield block" placeholder="搜索设置（跨分组；清空恢复当前页）"></div>
+    <div class="dialog-body">
+      <div class="nav">
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/></svg>状态概览</div>
+        <div class="item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>连接与通道</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>安全与权限</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>队列与数据</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>诊断与生态</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>关于</div>
+      </div>
+      <div class="content">
+        <p class="page-title">连接与通道</p>
+        <div class="card" style="padding:2px 14px">
+          <div class="row">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+            <div class="body">
+              <div class="label">外部命令桥 <span class="chip mute">默认关</span></div>
+              <div class="hint">开启后外部程序（Quicker / CLI / MCP）可发命令。思源端弹确认、全程留审计。</div>
+            </div>
+            <div class="ctrl"><button class="switch on" aria-label="外部命令桥"></button></div>
+          </div>
+          <div class="row">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+            <div class="body">
+              <div class="label">移动端桥 opt-in</div>
+              <div class="hint">默认关；移动端上开启外部命令桥需单独打开此项。</div>
+            </div>
+            <div class="ctrl"><button class="switch" aria-label="移动端桥"></button></div>
+          </div>
+          <div class="row">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg></div>
+            <div class="body">
+              <div class="label">广播快路径 v1.5</div>
+              <div class="hint">默认关，需先开桥；postMessage → qg-cmd 频道毫秒级执行。</div>
+            </div>
+            <div class="ctrl"><button class="switch on" aria-label="广播快路径"></button></div>
+          </div>
+          <div class="row">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <div class="body">
+              <div class="label">轮询间隔（ms）</div>
+              <div class="hint">200 ~ 60000；行内校验，非法值还原并提示原因；修改后立即生效（运行中的桥自动重启轮询）。</div>
+            </div>
+            <div class="ctrl"><input class="textfield" value="500"><span style="font-size:11px;color:var(--b3-theme-on-surface)">热生效</span></div>
+          </div>
+          <div class="row">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <div class="body">
+              <div class="label">快速捕获默认去向</div>
+              <div class="hint">命令面板「捕获」按钮的去向（选择器仍会记住上次使用并排前）。</div>
+            </div>
+            <div class="ctrl">
+              <select class="select"><option>今日日记（HH:mm 前缀）</option><option>收集箱（纯文本）</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;gap:8px;align-items:center;padding:10px 14px">
+          <span style="font-size:12px;color:var(--b3-theme-on-surface)">桥消费权：本窗口持有（Web Lock 认领）</span>
+          <span class="sp" style="flex:1"></span>
+          <button class="btn">桥自检</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <span>修改即保存，无需「确定」</span><span class="sp"></span><a>恢复默认设置</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ④ 队列与回执（队列治理 + 结果可查） ══════════════ -->
+<div class="frame" id="f-queue">
+  <h2>④ 队列与回执 — 队列与数据页（治理入口 + 最近回执）</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">小驴快门 · 设置</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="searchbar"><input class="textfield block" placeholder="搜索设置（跨分组；清空恢复当前页）"></div>
+    <div class="dialog-body">
+      <div class="nav">
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/></svg>状态概览</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>连接与通道</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>安全与权限</div>
+        <div class="item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>队列与数据</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>诊断与生态</div>
+        <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>关于</div>
+      </div>
+      <div class="content">
+        <p class="page-title">队列与数据</p>
+        <div class="kpi">
+          <div class="kv"><b>2</b><span>待处理命令</span></div>
+          <div class="kv"><b>18</b><span>处理台账</span></div>
+          <div class="kv"><b>1</b><span>迟到完成</span></div>
+        </div>
+        <div class="card" style="padding:0 14px 4px">
+          <div class="card-title" style="padding:10px 0 6px">最近回执
+            <span style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn sm">导出审计 JSON</button>
+              <button class="btn sm">收藏与最近使用</button>
+            </span>
+          </div>
+          <table class="receipts">
+            <tr><th>状态</th><th>op</th><th>时间</th><th>耗时</th><th></th></tr>
+            <tr><td><span class="chip ok">recorded</span></td><td class="mono">checkin.record</td><td>10:31:58</td><td>112ms</td><td><button class="btn sm">复制</button></td></tr>
+            <tr><td><span class="chip ok">recorded</span></td><td class="mono">favorites.add</td><td>10:31:40</td><td>6ms</td><td><button class="btn sm">复制</button></td></tr>
+            <tr><td><span class="chip err">failed</span></td><td class="mono">doc.open</td><td>10:31:02</td><td>8ms</td><td><button class="btn sm">复制</button></td></tr>
+          </table>
+        </div>
+        <div class="card" style="border-style:dashed;display:flex;gap:10px;align-items:center;padding:10px 14px">
+          <div style="font-size:12px;color:var(--b3-theme-on-surface)">
+            <b style="color:var(--b3-theme-error)">危险区</b>　清空前将预览：将丢弃条数、最老命令时间，并清空回执与处理台账（不可撤销）。
+          </div>
+          <span class="sp" style="flex:1"></span>
+          <button class="btn danger">清空命令队列</button>
+        </div>
+        <div class="card">
+          <div class="card-title">全量备份 / 恢复</div>
+          <div style="font-size:11px;color:var(--b3-theme-on-surface);margin:4px 0 8px;line-height:1.6">
+            导出=设置+收藏+审计+回执+处理台账拼装单 JSON（含 schemaVersion，导入走校验链）。导入=覆盖当前数据（确认后执行，桥自动重启生效）。
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn primary">导出全量备份</button>
+            <button class="btn">导入备份</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <span>队列即文件（NDJSON），重启不丢；台账滚动裁剪</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ⑤ 命令面板（G3-01 · Ctrl+Alt+P） ══════════════ -->
+<div class="frame" id="f-palette">
+  <h2>⑤ 命令面板 — 单输入 + 实时过滤 + 键盘导航；能力动作二段式（先参数后执行）</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">命令面板</div>
+      <div class="ver">↑↓ 选择 · Enter 执行 · Esc 关闭</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="dialog-body">
+      <div class="content" style="padding:14px 16px">
+        <input class="textfield pal-search" placeholder="搜索命令（中英/拼音别名；收藏与最近自动置顶）">
+        <div class="pal-list">
+          <div class="pal-item active"><span class="pal-mark">★</span><span class="pal-title">打卡：今日概览</span><span class="pal-sub">小驴打卡</span><button class="pal-star">★</button></div>
+          <div class="pal-item"><span class="pal-mark">↺</span><span class="pal-title">雷切：切换页签</span><span class="kbd">Ctrl+Tab</span><span class="pal-sub">小驴雷切</span><button class="pal-star">☆</button></div>
+          <div class="pal-item"><span class="pal-title">打卡：快速记录</span><span class="pal-sub">小驴打卡</span><button class="pal-star">☆</button></div>
+          <div class="pal-item"><span class="pal-title">人脉：搜索联系人</span><span class="pal-sub">小驴人脉</span><button class="pal-star">☆</button></div>
+          <div class="pal-group">能力动作（快门桥）</div>
+          <div class="pal-item"><span class="pal-mark" style="visibility:hidden">·</span><span class="pal-title">打卡记录</span><span class="pal-sub">checkin.record</span><span class="kbd">参数</span></div>
+          <div class="pal-item"><span class="pal-mark" style="visibility:hidden">·</span><span class="pal-title">人脉搜索</span><span class="pal-sub">contacts.search</span><span class="kbd">参数</span></div>
+          <div class="pal-item"><span class="pal-mark" style="visibility:hidden">·</span><span class="pal-title">从模板建文档</span><span class="pal-sub">template.new</span><span class="kbd">参数</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <span>空结果兜底：捕获「输入文本」→ 今日日记 / 收藏箱 · 打开设置 · 复制诊断包</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ⑥ 通知中心（G5-02） ══════════════ -->
+<div class="frame" id="f-notify">
+  <h2>⑥ 通知中心 — 聚合需要关注的事态；通知只是入口（动作跳转到既有处理面）</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">通知中心</div>
+      <div class="ver">需要关注的事态 · ↑↓ 选择 · Enter 跳转</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="dialog-body">
+      <div class="content" style="padding:14px 16px">
+        <div class="nhead">
+          <span class="logo">门</span><span class="t">通知中心</span>
+          <span class="sub">需要关注的事态（↑↓ 选择 · Enter 跳转）</span>
+          <span class="sp"></span><button class="btn sm">刷新</button>
+        </div>
+        <div class="ncard" style="align-items:center">
+          <span class="chip ok">最近成功</span>
+          <span class="body d" style="margin:0">events.list · 09:37:01</span>
+        </div>
+        <div class="ncard active">
+          <span class="chip warn">提醒</span>
+          <div class="body">
+            <div class="t">2 项待恢复（unknown / 失败 / 过期）</div>
+            <div class="d">unknown 不自动重试——需人工核对后选择重试或放弃。</div>
+          </div>
+          <button class="btn sm">去恢复中心</button>
+        </div>
+        <div class="ncard">
+          <span class="chip warn">提醒</span>
+          <div class="body">
+            <div class="t">2 条命令积压未消费</div>
+            <div class="d">可能为目标设备不匹配或桥短暂离线——积压命令在 TTL 内仍会被消费。</div>
+          </div>
+          <button class="btn sm">查看队列</button>
+        </div>
+        <div class="ncard">
+          <span class="chip mute">提示</span>
+          <div class="body">
+            <div class="t">1 次迟到完成</div>
+            <div class="d">超时已先行回执 failed，但底层操作稍后完成——副作用可能已发生，请按 op 核对。</div>
+          </div>
+          <button class="btn sm">查看队列</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ⑦ 恢复中心（G5 · 人工处置面） ══════════════ -->
+<div class="frame" id="f-recovery">
+  <h2>⑦ 恢复中心 — unknown / 失败 / 过期回执的人工处置：重试（换新 id）/ 放弃并记录 / 批量</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">恢复中心</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="dialog-body">
+      <div class="content" style="padding:14px 16px">
+        <div class="nhead">
+          <span class="logo">门</span><span class="t">恢复中心</span>
+          <span class="sub">unknown / 失败 / 过期回执的人工处置面</span>
+          <span class="sp"></span><button class="btn sm">刷新</button>
+        </div>
+        <div class="ncard">
+          <input type="checkbox" style="flex:none;margin-top:2px">
+          <div class="body">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="chip err">failed</span><span class="mono">doc.open</span><span class="qg-num" style="font-size:12px;color:var(--b3-theme-on-surface)">10:26:53</span>
+            </div>
+            <div class="d">文档不存在：20260930120000-ab12cd3</div>
+            <div class="d">原命令信封已不在队列（无法带参重试）——如需重试请从外部客户端重新发起。</div>
+          </div>
+          <span style="display:flex;gap:6px;flex:none;flex-wrap:wrap">
+            <button class="btn sm">复制原命令</button>
+            <button class="btn sm">放弃并记录</button>
+            <button class="btn sm">复制回执</button>
+          </span>
+        </div>
+        <div class="ncard">
+          <input type="checkbox" style="flex:none;margin-top:2px">
+          <div class="body">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span class="chip warn">expired</span><span class="mono">template.new</span><span style="font-size:12px;color:var(--b3-theme-on-surface)">10:20:03</span>
+            </div>
+            <div class="d">命令已过期（60s 窗口）</div>
+          </div>
+          <span style="display:flex;gap:6px;flex:none;flex-wrap:wrap">
+            <button class="btn sm">重试（换新 id）</button>
+            <button class="btn sm">放弃并记录</button>
+          </span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <input type="checkbox" style="flex:none"><span style="font-size:12px;color:var(--b3-theme-on-surface)">全选</span>
+          <button class="btn sm danger" style="display:none">放弃所选（2）</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--b3-theme-on-surface)">处置说明：重试=换新 id 重发原命令（写操作仍经确认门控）；放弃=人工核对后记录，不改变业务事实。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ⑧ 回执中心（G5-01 · 结果可查） ══════════════ -->
+<div class="frame" id="f-results">
+  <h2>⑧ 回执中心 — results.ndjson 查询面：状态/时间筛选 + 关键词 + 分页 + 导出</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">回执中心</div>
+      <div class="ver">外部命令回执留档</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="dialog-body">
+      <div class="content" style="padding:14px 16px">
+        <div class="nhead">
+          <span class="logo">门</span><span class="t">回执中心</span>
+          <span class="sub">外部命令回执留档（results.ndjson）</span>
+          <span class="sp"></span>
+          <button class="btn sm">刷新</button>
+          <button class="btn sm">导出 CSV</button>
+          <button class="btn sm">导出 JSON</button>
+        </div>
+        <div class="filterbar">
+          <select class="select" style="width:130px"><option>全部状态</option><option>recorded</option><option>rejected</option></select>
+          <select class="select" style="width:110px"><option>全部时间</option><option>今天</option><option>近 7 天</option></select>
+          <input class="textfield block" style="flex:1;width:auto" placeholder="搜索 id / op / 消息">
+        </div>
+        <div class="ncard" style="padding:8px 12px">
+          <span class="chip ok">recorded</span>
+          <div class="body">
+            <div style="display:flex;gap:8px;align-items:center"><span class="mono">checkin.record</span><span class="sp" style="flex:1"></span><span style="font-size:11px;color:var(--b3-theme-on-surface)">10:31:58</span><span style="font-size:11px;color:var(--b3-theme-on-surface)">112ms</span><button class="btn sm">复制</button></div>
+            <div class="d">已记录：英语晨读 ×1（连续 12 天）</div>
+          </div>
+        </div>
+        <div class="ncard" style="padding:8px 12px">
+          <span class="chip err">failed</span>
+          <div class="body">
+            <div style="display:flex;gap:8px;align-items:center"><span class="mono">doc.open</span><span class="sp" style="flex:1"></span><span style="font-size:11px;color:var(--b3-theme-on-surface)">10:26:53</span><span style="font-size:11px;color:var(--b3-theme-on-surface)">8ms</span><button class="btn sm">复制</button></div>
+            <div class="d">文档不存在：20260930120000-ab12cd3</div>
+          </div>
+        </div>
+        <div class="count-line">共 14 条（已显示 14）　<span style="margin-left:auto"></span><button class="btn sm" style="display:none">加载更多</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 原型交互：开关可点、导航高亮切换（仅演示，不代表实现）
+  document.querySelectorAll(".switch").forEach(s => s.addEventListener("click", () => s.classList.toggle("on")));
+  document.querySelectorAll(".nav").forEach(nav => nav.addEventListener("click", (e) => {
+    const item = e.target.closest(".item"); if (!item) return;
+    nav.querySelectorAll(".item").forEach(i => i.classList.remove("active")); item.classList.add("active");
+  }));
+</script>
+</body>
+</html>

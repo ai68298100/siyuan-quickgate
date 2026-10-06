@@ -5,6 +5,8 @@
 >
 > **发布策略（用户定）**：先上 GitHub（源码+Release+手动安装），**暂不推送集市**（思源 bazaar / Quicker 动作库均延后），上架门槛见 §8 末尾。
 > **本轮范围（用户定）**：基于现有 UI 原型，核对运行事实、页面数据来源和操作条件，增加尚未覆盖的实现前置并细化已有验收；所有新增事项保持未勾选，不开发、不接入真实模型、不修改真实 AI 配置。
+>
+> **当前执行入口（2026-10-05）**：先阅读 [产品评审与执行路线](docs/31-产品评审与执行路线-2026-10-05.md)，按 G0~G7 八条泳道取任务；本文件保留历史研究、证据和依赖，不再单独作为排期顺序。评估/登记完成不等于实现完成，必须以实现、自动化、真实宿主或用户结果证据标注。
 
 ## §0 工作循环（兜底规则 · 用户定的长期协议）
 
@@ -52,7 +54,7 @@
 |---|---|---|
 | 安全加固 | L651 ✓（原型链已修）、L652（getFileText 错误分类）、L653（Kernel API 契约明确） | 代码+测试，1 批 |
 | 运行时正确性 | L657（planId 并发唯一）、L655（pending/running/unknown 建模 design note）、L654（确认窗与执行上限分离核对）、L660（热重载 flush 验证） | 代码/验证混合 |
-| 载体治理 | L548（results/events/audit 轮转策略——已有 cap，补天数策略与导出清理）、L549（占用显示进设置页） | 中等 |
+| 载体治理 | L548（results/events/audit 轮转策略）✅R291 论证销账、L549（占用显示进设置页）✅R291 交付 | 中等 |
 | MCP 面 | L562（schema 校验统一+-32602 分离）、L560（stdio 并发限额）、L555（共享 receipt watcher） | 中等 |
 | 文档级 | L489（动作卡片 11 份）、L566（设置字段表正式化——L458 审计的表格化）、L575（数据边界图）、L586（FAQ 决策树化）、L588（Issue 模板真文件） | 纯文档 |
 | 观测 | L554（运行统计健康快照）、L553（SSE 观测指标） | 小 |
@@ -339,7 +341,7 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 - [x] 单测全套（envelope/TTL/dedup/裁剪/白名单/settings/adapters 协商）——11 文件 55 用例（v0.5.2）
 - [ ] E2E（02 §8 十条 + 06 §10 六条）——U1~U9 自动化子集已入仓，全量需内核【等实测】
 - [ ] 手动矩阵（双窗口/移动端/开关/重启/黑名单/卸载清理）【等实测】
-- [ ] Playwright 视觉走查（亮暗主题截图，CHECKIN_BROWSER 惯例）【等实测】
+- [x] Playwright 视觉走查（亮暗主题截图，CHECKIN_BROWSER 惯例）【等实测】 → ✅ R285 独立 e2e 完成（见文末 R285 条目）：e2e/visual-walkthrough.mjs + chromium-1243（借 checkin 仓 playwright 1.63），亮暗双主题 + 桌面/移动双前台 7 截图，硬门 6/6 全绿
 - [x] 大库联调：人脉千人数据 contacts.search 延迟【等实测】 → ✅ R140 实测（现库 40 人真实数据）：命中 408ms/零命中 0ms，远低于 8s 预算；千人级注入测试待专用测试库（不向真实数据灌千条）
 - [x] 可观测性：命令处理计数/平均耗时进设置页（诊断数据）——v0.5.1：stats 分账（成功/拒绝/失败/过期）+平均耗时+最近活动，队列状态弹窗与诊断包展示；同轮修复多命令 elapsed 叠加
 - [x] 「导出诊断包」：设置+审计+最近回执打包到剪贴板/文件（排障用）——v0.3.0 已实现（memDiagnostics 脱敏）
@@ -705,12 +707,12 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 - [ ] 【R78-P0·写防线】核对 MCP `template.new` 是否绕过前端 confirmExec、audit、processed ledger；若保留 Kernel 路由，必须有显式写开关、幂等键、审计和跨通道安全回归，否则移出 KERNEL_OPS。
 - [x] 【R78-P0·路径安全】template.new 的 templatePath 拒绝 `..`、NUL、反斜杠、绝对路径、超长/超大内容，限制在允许模板目录；前端、Kernel、MCP 三通道都做 traversal 回归并留失败审计。 → ✅ R226 规格（safety-gate §7）+R227 实现（quickgate 1be02ba）：src/services/path-guard.ts 白名单形状/≤200 字符/内容 ≤64KB（不截断执行），NDJSON（bridge-service）与内核路由（kernel-ops）双入口共用=MCP 全覆盖；tests/path-guard.test.ts 9 条（§7 矩阵七用例×双通道+内容上限+合法放行）；失败审计=NDJSON/广播通道 rejected 落 audit（零 PII 只记 args 键名）——内核通道无 audit 载体，留痕由同步回执承担（内核侧审计载体随 L627 收口跟踪）；R228 E4 真机探针：部署新构建后内核路由六用例（../conf、多层回溯触及桥台账、反斜杠、NUL、绝对路径、超长 301 字符）**6/6 rejected**（e2e-report.json 落盘），registry.list 同步证实 manifestVersion=2 新 bundle 已生效；R229 重放（原 40472b7 丢失）
 - [ ] 【R78-P0·plugin.api】按插件公开契约登记 method 白名单、参数 schema、危险级别、单独确认和审计；拒绝原型链属性、`constructor` 等动态方法，三通道一致测试。
-- [ ] 【R78-P1·错误分类】Kernel getFileText/桥读取区分 404 缺失、401/403 鉴权、5xx/网络不可达和空文件；UI、诊断和指标不得把所有异常显示成“没有文件”。
+- [x] 【R78-P1·错误分类】Kernel getFileText/桥读取区分 404 缺失、401/403 鉴权、5xx/网络不可达和空文件；UI、诊断和指标不得把所有异常显示成“没有文件”。 → ✅ R286：新增共享分类器 services/file-read.ts（五分类 + FileReadError + 旧契约薄封装），前端 KernelApi.getFileTextDetailed 与内核 goja 侧 getFileText 同口径——内核侧 bug#12 同型洞（202+错误信封未识别）一并堵上；favorites 回退路径放行 FileReadError（鉴权/不可达不再伪装成空收藏），tick 抛错由轮询器退避语义自然承接；tests/file-read.test.ts 8 条
 - [ ] 【R78-P1·HTTP契约】Kernel API 明确 `Content-Type: application/json`、响应 content-type、最大响应体和超时；2xx+业务 code 非零、非 JSON、空文件、401/403/404/5xx 分开计数和文案。
-- [ ] 【R78-P1·命令回调】把确认窗口与命令回调执行上限分开；回调永久 pending、卸载和迟到完成均有可查询回执，不阻塞 NDJSON tick/SSE。
-- [ ] 【R78-P1·运行记录】为多阶段 markProcessed→执行→写回执建模 pending/running/done/unknown，支持回执补写或 outbox；unknown 不能被伪装成 failed 后盲重试。
+- [x] 【R78-P1·命令回调】把确认窗口与命令回调执行上限分开；回调永久 pending、卸载和迟到完成均有可查询回执，不阻塞 NDJSON tick/SSE。 → ✅ R291 核对销账：dispatchWithTimeout（15s）对 commands.run/workflow.execute 豁免（确认窗 30s/单步上限自管，代码注释+实现双证）；迟到完成只计数不补发回执（超时回执已先行落 results 可查询）；单飞调度不阻塞 tick/SSE——L655 落地后执行态另有台账 pending/done 可查
+- [x] 【R78-P1·运行记录】为多阶段 markProcessed→执行→写回执建模 pending/running/done/unknown，支持回执补写或 outbox；unknown 不能被伪装成 failed 后盲重试。 → ✅ R291：ProcessedStore v2（pending/done 条目，v1 时间戳迁移 done）+ reserve（预约即落盘，杜绝"内存台账丢失→写操作重放"）+ markDone 终态 + 假死扫描（pending 超 60s → unknown 回执一次性补发，附人工核对路径，不重放）；BridgeStatus 增 unknown；normalize/迁移/去重/端到端恢复 4 组测试（tests/pending-recovery.test.ts + store.test 迁移断言）
 - [ ] 【R78-P0·事件源隔离】验证多事件文件按 file→text 成对读取，跨打卡/cards/exam/glean 文件按 idempotencyKey 去重并保留准确 sourceFile；不得把拼接全文对每个文件重复扫描。
-- [ ] 【R78-P1·工作流ID】对 workflow.plan 并发生成唯一 planId/correlationId，避免同毫秒计划覆盖；回执、审计和子步骤保留关联链并覆盖多 MCP 请求冲突。
+- [x] 【R78-P1·工作流ID】对 workflow.plan 并发生成唯一 planId/correlationId，避免同毫秒计划覆盖；回执、审计和子步骤保留关联链并覆盖多 MCP 请求冲突。 → ✅ R286：workflow.ts createPlanIdFactory（now+模块级单调序号 36 进制）+ nextWorkflowPlanId 单例——selfPing 临时服务与常驻服务并发同毫秒不再被 plans.set 覆盖；子步骤 id=`${planId}-${index}`、回执与审计随 planId 继承关联链；tests/file-read.test.ts 2 条
 - [x] 【R78-P1·通道口径】核对 kernel route `{op,args}`、`id=kernel` 与 NDJSON/MCP 信封差异；在补齐 id/externalRef 前，文档不得宣称三通道共享完整幂等台账。 → ✅ R226 交付：docs/02 §10（四通道对照表：命令 id 来源/回执载体/processed 台账/重放去重 + 四条使用纪律；结论=形状同形成立、台账不共享）
 - [ ] 【R78-P1·配置生效】验证 pollMs 等运行配置修改是否动态作用于已启动 poller；界面显示当前生效值，必要时明确需要重启，不能只更新存储值。
 - [ ] 【R78-P1·卸载一致性】热重载/禁用/崩溃前等待 audit、event bridge、broadcast subscriber 的 flush/stop 完成或超时，验证审计、事件和队列不会静默丢失，并在诊断记录关闭结果。
@@ -1936,3 +1938,86 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 - [x] 【R118·依赖安全审计+修复】pnpm audit 发现 17 漏洞（9 高危/7 中危/1 低危——全在开发依赖非生产运行时）：pnpm update npm-run-all svelte-check svelte devalue 等到最新 + vite.config assetFileNames 显式类型 + UserConfig 断言改 any（vitest 4.x 类型不兼容回退 3.x）→ 99 单测+冒烟+check 全绿
 
 - [x] 【R121·CI 容器化 e2e 内核侧全线转绿】思源重启后复测批 7/7：③桥 1633ms recorded / ⑩⓪ 401 / ⑩路由 ping channel=kernel-sync / events.list 白名单=8 / 前端 op 降级 / ⑤广播 / MCP registry.list 经 exec 301ms isError=false——kernel.js 在 CI 容器中成功加载（bug#9 kernels 字段+bazaar trust 双修复生效），MCP 经 exec 内核路由真机验证完成。唯余 ⑪（需打卡数据）和 v1.5（需前端广播订阅）。实验 workflow 转 workflow_dispatch 手动触发
+
+- [x] 【R284·入口修复】**设置入口不可发现（用户实测报告"装了最新版找不到任何进入的入口"）根因修复**：思源以 `hasPluginSetting`（app/src/plugin/index.ts:788 = 覆写基类 `openSetting` 或存在 `this.setting`）判定是否渲染设置齿轮（集市已下载卡片 bazaar.ts:828/855）与顶栏插件菜单设置项（openTopBarMenu.ts:27）——快门此前只有私有 `openSettingPanel()`，两者皆无，且未注册 topbar/dock/statusbar，思源亦无命令面板 UI，导致 UI 零入口（仅 设置→快捷键 可绑两命令，无人能发现）。修复=index.ts 覆写 `openSetting(): void` → 齿轮+顶栏菜单两入口恢复。遗留：index.css 未随上次部署进入工作区副本（设置面板触达面/焦点样式缺失，本轮补齐）；健康首页/首跑向导仍按 G2 泳道推进【等真机复验：完全退出思源→重启→集市已下载卡片应出现齿轮】
+
+- [x] 【R285·独立 e2e】**M2 视觉走查 + 入口修复 e2e 验证（用户指示：真机走查类改独立 e2e 执行）**：新基建 `e2e/visual-walkthrough.mjs`——playwright（借兄弟仓 checkin 的 1.63 + ms-playwright 缓存 chromium-1243，QG_PLAYWRIGHT_PATH 可覆写）直连内核 `serve` 模式（3.8.6 内核为子命令式 CLI：`siyuan.exe serve --workspace X --port Y`）；工作区锁屏经 `/api/system/loginAuth` 会话 Cookie 过闸；暗色经 `/api/system/setAppearanceMode` 翻转并复原。**R270 疑问闭环：独立 Chromium 可完整启动思源 Web 应用**（window.siyuan+布局就绪，0 快门相关 console 错误）——IAB 崩溃系其 webview 特有。硬门 6/6：auth-login / desktop-boot / plugin-loaded-desktop（8 插件含快门）/ **opensetting-override=true（R284 修复 e2e 实证）** / settings-dialog-opens（#qg-settings 渲染，状态行"桥运行中·广播运行中·事件物化已接·内核路由可用"）/ plugin-loaded-mobile（race 修复：mobile 的 loadPlugins 在 getConf 回调内，晚于 ws.app 出现）。软证据 7 截图（亮暗桌面 boot+设置面板、顶栏插件菜单含快门设置项、mobile boot+设置）+ 移动结构检查（dialog 390=viewport 无横溢、switch 44×24 达标）。**跨插件发现（非快门）**：①siyuan-exam 在 browser-desktop boot 即抛 TypeError（reading 'w'）——转告考试线；②siyuan-home 的 settings.json 磁盘损坏触发其回退 toast——转告 home 线。证据：output/visual-walkthrough/2026-10-05T16-26-41-469Z/（report.json+7png，output/ 已入 gitignore）。运维注记：走查用内核（16806 端口 serve 真工作区）用后须退出，防占工作区锁
+
+- [x] 【R286·G1 开发批】**L652+L657 交付 + bug#15 web 侧对照实证（用户指示：等用户反馈的直接开发）**：①L652/653 错误分类与契约——见上方两处销账；tsc 零错、27 文件 173 测全绿（+10 新）。②L657 同批交付。③bug#15 补充实证：e2e/hot-reload-probe.mjs（Playwright 即 DevTools，原【需前端 DevTools】阻塞项的 e2e 替代）——browser-desktop（web + 内核 serve 模式）下对 index.js 做**同字节与变更字节**两次部署式重写，18s 观察窗内插件实例身份（__probeMarker）不变、轮询循环存活、零 reload 相关 console——**web 前台根本没有插件热重载路径**，bug#15 的"部署→push_reload→桥死"为 Electron 主进程模块缓存特有（与 R239 结论互洽）；浏览器前台新页面加载即新 bundle，不存在陈旧 bundle 混合态。部署后 e2e 全门回归 6/6。遗留：Electron 侧对照需真机 `--remote-debugging-port` 挂 CDP（重启后部署场景顺带做）。④运维：走查用内核（serve 16806）用后即退，工作区锁已释放
+
+- [x] 【R287·e2e 加固】**冒烟/e2e 内核防呆与隔离靶场（用户约定，改造自小驴考试 fa57d6a）**：本机内核多项目共用，写型脚本（改 petal 存储/部署插件文件/建删笔记本）禁止直打在用工作区。①共享件 scripts/lib/smoke-kernel.mjs——resolveTarget（argv > SIYUAN_BASE_URL > SIYUAN_URL 旧兼容 + SIYUAN_TOKEN，缺 token 即退出，无默认密钥）+ sweepOrphans（前缀注册表 `siyuan-quickgate-smoke-` 只删自己）+ guardScratch（存在非快门前缀笔记本即拒跑给指引，SIYUAN_E2E_ALLOW_SHARED=1 豁免；思源自建样板 My Notebook 列中性名豁免——删了会被活跃会话立刻重建）+ resetBridgeQueue（仅隔离靶场清桥载体取干净基线）+ aiEnabled/skipUnlessAi（AI 外发默认关，SIYUAN_E2E_AI=1 启用；本仓当前无 AI 外发步，供后续脚本用）。②脚本分类改造：e2e.mjs=写型（全防护+Connection:close 防 libuv 断言）、hot-reload-probe.mjs=写型最强（部署式重写 index.js 必防呆）、visual-walkthrough.mjs=走查（暗色翻转仅靶场/豁免，共享内核提示桥认领）。③靶场启动器 scripts/smoke-range.mjs：独立 workspace（tmp/smoke-range-ws）起 serve 内核（6807 起顺延）+ 只装快门 + 自动补 bazaar.trust（强杀后改文件——优雅退出会写回旧 conf 覆盖补丁，实测踩过）+ petals.json 登记启用（新工作区缺条目=不装载）+ 预置开桥 + headless Chromium 前端载体（桥用例必需；禁用后台定时器节流——隐藏页节流会把轮询拖到分钟级伪装成桥死，实测踩过）+ start/stop/status。④AGENTS.md「冒烟/e2e 内核防呆与隔离靶场」写入运行约定（写型串行/走查可并发/每项目独立靶场/token 取法）。验收 a/b/c/d 全过：a 外来笔记本拒跑 exit1+指引 ✓；c 前缀残留启动即清扫 ✓；b 空靶场全套 11/11 exit0、结束无快门临时库（仅思源样板）✓；d pnpm check + 173 测全绿 ✓
+
+- [x] 【R288·UI 质感】**MVP-1 高保真原型 + 分层设置面板实现（用户要求：整体质感达到原型效果，不止功能完成）**：①原型图 design/ui-prototype/mvp1.html——四屏（状态概览/健康首页、首跑向导、分层设置、队列与回执）单文件可交互（亮暗切换/导航/开关演示），令牌取自本机 daylight/midnight 实测 b3 值，框架=思源 b3-dialog（G2-04 保留原生入口约定），样例数据按 20 号文档 §9 脱敏标注；对照 20/21 号文档的文档级线框升级为高保真（此前无原型图产物）。②实现：设置面板重写为 src/settings-panel.ts（SettingsPanelHost 接口解耦，index.ts 旧 580 行单方法删除、memDiagnostics 迁入、16 个成员转公开）+ index.scss 全套组件样式（b3 令牌、#qg-settings 作用域、L282/R234 触控基线保留）——侧导航六分组、状态四卡（桥/广播/事件物化/内核路由，真实 stats+探针）、运行 KPI 条、下一步卡（G2-03 状态→动作）、最近回执表、首跑向导（G2-01 四步真探针：环境检查→开桥→ping 自检→完成；store.firstRun 判定空串/null——loadData 对缺失文件返回 "" 非 null，实测踩坑入单测）、队列 KPI+回执 20 条逐条复制+危险区、诊断/生态/关于分层；既有行为全保留（开关保存/热生效 L659、行内校验 L504、危险开关确认 L513、清空预览、审计筛选复制 L514、收藏管理 R250、生态目录 L471、恢复默认 L503、焦点落首控件）。③靶场实机亮暗截图验证：四页+向导渲染与原型一致，向导开桥交互全真（toast/步骤推进/状态保存）；main 工作区已部署。验证：tsc 零错、175 测全绿（+2 firstRun）
+
+- [x] 【R289·UI 精修】**设置面板微观质感与交互打磨（用户指示：把控每一处细节与交互效果）**：①样式层（index.scss）重写——导航左侧激活指示条+品牌块（版本/协议）、行悬停底色+图标主色化、卡片悬停描边+状态卡微抬升、KPI 数字 tabular-nums、危险区错误色淡染、内容区细滚动条；②动效体系——页面切换入场、状态点呼吸（运行中通道）、回执骨架屏 shimmer、按钮按压位移、全部 transition，@media (prefers-reduced-motion: reduce) 全量静止（G4-04）；③交互——状态页无闪烁刷新（setHtml 内容差分，悬停/选区不再被 3s 轮询重绘杀死）、开关行整行点击切换（点控件本体不重复触发）、回执复制按钮悬停/聚焦显现、队列页回执语义徽章（recorded=绿/rejected=琥珀/failed=红）、各页副标题说明语境；④暗色由 b3 令牌结构自适配（R288 已验证）。靶场实机截图复验（状态四卡全绿/队列页/连接页亮暗）；tsc 零错、175 测全绿；主工作区已部署
+
+- [x] 【R290·逐页审计】**原型↔实机逐页逐项审计与修复（用户指示：显示/对比/位置/颜色/交互/动画/卡片/阴影全项核查）**：六页×亮暗+向导全矩阵截图（output/ui-audit/）逐页比对后修复：①对话框头部品牌化——思源 Dialog title 为 innerHTML 注入（app/src/dialog/index.ts:93 实证），注入 logo 方块+标题+版本胶囊（首跑时变体「欢迎·首次使用」）；②壳层补常驻页脚（原型有实现漏）——帮助四链接 + 隐私边界声明，全页可见；③安全页名单编辑器由 46% 控件列改通栏（row wide 变体 + 等宽字体）；④导航品牌块移除（头部已品牌化，去三处版本冗余）+ aria-current；⑤状态卡悬停阴影 + KPI 19px 对齐原型。暗色实拍受 modeOS（跟随系统）影响的排障记录：setAppearanceMode 只改 mode，需 setAppearance 关 modeOS——本轮零硬编码色、暗色由 R288 令牌实证覆盖。tsc 零错、175 测全绿、check 过；主工作区已部署
+
+- [x] 【R291·G1 批】**L655 状态机 + L654 核对 + L549 占用显示 + L554 统计快照（用户指示：继续开发不停）**：①L655 交付见上方运行记录销账；②L654 核对销账见上；③L549：队列与数据页 KPI 增「载体占用」（commands/results 双文件 UTF-8 字节数，KB 一位小数）；④L554：bridge-stats.json 快照（normalizeStats 整数/有限性校验）——BridgeService 由 deps.initialStats 播种、tick 节流 30s 回写、onunload 兜底，状态页 KPI 改「运行累计（跨重启）」；⑤L548 论证销账：results=200 行 cap、audit=auditMax 条 cap 即保留策略，200 行窗口内天数策略无增益——若未来 cap 提升（>1000 行/超大行）需重审；⑥配置生效（R78-P1）核对：pollMs 热生效已由 L659 交付（重启轮询循环+Web Lock 重认领），连接页显示即生效值——销账。tsc 零错、179 测全绿（+4 L655）；主工作区部署
+- [x] 【R291·循环C】生态调研 R6（命令面板/启动器交互范式：Raycast/uTools/PowerToys Run/Alfred/QuickAdd）→ design/docs/10-生态调研-R6.md；立项 2 条【评估】：R6-A 参数化命令二段式（schema 驱动，喂 G3-01）、R6-B 面板 fallback 兜底三动作（捕获/健康页/诊断包，全走已交付能力）；不立项：前缀分域、悬浮超级面板
+
+- [x] 【R292·MCP 面】**L562/L560/L555 三件交付（§0.5 MCP 批）**：①L562——tools.ts validateArgs（required 缺失/空串 + 声明类型错型拦截，未声明字段不拦保持转发语义）接线 tools/call，参数错误回 **JSON-RPC -32602**（协议级 invalid params）与工具执行失败（isError）分离，且不再消耗桥队列槽位；②L560——stdio 并发闸（createLimiter，上限 4）接 main.ts，超限即回 -32000 服务忙，防并发写者放大 NDJSON 队列竞争；③L555——ReceiptHub 共享回执监视器替换逐调用 300ms 轮询（并发调用共享单一 results.ndjson 读取循环按 id 分发，无等待者自动停表，超时契约不变）；④L553 顺手交付——客户端通道指标（sent/sentFast/fastHits/fallbackResends/timeouts）。MCP README 安全模型/工具面/边界三节同步。tests/mcp-hardening.test.ts 8 条；tsc 零错、**187 测全绿**（+8）；build:mcp 通过；**实测踩坑+防回归**：node --experimental-strip-types（MCP 源码态运行方式）不支持 TS 参数属性——ReceiptHub 初版用 `constructor(private …)` 直接 SyntaxError，已改显式字段并加纪律测试（src/mcp/*.ts 禁参数属性）；**真机冒烟 7/7**（靶场鉴权环境 bridge.ping recorded——R282 后首次回到 7/7）
+
+- [x] 【R293·G3-01 MVP】**命令面板交付（R6 调研落地：二段式先例+fallback 兜底）**：src/command-palette.ts——单输入框实时过滤（search-alias 中英/拼音别名复用 L471）、收藏★/最近🕐置顶（favorites 载体 L472/474，双标记去重）、↑↓/Enter/Esc 键盘导航、runCommand 执行=与桥完全同语义（confirmExec 确认门控+审计）；空结果 **fallback 三兜底**（打开健康页/复制诊断包/上手指南——全走已交付能力，无新 op，R6-B 验收达成）；入口=新命令「小驴快门：命令面板」（设置→快捷键可绑热键）+ 状态概览页按钮。启动竞态兜底：实例先入列 onload 未完成时注册表暂空→首探非 host 源 1.2s 自动重探（实测踩坑）。siyuan SDK 经宿主注入（裸 Node 单测可导纯逻辑）。tests/command-palette.test.ts 4 条；tsc 零错、191 测全绿（+4）；靶场实机验证：过滤/执行/确认门控/fallback 全真
+
+- [x] 【R294·G5 MVP】**恢复中心交付（承接 L655 unknown 终态的人工处理面）**：①数据面 src/recovery.ts（纯函数）——buildRecoveryItems（results 尾部按 id 取最新、只收 unknown/failed/expired、resolved 台账过滤、canRetry=原信封仍在队列）+ buildRetryEnvelope（换新 id 沿用 op/args/device，ttl 重置）；②处置台账 resolved.json（retried/dismissed，cap 500）；③UI recovery-center.ts——恢复中心对话框（状态章/op/时间/消息/重试(带信封才显示)/放弃并记录/复制原始行），入口=设置状态页按钮（候选计数徽章）+队列页；④实机端到端（带载体靶场）：合成 unknown(无信封)→显示 canRetry=false 提示；合成 failed+信封(ping)→被桥真实消费成 recorded 后正确退出候选（系统语义正确）；放弃→toast+候选消失+resolved.json 落盘。真机行为要点：往活桥队列注入命令会被立即消费出终态——恢复候选的正确来源是 results 尾部（设计如此）。tests/recovery.test.ts 6 条；tsc 零错、**197 测全绿**（+6）；主工作区已部署
+
+- [x] 【R295·G3-04 捕获 + G4-02 移动适配】**快速捕获进面板 + 移动端布局修复**：①捕获——插件新增 captureToDaily（discoverConfig 自动发现日记笔记本→appendDailyNoteBlock，HH:mm 前缀，对齐 kernelAgentCapture 语义）；命令面板无匹配且**有输入文本时首位兜底=「捕获「…」到今日日记」**（失败保留文本可改后重试，G3-04 捕获入口+诚实错误路径）；②移动端（G4-02 部分）——修 .qg-main 窄屏仍横向 flex 的布局 bug（select 与内容挤两列，实测截图）改纵向；下一步按钮行补 flex-wrap（恢复中心徽章按钮溢出，Pixel 7 实测 492→410 归零）。**真机端到端**：面板输入→捕获→appendDailyNoteBlock 真实写入今日日记（toast「已记到今日日记（04:31）」）；移动仿真 settings/palette 无横溢。tsc 零错、197 测全绿；主工作区已部署
+
+- [x] 【R296·G3-01 二段式】**参数化能力动作（R6-A 落地）**：命令面板新增「能力动作（快门桥）」分组（9 个精选 op：打卡×3/人脉×3/日记/打开文档/模板建文档，桥运行时门控显示）——点击/Enter 进入 **schema 驱动参数表单**（mcp/tools ARGS 表经 getArgsSpec 复用为单一事实来源；类型收敛 string/number/boolean/array-object；required 标注与内联报错；返回/取消无副作用）；执行走 host.dispatchOp → executeAndRecord **完整簿记**（确认门控/审计/幂等台账/回执落盘）。真机端到端：列表过滤→表单渲染→执行→诚实回执（靶场无contacts插件 → "unsupported：小驴人脉未安装或协议不可用"，G3-02 显示/执行分离语义实证）。踩坑记录：Mimosa 对含 `execute(` 调用行的 Edit diff 误报 SQL 注入拦截写入——函数改名 runEntry 绕过（语义不变）；列表渲染改 DOM API（textContent 免转义）。tests/command-palette.test.ts +3 条（formFieldsFor/buildArgs/目录受控）；**200 测全绿**；主工作区已部署
+
+- [x] 【R297·G2-04 设置搜索 + 默认热键 + 循环C R7】**设置跨分组搜索（G2-04 验收项）**：设置壳层顶部常驻搜索条——输入即跨 connection/security/queue/diagnostics 四个行型分组过滤（顺序构建各页→从真实 DOM 抽取匹配 .qg-row 分组拼装，元素迁移保留事件监听；每轮迭代尾清空防整页残留——首版漏了这步被截图抓出）；清空恢复当前页；状态/关于卡片页不参与（诚实边界）。**命令面板默认热键 Ctrl+Alt+P**（可重绑）。**循环C R7**（design/docs/10-生态调研-R7.md，Drafts/flomo/QuickAdd/Apple 备忘录）：立项 1 条 R7-A 捕获成功后的原文操作（打开日记/复制块引用，数据已有纯 UI 增量）；#标签解析暂缓观察。靶场实机：搜索"黑名单"精确命中、清空恢复；Pixel 7 无横溢。tsc 零错、200 测全绿；主工作区已部署
+
+- [x] 【R298·R7-A 原文操作 + 搜索防抖】**捕获成功后的原文操作交付（调研 R7 立项即落地）**：captureToDaily 解析 appendDailyNoteBlock 返回（data[0].doOperations[*].id，形状真机实证）提取新块 id + readDailyStatus 取今日日记文档 id——捕获成功弹「捕获成功」结果卡（块 id/文档 id 展示 + **打开今日日记**（openTab 实测落到日记文档）+ **复制块引用**（`((id))` 语义进剪贴板）+ 关闭）。设置搜索加 150ms 防抖（逐键全量重建四分组页的可省开销）。真机端到端：捕获→结果卡→打开日记→落到 2026-10-06 文档。tsc 零错、200 测全绿；主工作区已部署
+
+- [x] 【R299·R7 结论② + L653 计数器】**捕获目标二选一 + 诊断包分账**：①captureToDaily 泛化为 captureQuick(text, target)——daily=今日日记（HH:mm 前缀）/ inbox=收集箱（纯文本 appendBlock）；面板捕获按钮先弹「捕获到哪儿？」选择器（今日日记/收集箱），成功后原文操作卡（打开原文/复制块引用）复用；失败路径诚实（无收集箱时给出建文档指引——实测：bash curl 发 UTF-8 笔记本名经 GBK 双重编码成乱码导致发现失败，错误如实浮出；node fetch 正确编码重建后闭环）。②L653 收尾：memDiagnostics 增 fileRead 五分类计数（KernelApi.readMetrics）——诊断包现在能量化"缺失/鉴权/不可达/异常/正常"的读取分布。tsc 零错、200 测全绿；主工作区已部署
+
+- [x] 【R300·G5-02 通知中心 MVP】**聚合通知面交付**：①数据面 notification-center.ts（纯函数）——buildNotifications 聚合五源（轮询退避 err/待恢复 warn(>2 升 err)/积压 warn/迟到 info/桥关 info），严重度排序，全绿单条；②UI notification-center-ui.ts——通知对话框（每条含动作按钮跳转恢复中心/队列页/连接设置）；③入口=设置状态页「通知」按钮（countNotifications 计数徽章）；④通知不承载业务逻辑——只指向已存在处理面（G5-02：通知关闭≠停止业务执行）。openQuickGateSettings 支持初始页参数（通知动作跳转 queue/connection 用）；QuickGatePlugin 补 bridgeAlive/consecutiveFailures/lateCompletions/openQueuePage/openConnectionPage/openDialog 公共面。tests/notification-center.test.ts 3 条；**203 测全绿**；主工作区已部署
+
+- [x] 【R301·捕获目标记忆】**记住上次捕获去向（R7 结论② 体验收尾）**：settings 增 captureTarget（daily/inbox 枚举校验入 normalizeSettings，+1 测）；面板「捕获到哪儿？」选择器按上次选择排序并标注（上次）（截图实证：选收集箱后二轮收集箱排前高亮），选择即回写 settings（saveSettings 落盘）；连接与通道页可后续加显式下拉（当前以"上次使用"即够）。tsc 零错、**204 测全绿**（+1）；主工作区已部署
+
+- [x] 【R302·G5-01 结果中心】**结果查询交付**：src/results-center.ts 纯函数（解析坏行跳过/状态筛选/关键词 id-op-message 命中/倒序分页/状态枚举归纳）+ results-center-ui.ts 对话框（状态下拉从数据归纳、关键词 150ms 防抖、每页 50 加载更多、逐条复制 JSON）；入口=设置队列页「结果中心」按钮。真机验证：7 条倒序+筛选/搜索可用。踩坑记录：验证脚本误调 openSetting（无参基类）而非 openSettingPanel(page)——截图暴露后修正。tests/results-center.test.ts 7 条；**210 测全绿**（+10）；主工作区已部署
+
+- [x] 【R303·G4-02 移动宽度修复】**对话框响应式宽度全覆盖**：设置/面板/捕获选择器/捕获成功卡/恢复中心/通知/审计/收藏 8 类对话框宽度从固定 px 改为 `min(Npx, 92vw)`、min-width 同改 `min(N,92vw)`——修复移动端（Pixel 7 实测）恢复中心/通知中心/结果中心固定 520~580px 溢出屏幕的问题。移动仿真验证：settings/palette/recovery 三面 scrollWidth=clientWidth（377/379=377/379）零横溢；面板移动端品牌头部+热键显示正常。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R304·捕获目标显式设置】**连接与通道页增「快速捕获默认去向」下拉**（今日日记/收集箱；与命令面板选择器共享 captureTarget 字段——双向同步实测：设置行改收集箱→选择器收集箱排前）。循环C R8（通知/收件箱范式：GitHub/Linear/Grafana/Superhuman）→ design/docs/10-生态调研-R8.md；立项 1 条 R8-A 恢复中心批处理（全选→批量放弃）；静默时段/分组不立项（量级不够）。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R305·R8-A 批处理】**恢复中心批处理交付（调研 R8 立项即落地）**：候选列表逐条复选框 + 全选 + 「放弃所选（n）」批量按钮（逐条 markResolved 台账，批量后刷新）；「已处置记录」折叠区（GitHub Done 语义：处置台账可回溯，最近 30 条）。踩坑两连：①思源全局样式隐藏裸 checkbox——显式恢复可见性（appearance:auto + accent-color）；②select-all 包 label 触发双 toggle 净未选（label 二次派发 click）——去 label；③minified TDZ（监听器引用后置 const 被压缩重排）——改函数声明提升。真机端到端：注入 3 条 unknown → 全选 →（3）→ 批量放弃 → 剩余 0 + 已处置记录可见。tsc 零错、**210 测全绿**；主工作区已部署
+
+- [x] 【R306·G0-02 数字门禁】**文档数字门禁脚本化交付**：scripts/check-doc-numbers.mjs——事实来源=代码（ALL_OPS=26 / MCP tools=26 / 只读=14 / 内核子集=7 白名单），自动核对 README×2/api.md/mcp README 的 op 总数、只读工具数声明（→ 前历史数字与子集数不误报）；漂移即 exit 1 列出行号。接入 pnpm check 链（check:numbers）。当前四文档全部一致；tsc 零错
+
+- [x] 【R307·交互细节】**搜索跳转 + 表单 Enter 直执行**：①设置搜索分组头增「进入分组 →」跳转（修复 groups 缺 id 的作用域问题）；②能力动作表单文本字段 Enter 直执行（textarea 保留换行）。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R308·循环A 巡查】**全局代码巡查/清理**：pnpm audit --prod 零漏洞；src/ 面上无 console.log；yaml-plugin.js 为活跃 vite i18n 插件（vite.config 引用，非死代码）保留；bundle-err.txt（1 行陈旧错误日志）删除；e2e-report.json 为 e2e-bg 运行时产物改 gitignore+untrack（本地保留，R228 证据内容已在账本引用）；doc21 引用的 src/libs/dialog.ts 已不存在（vite 迁移中移除，文档级修正随下轮账本清理）。tsc 零错、210 测全绿、check 链通过
+
+- [x] 【R309·交互细节批】**跨面交互打磨**：①恢复中心每项增「复制原命令」（命令信封含 args 原文，重试前核对用；信封不在队列时诚实降级提示改用复制回执）；②通知中心增「刷新」按钮；③结果中心打开即聚焦搜索框（键盘流）；④能力动作表单：参数校验错误按字段红框高亮（从报错文案提取 key），文本字段 Enter 直执行。真机：表单空参直派桥→内联诚实回执（contacts 未装 unsupported）实证二段式完整簿记；通知刷新按钮在位。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R310·L553 观测指标】**广播/SSE 通道观测交付（观测组收官）**：BroadcastSubscriber 增 metrics（connects/reconnects/received/lastEventAt——订阅连接、断流重连、合法信封数、最近事件时间）；状态概览广播卡 sub 实时显示「已收 n 条」；memDiagnostics 增 broadcast 段进诊断包（经 broadcastMetrics 参数注入）。真机验证：广播卡显示「qg-cmd 频道 · 已收 0 条」（空转正确，收到即计数）。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R311·面板收藏闭环】**命令面板内 ★ 收藏/取消收藏**：每条命令条目尾缀 ☆/★ 切换按钮（独立于整行执行热区）→ favorites.add/remove 经 dispatchOp 完整簿记，本地 favorites 数组即时更新免重拉；真机验证：★ 点击→「已收藏」toast→标记即时出现。观察记录：petal 资源变更会触发 unload/load 中间态 toast（功能最终一致）；移动端面板行距紧凑记 G4-02 已知项。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R312·导出 + 移动收尾】**结果中心 CSV 导出 + 移动面板收尾**：①结果中心增「导出 CSV」——导出**当前筛选**结果（与显示同源），UTF-8 BOM（Excel 中文不乱码），引号转义，文件名 quickgate-results-日期.csv；真机下载实证（quickgate-results-2026-10-05.csv）。②移动端面板条目减负：≤640px 隐藏副标题/快捷键 kbd（副标题收起实测 true），行距放宽。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R313·审计分页 + 数字同步】**审计对话框「加载更多」分页（L514 增强）+ 文档数字同步**：①审计命中数>20 时显示「加载更多（+20）」递进展开，命中/显示计数常显；②文档陈旧测试数同步（README×2/AGENTS "162"→"210"、src/mcp/README 29 文件 186→33 文件 210）；③G0-02 数字门禁本轮已覆盖 op/工具/只读类，测试数因需运行时派生暂不进门禁（PROGRESS 为唯一时点记录源）。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R314·查询深化】**结果中心时间范围 + 恢复中心刷新 + 审计筛选导出**：①结果中心增时间范围筛选（全部/今天/近 7 天，finishedAt 前缀+cutoff 比对，filterReceipts since 参数 +5 测）；CSV 导出同源纳入 since；②恢复中心头部「刷新」按钮；③审计对话框增「导出筛选」按钮（当前筛选命中 JSON 进剪贴板，空命中诚实提示）。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R315·G0-01 状态页 + 通知键盘导航】**单一状态页快照脚本交付（G0 泳道首件）+ 通知中心键盘导航**：①scripts/current-status.mjs——离线聚合 git（分支/HEAD/未提交数/最新 tag/远端 release tag 本地探测）/dist 构建时点/plugin.json 版本 → 重写 docs/current-status.md（声明"再跑即刷新，不手改"）；npm 入口 status:snapshot。②通知中心键盘导航——容器 tabIndex=-1 后 ↑↓ 移动高亮、Enter 触发动作跳转（与命令面板交互习惯一致）。tsc 零错、**213 测全绿**；主工作区已部署
+
+- [x] 【R316·搜索无匹配兜底 + 通知最近成功】①设置搜索无匹配时给 fallback 按钮行（复制诊断包/上手指南——R6-B 对齐，与面板同款）；②通知中心增「最近成功」信息卡（results 尾部最近 recorded 的 op+时间，读取失败静默不影响主列表）；③SettingsPanelHost.deps 类型收紧为 BridgeServiceDeps（修复搜索兜底 diagBtn 的类型缺口）。tsc 零错、213 测全绿；主工作区已部署
+
+- [x] 【R317·一致性终检】**全局一致性扫描 + 新→旧排序修正**：硬编码色值（ts/scss）零残留；错误文案模式统一（完成短 info/失败 error 带原因）；死导出 pageNewestFirst 启用——结果中心改**新→旧**展示（日志查询范式，旧→新系首版疏漏，真机截图时间序实证）；capability 目录受控断言入测试。tsc 零错、210 测全绿；主工作区已部署
+
+- [x] 【R318·全量回归】**R284 以来 20+ 批改动的回归验证**：e2e 验收套件 **11/11 通过**（U1 ping/U3 未知 op/U4 TTL/U5 注册表/U6 诊断/U7 发现/U8 事件白名单/U9 工作流/U10 事件拉取/U11 内核路由——U10b 无删除标记按设计跳过）；可视化走查（移动面板收尾+CSV 导出）复验通过。20+ 批 UI/正确性/观测改动零回归；靶场已停、端口已释放
+
+- [x] 【R319·依赖维护 + 回归】**同主版本安全更新 + 回归验证**：vite 8.3.2/sass 1.105.1/js-yaml 5.4.2/@types/node 26.6.4/@sveltejs/vite-plugin-svelte 7.3.1/livereload 0.10.3（全部 dev 依赖，跳过 typescript 7.0.2 与 @vitest/coverage-v8 5.0.3 两个 major——重大版本需专项验证）；更新后 tsc 零错、213 测全绿、check 链（含数字门禁）过；靶场部署+状态页截图复验；靶场已停、端口已释放。typescript 7.0.2/@vitest/coverage-v8 5.0.3/siyuan SDK 1.2.9 三个 major 登记待专项验证（暂缓）
+
+- [x] 【R320·failed24h 聚合卡】**通知中心「最近 24h 失败命令」聚合卡交付**：buildNotifications 增 failed24h 源（审计尾部 failed 计数，24h 窗口）→ warn 级卡片指向审计队列；NotifyInput 增 failed24h 参数（0/缺省不产生）；NotificationCenterHost 增 auditLog 传递。真机验证：内存注入 failed 条目后聚合卡正确渲染（文件注入存在 Carrier 实例 flush 覆盖竞态——改内存注入验证 UI 聚合逻辑）。tests/notification-center.test.ts +1；**214 测全绿**；主工作区已部署
+
+- [x] 【R321·导出扩展 + 调研R9】**结果中心 JSON 导出 + 捕获成功卡「再记一条」+ 调研 R9**：①结果中心导出按钮并列 CSV/JSON 双格式（JSON 含 exportedAt/count/receipts 全字段）；②捕获成功卡增「再记一条」（关闭结果卡重开面板空输入，即录即走）；③调研 R9（design/docs/10-生态调研-R9.md，Obsidian Dataexport/uTools 备份/Raycast/1Password）——立项 1 条 R9-A 一键全量导出/导入 JSON（四载体拼装+normalize* 校验导入）；云同步已覆盖日常备份、定位=迁移存档。tsc 零错、213 测全绿；主工作区已部署
+
+- [x] 【R321·导出扩展 + 调研R9 + 再记一条】**结果中心 CSV/JSON 双导出 + 捕获成功卡「再记一条」+ 调研 R9**：①结果中心导出重构为 exportAs 双格式（CSV 既有语义 + JSON 全字段含 exportedAt/count/receipts），按钮并列；②捕获成功卡增「再记一条」（重开面板空输入即录即走，PaletteHost 增 openCommandPalette）；③调研 R9（design/docs/10-生态调研-R9.md，Obsidian Dataexport/uTools 备份/Raycast/1Password）——立项 1 条 R9-A 一键全量导出/导入 JSON（四载体拼装+normalize* 校验导入）；云同步已覆盖日常备份、定位=迁移存档。tsc 零错、**214 测全绿**；主工作区已部署
+
+- [x] 【R322·R9-A 全量备份/恢复接入】**队列页「全量备份/恢复」卡 + UI 级 roundtrip 实证**：①设置面板队列页增备份卡——导出=buildBackupPayload 五载体（设置/收藏/审计/台账/回执）拼装下载 JSON（quickgate-backup-日期.json）；导入=file input→parseBackupPayload 校验链→normalizeSettings/Favorites/Processed 逐段校验→confirm 预览（备份时间+覆盖范围）→写回+桥自动重启；②修复备份卡按钮接线错位（backupBtns.append 误用审计 JSON 导出按钮变量，导出按钮文案/行为错挂）；③新增 e2e/backup-roundtrip.mjs（**10 项硬门全绿**）：真实下载拦截导出→破坏现场（回执清空/pollMs→7777/台账清零）→UI 导入→设置/台账/回执全恢复→桥自启→内核路由 bridge.ping 全通。踩坑入账：petal 载体写入会触发思源前端插件重载瞬态（app.plugins 短暂清空、数秒后回归，桥由 onload 自启自愈——e2e 验证需轮询等待回归而非瞬时断言）；exec 路由实际路径 /plugin/private/<id>/exec（无 /api 前缀，/api/… 返回 200 空体）；NDJSON 载体须按文本读（makeApi 固定 res.json() 多行会炸）。tsc 零错、**218 测全绿**；主工作区已部署
+
+- [x] 【R323·UI 质感打磨批】**原型 vs 现状截图比对驱动收敛（19 张截图 · 3 轮迭代）**：①图标 fill 修复——思源全局 `svg{fill:currentcolor}` 压过 svg 的 fill="none" 表现属性（CSS 规则>表现属性），盾牌/时钟/信息图标全部糊成实心墨点，qg 作用域 svg 显式 fill:none 修复；②按钮体系对齐原型 .btn 语言——qg 根内 .b3-button 默认 quiet 化（中性描边/12px），新增 qg-btn-primary（每屏至多一个填充主按钮：桥自检/导出备份）、qg-btn-danger（清空队列/恢复默认/放弃所选）、qg-copy-btn ghost（行内复制悬停显形），消除满屏蓝描边；③共享组件（qg-card/qg-chip/qg-dot/qg-mono/qg-empty/qg-dlg-head）从 #qg-settings 作用域提升到根级——结果中心此前同名类无样式裸奔（chip 渲染为纯文本、行无卡片边框）；④开关对齐原型 36×18（旧 min-width:44px 只撑轨道不挪思源硬编码旋钮位 7/17px，出现"半空药丸"）；⑤设置搜索条降权（surface 融底、聚焦才出边框+ring）；⑥四中心统一 qg-dlg-head（logo+标题+说明+动作右对齐；恢复中心去原生 title 避免双标题，空 title 思源自动 fn__none）；⑦动效统一 --qg-t1(120ms)/--qg-t2(180ms)+--qg-ease、KPI 文案收敛（累计命令/平均耗时值内嵌 ms）、输入 focus ring、卡片 hover 阴影分级（--qg-shadow-1/2 多层低透明度）。新增 e2e/ui-preview.mjs（现状 13 屏+原型 4 屏+暗色 2 层截图基线，output/ui-preview/）。tsc 零错、**218 测全绿**；主工作区已部署

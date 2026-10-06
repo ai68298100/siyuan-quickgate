@@ -25,12 +25,15 @@ export class BroadcastSubscriber {
     private stopped = true;
     private loop: Promise<void> | null = null;
     private currentCtrl: AbortController | null = null;
+    /** L553 观测指标：连接次数 / 重连次数 / 合法信封数 / 最近事件时间（诊断包与设置页展示用） */
+    readonly metrics = { connects: 0, reconnects: 0, received: 0, lastEventAt: null as number | null };
 
     constructor(private deps: BroadcastDeps) {}
 
     start(): void {
         if (!this.stopped) return;
         this.stopped = false;
+        this.metrics.connects += 1;
         this.loop = this.runLoop();
     }
 
@@ -77,6 +80,8 @@ export class BroadcastSubscriber {
                         try {
                             const parsed = parseLine(payload, 0);
                             if (parsed.kind !== "ok") continue; // 坏/空信封静默（外部面不回执）
+                            this.metrics.received += 1;
+                            this.metrics.lastEventAt = Date.now();
                             await this.deps.onCommand(parsed.command);
                         } catch { /* 单条坏消息不影响流 */ }
                     }
@@ -84,6 +89,7 @@ export class BroadcastSubscriber {
                 try { reader.cancel?.(); } catch { /* 流已断 */ }
             } catch (e) {
                 if (this.stopped || ctrl.signal.aborted) break;
+                this.metrics.reconnects += 1;
                 this.deps.log?.(`广播订阅断开，${backoff}ms 后重连：${e instanceof Error ? e.message : String(e)}`);
                 await sleep(backoff);
                 // 退避上限 5s（bug#10，R81 真机实测：30s 上限时断连窗口内广播命令全部无人消费；

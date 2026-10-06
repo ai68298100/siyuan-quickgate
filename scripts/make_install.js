@@ -10,7 +10,7 @@
 import fs from 'fs';
 import { log, error, getSiYuanDir, chooseTarget, copyDirectory, getThisPluginName } from './utils.js';
 
-let targetDir = '';
+let targetDir = 'D:/小飞驴的SIYUAN/data/plugins';
 
 /**
  * 1. Get the parent directory to install the plugin

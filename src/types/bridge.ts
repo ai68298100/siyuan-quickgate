@@ -31,7 +31,9 @@ export type BridgeStatus =
     | "rejected"
     | "failed"
     | "unsupported"
-    | "expired";
+    | "expired"
+    /** 执行中途中断（崩溃/重启），最终状态未知——不自动重试，回执附人工核对路径（L655） */
+    | "unknown";
 
 /** 插件 → 外部 的回执信封（results.ndjson 每行一条） */
 export interface BridgeReceipt {
@@ -54,10 +56,23 @@ export interface BadLineFingerprint {
 }
 
 /** 处理过的命令 id 持久化存储（阻断项4：幂等跨重启，不用内存 200 条） */
+/** 台账条目状态（L655）：pending=已预约未终结；done=已终结（含 unknown 终态） */
+export type ProcessedState = "pending" | "done";
+
+export interface ProcessedEntry {
+    ts: number;
+    state: ProcessedState;
+    /** 预约时记录的 op（假死扫描发 unknown 回执时用） */
+    op?: string;
+    /** 终结时的回执状态 */
+    status?: string;
+}
+
 export interface ProcessedStore {
-    schemaVersion: 1;
-    /** id → 处理完成时间戳（ms）。上限 PROCESSED_CAP，超限按时间淘汰最旧 */
-    processed: Record<string, number>;
+    /** v2（L655）：id → 条目（pending/done 状态机）；v1（number 时间戳）迁移为 done */
+    schemaVersion: 2;
+    /** 上限 PROCESSED_CAP，超限按时间淘汰最旧 */
+    processed: Record<string, ProcessedEntry>;
 }
 
 /** 桥设置（bridge-settings.json） */
@@ -90,6 +105,8 @@ export interface QuickGateSettings {
     broadcastEnabled: boolean;
     /** 移动端桥 opt-in（默认关；旧版用 deviceName ":mobile-on" 隐式后缀，加载时迁移为本字段） */
     mobileBridgeEnabled: boolean;
+    /** 快速捕获默认去向（R301：daily=今日日记 / inbox=收集箱；面板选择器记忆上次选择） */
+    captureTarget: "daily" | "inbox";
 }
 
 export const DEFAULT_SETTINGS: QuickGateSettings = {
@@ -106,6 +123,7 @@ export const DEFAULT_SETTINGS: QuickGateSettings = {
     deviceName: "",
     broadcastEnabled: false,
     mobileBridgeEnabled: false,
+    captureTarget: "daily",
 };
 
 /** 命令注册表条目（spike① 已实证：id=langKey；形状见 services/registry.ts 头注与 WALKTHROUGH ①） */
@@ -123,4 +141,23 @@ export interface AuditEntry {
     command: string;
     status: string;
     elapsedMs: number;
+}
+
+/** 运行统计快照（L554）：跨重启累计（bridge-stats.json） */
+export interface BridgeStats {
+    commands: number;
+    ok: number;
+    rejected: number;
+    failed: number;
+    expired: number;
+    unknown: number;
+    totalDispatchMs: number;
+    lastActivityAt: number | null;
+}
+
+/** 恢复中心处置台账（G5 · R294）：人工处理过的回执 id，避免重复打扰 */
+export interface ResolvedStore {
+    schemaVersion: 1;
+    /** id → 处置记录（action: retried=已换新 id 重发 / dismissed=人工核对后放弃） */
+    resolved: Record<string, { at: string; action: string }>;
 }

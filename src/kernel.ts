@@ -16,6 +16,7 @@
  */
 import type * as kernel from "siyuan/kernel";
 import manifestJson from "./assets/ecosystem-manifests.json";
+import { classifyFileRead, fileReadLegacy, FileReadError, type FileRead } from "./services/file-read";
 import { createKernelOpHandler, kernelAgentCapture, kernelAgentDiscover, kernelPing } from "./kernel-ops";
 import type { EcosystemManifest } from "./services/bridge-service";
 
@@ -37,18 +38,28 @@ async function kpost<T>(endpoint: `/${string}`, payload: unknown = {}): Promise<
     return json.data;
 }
 
+/**
+ * 内核侧文件读取（L652 同口径）：null 仅表示"确认不存在"（404 / 202+错误信封——bug#12 在内核侧
+ * 的同型洞此前未堵）；鉴权/不可达/异常信封抛 FileReadError，由 /exec 包装成 500 msg 或各 op 的 catch 透出。
+ */
 async function getFileText(path: string): Promise<string | null> {
+    let res: Awaited<ReturnType<typeof api.client.fetch>>;
     try {
-        const res = await api.client.fetch("/api/file/getFile", {
+        res = await api.client.fetch("/api/file/getFile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ path }),
         });
-        if (!res.ok) return null;
-        return await res.text();
-    } catch {
-        return null;
+    } catch (e) {
+        throw new FileReadError(path, classifyFileRead(null, e) as Extract<FileRead, { kind: "unreachable" }>);
     }
+    const fr = classifyFileRead({
+        ok: res.ok,
+        status: (res as { status?: number }).status ?? 0,
+        headers: res.headers as { get?: (name: string) => string | null } | undefined,
+        text: await res.text(),
+    });
+    return fileReadLegacy(path, fr);
 }
 
 /* ---------- 生命周期与私有路由 ---------- */

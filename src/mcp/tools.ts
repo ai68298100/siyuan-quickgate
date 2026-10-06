@@ -207,3 +207,36 @@ export function buildToolDefs(): McpToolDef[] {
 export function filterTools(defs: McpToolDef[], writeEnabled: boolean): McpToolDef[] {
     return writeEnabled ? defs : defs.filter((t) => !t.write);
 }
+
+/**
+ * 统一参数校验（L562）：按登记 schema 做**宽严适度**的本地校验——required 缺失/空串、
+ * 已声明类型的明显错型（string/number/boolean/array/object）。未声明字段不拦（additionalProperties: true，
+ * 转发语义不变）。校验失败返回错误文案，server 层据此回 JSON-RPC -32602（协议级 invalid params），
+ * 与工具执行失败（isError result）分离——不再消耗桥队列槽位等前端回执。
+ */
+/** 供前端命令面板等复用：op 的参数 schema（未登记返回 null） */
+export function getArgsSpec(op: string): { properties: Record<string, { type: string; description: string }>; required?: string[] } | null {
+    return ARGS[op] ?? null;
+}
+
+export function validateArgs(def: McpToolDef, args: Record<string, unknown>): string | null {
+    const spec = ARGS[def.name];
+    if (!spec) return null; // 未登记 schema 的 op 不校验（纪律测试保证全登记）
+    for (const key of spec.required ?? []) {
+        const v = args?.[key];
+        if (v === undefined || v === null || (typeof v === "string" && v.trim() === "")) {
+            return `缺少必填参数：${key}`;
+        }
+    }
+    for (const [key, meta] of Object.entries(spec.properties)) {
+        const v = args?.[key];
+        if (v === undefined || v === null) continue;
+        const wrong = (meta.type === "string" && typeof v !== "string")
+            || (meta.type === "number" && typeof v !== "number")
+            || (meta.type === "boolean" && typeof v !== "boolean")
+            || (meta.type === "array" && !Array.isArray(v))
+            || (meta.type === "object" && (typeof v !== "object" || Array.isArray(v)));
+        if (wrong) return `参数 ${key} 类型应为 ${meta.type}（实得 ${Array.isArray(v) ? "array" : typeof v}）`;
+    }
+    return null;
+}

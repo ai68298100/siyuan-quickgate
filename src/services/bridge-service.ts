@@ -2,16 +2,17 @@
  * 桥服务：一次 poll tick 的完整实现（读取→解析→执行→写回）。
  * 依赖全部注入，便于单测；DOM/思源仅经由注入的桥实例与 kernelApi 触达。
  */
-import { BridgeCommand, BridgeReceipt, QuickGateSettings, AuditEntry } from "../types/bridge";
+import { BridgeCommand, BridgeReceipt, QuickGateSettings, AuditEntry, BridgeStats } from "../types/bridge";
 import manifestJson from "../assets/ecosystem-manifests.json";
 import { parseLine, splitLines, isExpired } from "./envelope";
 import { compactCommands } from "./queue";
 import { appendReceipt } from "./results";
 import { BridgeStore } from "./store";
 import { KernelApi } from "./kernelApi";
+import { FileReadError } from "./file-read";
 import { RegistryProbeResult, runCommand } from "./registry";
 import { eventWhitelist, pullEvents } from "./events";
-import { executePlan, makePlan, WorkflowPlan, WORKFLOW_ALLOWED_OPS } from "./workflow";
+import { executePlan, makePlan, WorkflowPlan, WORKFLOW_ALLOWED_OPS, nextWorkflowPlanId } from "./workflow";
 import {
     checkinItems, checkinRecord, checkinSummary,
     contactsSearch, contactsEnsure, contactsInteraction,
@@ -90,6 +91,8 @@ export interface EcosystemManifest {
 export interface BridgeServiceDeps {
     api: KernelApi;
     store: BridgeStore;
+    /** 上次生命周期统计快照（L554）：构造时播种累计，onunload 回写 */
+    initialStats?: BridgeStats;
     settings: () => QuickGateSettings;
     pluginName: string;
     pluginVersion: string;
@@ -124,21 +127,25 @@ export class BridgeService {
     /** workflow.plan 一次性计划池（内存即可：短生命周期，5 分钟过期） */
     private plans = new Map<string, WorkflowPlan>();
 
-    /** 累计统计（内存态，内核/插件重载归零；设置页与诊断包展示用） */
-    readonly stats = {
+    /** 累计统计（L554：由 deps.initialStats 播种跨重启快照，onunload 回写 bridge-stats.json） */
+    readonly stats: BridgeStats = {
         /** 实际执行过的命令数（不含跳过/坏行/过期） */
         commands: 0,
         ok: 0,
         rejected: 0,
         failed: 0,
         expired: 0,
+        /** 执行中途中断的假死回收数（L655 unknown 终态） */
+        unknown: 0,
         /** 执行耗时累计 ms（与 commands 对应，均值=totalDispatchMs/commands） */
         totalDispatchMs: 0,
         /** 最近一次读到非空命令文件的时间（ms；空转不刷新） */
-        lastActivityAt: null as number | null,
+        lastActivityAt: null,
     };
 
-    constructor(private deps: BridgeServiceDeps) {}
+    constructor(private deps: BridgeServiceDeps) {
+        if (deps.initialStats) Object.assign(this.stats, deps.initialStats);
+    }
 
     private paths() {
         const base = this.deps.settings().bridgeBasePath;
@@ -157,7 +164,11 @@ export class BridgeService {
         try {
             const raw = await this.deps.api.getFileText(this.favoritesPath());
             return raw ? normalizeFavorites(JSON.parse(raw)) : emptyFavorites();
-        } catch { return emptyFavorites(); }
+        } catch (e) {
+            // L652：鉴权/不可达等真异常必须透出（failed 回执带原因），只有缺文件/坏 JSON 才回退空收藏
+            if (e instanceof FileReadError) throw e;
+            return emptyFavorites();
+        }
     }
 
     private async saveFavorites(store: FavoritesStore): Promise<void> {
@@ -176,12 +187,30 @@ export class BridgeService {
         if (!s.bridgeEnabled) return { executed: 0, receipts: 0 };
         const { commands, results } = this.paths();
 
+        // L655 假死扫描（在空队列早退之前）：崩溃残留的 pending → unknown 回执一次性补发
+        const receipts: BridgeReceipt[] = [];
+        const stale = this.deps.store.takeStalePending(this.deps.now?.() ?? Date.now());
+        for (const { id, entry } of stale) {
+            this.stats.unknown += 1;
+            receipts.push(this.makeReceipt({
+                id, op: entry.op ?? "(unknown)", status: "unknown", data: null, elapsedMs: 0,
+                message: "执行中途中断（崩溃/重启），最终状态未知——不自动重试。处理路径：只读 op 可换新 id 重发；写 op 请先人工核对目标；可按 id 查询历史回执；确认放弃则忽略本条。",
+            }));
+        }
+
         const raw = await this.deps.api.getFileText(commands);
-        if (raw === null || raw.trim() === "") return { executed: 0, receipts: 0 };
+        if (raw === null || raw.trim() === "") {
+            if (receipts.length > 0) {
+                let t = (await this.deps.api.getFileText(results)) ?? "";
+                for (const r of receipts) t = appendReceipt(t, r);
+                await this.deps.api.putFileText(results, t);
+                await this.deps.store.saveProcessed().catch(() => {});
+            }
+            return { executed: 0, receipts: receipts.length };
+        }
         this.stats.lastActivityAt = this.deps.now?.() ?? Date.now();
 
         const now = this.deps.now?.() ?? Date.now();
-        const receipts: BridgeReceipt[] = [];
         const toProcess: BridgeCommand[] = [];
         let executions = 0;
 
@@ -217,10 +246,9 @@ export class BridgeService {
         }
 
         for (const cmd of toProcess) {
-            // 预留语义（v0.6.0）：与广播快路径（executeAndRecord）共用"先记账后执行"，
-            // 同步 check+mark 原子——双通道（NDJSON tick / 广播 SSE）不重复执行同一 id
-            if (this.deps.store.isProcessed(cmd.id)) continue;
-            this.deps.store.markProcessed(cmd.id, this.deps.now?.() ?? Date.now());
+            // 预留语义（v0.6.0 + L655 状态机）：pending 立即落盘——双通道不重复执行同一 id，
+            // 崩溃残留的 pending 由假死扫描发 unknown 回执（不重放写操作）
+            if (!(await this.deps.store.reserve(cmd.id, this.deps.now?.() ?? Date.now(), cmd.op))) continue;
             const t0 = this.deps.now?.() ?? Date.now(); // 预留后取时：elapsed 只含本条命令
             let result: BridgeResult;
             try {
@@ -236,6 +264,7 @@ export class BridgeService {
             else if (result.status === "rejected") this.stats.rejected += 1;
             else this.stats.failed += 1;
             this.auditWriteOp(cmd, result.status, elapsed);
+            this.deps.store.markDone(cmd.id, this.deps.now?.() ?? Date.now(), result.status);
             if (cmd.reply !== false) {
                 receipts.push(this.makeReceipt({
                     id: cmd.id, op: cmd.op, status: result.status, data: result.data,
@@ -260,6 +289,7 @@ export class BridgeService {
         }
 
         await this.deps.store.saveProcessed();
+        this.maybeSaveStats(); // L554
         return { executed: executions, receipts: receipts.length };
     }
 
@@ -298,7 +328,7 @@ export class BridgeService {
             }
             return { executed: false, receipt: expiredReceipt };
         }
-        this.deps.store.markProcessed(cmd.id, now); // 同步预留，防双通道竞态双执行
+        if (!(await this.deps.store.reserve(cmd.id, now, cmd.op))) return { executed: false }; // L655：pending 落盘预约，防双通道竞态双执行
         const t0 = this.deps.now?.() ?? Date.now();
         let result: BridgeResult;
         try {
@@ -313,6 +343,7 @@ export class BridgeService {
         else if (result.status === "rejected") this.stats.rejected += 1;
         else this.stats.failed += 1;
         this.auditWriteOp(cmd, result.status, elapsed);
+        this.deps.store.markDone(cmd.id, this.deps.now?.() ?? Date.now(), result.status);
 
         let receipt: BridgeReceipt | undefined;
         if (cmd.reply !== false) {
@@ -336,6 +367,16 @@ export class BridgeService {
      * commands.run 的确认窗口（30s）走确认流程自身语义，不受此上限截断。
      */
     lateCompletions = 0;
+
+    /** L554：统计快照节落盘节流（30s；onunload 兜底全量回写） */
+    private lastStatsSaveAt = 0;
+
+    private maybeSaveStats(): void {
+        const now = this.deps.now?.() ?? Date.now();
+        if (now - this.lastStatsSaveAt < 30_000) return;
+        this.lastStatsSaveAt = now;
+        void this.deps.store.saveStats(this.stats).catch(() => {});
+    }
 
     private dispatchWithTimeout(cmd: BridgeCommand): Promise<BridgeResult> {
         // commands.run（确认窗口自管）/ workflow.execute（单步上限自管）：内部已有界，
@@ -612,7 +653,7 @@ export class BridgeService {
             }
             case "workflow.plan": {
                 const r = makePlan(a.steps, {
-                    planId: `wf-${this.deps.now?.() ?? Date.now()}`,
+                    planId: nextWorkflowPlanId(this.deps.now?.() ?? Date.now()),
                     now: this.deps.now?.() ?? Date.now(),
                     whitelistOp: (op) => WORKFLOW_ALLOWED_OPS.has(op),
                 });

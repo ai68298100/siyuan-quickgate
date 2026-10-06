@@ -9,46 +9,34 @@ import "./index.scss";
 
 import { KernelApi } from "./services/kernelApi";
 import { BridgeStore, DataIO } from "./services/store";
-import { BridgeService, EditorContextResult, EcosystemManifest } from "./services/bridge-service";
-import manifestJson from "./assets/ecosystem-manifests.json";
+import { BridgeService, EditorContextResult } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
 import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
 import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted, planMaterialization } from "./services/eventbridge";
 import { IdempotencyRegistry } from "./services/idempotency";
-import { normalizeFavorites, FavoritesStore } from "./services/favorites";
 import { BridgeClaimHandle, BridgeClaimer, createNavigatorClaimer } from "./services/bridge-claim";
 import { HubEvent } from "./services/events";
-import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
+import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry, BridgeCommand } from "./types/bridge";
+import { openQuickGateSettings } from "./settings-panel";
+import { openCommandPalette } from "./command-palette";
+import { openRecoveryCenter } from "./recovery-center";
+import { openNotificationCenter } from "./notification-center-ui";
+import { openResultsCenter } from "./results-center-ui";
 
 const PLUGIN_NAME = "siyuan-quickgate";
 const PLUGIN_VERSION = "0.7.5";
 const CONFIRM_TIMEOUT_MS = 30000;
 
-/** 诊断包组装（脱敏：无 Token/正文/个人路径） */
-function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], service: BridgeService) {
-    const st = service.stats;
-    return {
-        protocol: 1,
-        plugin: PLUGIN_NAME,
-        version: PLUGIN_VERSION,
-        settings: { ...settings },
-        lateCompletions: service.lateCompletions,
-        stats: { ...st, avgDispatchMs: st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null },
-        auditTail: auditLog.slice(-50),
-        exportedAt: new Date().toISOString(),
-    };
-}
-
 export default class QuickGatePlugin extends Plugin {
     private isMobile: boolean = false;
-    private store = new BridgeStore(this.asDataIO());
+    store = new BridgeStore(this.asDataIO());
     private idempotency = new IdempotencyRegistry(this.asDataIO());
-    private kernelApi = new KernelApi();
-    private poller?: SingleFlightPoller;
-    private activeService?: BridgeService;
-    private settings: QuickGateSettings = { ...DEFAULT_SETTINGS };
-    private auditLog: AuditEntry[] = [];
+    kernelApi = new KernelApi();
+    poller?: SingleFlightPoller;
+    activeService?: BridgeService;
+    settings: QuickGateSettings = { ...DEFAULT_SETTINGS };
+    auditLog: AuditEntry[] = [];
     /** 正常生命周期完成标记（onload 末尾置位；热重载接管用） */
     private lifecycleBooted = false;
     /** 卸载标记：停用后构造器自愈不得复活后台循环 */
@@ -112,6 +100,12 @@ export default class QuickGatePlugin extends Plugin {
             callback: () => this.openSettingPanel(),
         });
         this.addCommand({
+            langKey: "openPalette",
+            langText: "小驴快门：命令面板",
+            hotkey: "Ctrl+Alt+P",
+            callback: () => this.openCommandPalette(),
+        });
+        this.addCommand({
             langKey: "pingBridge",
             langText: "小驴快门：桥自检（bridge.ping）",
             hotkey: "",
@@ -140,6 +134,8 @@ export default class QuickGatePlugin extends Plugin {
         this.bridgeClaim = undefined;
         this.stopEventBridge();
         this.flushAudit();
+        // L554：运行统计快照回写（跨重启续计）
+        if (this.activeService) void this.store.saveStats(this.activeService.stats);
         showMessage("小驴快门已停用；其桥目录随插件数据一并保留/清理", 3000, "info");
     }
 
@@ -150,15 +146,15 @@ export default class QuickGatePlugin extends Plugin {
      * v0.4.1 曾误订 eventBus 导致永不触发，v0.5.2 修正）。
      * analytics-updated 不订阅（D-0011：高频触发会挤占滚动窗口）。总线不可用时静默降级。
      */
-    private eventBridgeHandler?: (e: Event) => void;
-    private broadcastSub?: BroadcastSubscriber;
+    eventBridgeHandler?: (e: Event) => void;
+    broadcastSub?: BroadcastSubscriber;
     /** 桥消费权认领（L452 多窗口互斥）：持有=本窗口跑轮询；null=他窗占用；undefined=无 Locks 环境（单窗口假设） */
     private bridgeClaim?: BridgeClaimHandle;
     private bridgeClaimer?: BridgeClaimer;
     /** 内核路由探针结果（设置面板打开时一次性探测；undefined=未探测） */
-    private kernelRouteProbe?: boolean;
+    kernelRouteProbe?: boolean;
 
-    private startEventBridge() {
+    startEventBridge() {
         if (this.eventBridgeHandler) return;
         try {
             if (typeof window?.addEventListener !== "function") return;
@@ -173,7 +169,7 @@ export default class QuickGatePlugin extends Plugin {
         } catch { /* window 事件不可用 → 静默降级 */ }
     }
 
-    private stopEventBridge() {
+    stopEventBridge() {
         if (!this.eventBridgeHandler) return;
         try {
             window.removeEventListener("checkin:event-recorded", this.eventBridgeHandler);
@@ -247,7 +243,7 @@ export default class QuickGatePlugin extends Plugin {
         } catch { /* 写 local 失败不阻断 */ }
     }
 
-    private isMobileGuard(): boolean {
+    isMobileGuard(): boolean {
         // TODO(M1.5)：移动端默认关桥；显式设置项 mobileBridgeEnabled 开启后放行
         // （旧版隐式 deviceName ":mobile-on" 后缀仍兜底识别——normalize 迁移前的双保险）
         return this.isMobile && !(this.settings.mobileBridgeEnabled || this.settings.deviceName.endsWith(":mobile-on"));
@@ -261,7 +257,7 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     /** 启动桥（L506：异步认领，返回是否实际启动；false=消费权被另一窗口持有） */
-    private async startBridge(): Promise<boolean> {
+    async startBridge(): Promise<boolean> {
         if (this.poller?.isRunning) {
             this.startBroadcastSub(); // 桥已在跑、仅广播开关变化时也要接上订阅（幂等）
             return true;
@@ -311,7 +307,7 @@ export default class QuickGatePlugin extends Plugin {
         console.info(`[${PLUGIN_NAME}] 广播快路径已启动（频道 ${BROADCAST_CHANNEL}）`);
     }
 
-    private async stopBridge() {
+    async stopBridge() {
         this.poller?.stop();
         this.poller = undefined;
         if (this.broadcastSub?.running) {
@@ -425,7 +421,7 @@ export default class QuickGatePlugin extends Plugin {
         await openTab({ app, doc: { id } } as Parameters<typeof openTab>[0]);
     }
 
-    private async selfPing() {
+    async selfPing() {
         try {
             const service = new BridgeService(this.deps());
             const r = await service.tick();
@@ -435,10 +431,11 @@ export default class QuickGatePlugin extends Plugin {
         }
     }
 
-    private deps() {
+    deps() {
         return {
             api: this.kernelApi,
             store: this.store,
+            initialStats: this.store.statsSnapshot, // L554：跨重启续计
             settings: () => this.settings,
             pluginName: PLUGIN_NAME,
             pluginVersion: PLUGIN_VERSION,
@@ -574,583 +571,178 @@ export default class QuickGatePlugin extends Plugin {
         return { diaryNotebookId, inboxDocId, notes };
     }
 
-    private openSettingPanel() {
-        const dialog = new Dialog({
-            title: "小驴快门 · 设置",
-            content: `<div class="b3-dialog__content" id="qg-settings" style="padding:12px;max-height:72vh;overflow:auto"></div>`,
-            width: "640px",
-            height: "auto",
+    /**
+     * 思源以「覆写基类 openSetting 或存在 this.setting」判定插件有无设置入口
+     * （app/src/plugin/index.ts hasPluginSetting）：不覆写时集市已下载卡片不显示齿轮、
+     * 顶栏插件菜单无设置项，UI 上零入口（本类仅有私有 openSettingPanel，此前即踩此坑）。
+     */
+    openSetting(): void {
+        this.openSettingPanel();
+    }
+
+    /**
+     * 设置面板（R288 起为分层面板）：实现迁移至 src/settings-panel.ts（原型 design/ui-prototype/mvp1.html），
+     * 本类仅提供运行态与操作（SettingsPanelHost 接口）。
+     */
+    openSettingPanel(page?: string): void {
+        void openQuickGateSettings(this, page);
+    }
+
+    /** 桥运行态（通知中心/面板能力分组门控） */
+    bridgeAlive(): boolean {
+        return Boolean(this.activeService);
+    }
+
+    consecutiveFailures(): number {
+        return this.poller?.consecutiveFailures ?? 0;
+    }
+
+    lateCompletions(): number {
+        return this.activeService?.lateCompletions ?? 0;
+    }
+
+    openQueuePage(): void {
+        this.openSettingPanel("queue");
+    }
+
+    openConnectionPage(): void {
+        this.openSettingPanel("connection");
+    }
+
+    /** 裸对话框（通知中心等宿主注入用） */
+    openDialog(content: string): { element: HTMLElement; destroy(): void } {
+        const d = new Dialog({ content, width: "600px", height: "auto" });
+        return { element: d.element, destroy: () => d.destroy() };
+    }
+
+    /** 结果中心（G5-01）：回执查询（状态筛选/关键词/分页/复制） */
+    openResultsCenter(): void {
+        void openResultsCenter({
+            settings: this.settings,
+            kernelApi: this.kernelApi,
+            ui: {
+                openDialog: (content) => this.openDialog(content),
+                showMessage: (text, timeout, type) => showMessage(text, timeout, type),
+            },
         });
-        const root = dialog.element.querySelector("#qg-settings") as HTMLElement;
-        let seq = 0;
+    }
 
-        // —— 分组折叠节（details 原生键盘可达；open=首屏展开）——
-        const section = (title: string, open: boolean) => {
-            const d = document.createElement("details");
-            d.open = open;
-            d.style.marginBottom = "4px";
-            const s = document.createElement("summary");
-            s.textContent = title;
-            s.style.cursor = "pointer";
-            s.style.fontWeight = "bold";
-            s.style.padding = "4px 0";
-            d.appendChild(s);
-            const body = document.createElement("div");
-            d.appendChild(body);
-            root.appendChild(d);
-            return body;
-        };
-        // —— 行：label 关联控件（ htmlFor），hint 为次行说明——
-        const row = (parent: HTMLElement, label: string, ctrl: HTMLElement, hint?: string) => {
-            const div = document.createElement("div");
-            div.className = "fn__flex b3-label";
-            div.style.flexWrap = "wrap";
-            div.style.alignItems = "center";
-            const l = document.createElement("label");
-            l.textContent = label;
-            l.style.flex = "1";
-            l.style.paddingRight = "12px";
-            l.style.minWidth = "200px";
-            if (!ctrl.id) ctrl.id = `qg-f-${++seq}`;
-            l.htmlFor = ctrl.id;
-            div.appendChild(l);
-            div.appendChild(ctrl);
-            if (hint) {
-                const h = document.createElement("div");
-                h.style.fontSize = "11px";
-                h.style.width = "100%";
-                h.style.color = "var(--b3-theme-on-surface)";
-                h.textContent = hint;
-                div.appendChild(h);
-            }
-            parent.appendChild(div);
-            return div;
-        };
+    /** 通知中心（G5-02）：聚合待恢复/积压/退避/迟到为单一关注面 */
+    openNotificationCenter(): void {
+        void openNotificationCenter({
+            settings: this.settings,
+            kernelApi: this.kernelApi,
+            store: this.store,
+            auditLog: this.auditLog,
+            bridgeAlive: () => this.bridgeAlive(),
+            consecutiveFailures: () => this.consecutiveFailures(),
+            lateCompletions: () => this.lateCompletions(),
+            openRecoveryCenter: () => this.openRecoveryCenter(),
+            openQueuePage: () => this.openQueuePage(),
+            openConnectionPage: () => this.openConnectionPage(),
+            openDialog: (content: string) => {
+                const d = new Dialog({ content, width: "600px", height: "auto" });
+                return { element: d.element, destroy: () => d.destroy() };
+            },
+        });
+    }
 
-        // —— 状态概览（首屏；role=status 动态刷新 + 数据截至时间，超出原型要求）——
-        const statusCard = document.createElement("div");
-        statusCard.className = "b3-card";
-        statusCard.style.padding = "8px 12px";
-        statusCard.style.marginBottom = "8px";
-        const statusLine = document.createElement("div");
-        statusLine.setAttribute("role", "status");
-        statusLine.setAttribute("aria-live", "polite");
-        statusLine.style.fontSize = "12px";
-        statusLine.style.lineHeight = "1.9";
-        statusCard.appendChild(statusLine);
-        root.appendChild(statusCard);
-        const badge = (ok: boolean, okText: string, offText: string) =>
-            `<span style="color:${ok ? "var(--b3-theme-primary)" : "var(--b3-theme-on-surface)"}">● ${ok ? okText : offText}</span>`;
-        const refreshStatus = () => {
-            const st = this.activeService?.stats;
-            const avg = st && st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null;
-            const backoff = this.poller && this.poller.consecutiveFailures > 0 ? `退避中×${this.poller.consecutiveFailures}` : null;
-            statusLine.innerHTML = [
-                badge(!!this.poller?.isRunning, "桥 运行中", "桥 已停止"),
-                badge(!!this.broadcastSub?.running, "广播 运行中", "广播 关"),
-                badge(!!this.eventBridgeHandler, "事件物化 已接", "事件物化 未接"),
-                this.kernelRouteProbe === undefined ? null : badge(this.kernelRouteProbe, "内核路由 可用", "内核路由 不可达"),
-                st ? `本次运行 ${st.commands} 条（成功 ${st.ok} / 拒绝 ${st.rejected} / 失败 ${st.failed} / 过期 ${st.expired}）` : "服务未启动",
-                avg !== null ? `平均 ${avg}ms` : null,
-                backoff,
-                st?.lastActivityAt ? `数据截至 ${new Date(st.lastActivityAt).toLocaleTimeString()}` : null,
-            ].filter(Boolean).join(" · ");
-        };
-        refreshStatus();
-        // L505：内核路由状态探针（开面板一次性；随 petal 启用即用，不经桥开关）
-        void (async () => {
-            try {
-                const r = await this.kernelApi.post<unknown>(`/plugin/private/${PLUGIN_NAME}/exec`, { op: "bridge.ping", args: {} });
-                this.kernelRouteProbe = !!r;
-            } catch { this.kernelRouteProbe = false; }
-            if (document.body.contains(root)) refreshStatus();
-        })();
-        const statusTimer = window.setInterval(() => {
-            if (!document.body.contains(root)) { window.clearInterval(statusTimer); return; }
-            refreshStatus();
-        }, 3000);
+    /** 恢复中心（G5 · R294）：unknown/失败/过期回执的人工处理面（查询/重试/放弃/复制） */
+    openRecoveryCenter(): void {
+        void openRecoveryCenter({
+            settings: this.settings,
+            kernelApi: this.kernelApi,
+            store: this.store,
+            ui: { Dialog, showMessage },
+        });
+    }
 
-        // —— 基础连接（首屏展开）——
-        const secBasic = section("基础连接", true);
-
-        const enabledInput = document.createElement("input");
-        enabledInput.type = "checkbox";
-        enabledInput.className = "b3-switch";
-        enabledInput.checked = this.settings.bridgeEnabled;
-        enabledInput.onchange = async () => {
-            this.settings.bridgeEnabled = enabledInput.checked;
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-            if (this.settings.bridgeEnabled && !this.isMobileGuard()) {
-                const started = await this.startBridge(); // L506：等认领完成再提示，如实反映结果
-                this.startEventBridge(); // 与 onload 配对：开启桥即接上事件物化，无需重启插件
-                refreshStatus();
-                showMessage(started ? "外部命令桥已开启（本窗口消费）" : "另一思源窗口正在运行外部命令桥，本窗口未重复启动", 4000, "info");
-                return;
-            }
-            await this.stopBridge();
-            this.stopEventBridge(); // 与 onload 配对：关桥即退订，事件物化不得在桥关闭后继续写
-            refreshStatus();
-            showMessage("外部命令桥已关闭", 3000);
-        };
-        row(secBasic, "外部命令桥", enabledInput, "默认关；开启后外部程序（Quicker/CLI/MCP）可发命令");
-
-        const mobileInput = document.createElement("input");
-        mobileInput.type = "checkbox";
-        mobileInput.className = "b3-switch";
-        mobileInput.checked = this.settings.mobileBridgeEnabled
-            || this.settings.deviceName.endsWith(":mobile-on"); // 旧后缀迁移前也如实显示
-        mobileInput.onchange = async () => {
-            this.settings.mobileBridgeEnabled = mobileInput.checked;
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-            showMessage(`移动端桥已${this.settings.mobileBridgeEnabled ? "允许" : "关闭"}（仅在移动端设备上生效）`, 3000);
-        };
-        row(secBasic, "移动端桥 opt-in", mobileInput, "默认关；移动端上开启外部命令桥需单独打开此项");
-
-        const bcInput = document.createElement("input");
-        bcInput.type = "checkbox";
-        bcInput.className = "b3-switch";
-        bcInput.checked = this.settings.broadcastEnabled;
-        bcInput.onchange = async () => {
-            this.settings.broadcastEnabled = bcInput.checked;
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-            if (this.settings.broadcastEnabled && this.settings.bridgeEnabled && !this.isMobileGuard()) {
-                this.startBridge(); // startBridge 内部按开关幂等启动广播订阅
-            } else if (this.broadcastSub?.running) {
-                await this.broadcastSub.stop();
-            }
-            refreshStatus();
-            showMessage(`广播快路径已${this.settings.broadcastEnabled ? "开启（毫秒级命令通道 qg-cmd）" : "关闭"}`, 3000);
-        };
-        row(secBasic, "广播快路径 v1.5", bcInput, "默认关；需先开桥；postMessage→qg-cmd 频道毫秒级执行");
-
-        const pollWrap = document.createElement("div");
-        pollWrap.style.display = "flex";
-        pollWrap.style.alignItems = "center";
-        pollWrap.style.gap = "6px";
-        const pollInput = document.createElement("input");
-        pollInput.type = "number";
-        pollInput.className = "b3-text-field fn__size200";
-        pollInput.value = String(this.settings.pollMs);
-        const pollErr = document.createElement("span");
-        pollErr.setAttribute("role", "alert");
-        pollErr.style.color = "var(--b3-theme-error)";
-        pollErr.style.fontSize = "11px";
-        pollWrap.appendChild(pollInput);
-        pollWrap.appendChild(pollErr);
-        pollInput.onchange = async () => {
-            const v = parseInt(pollInput.value, 10);
-            if (v >= 200 && v <= 60000) {
-                pollErr.textContent = "";
-                this.settings.pollMs = v;
-                this.store.settings = this.settings;
-                await this.store.saveSettings();
-                // L659：运行中的桥热应用新间隔（重启轮询循环；Web Lock 认领重走防双窗口竞态）
-                if (this.poller?.isRunning) {
-                    await this.stopBridge();
-                    const started = await this.startBridge();
-                    showMessage(started ? `轮询间隔已生效：${v}ms` : "间隔已保存；桥消费权被他窗持有，本窗口轮询未重启", 3000, "info");
-                }
-            } else {
-                // 行内校验：不静默还原，给出原因（超出原型「inline 校验」要求）
-                pollErr.textContent = "须为 200~60000 的整数，已还原当前生效值";
-                pollInput.value = String(this.settings.pollMs);
-            }
-        };
-        row(secBasic, "轮询间隔（ms）", pollWrap, "200~60000；行内校验，非法值还原并提示；修改后立即生效（运行中的桥自动重启轮询）");
-
-        // —— 安全与权限（折叠）——
-        const secSec = section("安全与权限", false);
-
-        const confirmInput = document.createElement("input");
-        confirmInput.type = "checkbox";
-        confirmInput.className = "b3-switch";
-        confirmInput.checked = this.settings.confirmExec;
-        confirmInput.onchange = async () => {
-            this.settings.confirmExec = confirmInput.checked;
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-        };
-        row(secSec, "命令执行前确认", confirmInput, "默认开；思源端弹确认，30 秒超时拒绝");
-
-        const rawInput = document.createElement("input");
-        rawInput.type = "checkbox";
-        rawInput.className = "b3-switch";
-        rawInput.checked = this.settings.rawApiEnabled;
-        rawInput.onchange = async () => {
-            if (rawInput.checked) {
-                // L513：启用前列出影响/留痕/可逆性（危险开关确认框纪律）；取消则回滚开关
-                const 名单 = this.settings.rawApiAllowlist.length > 0
-                    ? this.settings.rawApiAllowlist.join("、")
-                    : "（当前名单为空——开启后调用仍会被全部拒绝，请先在下方编辑名单）";
-                confirm(
-                    "小驴快门 · 启用 plugin.api 高级透传",
-                    `将允许外部客户端（MCP/CLI）经快门调用名单内插件的窗口桥方法：${名单}。\n` +
-                    `所有调用留审计（仅记录插件与方法名，不含参数值）。随时可关闭本开关回退，设置即改即生效。`,
-                    async () => {
-                        this.settings.rawApiEnabled = true;
-                        this.store.settings = this.settings;
-                        await this.store.saveSettings();
-                        showMessage("plugin.api 已启用（名单可在下方编辑）", 3000);
-                    },
-                    () => { rawInput.checked = false; },
-                );
-                return;
-            }
-            this.settings.rawApiEnabled = false;
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-        };
-        row(secSec, "plugin.api 高级透传", rawInput, "默认关；启用前确认；配合允许名单使用（见下方黑名单）");
-
-        // 允许名单编辑器（L458：api.md §11 承诺「新插件由用户手动加入」——此前无入口，承诺无法履行）
-        const allowlistInput = document.createElement("textarea");
-        allowlistInput.className = "b3-text-field fn__block";
-        allowlistInput.rows = 2;
-        allowlistInput.value = this.settings.rawApiAllowlist.join(", ");
-        allowlistInput.onchange = async () => {
-            // L504：行内校验——pluginId 形状（siyuan-*）不符的条目剔除并列出；合法条目照常保存
-            const raw = allowlistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
-            const invalid = raw.filter((s) => !/^siyuan-[a-z0-9-]+$/.test(s));
-            const valid = raw.filter((s) => /^siyuan-[a-z0-9-]+$/.test(s));
-            this.settings.rawApiAllowlist = [...new Set(valid)];
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-            allowlistInput.value = this.settings.rawApiAllowlist.join(", ");
-            if (invalid.length > 0) {
-                showMessage(`已保存合法条目；以下不符合 pluginId 形状（siyuan-*）被剔除：${invalid.join("、")}`, 5000, "error");
-            } else {
-                showMessage("允许名单已保存", 1500, "info");
-            }
-        };
-        row(secSec, "plugin.api 允许名单", allowlistInput, "逗号分隔的 pluginId；默认仅含已完成契约审计的三个插件（打卡/人脉/雷切）——新加入即授权透传其窗口桥，请先完成契约审计");
-
-        const blacklistInput = document.createElement("textarea");
-        blacklistInput.className = "b3-text-field fn__block";
-        blacklistInput.rows = 2;
-        blacklistInput.value = this.settings.blacklist.join(", ");
-        blacklistInput.onchange = async () => {
-            this.settings.blacklist = blacklistInput.value.split(/[,，\n]+/).map((s) => s.trim()).filter(Boolean);
-            this.store.settings = this.settings;
-            await this.store.saveSettings();
-            showMessage("黑名单已保存", 1500, "info"); // L504：保存反馈（轻提示，不打断）
-        };
-        row(secSec, "插件黑名单", blacklistInput, "逗号分隔；名单内插件不暴露命令");
-
-        // —— 数据与队列（折叠）——
-        const secQueue = section("数据与队列", false);
-
-        const queueBtn = document.createElement("button");
-        queueBtn.className = "b3-button b3-button--outline";
-        queueBtn.textContent = "查看队列与运行统计";
-        queueBtn.onclick = async () => {
-            try {
-                const text = (await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/commands.ndjson`)) ?? "";
-                const lines = text.trim() ? text.trim().split("\n").length : 0;
-                const st = this.activeService?.stats;
-                const avg = st && st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null;
-                const parts = [
-                    `待处理命令 ${lines} 条`,
-                    `台账 ${Object.keys(this.store.processed.processed).length} 条`,
-                    `迟到完成 ${this.activeService?.lateCompletions ?? 0} 次`,
-                    st ? `本次运行已执行 ${st.commands} 条（成功 ${st.ok} / 拒绝 ${st.rejected} / 失败 ${st.failed} / 过期 ${st.expired}）` : "服务未启动",
-                    avg !== null ? `平均耗时 ${avg}ms` : null,
-                    st?.lastActivityAt ? `最近活动 ${new Date(st.lastActivityAt).toLocaleTimeString()}` : null,
-                ].filter((p): p is string => p !== null);
-                showMessage(parts.join(" · "), 6000, "info");
-            } catch (e) {
-                showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-            }
-        };
-        row(secQueue, "队列与运行统计", queueBtn);
-
-        const clearBtn = document.createElement("button");
-        clearBtn.className = "b3-button b3-button--outline";
-        clearBtn.textContent = "清空命令队列";
-        clearBtn.onclick = async () => {
-            try {
-                const base = this.settings.bridgeBasePath;
-                // 清空前预览：数量 / 最老命令时间（超出原型「清队列前预览」要求）
-                const text = (await this.kernelApi.getFileText(`${base}/commands.ndjson`)) ?? "";
-                const ls = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
-                let oldest = "";
-                for (const l of ls) {
-                    try { const c = JSON.parse(l); if (typeof c.createdAt === "string" && (!oldest || c.createdAt < oldest)) oldest = c.createdAt; } catch { }
-                }
-                const preview = ls.length === 0
-                    ? "队列当前为空。仍将清空回执文件并重置处理台账。"
-                    : `将丢弃 ${ls.length} 条未消费命令${oldest ? `（最早提交 ${oldest}）` : ""}，并清空回执文件与处理台账。`;
-                confirm("小驴快门 · 清空队列", preview + " 此操作不可撤销。", async () => {
-                    try {
-                        await this.kernelApi.putFileText(`${base}/commands.ndjson`, "");
-                        await this.kernelApi.putFileText(`${base}/results.ndjson`, "");
-                        this.store.processed = { schemaVersion: 1, processed: {} };
-                        await this.store.saveProcessed();
-                        showMessage("命令队列已清空", 3000);
-                    } catch (e) {
-                        showMessage(`清空失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-                    }
-                }, () => {});
-            } catch (e) {
-                showMessage(`预览失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-            }
-        };
-        row(secQueue, "排障", clearBtn, "清空前预览将丢弃数量与最老命令（不可撤销）");
-
-        const auditFilterInput = document.createElement("input");
-        auditFilterInput.className = "b3-text-field fn__size200";
-        auditFilterInput.placeholder = "筛选：op / 状态 / 插件";
-        const auditBtn = document.createElement("button");
-        auditBtn.className = "b3-button b3-button--outline";
-        auditBtn.textContent = "查看审计（最近 20 条）";
-        auditBtn.onclick = () => {
-            // L514：关键词（op/状态/插件）+ 日期筛选 + 逐条复制；20 条窗口内不做分页/虚拟化（数据量不支撑，裁剪声明）
-            const state = { kw: "", date: "" };
-            const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-            const view = () => this.auditLog.slice(-20).filter((a) => {
-                if (state.date && !a.time.startsWith(state.date)) return false;
-                if (state.kw && !`${a.plugin}/${a.command} ${a.status}`.toLowerCase().includes(state.kw)) return false;
-                return true;
+    /** 快速捕获（G3-04 + R7 结论②）：目标二选一——今日日记（HH:mm 前缀）或收集箱（纯文本）。
+     * 笔记本/收集箱自动发现（只探测不创建）；返回块/文档 id 供原文操作（R7-A）。 */
+    async captureQuick(text: string, target: "daily" | "inbox"): Promise<{ ok: boolean; message: string; blockId?: string; docId?: string }> {
+        const clean = text.trim();
+        if (!clean) return { ok: false, message: "捕获内容为空" };
+        const disc = await this.discoverConfig();
+        if (target === "inbox" && !disc.inboxDocId) {
+            return { ok: false, message: "未发现收集箱（建一个名为「收集箱」的顶层文档，或在捕获设置里手填 id）——已取消" };
+        }
+        if (target === "daily" && !disc.diaryNotebookId) {
+            return { ok: false, message: "未发现日记笔记本（请确认某笔记本配置了日记保存路径）——已取消" };
+        }
+        const hhmm = new Date().toTimeString().slice(0, 5);
+        let res: unknown;
+        if (target === "inbox") {
+            res = await this.kernelApi.post("/api/block/appendBlock", {
+                dataType: "markdown",
+                data: clean,
+                parentID: disc.inboxDocId,
             });
-            const render = () => {
-                const rows = view().map((a) => {
-                    const idx = this.auditLog.indexOf(a);
-                    return `<div style="margin-bottom:2px">${esc(`${a.time} ${a.plugin}/${a.command} → ${a.status} (${a.elapsedMs}ms)`)} ` +
-                        `<button class="b3-button b3-button--small" data-qg-copy="${idx}">复制</button></div>`;
-                }).join("") || "（无匹配）";
-                return `<div style="display:flex;gap:6px;margin-bottom:6px">` +
-                    `<input id="qg-audit-filter" class="b3-text-field" style="flex:1" placeholder="筛选：op / 状态 / 插件" value="${esc(state.kw)}" />` +
-                    `<input id="qg-audit-date" type="date" class="b3-text-field" style="width:150px" value="${state.date}" title="按日期筛选" />` +
-                    `</div><div style="white-space:pre-wrap;font-size:12px">${rows}</div>`;
-            };
-            const rerender = () => {
-                const body = d.element.querySelector("#qg-audit-body");
-                if (body) body.innerHTML = render();
-                const again = d.element.querySelector("#qg-audit-filter") as HTMLInputElement | null;
-                if (again && document.activeElement === again || document.activeElement?.id === "qg-audit-date") {
-                    const focusBack = d.element.querySelector(`#${document.activeElement?.id}`) as HTMLInputElement | null;
-                    focusBack?.focus();
-                }
-            };
-            const d = new Dialog({ title: "审计日志", content: `<div style="padding:12px"><div id="qg-audit-body">${render()}</div></div>`, width: "640px" });
-            d.element.addEventListener("input", (ev) => {
-                const target = ev.target as HTMLInputElement;
-                if (target.id === "qg-audit-filter") state.kw = target.value.trim().toLowerCase();
-                else if (target.id === "qg-audit-date") state.date = target.value;
-                else return;
-                rerender();
-                const again = d.element.querySelector(`#${target.id}`) as HTMLInputElement | null;
-                if (again && target.id === "qg-audit-filter") { again.focus(); again.setSelectionRange(again.value.length, again.value.length); }
+        } else {
+            res = await this.kernelApi.post("/api/block/appendDailyNoteBlock", {
+                notebook: disc.diaryNotebookId,
+                dataType: "markdown",
+                data: `- ${hhmm} ${clean}`,
             });
-            d.element.addEventListener("click", (ev) => {
-                const btn = (ev.target as HTMLElement).closest("[data-qg-copy]") as HTMLElement | null;
-                if (!btn) return;
-                const entry = this.auditLog[Number(btn.dataset.qgCopy)];
-                if (!entry) return;
-                void navigator.clipboard.writeText(JSON.stringify(entry, null, 2)).then(() => showMessage("已复制单条审计（JSON，脱敏字段本就不含参数值）", 2500, "info"));
-            });
+        }
+        // 返回形状（真机实证 R298/R299）：data[0].doOperations[*].id = 新块 id
+        let blockId: string | undefined;
+        try {
+            const ops = (res as Array<{ doOperations?: Array<{ id?: string }> }>)?.[0]?.doOperations;
+            blockId = ops?.[ops.length - 1]?.id;
+        } catch { /* 形状异常不阻断成功路径 */ }
+        const daily = target === "daily" ? await this.readDailyStatus() : null;
+        const where = target === "inbox" ? "收集箱" : "今日日记";
+        return {
+            ok: true,
+            message: `已记到${where}（${target === "daily" ? hhmm : new Date().toTimeString().slice(0, 5)}）：${clean.slice(0, 40)}${clean.length > 40 ? "…" : ""}`,
+            blockId,
+            docId: target === "daily" ? daily?.docId ?? undefined : disc.inboxDocId ?? undefined,
         };
-        row(secQueue, "审计日志（筛选+复制）", auditBtn, "按 op / 状态 / 插件关键词与日期过滤最近 20 条；单条可复制 JSON");
+    }
 
-        // —— 收藏与最近使用管理（L472 消费面 · R250）——
-        const favBtn = document.createElement("button");
-        favBtn.className = "b3-button b3-button--outline";
-        favBtn.textContent = "收藏与最近使用管理";
-        favBtn.onclick = () => {
-            const favPath = `/storage/petal/${PLUGIN_NAME}/favorites.json`;
-            const esc = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-            const load = async () => {
-                try {
-                    const raw = await this.kernelApi.getFileText(favPath);
-                    return normalizeFavorites(raw ? JSON.parse(raw) : null);
-                } catch { return normalizeFavorites(null); }
-            };
-            const save = async (s: FavoritesStore) => {
-                await this.kernelApi.putFileText(favPath, JSON.stringify({ schemaVersion: 1, favorites: s.favorites, recent: s.recent }, null, 2));
-            };
-            const render = (s: FavoritesStore) => {
-                const favRows = s.favorites.map((f, i) =>
-                    `<div style="margin-bottom:2px">★ ${esc(`${f.plugin}/${f.command}`)}（${esc(f.title)}） <button class="b3-button b3-button--small" data-qg-fav-del="${i}">移除</button></div>`).join("")
-                    || '<div style="color:var(--b3-theme-on-surface)">暂无收藏——面板/CLI 经 favorites.add 添加</div>';
-                const recRows = s.recent.map((r, i) =>
-                    `<div style="margin-bottom:2px">${esc(r.at.slice(0, 16).replace("T", " "))} ${esc(`${r.plugin}/${r.command}`)} <button class="b3-button b3-button--small" data-qg-rec-del="${i}">移除</button></div>`).join("")
-                    || '<div style="color:var(--b3-theme-on-surface)">暂无最近使用</div>';
-                return `<div style="margin-bottom:6px"><b>收藏（${s.favorites.length}）</b></div>${favRows}` +
-                    `<div style="margin:8px 0 6px"><b>最近使用（${s.recent.length}）</b></div>${recRows}` +
-                    `<div style="margin-top:8px"><button class="b3-button b3-button--small" data-qg-rec-clear ${s.recent.length === 0 ? "disabled" : ""}>清空全部最近使用</button></div>`;
-            };
-            const d = new Dialog({ title: "收藏与最近使用", content: `<div style="padding:12px;font-size:12px"><div id="qg-fav-body">${render(normalizeFavorites(null))}</div></div>`, width: "640px" });
-            const refresh = async () => {
-                const body = d.element.querySelector("#qg-fav-body");
-                if (body) body.innerHTML = render(await load());
-            };
-            void refresh();
-            d.element.addEventListener("click", async (ev) => {
-                const t = ev.target as HTMLElement;
-                const delFav = t.closest("[data-qg-fav-del]") as HTMLElement | null;
-                const delRec = t.closest("[data-qg-rec-del]") as HTMLElement | null;
-                const clr = t.closest("[data-qg-rec-clear]") as HTMLElement | null;
-                if (!delFav && !delRec && !clr) return;
-                const s = await load();
-                if (delFav) s.favorites.splice(Number(delFav.dataset.qgFavDel), 1);
-                else if (delRec) s.recent.splice(Number(delRec.dataset.qgRecDel), 1);
-                else if (clr) s.recent = [];
-                await save(s);
-                await refresh();
-            });
-        };
-        row(secQueue, "收藏与最近使用", favBtn, "管理 favorites.json：移除收藏/单条最近/一键清空最近（命令面板动态组的数据源，L472）");
-
-        const auditExportBtn = document.createElement("button");
-        auditExportBtn.className = "b3-button b3-button--outline";
-        auditExportBtn.textContent = "导出审计 JSON";
-        auditExportBtn.onclick = async () => {
-            try {
-                const payload = JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), entries: this.auditLog }, null, 2);
-                await navigator.clipboard.writeText(payload);
-                showMessage(`已复制 ${this.auditLog.length} 条审计到剪贴板`, 4000, "info");
-            } catch (e) {
-                showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-            }
-        };
-        row(secQueue, "审计导出（完整 auditLog → 剪贴板）", auditExportBtn);
-
-        const receiptBtn = document.createElement("button");
-        receiptBtn.className = "b3-button b3-button--outline";
-        receiptBtn.textContent = "最近回执（20 条）";
-        receiptBtn.onclick = async () => {
-            try {
-                const text = (await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/results.ndjson`)) ?? "";
-                const lines = text.trim() ? text.trim().split("\n").slice(-20) : [];
-                const view = lines.map((l) => {
-                    try { const r = JSON.parse(l); return `${r.finishedAt} ${r.id} ${r.op} → ${r.status} (${r.elapsedMs}ms)`; }
-                    catch { return l.slice(0, 120); }
-                }).join("\n") || "（暂无回执）";
-                new Dialog({ title: "最近回执", content: `<div class="b3-typography" style="padding:12px;white-space:pre-wrap;font-size:12px">${view.replace(/</g, "&lt;")}</div>`, width: "680px" });
-            } catch (e) {
-                showMessage(`读取回执失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-            }
-        };
-        row(secQueue, "最近回执", receiptBtn);
-
-        // —— 诊断与生态（折叠）——
-        const secDiag = section("诊断与生态", false);
-
-        const diagBtn = document.createElement("button");
-        diagBtn.className = "b3-button b3-button--outline";
-        diagBtn.textContent = "导出诊断包（到剪贴板）";
-        diagBtn.onclick = async () => {
-            try {
-                // 统计须取自当前活动服务实例：临时 new 的服务计数全零，诊断包会失真（桥关时才回落新实例）
+    /** 命令面板（G3-01 MVP）：与桥共用 runCommand 语义（确认门控/审计一致） */
+    openCommandPalette(): void {
+        void openCommandPalette({
+            settings: this.settings,
+            pluginName: PLUGIN_NAME,
+            kernelApi: this.kernelApi,
+            ui: { Dialog, showMessage },
+            registry: () => probeCommandRegistry(),
+            confirm: (t) => this.confirmWithFront(t),
+            audit: (e) => this.pushAudit(e),
+            openSettingPanel: () => this.openSettingPanel(),
+            copyDiagnostics: async () => {
+                const { memDiagnostics } = await import("./settings-panel");
                 const service = this.activeService ?? new BridgeService(this.deps());
                 const mem = memDiagnostics(this.settings, this.auditLog, service);
                 await navigator.clipboard.writeText(JSON.stringify(mem, null, 2));
                 showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
-            } catch (e) {
-                showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-            }
-        };
-        row(secDiag, "诊断", diagBtn, "脱敏：不含 Token / 正文 / 个人路径");
-
-        const ecoBtn = document.createElement("button");
-        ecoBtn.className = "b3-button b3-button--outline";
-        ecoBtn.textContent = "生态清单版本";
-        ecoBtn.onclick = async () => {
-            try {
-                const manifest = manifestJson as EcosystemManifest;
-                let installed: Array<Record<string, unknown>> = [];
-                try {
-                    installed = await this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() });
-                } catch { /* 内核不可达 → 只展示 manifest 口径 */ }
-                const instMap = new Map(installed.map((p) => [String(p.name), p]));
-                const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-                // L471 能力目录视图：状态 / 版本对照 / 缺失原因 / 入口，逐插件卡片
-                const cards = manifest.plugins.map((m) => {
-                    const inst = instMap.get(m.pluginId) as { version?: unknown; enabled?: unknown } | undefined;
-                    const iv = typeof inst?.version === "string" ? inst.version : null;
-                    const enabled = inst ? inst.enabled !== false : false;
-                    const stale = iv !== null && m.version !== null && iv !== m.version;
-                    let status: string;
-                    let reason = "";
-                    if (iv === null) {
-                        status = `<span style="color:var(--b3-theme-on-surface)">● 未安装</span>`;
-                        reason = m.maturity === "stable" ? "缺失原因：未安装（集市暂缓，<a class=\"b3-link\" target=\"_blank\" href=\"https://github.com/ai68298100/siyuan-quickgate/releases\">GitHub Releases</a> 获取上游；或用本页诊断核对环境）" : "";
-                    } else if (stale) {
-                        status = `<span style="color:var(--b3-theme-warning, #d97706)">● 版本漂移</span>`;
-                        reason = `缺失原因：实装 ${iv} ≠ 清单基准 ${m.version}（能力面可能变化，可校准清单）`;
-                    } else if (!enabled) {
-                        status = `<span style="color:var(--b3-theme-warning, #d97706)">● 已停用</span>`;
-                        reason = "缺失原因：插件在思源插件列表中已停用";
-                    } else {
-                        status = `<span style="color:var(--b3-theme-primary)">● 已安装启用</span>`;
-                    }
-                    const maturityBadge = m.maturity === "stable" ? "stable" : m.maturity === "design" ? "design（无公开契约，不接入）" : "unlocated";
-                    const caps = m.capabilities.length > 0 ? `能力 ${m.capabilities.length} 项（读写属性经 adapter 能力协商）` : "能力 0 项";
-                    return `<div class="b3-card" style="padding:8px 12px;margin-bottom:6px">` +
-                        `<div><b>${esc(m.displayName)}</b> <span style="color:var(--b3-theme-on-surface);font-size:11px">${m.pluginId} · ${maturityBadge}</span></div>` +
-                        `<div>状态：${status} · 清单 ${m.version ?? "-"} / 实装 ${iv ?? "-"}</div>` +
-                        `<div style="color:var(--b3-theme-on-surface)">${esc(m.protocol ?? "协议未定义")} · ${caps}</div>` +
-                        `<div style="color:var(--b3-theme-on-surface)">${esc(m.hubIntegration)}${reason ? " · " + reason : ""}</div>` +
-                        `</div>`;
-                }).join("");
-                new Dialog({
-                    title: `生态能力目录（清单 v${manifest.version} · 校准 ${manifest.updatedAt ?? "未知"}）`,
-                    content: `<div style="padding:12px;font-size:12px">${cards}<div style="margin-top:6px;color:var(--b3-theme-on-surface)">诊断入口：本页「导出诊断包」/ 仓库 tools（verify:bg）</div></div>`,
-                    width: "620px",
-                });
-            } catch (e) {
-                showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-            }
-        };
-        row(secDiag, "生态", ecoBtn, "能力目录视图：状态/版本对照/缺失原因/入口（L471）");
-
-        // —— 关于（常显 + 帮助链接，超出原型「帮助入口」要求）——
-        const about = document.createElement("div");
-        about.className = "b3-label";
-        about.style.fontSize = "12px";
-        about.textContent = `小驴快门 v${PLUGIN_VERSION} · 协议 v1 · 小驴生态联动中枢 + 外部网关。`
-            + `数据流向与隐私边界见 PRIVACY.md（本插件不外传任何数据）。`;
-        root.appendChild(about);
-        // L503：全局恢复默认（保留 deviceName——device 路由身份属自动管理字段，重置不应改变本机身份）
-        const resetBtn = document.createElement("button");
-        resetBtn.className = "b3-button b3-button--outline";
-        resetBtn.textContent = "恢复默认设置";
-        resetBtn.onclick = () => {
-            confirm(
-                "小驴快门 · 恢复默认设置",
-                "将恢复全部设置为出厂默认：桥/广播关闭、轮询 500ms、黑名单与允许名单还原、确认门控开启；桥若在运行会停止。设备名保留（本机身份不变）。当前自定义值不可找回。",
-                async () => {
-                    const deviceName = this.settings.deviceName;
-                    this.settings = { ...DEFAULT_SETTINGS, deviceName };
-                    this.store.settings = this.settings;
-                    await this.store.saveSettings();
-                    this.stopBridge();
-                    this.stopEventBridge();
-                    if (this.broadcastSub?.running) await this.broadcastSub.stop();
-                    dialog.destroy();
-                    this.openSettingPanel(); // 重开面板反映默认值
-                    showMessage("已恢复默认设置（设备名保留）", 3000);
-                },
-                () => { },
-            );
-        };
-        const resetRow = document.createElement("div");
-        resetRow.style.marginTop = "4px";
-        resetRow.appendChild(resetBtn);
-        root.appendChild(resetRow);
-        const help = document.createElement("div");
-        help.style.fontSize = "12px";
-        help.style.marginTop = "4px";
-        help.innerHTML = "帮助：" +
-            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/GETTING-STARTED.md">上手指南</a> · ` +
-            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/FAQ.md">故障排查 FAQ</a> · ` +
-            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/PRIVACY.md">隐私说明</a> · ` +
-            `<a class="b3-link" target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>`;
-        root.appendChild(help);
-
-        // 键盘可达：打开后焦点落首控件（原型「焦点落首控件」）
-        enabledInput.focus();
+            },
+            captureQuick: (text, target) => this.captureQuick(text, target),
+            openCommandPalette: () => this.openCommandPalette(),
+            lastCaptureTarget: () => this.settings.captureTarget,
+            rememberCaptureTarget: (target) => {
+                this.settings.captureTarget = target;
+                this.store.settings = this.settings;
+                void this.store.saveSettings().catch(() => {});
+            },
+            openDoc: async (id) => { await this.openDocById(id); },
+            bridgeAlive: () => Boolean(this.activeService),
+            dispatchOp: async (op, args) => {
+                if (!this.activeService) return { status: "failed", message: "桥未运行——请先在 连接与通道 开启外部命令桥", data: null };
+                const command: BridgeCommand = {
+                    v: 1,
+                    id: `ui-${Date.now()}-${Math.floor(Math.random() * 65536).toString(16)}`,
+                    op, args,
+                    createdAt: new Date().toISOString(),
+                };
+                const r = await this.activeService.executeAndRecord(command);
+                return {
+                    status: r.receipt?.status ?? (r.executed ? "recorded" : "skipped"),
+                    message: r.receipt?.message ?? "",
+                    data: r.receipt?.data ?? null,
+                };
+            },
+        });
     }
 }

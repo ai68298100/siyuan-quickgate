@@ -25,6 +25,14 @@
 
 > **集市状态：暂缓上架**。当前唯一分发渠道是 GitHub Release（见下方安装）。
 
+## 插件内 UI（思源侧）
+
+观感对齐 [design/ui-prototype/mvp1.html](./design/ui-prototype/mvp1.html)（全部 `--b3-*` 令牌、亮暗随宿主主题，不硬编码颜色）：
+
+- **分层设置面板**：状态概览（健康首页：通道卡片 / 运行 KPI / 下一步 / 最近回执）· 首跑向导（环境检查→开桥→连通自检，全部真状态）· 连接与通道 · 安全与权限 · 队列与数据（含**全量备份/恢复**与清空队列预览）· 诊断与生态 · 关于；顶部搜索条**跨分组过滤**设置项。
+- **命令面板**（`Ctrl+Alt+P`）：搜索宿主命令（中英/拼音别名，收藏★/最近自动置顶）；「能力动作」二段式（先填参数后执行）；空结果兜底 = 一句话**快速捕获**到今日日记 / 收集箱。
+- **通知中心 / 恢复中心 / 回执中心**：待关注事态聚合（一键跳转处理面）· unknown/失败/过期回执的人工处置（换新 id 重试 / 放弃并记录 / 批量）· `results.ndjson` 查询（状态/时间筛选、关键词、分页、导出 CSV/JSON）。
+
 ## 手动安装
 
 1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；SHA-256 清单随 Release 提供）。
@@ -82,6 +90,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | v0.7.0~0.7.3 | MCP stdio 服务器（AI 助手）+ 内核路由 3.8.6 真机打通（bug#9）+ 验收入口收敛 → 池清账八处正确性修复 + 版本/发布双门禁 + bug#11/12/13 |
 | **v0.7.4** | **template.new 路径穿越安全修复**（三通道守卫）+ 收藏/最近使用全链 + **思源内置 Agent 原生三能力**（零配置）+ 并发正确性（幂等注册表/桥消费权认领/多写者竞态缓解）+ 契约 23→26 op + manifest v2（真机校准） |
 | **v0.7.5** | 发布链补强：package.zip 解包断言（bug#9 回归门）+ Agent 集成指南 + 重启工具 + bug#17 登记（lifecycle 钩子噪音，功能零影响） |
+| **v0.7.5+（当前工作区）** | 插件内 UI 成型：分层设置 + 首跑向导 + 健康首页 · 命令面板 / 通知 / 恢复 / 回执四中心 · 全量备份 · UI 对齐原型打磨（border-box 修正 KPI 爆版 / 回执时间本地化 / 暗色对比度 / 面板组件补样式） |
 
 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)，路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 
@@ -90,7 +99,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # 验收门：单测(162) + MCP 协议冒烟(7)
+corepack pnpm accept  # 验收门：单测(218) + MCP 协议冒烟(7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # 软链进工作空间联调
 ```

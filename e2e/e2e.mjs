@@ -1,20 +1,26 @@
 #!/usr/bin/env node
 /**
  * 快门 E2E 验收（对照项目设计文档 02 §8 十条 / 06 §10 六条的自动化子集）。
- * 需要思源运行且快门桥已开启；内核不可达或桥无响应时提示并退出码 2（不误报失败）。
+ * 【写型脚本】会写快门桥载体（commands/results，petal 存储）——按 R287 约定：
+ * 目标必须是隔离靶场（node scripts/smoke-range.mjs start），打在用工作区会被
+ * guardScratch 拒跑（SIYUAN_E2E_ALLOW_SHARED=1 显式豁免）；隔离靶场启动时自动
+ * 清残留临时库并重置桥载体。需要思源运行且快门桥已开启（靶场可加前端载体）；
+ * 内核不可达或桥无响应时提示并退出码 2（不误报失败）。
  * 桥存活预检（3s）：不通过则跳过 U1~U10（它们都经桥），只跑 U11 内核路由探针。
  *
- *   SIYUAN_URL=http://127.0.0.1:6806 SIYUAN_TOKEN=xxx node e2e/e2e.mjs
+ *   node e2e/e2e.mjs [<base-url> <token>]      # argv 优先
+ *   SIYUAN_BASE_URL=http://127.0.0.1:6807 SIYUAN_TOKEN=xxx node e2e/e2e.mjs
  */
-const url = (process.env.SIYUAN_URL || "http://127.0.0.1:6806").replace(/\/$/, "");
-const token = process.env.SIYUAN_TOKEN || "";
+import { resolveTarget, makeApi, sweepOrphans, guardScratch, resetBridgeQueue } from "../scripts/lib/smoke-kernel.mjs";
+
+const { base: url, token } = resolveTarget({ baseArg: process.argv[2], tokenArg: process.argv[3] });
 const PLUGIN = "siyuan-quickgate";
 const results = [];
 
 async function kernelPost(endpoint, payload) {
     const res = await fetch(`${url}${endpoint}`, {
         method: "POST",
-        headers: { Authorization: `Token ${token}` },
+        headers: { Authorization: `Token ${token}`, Connection: "close" },
         body: JSON.stringify(payload),
     });
     if (endpoint === "/api/file/getFile") {
@@ -69,10 +75,17 @@ async function main() {
     try {
         await kernelPost("/api/system/version", {});
     } catch {
-        console.log("思源内核不可达（请启动思源、核对 SIYUAN_URL/Token，并在快门设置开启外部命令桥）。E2E 未执行。");
+        console.log(`思源内核不可达（${url}；请启动思源/靶场、核对 token，并在快门设置开启外部命令桥）。E2E 未执行。`);
         process.exit(2);
     }
     console.log("== 快门 E2E（自动化子集）==\n");
+
+    // R287 防呆：清残留（只动快门冒烟前缀）→ 共享内核拒跑 → 靶场重置桥载体取干净基线
+    const api = makeApi(url, token);
+    await sweepOrphans(api);
+    const isolated = await guardScratch(api, { base: url });
+    if (isolated) await resetBridgeQueue(url, token, PLUGIN);
+    else console.log("  (共享内核豁免模式：不清桥载体，测试命令会混入现有队列)\n");
 
     // 桥存活预检（3s）：U1~U10 全部经桥，桥不活就别逐项 8s 超时慢慢死
     const preId = genId();
