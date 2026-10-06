@@ -6,6 +6,7 @@ import { KernelApi } from "./services/kernelApi";
 import { BridgeStore } from "./services/store";
 import { countRecoveryItems } from "./recovery-center";
 import { fmtReceiptTime } from "./results-center";
+import { installFocusTrap } from "./services/focus-trap";
 import { buildNotifications, NotificationItem } from "./notification-center";
 import type { QuickGateSettings } from "./types/bridge";
 
@@ -59,6 +60,7 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
     );
     dialog.element.querySelector(".b3-dialog__container")?.setAttribute("style", "width:min(640px, 92vw)");
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;
+    installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
     dialog.element.querySelector('[data-role="refresh"]')?.addEventListener("click", () => void refresh());
     // 键盘导航（R315/R330）：容器 tabindex=-1 并在打开后聚焦——否则焦点留在外部触发按钮，
     // ↑↓/Enter 根本收不进本对话框（靶场实测踩坑）

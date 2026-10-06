@@ -14,6 +14,7 @@ import { Dialog, showMessage, confirm, getFrontend } from "siyuan";
 import { KernelApi } from "./services/kernelApi";
 import { BridgeStore } from "./services/store";
 import { PROCESSED_CAP } from "./services/store";
+import { installFocusTrap } from "./services/focus-trap";
 import { BridgeService, EcosystemManifest } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
 import { BroadcastSubscriber } from "./services/broadcast";
@@ -158,6 +159,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
     });
     const root = dialog.element.querySelector("#qg-settings") as HTMLElement;
+    installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
     const nav = root.querySelector(".qg-nav") as HTMLElement;
     const fallback = root.querySelector(".qg-nav-fallback") as HTMLSelectElement;
     const content = root.querySelector(".qg-content") as HTMLElement;

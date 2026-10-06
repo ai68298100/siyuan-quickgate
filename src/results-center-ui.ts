@@ -4,6 +4,7 @@
  */
 import { KernelApi } from "./services/kernelApi";
 import type { QuickGateSettings } from "./types/bridge";
+import { installFocusTrap } from "./services/focus-trap";
 import { collectStatuses, filterReceipts, fmtElapsedMs, fmtReceiptTime, pageNewestFirst, parseReceiptLines, ReceiptRow } from "./results-center";
 
 export interface ResultsCenterHost {
@@ -47,6 +48,7 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
         `</div></div>`,
     );
     const root = dialog.element.querySelector("#qg-results") as HTMLElement;
+    installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
     const statusSel = root.querySelector("[data-role=status]") as HTMLSelectElement;
     const qInput = root.querySelector("[data-role=q]") as HTMLInputElement;
     const listEl = root.querySelector("[data-role=list]") as HTMLElement;

@@ -8,6 +8,7 @@
 import { expandSearchKeyword } from "./services/search-alias";
 import { normalizeFavorites } from "./services/favorites";
 import { runCommand, RegistryProbeResult } from "./services/registry";
+import { installFocusTrap } from "./services/focus-trap";
 import { getArgsSpec } from "./mcp/tools";
 import type { Dialog, showMessage } from "siyuan";
 import type { KernelApi } from "./services/kernelApi";
@@ -176,6 +177,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
     });
     const root = dialog.element.querySelector("#qg-palette") as HTMLElement;
+    installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
     const input = root.querySelector("[data-role=q]") as HTMLInputElement;
     const list = root.querySelector("[data-role=list]") as HTMLElement;
     let entries: PaletteEntry[] = [];
@@ -466,10 +468,30 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                         (host.lastCaptureTarget() === "inbox"
                             ? `<button class="b3-button b3-button--primary" data-target="inbox">收集箱（上次）</button><button class="b3-button" data-target="daily">今日日记</button>`
                             : `<button class="b3-button b3-button--primary" data-target="daily">今日日记（上次）</button><button class="b3-button" data-target="inbox">收集箱</button>`) +
-                        `</div><div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:10px">今日日记 = 追加 <span class="qg-mono">- HH:mm 内容</span>；收集箱 = 纯文本段落。</div></div>`,
+                        `</div>` +
+                        // L567 部分：写入前格式预览——用户看到的确切落盘内容（与 captureQuick 的拼装一致）
+                        `<div style="margin-top:12px;font-size:11px;color:var(--b3-theme-on-surface)">写入内容预览（随选择变化）：</div>` +
+                        `<pre data-role="capture-preview" style="margin:4px 0 8px;padding:8px 10px;border:1px solid var(--b3-border-color);border-radius:6px;background:var(--b3-theme-surface);font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-all;font-family:var(--b3-font-family-code, ui-monospace, Consolas, monospace)"></pre>` +
+                        `<div style="font-size:11px;color:var(--b3-theme-on-surface)">今日日记 = 追加 <span class="qg-mono">- HH:mm 内容</span>；收集箱 = 纯文本段落。</div></div>`,
                     width: "min(420px, 92vw)",
                     height: "auto",
                 });
+                // 预览随悬停/聚焦的目标按钮联动（默认高亮上次去向）
+                {
+                    const previewEl = ask.element.querySelector("[data-role=capture-preview]") as HTMLElement;
+                    const renderPreview = (target: "daily" | "inbox") => {
+                        const hhmm = new Date().toTimeString().slice(0, 5);
+                        const line = target === "daily" ? `- ${hhmm} ${text}` : text;
+                        previewEl.textContent = line.length > 200 ? `${line.slice(0, 200)}…（共 ${text.length} 字）` : line;
+                    };
+                    const defaultTarget = host.lastCaptureTarget() === "inbox" ? "inbox" : "daily";
+                    renderPreview(defaultTarget);
+                    ask.element.querySelectorAll<HTMLElement>("[data-target]").forEach((b) => {
+                        const on = () => renderPreview(b.dataset.target as "daily" | "inbox");
+                        b.addEventListener("mouseenter", on);
+                        b.addEventListener("focus", on);
+                    });
+                }
             ask.element.addEventListener("click", (ev) => {
                 const b = (ev.target as HTMLElement).closest("[data-target]") as HTMLElement | null;
                 if (!b) return;

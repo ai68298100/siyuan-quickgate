@@ -9,6 +9,7 @@ import { Dialog, showMessage } from "siyuan";
 import { KernelApi } from "./services/kernelApi";
 import { BridgeStore } from "./services/store";
 import { fmtReceiptTime } from "./results-center";
+import { installFocusTrap } from "./services/focus-trap";
 import { buildRecoveryItems, buildRetryEnvelope, RecoveryItem } from "./recovery";
 import type { QuickGateSettings } from "./types/bridge";
 
@@ -48,6 +49,7 @@ export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
         destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
     });
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;
+    installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
     dialog.element.querySelector('[data-role="refresh"]')?.addEventListener("click", () => void refresh());
     // 打开后聚焦刷新按钮（键盘入口点；纯浏览用户不受影响）
     (dialog.element.querySelector('[data-role="refresh"]') as HTMLButtonElement | null)?.focus({ preventScroll: true });
