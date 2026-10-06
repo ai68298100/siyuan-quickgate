@@ -203,6 +203,47 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         URL.revokeObjectURL(a.href);
     };
 
+    /** 诊断包 JSON 组装（诊断页按钮与桥恢复向导共用；统计取自活动服务实例避免全零失真） */
+    const buildDiagJson = async (): Promise<string> => {
+        const service = host.activeService ?? new BridgeService(host.deps() as never);
+        return JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics), null, 2);
+    };
+
+    /** 清空命令队列（带预览确认；队列页危险区与桥恢复向导共用） */
+    const clearQueueWithPreview = async (onDone?: () => void): Promise<void> => {
+        try {
+            const base = host.settings.bridgeBasePath;
+            const text = (await host.kernelApi.getFileText(`${base}/commands.ndjson`)) ?? "";
+            const ls = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
+            let oldest = "";
+            for (const l of ls) {
+                try { const c = JSON.parse(l); if (typeof c.createdAt === "string" && (!oldest || c.createdAt < oldest)) oldest = c.createdAt; } catch { }
+            }
+            const preview = ls.length === 0
+                ? "队列当前为空。仍将清空回执文件并重置处理台账。"
+                : `将丢弃 ${ls.length} 条未消费命令${oldest ? `（最早提交 ${fmtLocalStamp(oldest)}）` : ""}，并清空回执文件与处理台账。`;
+            confirm(
+                "小驴快门 · 清空队列",
+                preview + " 此操作不可撤销。",
+                async () => {
+                    try {
+                        await host.kernelApi.putFileText(`${base}/commands.ndjson`, "");
+                        await host.kernelApi.putFileText(`${base}/results.ndjson`, "");
+                        host.store.processed = { schemaVersion: 2, processed: {} };
+                        await host.store.saveProcessed();
+                        showMessage("命令队列已清空", 3000);
+                        onDone?.();
+                    } catch (e) {
+                        showMessage(`清空失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+                    }
+                },
+                () => { },
+            );
+        } catch (e) {
+            showMessage(`预览失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
+        }
+    };
+
     // —— 通用行构造（原型 .qg-row：图标 + 标题/说明 + 控件；clickable 时点行即切控件；wide 时控件通栏） ——
     const row = (parent: HTMLElement, opts: { icon: string; label: string; chip?: string; hint?: string; ctrl: HTMLElement; onRowClick?: () => void; wide?: boolean }) => {
         const div = document.createElement("div");
@@ -617,12 +658,16 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         claimCard.className = "qg-card";
         claimCard.style.cssText = "display:flex;gap:8px;align-items:center;padding:10px 14px;flex-wrap:wrap";
         claimCard.innerHTML = `<span style="font-size:12px;color:var(--b3-theme-on-surface)">桥消费权：${host.poller?.isRunning ? "本窗口持有（Web Lock 认领）" : "未由本窗口持有"}</span>`;
+        const recoveryLink = document.createElement("button");
+        recoveryLink.className = "b3-button b3-button--small";
+        recoveryLink.textContent = "桥出问题了？运行恢复向导";
+        recoveryLink.onclick = () => showBridgeRecoveryWizard();
         const pingBtn = document.createElement("button");
         pingBtn.className = "b3-button b3-button--outline";
         pingBtn.textContent = "桥自检";
         pingBtn.style.marginLeft = "auto";
         pingBtn.onclick = () => withPending(pingBtn, "自检中…", () => host.selfPing());
-        claimCard.appendChild(pingBtn);
+        claimCard.append(recoveryLink, pingBtn);
         content.appendChild(claimCard);
     };
 
@@ -823,7 +868,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             }
         })();
 
-        // 危险区：清空队列（保留预览纪律）
+        // 危险区：清空队列（保留预览纪律；动作复用共享 clearQueueWithPreview）
         const danger = document.createElement("div");
         danger.className = "qg-card danger";
         danger.innerHTML = `<div style="font-size:12px;color:var(--b3-theme-on-surface)"><b style="color:var(--b3-theme-error)">危险区</b>　清空前将预览：将丢弃条数、最老命令时间，并清空回执与处理台账（不可撤销）。</div>`;
@@ -831,34 +876,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         clearBtn.className = "b3-button qg-btn-danger";
         clearBtn.style.marginLeft = "auto"; // 危险区 flex：按钮靠右（原型 .sp 布局）
         clearBtn.textContent = "清空命令队列";
-        clearBtn.onclick = async () => {
-            try {
-                const base = host.settings.bridgeBasePath;
-                const text = (await host.kernelApi.getFileText(`${base}/commands.ndjson`)) ?? "";
-                const ls = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
-                let oldest = "";
-                for (const l of ls) {
-                    try { const c = JSON.parse(l); if (typeof c.createdAt === "string" && (!oldest || c.createdAt < oldest)) oldest = c.createdAt; } catch { }
-                }
-                const preview = ls.length === 0
-                    ? "队列当前为空。仍将清空回执文件并重置处理台账。"
-                    : `将丢弃 ${ls.length} 条未消费命令${oldest ? `（最早提交 ${fmtLocalStamp(oldest)}）` : ""}，并清空回执文件与处理台账。`;
-                confirm("小驴快门 · 清空队列", preview + " 此操作不可撤销。", async () => {
-                    try {
-                        await host.kernelApi.putFileText(`${base}/commands.ndjson`, "");
-                        await host.kernelApi.putFileText(`${base}/results.ndjson`, "");
-                        host.store.processed = { schemaVersion: 2, processed: {} };
-                        await host.store.saveProcessed();
-                        showMessage("命令队列已清空", 3000);
-                        show("queue"); // 重渲染本页计数
-                    } catch (e) {
-                        showMessage(`清空失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-                    }
-                }, () => {});
-            } catch (e) {
-                showMessage(`预览失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-            }
-        };
+        clearBtn.onclick = () => void clearQueueWithPreview(() => show("queue"));
         danger.appendChild(clearBtn);
         // ══════════ 全量备份/恢复（R9-A · R322）：四载体+台账拼装单 JSON ══════════
         const backupCard = document.createElement("div");
@@ -950,10 +968,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         diagBtn.textContent = "导出诊断包（到剪贴板）";
         diagBtn.onclick = () => withPending(diagBtn, "组装中…", async () => {
             try {
-                // 统计须取自当前活动服务实例：临时 new 的服务计数全零，诊断包会失真（桥关时才回落新实例）
-                const service = host.activeService ?? new BridgeService(host.deps() as never);
-                const diagJson = JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics), null, 2);
                 // L593 部分：复制前先展示脱敏预览（用户可见将复制的内容），确认后才写入剪贴板
+                const diagJson = await buildDiagJson();
                 const preview = new Dialog({
                     title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>诊断包预览（脱敏）</span></span>`,
                     content: `<div style="padding:12px 14px">` +
@@ -1087,6 +1103,131 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         danger.appendChild(resetBtn);
         content.appendChild(danger);
 
+    };
+
+    // ══════════ 子对话框：桥恢复向导（L571 部分：检测 → 分级呈现 → 复用既有处置动作） ══════════
+    const showBridgeRecoveryWizard = () => {
+        const dlg = new Dialog({
+            title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>桥恢复向导</span></span>`,
+            content: `<div id="qg-bridge-recovery" style="padding:14px 16px;min-width:min(560px, 92vw)">` +
+                `<div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>桥恢复向导</span>` +
+                `<span style="font-size:11px;color:var(--b3-theme-on-surface-light)">桥出问题了？逐项检测、按级处置</span>` +
+                `<span class="sp"></span><button class="b3-button b3-button--small" data-role="refresh">重新检测</button></div>` +
+                `<div data-role="body" role="region" aria-label="检测结果"><div class="qg-skel"><span></span><span></span><span></span></div></div>` +
+                `<div style="margin-top:10px;font-size:11px;color:var(--b3-theme-on-surface)">所有清理类动作均带预览确认；检测只读，不改动任何数据。</div></div>`,
+            width: "min(640px, 92vw)",
+            height: "auto",
+            // 焦点回归（L585 部分）
+            destroyCallback: () => { try { (document.activeElement as HTMLElement)?.blur?.(); } catch { /* 不阻断 */ } },
+        });
+        const body = dlg.element.querySelector("[data-role=body]") as HTMLElement;
+        installFocusTrap(dlg.element);
+        dlg.element.querySelector('[data-role="refresh"]')?.addEventListener("click", () => void refresh());
+
+        type Item = { dot: "ok" | "warn" | "err" | "off"; text: string; action?: { label: string; run: () => void | Promise<void> } };
+
+        const refresh = async () => {
+            body.innerHTML = `<div class="qg-skel"><span></span><span></span><span></span></div>`;
+            const items: Item[] = [];
+            // ① 桥开关
+            if (!host.settings.bridgeEnabled) {
+                items.push({ dot: "warn", text: "外部命令桥：未开启——Quicker / CLI / 手机快捷指令将无法发命令", action: { label: "去开启", run: () => show("connection") } });
+            } else {
+                items.push({ dot: "ok", text: "外部命令桥：已开启" });
+            }
+            // ② 本窗口轮询
+            if (host.poller?.isRunning) {
+                items.push({ dot: "ok", text: `本窗口轮询运行中（间隔 ${host.settings.pollMs}ms）` });
+            } else if (host.settings.bridgeEnabled) {
+                items.push({
+                    dot: "err", text: "桥已开启但本窗口轮询未运行——多为消费权被另一窗口持有或启动失败",
+                    action: {
+                        label: "重启桥", run: async () => {
+                            await host.stopBridge();
+                            const started = await host.startBridge();
+                            showMessage(started ? "桥已重启" : "重启未启动：消费权可能仍被另一窗口持有", 3500, started ? "info" : "error");
+                        },
+                    },
+                });
+            }
+            // ③ 退避
+            const backoff = host.poller && host.poller.consecutiveFailures > 0 ? host.poller.consecutiveFailures : 0;
+            if (backoff > 0) {
+                items.push({
+                    dot: "err", text: `轮询连续失败 ${backoff} 次（指数退避中）——多为内核不可达或存储不可写`,
+                    action: {
+                        label: "导出诊断包", run: async () => {
+                            await navigator.clipboard.writeText(await buildDiagJson());
+                            showMessage("诊断包已复制到剪贴板（脱敏）", 2500);
+                        },
+                    },
+                });
+            }
+            // ④ 命令队列（积压 / 坏行 / 最老）
+            try {
+                const text = (await host.kernelApi.getFileText(`${host.settings.bridgeBasePath}/commands.ndjson`)) ?? "";
+                const lines = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
+                let bad = 0;
+                let oldest = "";
+                for (const l of lines) {
+                    try {
+                        const c = JSON.parse(l) as { createdAt?: string };
+                        if (typeof c.createdAt === "string" && (!oldest || c.createdAt < oldest)) oldest = c.createdAt;
+                    } catch { bad++; }
+                }
+                if (lines.length === 0) items.push({ dot: "ok", text: "命令队列：空（无积压）" });
+                else {
+                    items.push({
+                        dot: bad > 0 ? "err" : "warn",
+                        text: `命令队列积压 ${lines.length} 条${oldest ? `（最早 ${fmtLocalStamp(oldest)}）` : ""}${bad ? `，坏行 ${bad} 条（多为主机断电/磁盘满所致）` : ""}`,
+                        action: { label: "清空队列", run: () => void clearQueueWithPreview(() => void refresh()) },
+                    });
+                }
+            } catch {
+                items.push({
+                    dot: "err", text: "命令队列读取失败——载体不可达",
+                    action: {
+                        label: "导出诊断包", run: async () => {
+                            await navigator.clipboard.writeText(await buildDiagJson());
+                            showMessage("诊断包已复制到剪贴板（脱敏）", 2500);
+                        },
+                    },
+                });
+            }
+            // ⑤ 广播（可选通道）
+            items.push(host.broadcastSub?.running
+                ? { dot: "ok", text: "广播快路径运行中（可选通道）" }
+                : { dot: "off", text: "广播快路径未运行（可选通道，不影响 NDJSON 桥）" });
+            // ⑥ 内核路由
+            items.push(host.kernelRouteProbe === undefined
+                ? { dot: "warn", text: "内核同步路由：探测中" }
+                : host.kernelRouteProbe
+                    ? { dot: "ok", text: "内核同步路由可用（桥关闭时 7 只读 op 仍可用）" }
+                    : { dot: "warn", text: "内核同步路由不可达（不影响 NDJSON 桥；内核升级/重启后自愈）" });
+
+            const hasErr = items.some((i) => i.dot === "err");
+            const hasWarn = items.some((i) => i.dot === "warn");
+            const summary = hasErr
+                ? { cls: "err", text: "✕ 检测到阻塞项——按行内动作逐项处置后「重新检测」" }
+                : hasWarn
+                    ? { cls: "warn", text: "⚠ 可继续，存在需注意项" }
+                    : { cls: "ok", text: "✓ 全部正常，无需恢复动作" };
+            const summaryColor = `color:var(--b3-theme-${summary.cls === "err" ? "error" : summary.cls === "warn" ? "warning, var(--b3-theme-secondary)" : "success"})`;
+            body.innerHTML = `<div style="font-size:12px;font-weight:600;${summaryColor};margin-bottom:6px">${esc(summary.text)}</div>` +
+                items.map((it) => `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 2px;border-bottom:1px solid var(--b3-border-color)">` +
+                    `${dot(it.dot)}<span style="flex:1;min-width:0;font-size:12px;line-height:1.6">${esc(it.text)}</span>` +
+                    (it.action ? `<button class="b3-button b3-button--small" data-role="wiz-action">${esc(it.action.label)}</button>` : "") +
+                    `</div>`).join("");
+            // 接线动作（每行最后一个按钮）
+            const actionButtons = Array.from(body.querySelectorAll<HTMLButtonElement>('[data-role="wiz-action"]'));
+            const actions = items.map((i) => i.action);
+            actionButtons.forEach((btn, i) => {
+                const run = actions[i]?.run;
+                if (!run) return;
+                btn.addEventListener("click", () => void Promise.resolve(run()).then(() => void refresh()));
+            });
+        };
+        void refresh();
     };
 
     // ══════════ 子对话框：审计（筛选/日期/逐条复制/加载更多 · L514+R313） ══════════

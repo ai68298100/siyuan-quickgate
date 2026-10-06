@@ -514,7 +514,10 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                             (r.docId ? `<button class="b3-button" data-cap-doc="${esc(r.docId)}">打开原文</button>` : "") +
                             (r.blockId ? `<button class="b3-button" data-cap-ref="${esc(r.blockId)}">复制块引用</button>` : "") +
                             `<button class="b3-button b3-button--primary" data-cap-again>再记一条</button>` +
-                            `<button class="b3-button" data-cap-close>关闭</button></div></div>`,
+                            (r.blockId ? `<button class="b3-button qg-btn-danger" data-cap-undo="${esc(r.blockId)}">撤销写入</button>` : "") +
+                            `<button class="b3-button" data-cap-close>关闭</button></div>` +
+                            (r.blockId ? `<div style="margin-top:8px;font-size:11px;color:var(--b3-theme-on-surface)">撤销 = 删除刚写入的块（L566：测试写入可撤销）；若你已在思源中编辑过该块，请勿撤销。</div>` : "") +
+                            `</div>`,
                         width: "min(520px, 92vw)",
                         height: "auto",
                     });
@@ -529,6 +532,23 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                         void navigator.clipboard.writeText(`((${id} ''))`).then(() => {
                             host.ui.showMessage("块引用已复制", 2000, "info");
                             done.destroy();
+                        });
+                    });
+                    // L566 部分：撤销写入——删除刚追加的块（内核 deleteBlock；走 PaletteHost.confirm 二次把关）
+                    root2.querySelector("[data-cap-undo]")?.addEventListener("click", () => {
+                        const blockId = (root2.querySelector("[data-cap-undo]") as HTMLElement).dataset.capUndo as string;
+                        const undoBtn = root2.querySelector("[data-cap-undo]") as HTMLButtonElement;
+                        void host.confirm(`撤销本次捕获：将删除刚写入的块 ${blockId}。若你已在思源中编辑过该块，请取消。`).then((ok) => {
+                            if (!ok) return;
+                            undoBtn.disabled = true;
+                            void host.kernelApi.post("/api/block/deleteBlock", { id: blockId }).then((resp) => {
+                                const okDel = (resp as { code?: number })?.code === 0;
+                                undoBtn.textContent = okDel ? "已撤销" : "撤销失败";
+                                host.ui.showMessage(okDel ? "已撤销本次捕获（块已删除）" : `撤销失败：${(resp as { msg?: string })?.msg ?? "内核未确认删除"}`, okDel ? 2500 : 5000, okDel ? "info" : "error");
+                            }).catch((e: unknown) => {
+                                undoBtn.disabled = false;
+                                host.ui.showMessage(`撤销失败：${e instanceof Error ? e.message : String(e)}`, 5000, "error");
+                            });
                         });
                     });
                     root2.querySelector("[data-cap-close]")?.addEventListener("click", () => done.destroy());
