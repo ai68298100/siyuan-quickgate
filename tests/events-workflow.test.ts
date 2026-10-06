@@ -130,4 +130,38 @@ describe("workflow plan/execute", () => {
         });
         expect(r.kind).toBe("expired");
     });
+
+    // L572（docs/36）：取消检查点——每步开始前检查 isCancelled
+    it("execute：中途取消 → 已完成步骤保留不回滚，回执标注 user-cancel", async () => {
+        const plan = makePlan(
+            [{ op: "doc.open", args: { id: "d" } }, { op: "doc.open", args: { id: "d" } }, { op: "doc.open", args: { id: "d" } }],
+            { planId: "wf-cancel", now, whitelistOp: () => true }
+        );
+        if (plan.kind !== "plan") throw new Error("plan expected");
+        let executed = 0;
+        const r = await executePlan(plan.plan, {
+            confirmAll: async () => true,
+            runStep: async () => { executed += 1; return { status: "recorded", data: null, message: "ok" }; },
+            isCancelled: async () => executed >= 2, // 第 3 步开始前命中取消
+            now: () => now,
+        });
+        expect(r.kind).toBe("done");
+        expect(executed).toBe(2); // 第 3 步未执行
+        if (r.kind !== "done") return;
+        expect(r.cancelled?.requestedBy).toBe("user");
+        expect(r.steps.length).toBe(2); // 已完成步骤照常列入回执
+    });
+
+    it("execute：isCancelled 全程 false → 正常完成无取消标注", async () => {
+        const plan = makePlan([{ op: "doc.open", args: { id: "d" } }], { planId: "wf-nocancel", now, whitelistOp: () => true });
+        const r = await executePlan(plan.kind === "plan" ? plan.plan : undefined, {
+            confirmAll: async () => true,
+            runStep: async () => ({ status: "recorded", data: null, message: "ok" }),
+            isCancelled: async () => false,
+            now: () => now,
+        });
+        expect(r.kind).toBe("done");
+        if (r.kind !== "done") return;
+        expect(r.cancelled).toBeUndefined();
+    });
 });

@@ -1,6 +1,6 @@
 # MCP stdio 代理（lv-quickgate）
 
-把小驴快门的 26 个 op 一比一暴露为 MCP tools，供 Claude Desktop / Cursor 等 AI 客户端调用。
+把小驴快门的 27 个 op 一比一暴露为 MCP tools，供 Claude Desktop / Cursor 等 AI 客户端调用。
 零插件改动：代理 ↔ 思源内核 HTTP API（NDJSON 桥文件 + 广播快路径），消费的端点均已真机实证。
 
 ## 运行
@@ -38,7 +38,7 @@ Claude Desktop 配置（`claude_desktop_config.json`）：
 
 ## 工具面
 
-26 op 一比一（tools 集合由测试强制 === src/ops.ts ALL_OPS）：
+27 op 一比一（tools 集合由测试强制 === src/ops.ts ALL_OPS）：
 逐 op 参数 schema 见 tools.ts ARGS 表（required 已穿透；无参 op 为空 properties；本地校验同表驱动）。
 等待策略：普通 op 15s；commands.run / workflow.execute 35s（覆盖确认窗口）。
 回执等待经共享监视器（L555）：并发调用共享单一 results.ndjson 读取循环按 id 分发；

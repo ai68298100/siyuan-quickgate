@@ -1,261 +1,270 @@
 {
- "protocol": 1,
- "name": "siyuan-quickgate",
- "displayName": "小驴快门 / Lv QuickGate",
- "apiVersion": 1,
- "transport": {
-  "kind": "ndjson-files",
-  "basePath": "/storage/petal/siyuan-quickgate/bridge",
-  "commandsFile": "commands.ndjson",
-  "resultsFile": "results.ndjson",
-  "resultsMaxLines": 200,
-  "argsMaxBytes": 32768,
-  "defaultTtlMs": 60000
- },
- "envelope": {
-  "required": [
-   "v",
-   "id",
-   "op"
+  "protocol": 1,
+  "name": "siyuan-quickgate",
+  "displayName": "小驴快门 / Lv QuickGate",
+  "apiVersion": 1,
+  "transport": {
+    "kind": "ndjson-files",
+    "basePath": "/storage/petal/siyuan-quickgate/bridge",
+    "commandsFile": "commands.ndjson",
+    "resultsFile": "results.ndjson",
+    "resultsMaxLines": 200,
+    "argsMaxBytes": 32768,
+    "defaultTtlMs": 60000
+  },
+  "envelope": {
+    "required": [
+      "v",
+      "id",
+      "op"
+    ],
+    "optional": [
+      "args",
+      "createdAt",
+      "ttlMs",
+      "reply",
+      "device"
+    ],
+    "idPattern": "^[A-Za-z0-9_-]{1,64}$"
+  },
+  "receiptStatuses": [
+    "recorded",
+    "duplicate",
+    "rejected",
+    "failed",
+    "unsupported",
+    "expired"
   ],
-  "optional": [
-   "args",
-   "createdAt",
-   "ttlMs",
-   "reply",
-   "device"
-  ],
-  "idPattern": "^[A-Za-z0-9_-]{1,64}$"
- },
- "receiptStatuses": [
-  "recorded",
-  "duplicate",
-  "rejected",
-  "failed",
-  "unsupported",
-  "expired"
- ],
- "ops": [
-  {
-   "op": "bridge.ping",
-   "args": {},
-   "effect": "read"
-  },
-  {
-   "op": "commands.list",
-   "args": {
-    "plugin": "string?"
-   },
-   "effect": "read"
-  },
-  {
-   "op": "commands.search",
-   "args": {
-    "keyword": "string?"
-   },
-   "effect": "read"
-  },
-  {
-   "op": "commands.run",
-   "args": {
-    "plugin": "string",
-    "command": "string"
-   },
-   "effect": "write",
-   "confirm": true,
-   "confirmTimeoutMs": 30000
-  },
-  {
-   "op": "favorites.list",
-   "args": {},
-   "effect": "read"
-  },
-  {
-   "op": "favorites.add",
-   "args": {
-    "plugin": "string",
-    "command": "string",
-    "title": "string?"
-   },
-   "effect": "write"
-  },
-  {
-   "op": "favorites.remove",
-   "args": {
-    "plugin": "string",
-    "command": "string",
-    "scope": "'favorite'(默认)|'recent'|'both'",
-    "clearRecent": "boolean?"
-   },
-   "effect": "write",
-   "note": "scope=recent 即最近使用隐私清除；clearRecent=true 清空全部最近使用（无需 plugin/command）"
-  },
-  {
-   "op": "checkin.items",
-   "args": {
-    "includeArchived": "bool?",
-    "limit": "int?<=200"
-   },
-   "effect": "read",
-   "requires": "siyuan-checkin v5 items.read"
-  },
-  {
-   "op": "checkin.record",
-   "args": {
-    "itemId": "string",
-    "value": "number?",
-    "unit": "string?",
-    "note": "string?",
-    "occurredAt": "string?"
-   },
-   "effect": "write",
-   "requires": "siyuan-checkin v5 events.record",
-   "idempotency": "source=api, externalRef=envelope.id",
-   "since": "0.5.7",
-   "note": "occurredAt 仅批量接口接受：带值时路由 recordEventsBatch 并映射 BatchEntryResult（duplicate→recorded+标记）；source 固定 api（上游白名单无 quickgate，会静默归一）"
-  },
-  {
-   "op": "checkin.summary",
-   "args": {},
-   "effect": "read",
-   "requires": "siyuan-checkin v5 summary.read",
-   "since": "0.5.6",
-   "note": "data={today:SummaryContext(range/startDate/endDate/items/totalEvents/completedItems/scheduledItems), streaks:{itemId:天数}}；由 getSummaryContext(\"day\")+getStreaks 组合（v0.5.6 修正：上游公开面无 getSummary，此前静默返回空数据）"
-  },
-  {
-   "op": "contacts.search",
-   "args": {
-    "keyword": "string?"
-   },
-   "effect": "read",
-   "requires": "siyuan-contacts v1"
-  },
-  {
-   "op": "contacts.ensure",
-   "args": {
-    "name": "string<=64"
-   },
-   "effect": "write",
-   "requires": "siyuan-contacts v1"
-  },
-  {
-   "op": "contacts.interaction",
-   "args": {
-    "names": "string[]?",
-    "docIds": "string[]?",
-    "date": "string?",
-    "place": "string?",
-    "note": "string?"
-   },
-   "effect": "write",
-   "requires": "siyuan-contacts v1",
-   "idempotency": "ref=envelope.id"
-  },
-  {
-   "op": "doc.open",
-   "args": {
-    "id": "string"
-   },
-   "effect": "navigation"
-  },
-  {
-   "op": "template.new",
-   "args": {
-    "notebook": "string",
-    "hpath": "string",
-    "template": "string?",
-    "templatePath": "string?"
-   },
-   "effect": "write",
-   "since": "0.3.0",
-   "note": "renderSprig 渲染后 createDocWithMd；template 与 templatePath 二选一（缺省读 /templates/<templatePath>）"
-  },
-  {
-   "op": "daily.status",
-   "args": {},
-   "effect": "read"
-  },
-  {
-   "op": "setting.open",
-   "args": {},
-   "effect": "ui"
-  },
-  {
-   "op": "editor.context",
-   "args": {},
-   "effect": "read"
-  },
-  {
-   "op": "registry.list",
-   "args": {},
-   "effect": "read",
-   "since": "0.2.0",
-   "note": "生态七插件清单：manifest×loadPetals 合并"
-  },
-  {
-   "op": "diagnostics.report",
-   "args": {},
-   "effect": "read",
-   "since": "0.2.0",
-   "note": "脱敏诊断快照"
-  },
-  {
-   "op": "config.discover",
-   "args": {},
-   "effect": "read",
-   "since": "0.2.0",
-   "note": "日记/收集箱自动发现（best-effort）"
-  },
-  {
-   "op": "plugin.api",
-   "args": {
-    "plugin": "string",
-    "method": "string",
-    "args": "unknown[]?"
-   },
-   "effect": "passthrough",
-   "default": "off",
-   "allowlist": [
-    "siyuan-checkin",
-    "siyuan-contacts",
-    "siyuan-speed-switch"
-   ]
-  },
-  {
-   "op": "events.list",
-   "args": {},
-   "effect": "read",
-   "since": "0.4.0",
-   "note": "白名单事件目录（manifest 驱动）"
-  },
-  {
-   "op": "events.pull",
-   "args": {
-    "names": "string[]?",
-    "since": "string?",
-    "limit": "int?<=200"
-   },
-   "effect": "read",
-   "since": "0.4.0",
-   "note": "文件载体拉取，幂等键去重归调用方。物化事件：checkin:event-recorded（v0.5.2）、checkin:event-deleted（v0.5.4，幂等键=原键+:deleted，append-only 删除标记）；analytics-updated 不物化（D-0011）"
-  },
-  {
-   "op": "workflow.plan",
-   "args": {
-    "steps": "array<=8"
-   },
-   "effect": "plan",
-   "since": "0.4.0",
-   "note": "受控 op 白名单，只出计划不执行，5 分钟过期"
-  },
-  {
-   "op": "workflow.execute",
-   "args": {
-    "planId": "string"
-   },
-   "effect": "write",
-   "since": "0.4.0",
-   "note": "总确认30s→逐步执行→失败停止，计划一次性"
-  }
- ]
+  "ops": [
+    {
+      "op": "bridge.ping",
+      "args": {},
+      "effect": "read"
+    },
+    {
+      "op": "commands.list",
+      "args": {
+        "plugin": "string?"
+      },
+      "effect": "read"
+    },
+    {
+      "op": "commands.search",
+      "args": {
+        "keyword": "string?"
+      },
+      "effect": "read"
+    },
+    {
+      "op": "commands.run",
+      "args": {
+        "plugin": "string",
+        "command": "string"
+      },
+      "effect": "write",
+      "confirm": true,
+      "confirmTimeoutMs": 30000
+    },
+    {
+      "op": "favorites.list",
+      "args": {},
+      "effect": "read"
+    },
+    {
+      "op": "favorites.add",
+      "args": {
+        "plugin": "string",
+        "command": "string",
+        "title": "string?"
+      },
+      "effect": "write"
+    },
+    {
+      "op": "favorites.remove",
+      "args": {
+        "plugin": "string",
+        "command": "string",
+        "scope": "'favorite'(默认)|'recent'|'both'",
+        "clearRecent": "boolean?"
+      },
+      "effect": "write",
+      "note": "scope=recent 即最近使用隐私清除；clearRecent=true 清空全部最近使用（无需 plugin/command）"
+    },
+    {
+      "op": "checkin.items",
+      "args": {
+        "includeArchived": "bool?",
+        "limit": "int?<=200"
+      },
+      "effect": "read",
+      "requires": "siyuan-checkin v5 items.read"
+    },
+    {
+      "op": "checkin.record",
+      "args": {
+        "itemId": "string",
+        "value": "number?",
+        "unit": "string?",
+        "note": "string?",
+        "occurredAt": "string?"
+      },
+      "effect": "write",
+      "requires": "siyuan-checkin v5 events.record",
+      "idempotency": "source=api, externalRef=envelope.id",
+      "since": "0.5.7",
+      "note": "occurredAt 仅批量接口接受：带值时路由 recordEventsBatch 并映射 BatchEntryResult（duplicate→recorded+标记）；source 固定 api（上游白名单无 quickgate，会静默归一）"
+    },
+    {
+      "op": "checkin.summary",
+      "args": {},
+      "effect": "read",
+      "requires": "siyuan-checkin v5 summary.read",
+      "since": "0.5.6",
+      "note": "data={today:SummaryContext(range/startDate/endDate/items/totalEvents/completedItems/scheduledItems), streaks:{itemId:天数}}；由 getSummaryContext(\"day\")+getStreaks 组合（v0.5.6 修正：上游公开面无 getSummary，此前静默返回空数据）"
+    },
+    {
+      "op": "contacts.search",
+      "args": {
+        "keyword": "string?"
+      },
+      "effect": "read",
+      "requires": "siyuan-contacts v1"
+    },
+    {
+      "op": "contacts.ensure",
+      "args": {
+        "name": "string<=64"
+      },
+      "effect": "write",
+      "requires": "siyuan-contacts v1"
+    },
+    {
+      "op": "contacts.interaction",
+      "args": {
+        "names": "string[]?",
+        "docIds": "string[]?",
+        "date": "string?",
+        "place": "string?",
+        "note": "string?"
+      },
+      "effect": "write",
+      "requires": "siyuan-contacts v1",
+      "idempotency": "ref=envelope.id"
+    },
+    {
+      "op": "doc.open",
+      "args": {
+        "id": "string"
+      },
+      "effect": "navigation"
+    },
+    {
+      "op": "template.new",
+      "args": {
+        "notebook": "string",
+        "hpath": "string",
+        "template": "string?",
+        "templatePath": "string?"
+      },
+      "effect": "write",
+      "since": "0.3.0",
+      "note": "renderSprig 渲染后 createDocWithMd；template 与 templatePath 二选一（缺省读 /templates/<templatePath>）"
+    },
+    {
+      "op": "daily.status",
+      "args": {},
+      "effect": "read"
+    },
+    {
+      "op": "setting.open",
+      "args": {},
+      "effect": "ui"
+    },
+    {
+      "op": "editor.context",
+      "args": {},
+      "effect": "read"
+    },
+    {
+      "op": "registry.list",
+      "args": {},
+      "effect": "read",
+      "since": "0.2.0",
+      "note": "生态七插件清单：manifest×loadPetals 合并"
+    },
+    {
+      "op": "diagnostics.report",
+      "args": {},
+      "effect": "read",
+      "since": "0.2.0",
+      "note": "脱敏诊断快照"
+    },
+    {
+      "op": "config.discover",
+      "args": {},
+      "effect": "read",
+      "since": "0.2.0",
+      "note": "日记/收集箱自动发现（best-effort）"
+    },
+    {
+      "op": "plugin.api",
+      "args": {
+        "plugin": "string",
+        "method": "string",
+        "args": "unknown[]?"
+      },
+      "effect": "passthrough",
+      "default": "off",
+      "allowlist": [
+        "siyuan-checkin",
+        "siyuan-contacts",
+        "siyuan-speed-switch"
+      ]
+    },
+    {
+      "op": "events.list",
+      "args": {},
+      "effect": "read",
+      "since": "0.4.0",
+      "note": "白名单事件目录（manifest 驱动）"
+    },
+    {
+      "op": "events.pull",
+      "args": {
+        "names": "string[]?",
+        "since": "string?",
+        "limit": "int?<=200"
+      },
+      "effect": "read",
+      "since": "0.4.0",
+      "note": "文件载体拉取，幂等键去重归调用方。物化事件：checkin:event-recorded（v0.5.2）、checkin:event-deleted（v0.5.4，幂等键=原键+:deleted，append-only 删除标记）；analytics-updated 不物化（D-0011）"
+    },
+    {
+      "op": "workflow.plan",
+      "args": {
+        "steps": "array<=8"
+      },
+      "effect": "plan",
+      "since": "0.4.0",
+      "note": "受控 op 白名单，只出计划不执行，5 分钟过期"
+    },
+    {
+      "op": "workflow.execute",
+      "args": {
+        "planId": "string"
+      },
+      "effect": "write",
+      "since": "0.4.0",
+      "note": "总确认30s→逐步执行→失败停止，计划一次性"
+    },
+    {
+      "op": "workflow.cancel",
+      "args": {
+        "planId": "string"
+      },
+      "effect": "write",
+      "since": "0.7.6",
+      "note": "请求取消运行中的工作流（下一开始前停止；已完成步骤保留；幂等 recorded）"
+    }
+  ]
 }

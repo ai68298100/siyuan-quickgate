@@ -22,7 +22,7 @@ export const ALL_OPS = [
     // 模板
     "template.new",
     // events / workflow
-    "events.list", "events.pull", "workflow.plan", "workflow.execute",
+    "events.list", "events.pull", "workflow.plan", "workflow.execute", "workflow.cancel",
     // 高级透传
     "plugin.api",
 ] as const;

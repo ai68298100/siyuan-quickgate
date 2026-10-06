@@ -665,10 +665,20 @@ export class BridgeService {
                 const planId = typeof a.planId === "string" ? a.planId : "";
                 const plan = this.plans.get(planId);
                 this.plans.delete(planId); // 一次性：执行即消费
+                // L572（docs/36 §3.1）：取消检查点——每步开始前读 cancel.json
+                const cancelPath = `${this.deps.settings().bridgeBasePath}/cancel.json`;
                 const r = await executePlan(plan, {
                     confirmAll: async (steps) => {
                         const summary = steps.map((s) => `${s.index + 1}. ${s.op}${s.confirm ? "（写）" : ""}`).join("\n");
                         return this.deps.confirm(`执行工作流（${steps.length} 步）：\n${summary}`);
+                    },
+                    isCancelled: async () => {
+                        try {
+                            const raw = await this.deps.api.getFileText(cancelPath);
+                            if (!raw) return false;
+                            const obj = JSON.parse(raw) as { planId?: string };
+                            return obj.planId === planId;
+                        } catch { return false; } // 损坏按无请求（docs/36 §4）
                     },
                     runStep: async (step) => {
                         const cmd: BridgeCommand = {
@@ -682,11 +692,34 @@ export class BridgeService {
                     },
                 });
                 if (r.kind !== "done") return this.reject(r.message);
+                // L572：用完即删 cancel.json（docs/36 §7 开放问题 1）
+                void this.deps.api.putFileText(cancelPath, "").catch(() => {});
+                if (r.cancelled) {
+                    return {
+                        status: "recorded",
+                        data: { stopped: "user-cancel", completedSteps: r.steps.map((s) => s.index + 1), done: r.done },
+                        message: `用户取消于第 ${(r.stoppedAt ?? 0) + 1} 步前（已完成 ${r.done} 步不回滚）`,
+                    };
+                }
                 return {
                     status: "recorded",
                     data: { done: r.done, stoppedAt: r.stoppedAt, steps: r.steps },
                     message: r.stoppedAt === null ? `全部 ${r.done} 步完成` : `第 ${r.stoppedAt + 1} 步失败停止（已完成 ${r.done} 步不回滚）`,
                 };
+            }
+            case "workflow.cancel": {
+                // L572（docs/36）：写取消请求，运行中的 execute 每步开始前检查。
+                // 同信封队列内会排在运行中 execute 之后——跨窗口/直写内核 putFile 才是实时通道；
+                // 本 op 幂等 recorded（已停止再取消仍 recorded，docs/36 §3.2）。
+                const planId = typeof a.planId === "string" ? a.planId : "";
+                if (!planId) return this.reject("缺少 planId");
+                const cancelPath = `${this.deps.settings().bridgeBasePath}/cancel.json`;
+                try {
+                    await this.deps.api.putFileText(cancelPath, JSON.stringify({ schemaVersion: 1, planId, requestedBy: "external", requestedAt: new Date().toISOString() }));
+                } catch (e) {
+                    return this.reject(`取消请求写入失败：${e instanceof Error ? e.message : String(e)}`);
+                }
+                return { status: "recorded", data: { planId }, message: `取消请求已写入（planId ${planId}）；运行中的计划将在下一开始前停止` };
             }
 
             // ---- 高级透传（默认关）----

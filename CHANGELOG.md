@@ -80,6 +80,10 @@
 - **触屏触控目标**（L587 部分）：coarse-pointer 媒体查询——qg 根内导航/面板条目/设置行主热区 ≥44px，常规按钮 36px（桌面鼠标不受影响）
 - 诊断包复制成功提示附「敏感场合请及时清理剪贴板」（L593 尾巴）
 
+### Added（workflow.cancel 实现 · R351，docs/36 I1~I2）
+- **workflow.cancel op**（契约 27 个）：外部客户端/面板可请求取消运行中的工作流——写 `bridge/cancel.json`，execute 循环每步开始前检查；已完成步骤保留不回滚，回执标注 `stopped: "user-cancel"` + completed/pending 步骤列表；幂等 recorded（已停止再取消仍 recorded）；kernel-sync 路由不支持（FRONTEND_ONLY，收 unsupported+NDJSON 指引）
+- 新增取消检查点单测 2 条（中途取消保留已完成步骤 / 全程 false 无取消标注）
+
 ### Added（L562 实现 · R347，规格 docs/33 I1~I4）
 - **首跑向导升级为七步可恢复状态机**：环境检查 → 选择能力 → 桥权限（含"暂不开桥用 MCP 路径"）→ 连接探针 → 样例只读（daily.status+证据复制）→ 样例写入（可选，复用快速捕获）→ 完成；进度实时持久化 `wizard-state.json`，关闭面板/重启思源后续跑；损坏自动重置（步骤内提示）；完成后 `completedAt` 永久退出向导
 - 步骤 1/4/5 失败均给「重试 / 改配置 / 查看 FAQ」三路径；样例写入含撤销指引；双路径说明（外部桥 vs MCP 只读）内置步骤文案

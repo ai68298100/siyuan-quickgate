@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.7.5-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
-**小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（26 个 op）——
+**小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
 
 - `commands.*` — 发现/搜索/执行任意已装插件的命令面板条目（默认确认门控 + 审计；搜索支持中英/拼音别名，如「打卡/daka/checkin」互达）
 - `checkin.*` / `contacts.*` — 向小驴打卡（API v5）、小驴人脉（bridge v1）的公开桥做结构化透传
@@ -56,7 +56,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 ### 面向 AI 助手：MCP
 
-[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 26 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，这是任何内置 MCP server 都没有覆盖的能力面（差异化论证见项目文档 docs/10 §3.14）。
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 27 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，这是任何内置 MCP server 都没有覆盖的能力面（差异化论证见项目文档 docs/10 §3.14）。
 
 - **默认只暴露 14 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
 - `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
@@ -88,7 +88,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | v0.1~v0.3 | 桥核心 + 适配器 + 设置页 + 单测 → 生态中枢（manifest/registry/diagnostics）→ 可靠性收尾（template.new/15s 上限/设备名/诊断包） |
 | v0.4~v0.6 | events/workflow + 打卡宿主事件桥接 → 内核同步通道（实验性）→ 真机部署（3.8.5）+ v1.5 广播快路径 + bundle 静态核实 |
 | v0.7.0~0.7.3 | MCP stdio 服务器（AI 助手）+ 内核路由 3.8.6 真机打通（bug#9）+ 验收入口收敛 → 池清账八处正确性修复 + 版本/发布双门禁 + bug#11/12/13 |
-| **v0.7.4** | **template.new 路径穿越安全修复**（三通道守卫）+ 收藏/最近使用全链 + **思源内置 Agent 原生三能力**（零配置）+ 并发正确性（幂等注册表/桥消费权认领/多写者竞态缓解）+ 契约 23→26 op + manifest v2（真机校准） |
+| **v0.7.4** | **template.new 路径穿越安全修复**（三通道守卫）+ 收藏/最近使用全链 + **思源内置 Agent 原生三能力**（零配置）+ 并发正确性（幂等注册表/桥消费权认领/多写者竞态缓解）+ 契约 23→27 op + manifest v2（真机校准） |
 | **v0.7.5** | 发布链补强：package.zip 解包断言（bug#9 回归门）+ Agent 集成指南 + 重启工具 + bug#17 登记（lifecycle 钩子噪音，功能零影响） |
 | **v0.7.5+（当前工作区）** | 插件内 UI 成型：分层设置 + 首跑向导 + 健康首页 · 命令面板 / 通知 / 恢复 / 回执四中心 · 全量备份 · UI 对齐原型打磨（border-box 修正 KPI 爆版 / 回执时间本地化 / 暗色对比度 / 面板组件补样式） |
 

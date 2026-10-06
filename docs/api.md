@@ -26,7 +26,7 @@
 
 设置页状态概览实时呈现桥/广播/事件物化/内核路由四路状态；本表为静态口径，两者冲突时以状态概览为准。
 
-**参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec|fast>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼、`fast` 广播快路径）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec] [-Fast]`。**AI 客户端**：`src/mcp/`（MCP stdio 代理，26 op→tools，默认 14 只读，详见其 README）。
+**参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec|fast>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼、`fast` 广播快路径）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec] [-Fast]`。**AI 客户端**：`src/mcp/`（MCP stdio 代理，27 op→tools，默认 14 只读，详见其 README）。
 
 ## 通用
 
@@ -61,6 +61,7 @@
 | `events.pull` | `{names?, since?, limit?≤200}` | `{events:[HubEvent], files}` | 文件载体拉取；幂等键去重由调用方按 `idempotencyKey`。当前物化事件：`checkin:event-recorded`（v0.5.2 通道修正）与 `checkin:event-deleted`（v0.5.4，幂等键 `原键:deleted`，append-only 删除标记，与 recorded 行按键配对）；`analytics-updated` 不物化（D-0011） |
 | `workflow.plan` | `{steps:[{op,args}≤8]}` | `{plan:{planId,steps[],expiresAt}}` | 受控 op 白名单；写步骤带 confirm 标记；只出计划不执行 |
 | `workflow.execute` | `{planId}` | `{done, stoppedAt?, steps[]}` | 总确认（30s）→ 逐步执行 → 单步失败停止；计划一次性 |
+| `workflow.cancel` | `{planId}` | `{planId}` | 请求取消运行中的计划（每步开始前检查）；已完成步骤保留不回滚；幂等 recorded |
 | `registry.list` | `{}` | `{manifestVersion, plugins:[{pluginId,displayName,maturity,manifestVersion,installedVersion,installed,protocol,capabilities,hubIntegration}], registrySource}` | 生态七插件清单（v0.2.0）；maturity ∈ stable/design/unlocated |
 | `diagnostics.report` | `{}` | `{protocol, plugin, version, bridge:{enabled,pollMs,basePath,commandsFileLines}, registry:{source,hostPlugins}, confirmExec, rawApiEnabled}` | 脱敏诊断快照（不含 Token/正文/个人路径） |
 | `config.discover` | `{}` | `{diaryNotebookId, inboxDocId, notes[]}` | 自动发现（spike⑧ 校准前 best-effort；失败回 null + notes 说明） |

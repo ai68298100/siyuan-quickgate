@@ -108,6 +108,8 @@ export function makePlan(
 export interface ExecuteDeps {
     confirmAll: (steps: WorkflowPlan["steps"]) => Promise<boolean>;
     runStep: (step: WorkflowPlan["steps"][number]) => Promise<{ status: string; data: unknown; message: string }>;
+    /** L572 取消检查点（docs/36 §3.1）：每步开始前调用，返回 true=命中同 planId 取消请求 */
+    isCancelled?: () => Promise<boolean>;
     now?: () => number;
 }
 
@@ -123,7 +125,7 @@ export type ExecuteResult =
     | { kind: "rejected"; message: string }
     | { kind: "expired"; message: string }
     | { kind: "denied"; message: string }
-    | { kind: "done"; done: number; stoppedAt: number | null; steps: ExecutedStep[] };
+    | { kind: "done"; done: number; stoppedAt: number | null; steps: ExecutedStep[]; cancelled?: { requestedBy: "user" | "external"; requestedAt: string } };
 
 export async function executePlan(
     plan: WorkflowPlan | undefined,
@@ -137,6 +139,16 @@ export async function executePlan(
     const steps: ExecutedStep[] = [];
     let stoppedAt: number | null = null;
     for (const step of plan.steps) {
+        // L572 取消检查点（docs/36 §3.1）：每步开始前检查；命中即停（已完成步骤保留，回执标注 user-cancel）
+        if (deps.isCancelled && (await deps.isCancelled())) {
+            return {
+                kind: "done",
+                done: steps.filter((s) => s.status === "recorded" || s.status === "duplicate").length,
+                stoppedAt: null,
+                steps,
+                cancelled: { requestedBy: "user", requestedAt: new Date().toISOString() },
+            };
+        }
         const t0 = now;
         let status = "recorded";
         let message = "ok";

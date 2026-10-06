@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.7.5-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
-**Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (26 ops):
+**Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (27 ops):
 
 - `commands.*` — discover / search / run command-palette entries of any installed plugin (confirm-gated, audited; search understands zh/en/pinyin aliases — 打卡/daka/checkin all hit)
 - `checkin.*` / `contacts.*` — structured pass-through to the public bridges of Lv Check-in (API v5) and Lv Contacts (bridge v1)
@@ -56,7 +56,7 @@ Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tr
 
 ### MCP for AI assistants
 
-[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 26 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, a surface no built-in MCP server covers (see project design docs, docs/10 §3.14, for the rationale).
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 27 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, a surface no built-in MCP server covers (see project design docs, docs/10 §3.14, for the rationale).
 
 - **14 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
 - `plugin.api` / `workflow.execute` additionally carry the `destructiveHint` annotation
@@ -88,7 +88,7 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | v0.1–v0.3 | bridge core + adapters + settings + tests → ecosystem hub (manifest/registry/diagnostics) → reliability hardening (template.new, 15s cap, device name, diag package) |
 | v0.4–v0.6 | events/workflow + check-in host-event bridging → experimental kernel sync route → live deployment (3.8.5) + v1.5 broadcast fast path + bundle static verification |
 | v0.7.0–0.7.3 | MCP stdio server for AI assistants + kernel route live-verified on 3.8.6 (bug#9) + acceptance entry points → backlog cleanup (eight correctness fixes + version/release gates) + bug#11/12/13 |
-| **v0.7.4** | **template.new path-traversal security fix** (three-channel guard) + favorites/recents full chain + **built-in SiYuan Agent native capabilities** (zero config) + concurrency correctness (idempotency registry / bridge claim / multi-writer mitigation) + contract 23→26 ops + manifest v2 (live-calibrated) |
+| **v0.7.4** | **template.new path-traversal security fix** (three-channel guard) + favorites/recents full chain + **built-in SiYuan Agent native capabilities** (zero config) + concurrency correctness (idempotency registry / bridge claim / multi-writer mitigation) + contract 23→27 ops + manifest v2 (live-calibrated) |
 | **v0.7.5** | release-chain hardening: package.zip unpack assertions (bug#9 regression gate) + Agent integration guide + restart tool + bug#17 documented (lifecycle hook noise, zero functional impact) |
 | **v0.7.5+ (working tree)** | in-plugin UI takes shape: layered settings + first-run wizard + health home · command palette / notification / recovery / results centers · full backup · prototype-aligned polish (border-box fix for KPI wrap / localized receipt times / dark-mode contrast / palette component styles) |
 

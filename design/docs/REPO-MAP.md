@@ -29,7 +29,7 @@
 | 域 | 权威文件（均在合并仓库内） |
 |---|---|
 | 桥协议 | design/docs/02-小驴桥协议-v1.md ↔ src/services/envelope.ts · queue.ts · results.ts |
-| op 契约（26 op 单一事实源=src/ops.ts） | docs/api.md · docs/contracts/quickgate-api-v1.json · src/mcp/tools.ts（一致性测试强制） |
+| op 契约（27 op 单一事实源=src/ops.ts） | docs/api.md · docs/contracts/quickgate-api-v1.json · src/mcp/tools.ts（一致性测试强制） |
 | 生态清单（manifest v2） | src/assets/ecosystem-manifests.json ↔ design/docs/contracts/ecosystem-manifest-contract.md · ecosystem-manifest.schema.json · design/scripts/validate-ecosystem-manifest.mjs |
 | 动作蓝图与参考件 | design/docs/03-动作蓝图.md ↔ design/quicker-actions/reference/*.cs（27 件，csc 门） |
 | 超级面板 | design/docs/05-超级面板方案.md ↔ design/templates/superpanel-menu.json · reference/SY-路由.cs |

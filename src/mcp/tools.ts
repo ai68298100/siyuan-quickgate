@@ -148,6 +148,7 @@ const ARGS: Record<string, { properties: Record<string, { type: string; descript
         required: ["steps"],
     },
     "workflow.execute": { properties: { planId: { type: "string", description: "workflow.plan 返回的 planId；总确认 30s，一次性" } }, required: ["planId"] },
+    "workflow.cancel": { properties: { planId: { type: "string", description: "要取消的 planId（运行中计划的取消请求；每步开始前检查）" } }, required: ["planId"] },
     "plugin.api": {
         properties: {
             plugin: { type: "string", description: "目标插件 id" },
@@ -184,6 +185,7 @@ const DESCRIPTIONS: Record<string, string> = {
     "events.pull": "拉取物化事件（含 event-deleted 删除标记，幂等键配对由调用方做）",
     "workflow.plan": "编排计划（≤8 步骤；只出计划不执行）",
     "workflow.execute": "执行计划（planId 一次性；总确认 30s——MCP 场景建议人工在场）",
+    "workflow.cancel": "请求取消运行中的工作流（在下一开始前停止；已完成步骤保留，回执标注 user-cancel）",
     "plugin.api": "原始 API 透传（默认关+允许名单；MCP 侧需 writeEnabled 且快门透传开关已开）",
 };
 
