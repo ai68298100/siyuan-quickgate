@@ -16,7 +16,7 @@ const PAGE_SIZE = 50;
 
 export async function openResultsCenter(host: ResultsCenterHost): Promise<void> {
     const dialog = host.ui.openDialog(
-        `<div id="qg-results" style="min-width:min(600px, 92vw);padding:14px 16px;font-size:12px">` +
+        `<div id="qg-results" style="min-width:min(640px, 92vw);padding:14px 16px;font-size:12px">` +
         `<div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>回执中心</span>` +
         `<span style="font-size:11px;color:var(--b3-theme-on-surface-light)">外部命令回执留档（results.ndjson）</span><span class="sp"></span>` +
         `<button class="b3-button b3-button--small" data-role="reload" title="重新读取 results.ndjson">刷新</button>` +

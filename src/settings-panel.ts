@@ -85,6 +85,18 @@ const setHtml = (el: HTMLElement, html: string) => {
     el.dataset.h = html;
 };
 
+/** 按钮 pending 态：异步期间禁用+文案切换，结束恢复（防连点重复执行；节点被页面切换移除时恢复为无害空操作） */
+const withPending = (btn: HTMLButtonElement, pendingText: string, fn: () => unknown | Promise<unknown>) => {
+    if (btn.disabled) return;
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = pendingText;
+    void Promise.resolve()
+        .then(fn)
+        .catch(() => { /* 错误已由被调方经 showMessage 承载 */ })
+        .finally(() => { btn.disabled = false; btn.textContent = original; });
+};
+
 /** 回执状态 → 语义徽章（recorded/duplicate=成功绿；rejected/expired=警示；failed/timeout=错误红） */
 const receiptKind = (status?: string) =>
     status === "recorded" || status === "duplicate" ? "ok"
@@ -209,7 +221,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         const pingBtn = document.createElement("button");
         pingBtn.className = "b3-button qg-btn-primary";
         pingBtn.textContent = "桥自检（bridge.ping）";
-        pingBtn.onclick = () => void host.selfPing();
+        pingBtn.onclick = () => withPending(pingBtn, "自检中…", () => host.selfPing());
         const ecoBtn = document.createElement("button");
         ecoBtn.className = "b3-button b3-button--outline";
         ecoBtn.textContent = "查看能力目录";
@@ -348,6 +360,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 const nextBtn = document.createElement("button");
                 nextBtn.className = "b3-button b3-button--primary";
                 nextBtn.textContent = "下一步：连通自检";
+                nextBtn.disabled = pingState === "running"; // 自检期间禁用，防连点重复执行
                 nextBtn.onclick = () => void runPing();
                 const sp = document.createElement("span"); sp.style.flex = "1";
                 line.append(sp, nextBtn);
@@ -364,7 +377,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 const btn = document.createElement("button");
                 btn.className = "b3-button b3-button--outline";
                 btn.style.marginTop = "8px";
-                btn.textContent = "发 bridge.ping";
+                btn.textContent = pingState === "running" ? "自检中…" : "发 bridge.ping";
+                btn.disabled = pingState === "running";
                 btn.onclick = () => void runPing();
                 pingCard.appendChild(btn);
             }
@@ -523,7 +537,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         pingBtn.className = "b3-button b3-button--outline";
         pingBtn.textContent = "桥自检";
         pingBtn.style.marginLeft = "auto";
-        pingBtn.onclick = () => void host.selfPing();
+        pingBtn.onclick = () => withPending(pingBtn, "自检中…", () => host.selfPing());
         claimCard.appendChild(pingBtn);
         content.appendChild(claimCard);
     };
@@ -1053,7 +1067,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 new Dialog({
                     title: `生态能力目录（清单 v${manifest.version} · 校准 ${manifest.updatedAt ?? "未知"}）`,
                     content: `<div style="padding:12px;font-size:12px">${cards}<div style="margin-top:6px;color:var(--b3-theme-on-surface)">诊断入口：设置→诊断与生态「导出诊断包」/ 仓库 tools（verify:bg）</div></div>`,
-                    width: "min(620px, 92vw)",
+                    width: "min(640px, 92vw)",
                 });
             } catch (e) {
                 showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");

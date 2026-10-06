@@ -609,9 +609,9 @@ export default class QuickGatePlugin extends Plugin {
         this.openSettingPanel("connection");
     }
 
-    /** 裸对话框（通知中心等宿主注入用） */
+    /** 裸对话框（通知中心等宿主注入用；宽度与四中心其余面对齐 640） */
     openDialog(content: string): { element: HTMLElement; destroy(): void } {
-        const d = new Dialog({ content, width: "600px", height: "auto" });
+        const d = new Dialog({ content, width: "min(640px, 92vw)", height: "auto" });
         return { element: d.element, destroy: () => d.destroy() };
     }
 
@@ -641,7 +641,7 @@ export default class QuickGatePlugin extends Plugin {
             openQueuePage: () => this.openQueuePage(),
             openConnectionPage: () => this.openConnectionPage(),
             openDialog: (content: string) => {
-                const d = new Dialog({ content, width: "600px", height: "auto" });
+                const d = new Dialog({ content, width: "min(640px, 92vw)", height: "auto" });
                 return { element: d.element, destroy: () => d.destroy() };
             },
         });

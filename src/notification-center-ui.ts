@@ -57,7 +57,7 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
         `<button class="b3-button b3-button--small" data-role="refresh">刷新</button></div>` +
         `<div data-role="body"></div></div>`,
     );
-    dialog.element.querySelector(".b3-dialog__container")?.setAttribute("style", "width:600px");
+    dialog.element.querySelector(".b3-dialog__container")?.setAttribute("style", "width:min(640px, 92vw)");
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;
     dialog.element.querySelector('[data-role="refresh"]')?.addEventListener("click", () => void refresh());
     // 键盘导航（R315）：↑↓ 移动高亮，Enter 触发当前条目动作（与命令面板交互习惯一致）

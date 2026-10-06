@@ -337,12 +337,15 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         }
         msg.style.color = "var(--b3-theme-on-surface)";
         msg.textContent = "执行中……";
+        const execBtn = list.querySelector('[data-form="exec"]') as HTMLButtonElement | null;
+        if (execBtn) execBtn.disabled = true; // 执行期间禁用，防双击重复派发
         const r = await host.dispatchOp(formOp, args ?? {});
         if (r.status === "recorded" || r.status === "duplicate") {
             showMessage(`已执行（${r.status}）：${r.message}`, 4000, "info");
             dialog.destroy();
             return;
         }
+        if (execBtn) execBtn.disabled = false; // 失败可修正参数后重试
         msg.style.color = "var(--b3-theme-error)";
         msg.textContent = `${r.status}：${r.message}`;
     };
