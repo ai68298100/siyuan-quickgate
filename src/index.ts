@@ -405,8 +405,8 @@ export default class QuickGatePlugin extends Plugin {
         }
     }
 
-    /** 今日日记状态：只探测不创建（对齐雷切语义）；SQL 标题日期法已于 R25 真机实测 code=0 ✓（字段名实证见 spike⑧） */
-    private async readDailyStatus(): Promise<{ docId: string | null; exists: boolean }> {
+    /** 今日日记状态：只探测不创建（对齐雷切语义）；SQL 标题日期法已于 R25 真机实测 code=0 ✓（字段名实证见 spike⑧）。R347 转公开——首跑向导步骤 5 样例只读探针 */
+    async readDailyStatus(): Promise<{ docId: string | null; exists: boolean }> {
         try {
             const today = new Date();
             const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;

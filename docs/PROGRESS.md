@@ -2,6 +2,13 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R347（L562 实现：七步可恢复首跑状态机，docs/33 I1~I4）
+
+- 按 docs/33 规格实现：wizard-state.json 载体（load/save/损坏降级）+ 七步 renderWizard 重写（步骤 2 能力勾选 / 步骤 3 defer 路径 / 步骤 5 样例只读+证据 / 步骤 6 样例写入可撤销 / 步骤 7 completedAt 完成语义）；每步变更即持久化，关闭/重启续跑。
+- host 接口新增 readDailyStatus/captureQuick（index.ts 既有方法转公开）。
+- 踩坑三连（均已修）：①旧 renderWizard 移除时 node 脚本按行号切割留下重复 helper 声明；②wire 逐按钮挂监听漏掉 render 末尾插入的 nextBtn（**改为 content 级事件委托 + wizHandlers 注册表**，跨 render 存活）；③case 1 自动探测无重入守卫致无限递归（probing 标志）。另一靶场 mock 缺 readDailyStatus/captureQuick 已补。
+- 端到端实测：s1 通过→s2 勾选→s3 defer→s5 探针通过→s6 已写入→s7 完成→进状态概览 ✓；226 测全绿 + tsc 0 错。
+
 ## 2026-10-07 · R345（规格先行：桥消费权失联检测与接管 L571/L627）
 
 - 新增 design/docs/34-桥消费权失联检测与接管规格.md：心跳机制（持有方 tick 后限流 2s 落盘 heartbeat.json）、检测阈值两档（15s 卡死嫌疑/60s 高度失联）、接管=Web Locks `steal` + 两档确认文案（含待处理数与卡死时长）、双消费防线（台账先查不变量，理论竞窗如实登记）、release 容错增量、六条验收（双窗口真机）、I1~I3 实现切分、开放问题三项。

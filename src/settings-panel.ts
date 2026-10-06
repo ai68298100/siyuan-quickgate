@@ -62,6 +62,10 @@ export interface SettingsPanelHost {
     consecutiveFailures(): number;
     lateCompletions(): number;
     flushAudit(): void;
+    /** 首跑向导步骤 5 样例只读探针用（index.ts 已有方法转公开，R347 L562） */
+    readDailyStatus(): Promise<{ docId: string | null; exists: boolean }>;
+    /** 首跑向导步骤 6 可选样例写入用（复用快速捕获，R347 L562） */
+    captureQuick(text: string, target: "daily" | "inbox"): Promise<{ ok: boolean; message: string; blockId?: string; docId?: string }>;
     openDialog(content: string): { element: HTMLElement; destroy(): void };
 }
 
@@ -137,12 +141,48 @@ const ICONS: Record<string, string> = {
 
 type DotState = "ok" | "warn" | "off" | "err";
 const dot = (s: DotState) => `<span class="qg-dot ${s}"></span>`;
-const chip = (text: string, kind: "ok" | "warn" | "mute" = "mute") => `<span class="qg-chip ${kind}">${esc(text)}</span>`;
+const chip = (text: string, kind: "ok" | "warn" | "err" | "mute" = "mute") => `<span class="qg-chip ${kind}">${esc(text)}</span>`;
+
+/** 首跑向导持久化状态（L562 · docs/33 §2.2）：只存进度与证据，不复制开关值（避免双写者竞态） */
+interface WizardState {
+    schemaVersion: 1;
+    startedAt: string;
+    currentStep: number; // 1..7
+    stepResults: {
+        env: "ok" | "err" | null;
+        capability: string[];
+        bridgeDecision: "on" | "defer" | null;
+        ping: "ok" | "err" | "skipped" | null;
+        pingEvidence: string;
+        sampleRead: "ok" | "err" | "skipped" | null;
+        sampleReadEvidence: string;
+        sampleWrite: "ok" | "undone" | "skipped" | null;
+    };
+    completedAt: string | null;
+}
+const WIZARD_PATH = "/storage/petal/siyuan-quickgate/wizard-state.json";
+const WIZARD_STEPS = ["环境检查", "选择能力", "桥权限", "连接探针", "样例只读", "样例写入", "完成"];
+const defaultWizardState = (): WizardState => ({
+    schemaVersion: 1,
+    startedAt: new Date().toISOString(),
+    currentStep: 1,
+    stepResults: { env: null, capability: [], bridgeDecision: null, ping: null, pingEvidence: "", sampleRead: null, sampleReadEvidence: "", sampleWrite: null },
+    completedAt: null,
+});
 
 export async function openQuickGateSettings(host: SettingsPanelHost, initialPage = "status"): Promise<void> {
     const firstRunTitle = host.store.firstRun;
     // 焦点回归（L585 部分）：对话框销毁后焦点回到触发元素（思源 Dialog destroyCallback；失败不阻断）
     const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // 首跑向导状态（L562）：对话框打开时载入一次；损坏/缺失按 null 降级（docs/33 §4）
+    let wizardState: WizardState | null = null;
+    try {
+        const raw = await host.kernelApi.getFileText(WIZARD_PATH);
+        if (raw) {
+            const parsed = JSON.parse(raw) as WizardState;
+            if (parsed?.schemaVersion === 1 && typeof parsed.currentStep === "number" && parsed.stepResults) wizardState = parsed;
+        }
+    } catch { /* 损坏降级：视为不存在（docs/33 §4 明示"进度损坏已重置"由步骤 1 卡提示） */ }
     const dialog = new Dialog({
         title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span>` +
             `<span>${firstRunTitle ? "小驴快门 · 欢迎" : "小驴快门 · 设置"}</span>` +
@@ -316,8 +356,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
 
     // ══════════ 页：状态概览 / 首跑向导 ══════════
     const pageStatus = () => {
-        if (host.store.firstRun && !host.settings.bridgeEnabled) {
-            renderWizard();
+        // L562 门禁：真首跑/向导未完成 → 向导（docs/33 §2.3 恢复规则）；完成或放弃 → 状态概览
+        if (host.store.firstRun && !wizardState?.completedAt && (wizardState || !host.settings.bridgeEnabled)) {
+            void renderWizard();
             return;
         }
         content.innerHTML = pageHeader("状态概览", "通道实时状态 · 每 3 秒自动刷新") +
@@ -462,133 +503,258 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         pageTimer = window.setInterval(() => void refresh(), 3000);
     };
 
-    /** 首跑向导（G2-01）：环境检查 → 开启通道 → 连通自检 → 完成；每步真状态，失败给原因 */
-    const renderWizard = () => {
-        let pingState: "idle" | "running" | "ok" | "err" = "idle";
-        let pingMsg = "";
-        let pingMs = 0;
-        let pingEvidence = ""; // L564 部分：自检证据（可复制，含时间/结果/耗时/通道）
-        let envState: "running" | "ok" | "err" = "running";
-        let envMsg = "检查内核与存储……";
-        content.innerHTML = `<p class="qg-page-title" style="font-size:14px;color:var(--b3-theme-on-background)">三步接通外部自动化<span style="font-weight:400;color:var(--b3-theme-on-surface)">　——　Quicker / 快捷指令 / CLI 复用同一条命令通道</span></p>` +
-            // L565 部分：双路径如实说明——不开桥也有可用的只读面
-            `<p style="font-size:11px;color:var(--b3-theme-on-surface);margin:0 0 10px;line-height:1.6">两条路径，按需选择：①<b>外部桥</b>（Quicker / CLI / 手机快捷指令）需完成下面的向导显式开启；②<b>不开桥也可用</b>——AI 助手经 <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/src/mcp/README.md">MCP 只读工具</a>、或内核同步路由的 7 个只读 op（见 <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>），桥关闭时同样工作。</p>` +
-            `<div class="qg-steps" data-role="steps"></div><div data-role="body"></div>` +
-            `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:8px">跳过向导，直接浏览<a data-role="skip" style="color:var(--b3-theme-primary);cursor:pointer">全部设置</a></div>`;
+    /** 首跑向导状态机（L562 · docs/33）：七步、wizard-state.json 续跑、每步真实探针、失败三路径 */
+    const renderWizard = async () => {
+        if (!wizardState) wizardState = defaultWizardState();
+        const ws = wizardState;
+        const persist = async () => { try { await host.kernelApi.putFileText(WIZARD_PATH, JSON.stringify(ws)); } catch (e) { showMessage(`向导进度保存失败：${e instanceof Error ? e.message : String(e)}`, 4000, "error"); } };
+        let pingRunning = false;
+        let probing = false;
+        let sampleReadMsg = ws.stepResults.sampleRead === "ok" ? "探针已完成（见下方证据）" : "";
+        let sampleWriteMsg = "";
 
-        const stepsEl = root.querySelector("[data-role=steps]") as HTMLElement;
-        const bodyEl = root.querySelector("[data-role=body]") as HTMLElement;
-        const render = () => {
-            const bridgeOn = host.settings.bridgeEnabled;
-            const stepIdx = pingState === "ok" ? 3 : bridgeOn ? 2 : envState === "ok" ? 1 : 0;
-            stepsEl.innerHTML = ["环境检查", "开启通道", "连通自检", "完成"].map((label, i) => {
-                const cls = i < stepIdx ? "done" : i === stepIdx ? "current" : "";
-                const ball = i < stepIdx ? "✓" : String(i + 1);
+        const goto = async (step: number) => { ws.currentStep = step; await persist(); render(); };
+        // L585/L562：data-wiz 动作走 content 级事件委托——render 每次重建内部 DOM，
+        // 若逐按钮挂监听会漏掉 render 末尾才插入的按钮（wire 顺序坑，实测踩坑）
+        const wizHandlers: Record<string, (el: HTMLElement) => void> = {};
+        content.addEventListener("click", (ev) => {
+            const b = (ev.target as HTMLElement).closest("[data-wiz]") as HTMLElement | null;
+            if (!b || !ws) return;
+            wizHandlers[b.dataset.wiz ?? ""]?.(b);
+        });
+        const rail = () => {
+            const idx = Math.min(Math.max(ws.currentStep, 1), 7);
+            return WIZARD_STEPS.map((label, i) => {
+                const n = i + 1;
+                const cls = n < idx ? "done" : n === idx ? "current" : "";
+                const ball = n < idx ? "✓" : String(n);
                 return `<div class="qg-step ${cls}"><div class="ball">${ball}</div>${esc(label)}</div>`;
             }).join("");
-            bodyEl.innerHTML = "";
-            // 步骤 1：环境检查（真探针：内核 version）
-            const envCard = document.createElement("div");
-            envCard.className = "qg-card";
-            envCard.innerHTML = `<div class="qg-card-title">${dot(envState === "ok" ? "ok" : envState === "err" ? "err" : "warn")}环境检查 <span data-role="envchip" style="margin-left:auto">${envState === "ok" ? chip("通过", "ok") : envState === "err" ? chip("未通过", "warn") : chip("检查中", "mute")}</span></div><div style="font-size:12px;color:var(--b3-theme-on-surface)">${esc(envMsg)}</div>`;
-            bodyEl.appendChild(envCard);
-            // 步骤 2：开启通道
-            const bridgeCard = document.createElement("div");
-            bridgeCard.className = "qg-card";
-            bridgeCard.classList.toggle("accent", stepIdx === 1);
-            const toggle = switchCtrl(bridgeOn, async (v) => { await applyBridgeEnabled(v); render(); });
-            bridgeCard.innerHTML = `<div class="qg-card-title">开启外部命令桥 <span style="margin-left:auto">${chip("默认关", "mute")}</span></div>` +
-                `<div style="font-size:12px;color:var(--b3-theme-on-surface);margin-bottom:8px">开启后外部程序才能发命令进来。所有命令留审计、写操作有确认门控；随时可关。</div>`;
-            const line = document.createElement("div");
-            line.style.cssText = "display:flex;align-items:center;gap:10px";
-            line.append(toggle, Object.assign(document.createElement("span"), { textContent: bridgeOn ? "已开启（本窗口消费）" : "未开启", style: "font-size:12px" }));
-            if (bridgeOn) {
-                const nextBtn = document.createElement("button");
-                nextBtn.className = "b3-button b3-button--primary";
-                nextBtn.textContent = "下一步：连通自检";
-                nextBtn.disabled = pingState === "running"; // 自检期间禁用，防连点重复执行
-                nextBtn.onclick = () => void runPing();
-                const sp = document.createElement("span"); sp.style.flex = "1";
-                line.append(sp, nextBtn);
-            }
-            bridgeCard.appendChild(line);
-            bodyEl.appendChild(bridgeCard);
-            // 步骤 3：连通自检
-            const pingCard = document.createElement("div");
-            pingCard.className = "qg-card";
-            pingCard.classList.toggle("dimmed", !bridgeOn);
-            pingCard.innerHTML = `<div class="qg-card-title">连通自检 <span data-role="pingchip" style="margin-left:auto">${pingState === "ok" ? chip("通过", "ok") : pingState === "err" ? chip("失败", "warn") : pingState === "running" ? chip("检测中", "mute") : chip("待上一步", "mute")}</span></div>` +
-                `<div style="font-size:12px;color:var(--b3-theme-on-surface)">${pingState === "err" ? esc(pingMsg) : `发一条 <b>bridge.ping</b> 并核对回执——通过后即可从外部客户端发第一条真实命令。`}</div>`;
-            if (bridgeOn) {
-                const btn = document.createElement("button");
-                btn.className = "b3-button b3-button--outline";
-                btn.style.marginTop = "8px";
-                btn.textContent = pingState === "running" ? "自检中…" : "发 bridge.ping";
-                btn.disabled = pingState === "running";
-                btn.onclick = () => void runPing();
-                pingCard.appendChild(btn);
-                // L564 部分：自检完成后提供可复制证据（时间/结果/耗时/通道——贴进 issue 或留档）
-                if (pingState === "ok" || pingState === "err") {
-                    const evBtn = document.createElement("button");
-                    evBtn.className = "b3-button b3-button--outline";
-                    evBtn.style.marginTop = "8px";
-                    evBtn.style.marginLeft = "6px";
-                    evBtn.textContent = "复制证据";
-                    evBtn.title = "复制本次自检证据 JSON（时间/结果/耗时/通道）";
-                    evBtn.onclick = () => {
-                        void navigator.clipboard.writeText(pingEvidence).then(() => showMessage("自检证据已复制", 2000, "info"));
-                    };
-                    pingCard.appendChild(evBtn);
+        };
+        const nextBtn = (step: number, label: string) =>
+            `<button class="b3-button b3-button--primary" data-wiz="goto" data-step="${step}" style="margin-top:8px">${esc(label)}</button>`;
+        const failPaths = (retryId: string) =>
+            `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">` +
+            `<button class="b3-button b3-button--outline b3-button--small" data-wiz="${esc(retryId)}">重试</button>` +
+            `<button class="b3-button b3-button--outline b3-button--small" data-wiz="config">改配置</button>` +
+            `<a class="b3-link" target="_blank" rel="noopener" style="font-size:11px;align-self:center" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/FAQ.md">查看 FAQ</a></div>`;
+
+        const render = () => {
+            content.innerHTML = pageHeader("首跑向导", `七步接通外部自动化 · 进度自动保存（docs/33）`) +
+                `<p style="font-size:11px;color:var(--b3-theme-on-surface);margin:0 0 10px;line-height:1.6">两条路径按需选择：①<b>外部桥</b>（Quicker / CLI / 手机快捷指令）走步骤 3~4；②<b>不开桥也可用</b>——<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/src/mcp/README.md">MCP 只读工具</a>与内核同步路由 7 只读 op（见<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>），桥关闭时同样工作。</p>` +
+                `<div class="qg-steps" data-role="steps">${rail()}</div><div data-role="body"></div>` +
+                `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:8px">跳过向导，直接浏览<a data-role="skip" style="color:var(--b3-theme-primary);cursor:pointer">全部设置</a>（进度已保存，随时回来续跑）</div>`;
+            const bodyEl = root.querySelector("[data-role=body]") as HTMLElement;
+            root.querySelector("[data-role=skip]")?.addEventListener("click", () => show("connection"));
+
+            const card = (title: string, chipText: string, chipKind: "ok" | "warn" | "err" | "mute", bodyHtml: string) => {
+                const c = document.createElement("div");
+                c.className = "qg-card";
+                c.innerHTML = `<div class="qg-card-title">${esc(title)} <span style="margin-left:auto">${chip(chipText, chipKind)}</span></div><div style="font-size:12px;color:var(--b3-theme-on-surface);line-height:1.7">${bodyHtml}</div>`;
+                bodyEl.appendChild(c);
+                return c;
+            };
+            const cfgPath = () => { show("connection"); };
+            // 委托处理器注册（content 级委托在 renderWizard 外层，跨 render 存活）
+            wizHandlers.probe = () => void probeEnv();
+            wizHandlers.config = cfgPath;
+            wizHandlers.sampleRead = () => void runSampleRead();
+            wizHandlers.goto = (el) => {
+                ws.stepResults.capability = Array.from(bodyEl.querySelectorAll<HTMLInputElement>("input[data-cap-key]:checked")).map((c) => c.dataset.capKey as string);
+                void goto(Number(el.dataset.step) || (ws.currentStep + 1));
+            };
+
+            switch (ws.currentStep) {
+                case 1: {
+                    const ok = ws.stepResults.env === "ok";
+                    card(`步骤 1 · 环境检查`, ok ? "通过" : ws.stepResults.env === "err" ? "未通过" : "检查中", ok ? "ok" : ws.stepResults.env === "err" ? "warn" : "mute",
+                        ok ? "思源内核可达 ✓　插件已加载 ✓　桥目录可读 ✓" : esc(ws.stepResults.env === "err" ? "上次检查未通过——请确认思源正在运行后重试。" : "检查内核与存储……") + (ok ? "" : failPaths("probe")));
+                    if (ws.stepResults.env === null && !probing) void probeEnv(); // 进入步骤即自动探测（docs/33 步骤 1 通过条件）
+                    if (ok) bodyEl.insertAdjacentHTML("beforeend", nextBtn(2, "下一步：选择能力"));
+                    break;
+                }
+                case 2: {
+                    const caps: Array<{ key: string; label: string; hint: string }> = [
+                        { key: "external", label: "外部自动化", hint: "Quicker / CLI / 手机快捷指令经桥发命令（步骤 3~4 开启桥）" },
+                        { key: "mcp", label: "MCP 只读（AI 助手）", hint: "不开桥也可用：14 只读工具，写入需独立开关" },
+                    ];
+                    card(`步骤 2 · 选择能力`, "按需勾选", "mute",
+                        caps.map((cp) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.6;margin-bottom:8px">` +
+                            `<input type="checkbox" data-cap-key="${cp.key}" ${ws.stepResults.capability.includes(cp.key) ? "checked" : ""} style="margin-top:2px" />` +
+                            `<span><b>${esc(cp.label)}</b>——${esc(cp.hint)}</span></label>`).join(""));
+                    bodyEl.insertAdjacentHTML("beforeend", nextBtn(3, "下一步：桥权限"));
+                    break;
+                }
+                case 3: {
+                    const decided = ws.stepResults.bridgeDecision !== null;
+                    const bridgeOn = host.settings.bridgeEnabled;
+                    const c = card(`步骤 3 · 桥权限`, decided ? (ws.stepResults.bridgeDecision === "on" ? "已开启" : "暂不开桥") : "待表态", decided ? "ok" : "mute",
+                        `开启后外部程序（Quicker / CLI / 手机快捷指令）才能发命令进来。所有命令留审计、写操作有确认门控；随时可关。`);
+                    const line = document.createElement("div");
+                    line.style.cssText = "display:flex;align-items:center;gap:10px";
+                    const toggle = switchCtrl(bridgeOn, async (v) => {
+                        await applyBridgeEnabled(v);
+                        if (v) { ws.stepResults.bridgeDecision = "on"; ws.currentStep = 4; await persist(); }
+                        render();
+                    });
+                    line.append(toggle, Object.assign(document.createElement("span"), { textContent: bridgeOn ? "已开启（本窗口消费）" : "未开启", style: "font-size:12px" }));
+                    const deferBtn = document.createElement("button");
+                    deferBtn.className = "b3-button b3-button--outline b3-button--small";
+                    deferBtn.style.marginLeft = "auto";
+                    deferBtn.textContent = "暂不开桥，用不开桥路径";
+                    deferBtn.onclick = () => void (async () => { ws.stepResults.bridgeDecision = "defer"; await goto(5); })();
+                    line.append(deferBtn);
+                    c.appendChild(line);
+                    bodyEl.appendChild(c);
+                    break;
+                }
+                case 4: {
+                    const pingOk = ws.stepResults.ping === "ok";
+                    const pingErr = ws.stepResults.ping === "err";
+                    const c = card(`步骤 4 · 连接探针（bridge.ping）`, pingOk ? "通过" : pingErr ? "失败" : pingRunning ? "检测中" : "待执行", pingOk ? "ok" : pingErr ? "err" : "mute",
+                        pingErr ? `上次自检失败（可复制证据排查）。` + failPaths("ping") : `发一条 <b>bridge.ping</b> 并核对回执——通过后即可从外部客户端发第一条真实命令。`);
+                    if (!pingOk) {
+                        const btn = document.createElement("button");
+                        btn.className = "b3-button b3-button--outline";
+                        btn.style.marginTop = "8px";
+                        btn.textContent = pingRunning ? "自检中…" : "发 bridge.ping";
+                        btn.disabled = pingRunning;
+                        btn.onclick = () => void runPing();
+                        c.appendChild(btn);
+                        if (ws.stepResults.pingEvidence) {
+                            const evBtn = document.createElement("button");
+                            evBtn.className = "b3-button b3-button--outline b3-button--small";
+                            evBtn.style.margin = "8px 0 0 6px";
+                            evBtn.textContent = "复制证据";
+                            evBtn.onclick = () => void navigator.clipboard.writeText(ws.stepResults.pingEvidence).then(() => showMessage("自检证据已复制", 2000, "info"));
+                            c.appendChild(evBtn);
+                        }
+                    }
+                    if (pingOk) c.insertAdjacentHTML("beforeend", nextBtn(5, "下一步：样例只读"));
+                    bodyEl.appendChild(c);
+                    break;
+                }
+                case 5: {
+                    const ok = ws.stepResults.sampleRead === "ok";
+                    const skipped = ws.stepResults.sampleRead === "skipped";
+                    const c = card(`步骤 5 · 样例只读（今日日记状态）`, ok ? "通过" : ws.stepResults.sampleRead === "err" ? "失败" : skipped ? "已跳过" : "待执行", ok ? "ok" : ws.stepResults.sampleRead === "err" ? "err" : "mute",
+                        ok ? esc(sampleReadMsg) + (ws.stepResults.sampleReadEvidence ? `<div class="qg-mono" style="margin-top:4px">${esc(ws.stepResults.sampleReadEvidence)}</div>` : "") : `发一条只读探针（daily.status），验证「查询类」命令全链。不开桥路径的用户在此即可确认可用性。`);
+                    if (!ok && !skipped) {
+                        const btn = document.createElement("button");
+                        btn.className = "b3-button b3-button--outline";
+                        btn.style.marginTop = "8px";
+                        btn.textContent = sampleReadMsg === "探针中…" ? "探针中…" : "发只读探针（daily.status）";
+                        btn.disabled = sampleReadMsg === "探针中…";
+                        btn.onclick = () => void runSampleRead();
+                        c.appendChild(btn);
+                        if (ws.stepResults.sampleRead === "err") c.insertAdjacentHTML("beforeend", failPaths("sampleRead"));
+                    }
+                    const skip = document.createElement("button");
+                    skip.className = "b3-button b3-button--outline b3-button--small";
+                    skip.style.marginTop = "8px";
+                    skip.textContent = "跳过此步";
+                    skip.onclick = () => void (async () => { ws.stepResults.sampleRead = "skipped"; await goto(6); })();
+                    c.appendChild(skip);
+                    if (ok || skipped) c.insertAdjacentHTML("beforeend", nextBtn(6, "下一步：样例写入（可选）"));
+                    break;
+                }
+                case 6: {
+                    const doneWrite = ws.stepResults.sampleWrite === "ok" || ws.stepResults.sampleWrite === "undone";
+                    const skipped = ws.stepResults.sampleWrite === "skipped";
+                    const c = card(`步骤 6 · 样例写入（可选）`, ws.stepResults.sampleWrite === "ok" ? "已写入" : ws.stepResults.sampleWrite === "undone" ? "已写入并撤销" : skipped ? "已跳过" : "待执行", doneWrite || skipped ? "ok" : "mute",
+                        (ws.stepResults.sampleWrite === "ok" || ws.stepResults.sampleWrite === "undone" ? esc(sampleWriteMsg) + "<br>" : "") +
+                        `写入一条测试块验证「写入类」命令全链（默认今日日记，可撤销）。不想要写入可跳过——跳过不影响完成。`);
+                    if (!doneWrite && !skipped) {
+                        const btn = document.createElement("button");
+                        btn.className = "b3-button b3-button--outline";
+                        btn.style.marginTop = "8px";
+                        btn.textContent = "写入测试块";
+                        btn.onclick = () => void runSampleWrite();
+                        c.appendChild(btn);
+                    }
+                    const skip = document.createElement("button");
+                    skip.className = "b3-button b3-button--outline b3-button--small";
+                    skip.style.marginTop = "8px";
+                    skip.style.marginLeft = "6px";
+                    skip.textContent = "跳过此步";
+                    skip.onclick = () => void (async () => { ws.stepResults.sampleWrite = "skipped"; await goto(7); })();
+                    c.appendChild(skip);
+                    if (doneWrite || skipped) c.insertAdjacentHTML("beforeend", nextBtn(7, "下一步：完成"));
+                    bodyEl.appendChild(c);
+                    break;
+                }
+                default: {
+                    // 步骤 7：完成（进入即写 completedAt——L562 完成语义，永久不进向导）
+                    if (!ws.completedAt) { ws.completedAt = new Date().toISOString(); void persist(); }
+                    const c = card(`步骤 7 · 完成`, "可以开始用了", "ok",
+                        `从 Quicker / CLI / AI 助手发第一条真实命令；写命令会弹确认。数据流向与隐私边界见 PRIVACY.md（本插件不外传任何数据）。`);
+                    const browse = document.createElement("button");
+                    browse.className = "b3-button b3-button--primary";
+                    browse.style.marginTop = "8px";
+                    browse.textContent = "进入状态概览";
+                    browse.onclick = () => show("status");
+                    c.appendChild(browse);
+                    bodyEl.appendChild(c);
                 }
             }
-            bodyEl.appendChild(pingCard);
-            // 步骤 4：完成
-            if (pingState === "ok") {
-                const done = document.createElement("div");
-                done.className = "qg-card";
-                done.innerHTML = `<div class="qg-card-title">${dot("ok")}完成 <span style="margin-left:auto">${chip("可以开始用了", "ok")}</span></div><div style="font-size:12px;color:var(--b3-theme-on-surface)">从 Quicker / CLI 发第一条真实命令；写命令会弹确认。数据流向与隐私边界见 PRIVACY.md（本插件不外传任何数据）。</div>`;
-                const browse = document.createElement("button");
-                browse.className = "b3-button b3-button--outline";
-                browse.style.marginTop = "8px";
-                browse.textContent = "浏览全部设置";
-                browse.onclick = () => show("connection");
-                done.appendChild(browse);
-                bodyEl.appendChild(done);
+        };
+
+        const probeEnv = async () => {
+            if (probing) return; // 防 render 重入递归（case 1 见 null 自动触发）
+            probing = true;
+            ws.stepResults.env = null; render();
+            try {
+                await host.kernelApi.post("/api/system/version", {});
+                await host.kernelApi.getFileText(`${host.settings.bridgeBasePath}/commands.ndjson`);
+                ws.stepResults.env = "ok";
+            } catch {
+                ws.stepResults.env = "err";
             }
+            probing = false;
+            await persist(); render();
         };
         const runPing = async () => {
-            pingState = "running"; render();
+            pingRunning = true; render();
             const started = performance.now();
             try {
                 const service = new BridgeService(host.deps() as never);
                 const r = await service.tick();
-                pingMs = Math.round(performance.now() - started);
-                pingState = "ok";
-                pingMsg = "";
-                pingEvidence = JSON.stringify({ time: new Date().toISOString(), result: "ok", executed: r.executed, receipts: r.receipts, elapsedMs: pingMs, channel: "wizard", op: "bridge.ping" });
+                ws.stepResults.ping = "ok";
+                ws.stepResults.pingEvidence = JSON.stringify({ time: new Date().toISOString(), result: "ok", executed: r.executed, receipts: r.receipts, elapsedMs: Math.round(performance.now() - started), channel: "wizard", op: "bridge.ping" });
                 showMessage(`自检通过：处理 ${r.executed} 条，回执 ${r.receipts} 条`, 3000, "info");
             } catch (e) {
-                pingMs = Math.round(performance.now() - started);
-                pingState = "err";
-                pingMsg = `自检失败：${e instanceof Error ? e.message : String(e)}（内核不可达或桥目录不可写——见下方原因，修好后可重试）`;
-                pingEvidence = JSON.stringify({ time: new Date().toISOString(), result: "err", error: e instanceof Error ? e.message : String(e), elapsedMs: pingMs, channel: "wizard", op: "bridge.ping" });
+                ws.stepResults.ping = "err";
+                ws.stepResults.pingEvidence = JSON.stringify({ time: new Date().toISOString(), result: "err", error: e instanceof Error ? e.message : String(e), elapsedMs: Math.round(performance.now() - started), channel: "wizard", op: "bridge.ping" });
             }
-            render();
+            await persist(); render();
         };
-        // 环境检查探针：内核可达 + 存储可读（读自身设置载体）；失败给原因（G2-03）
-        void (async () => {
+        const runSampleRead = async () => {
+            sampleReadMsg = "探针中…"; render();
+            const started = performance.now();
             try {
-                await host.kernelApi.post("/api/system/version", {});
-                await host.kernelApi.getFileText(`${host.settings.bridgeBasePath}/commands.ndjson`);
-                envState = "ok";
-                envMsg = `思源内核可达 ✓　插件已加载 ✓　桥目录可读 ✓`;
+                const r = await host.readDailyStatus();
+                const elapsed = Math.round(performance.now() - started);
+                ws.stepResults.sampleRead = "ok";
+                ws.stepResults.sampleReadEvidence = JSON.stringify({ time: new Date().toISOString(), result: r, elapsedMs: elapsed, channel: "kernel-api", op: "daily.status" });
+                sampleReadMsg = `探针完成（${elapsed}ms）：今日日记${r.exists ? `已存在（${r.docId}）` : "尚未创建（不是错误——状态如实返回）"}`;
             } catch (e) {
-                envState = "err";
-                envMsg = `环境未就绪：${e instanceof Error ? e.message : String(e)}——请确认思源正在运行后重试。`;
+                ws.stepResults.sampleRead = "err";
+                sampleReadMsg = `探针失败：${e instanceof Error ? e.message : String(e)}`;
             }
-            render();
-        })();
-        content.querySelector("[data-role=skip]")?.addEventListener("click", () => show("connection"));
+            await persist(); render();
+        };
+        const runSampleWrite = async () => {
+            try {
+                const r = await host.captureQuick("快门首跑测试块（可撤销）", host.settings.captureTarget);
+                if (!r.ok) { showMessage(r.message, 5000, "error"); return; }
+                ws.stepResults.sampleWrite = "ok";
+                sampleWriteMsg = `已写入${r.blockId ? `（块 ${r.blockId}，可撤销）` : ""}`;
+                await persist(); render();
+            } catch (e) {
+                showMessage(`写入失败：${e instanceof Error ? e.message : String(e)}（失败不留半写入垃圾）`, 5000, "error");
+            }
+        };
+
         render();
     };
 
