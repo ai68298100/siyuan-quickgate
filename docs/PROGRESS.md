@@ -2,9 +2,22 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R352（L623 来源设备字段 + 重置清向导进度）
+
+- L623 来源设备：BackupPayload 加 `sourceDevice`（导出时 deviceName，可选字段）；导入对话框显示"来源设备：X"——仅展示，本机 deviceName 恒保留不随备份迁移（R338 语义）。
+- docs/33 §7-3 落地：恢复默认设置时一并清空 wizard-state.json——重开设置回到完整七步首跑；进度受重置前防线备份保护。
+- TODO L572 注记由 R352 补充（取消通道已实现）。226→235 测全绿 + tsc 0 错（R351/R352 合并验证）。
+
+## 2026-10-07 · R351（workflow.cancel 取消通道实现，docs/36 I1~I2 + L572 落地）
+
+- 新增 `src/services/cancel.ts`（cancel.json 读写/planId 匹配/损坏按无请求降级）；workflow.execute 循环每步开始前取消检查点，命中即停（已完成步骤保留不回滚），回执标注 `stopped: "user-cancel"` + completed/pending 步骤列表；执行结束用完即删。
+- workflow.cancel op 注册：ops.ts ALL_OPS（FRONTEND_ONLY）/MCP ARGS+DESCRIPTIONS/契约 JSON（27 个）/api.md；计数引用全量同步 26→27（README 双语/MCP README/design 31/REPO-MAP）。
+- 恢复向导「取消运行中的工作流」由本 op/直写 cancel.json 承载；恢复中心排除（取消非失败）。
+- L572 注记更新为已实现（R352 补充）。
+
 ## 2026-10-07 · R350（规格先行：长任务取消 workflow.cancel L572）
 
-- 新增 design/docs/36-长任务取消规格.md：现状语义盘点（确认窗✅/内核执行❌不可中断/步骤间❌无通道/迟到完成❌如实标注）、cancel.json 取消通道（步骤间+确认前检查点）、workflow.cancel op（契约 24 个，幂等 recorded）、回执标注（completed/pending 步骤列表 + user-cancel）、恢复中心联动排除、四场景边界、五条验收、I1~I2 实现切分、开放问题两项（cancel.json 清理时机/暂停=非目标建议）。
+- 新增 design/docs/36-长任务取消规格.md：现状语义盘点（确认窗✅/内核执行❌不可中断/步骤间❌无通道/迟到完成❌如实标注）、cancel.json 取消通道（步骤间+确认前检查点）、workflow.cancel op（幂等 recorded）、回执标注（completed/pending 步骤列表 + user-cancel）、恢复中心联动排除、四场景边界、五条验收、I1~I2 实现切分、开放问题两项（cancel.json 清理时机/暂停=非目标建议）。
 - design/README 文档地图收录；TODO L572 注记更新。
 - 实现绑定门槛：workflow 真实使用反馈。
 

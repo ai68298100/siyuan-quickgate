@@ -17,6 +17,8 @@ export interface BackupPayload {
     schemaVersion: 1;
     exportedAt: string;
     plugin: "siyuan-quickgate";
+    /** 来源设备（L623：导出时 deviceName，仅供导入对话框展示；导入时本机 deviceName 恒保留） */
+    sourceDevice?: string;
     settings: unknown;
     favorites: unknown;
     audit: unknown;
@@ -24,11 +26,12 @@ export interface BackupPayload {
     resultsNdjson: string;
 }
 
-export function buildBackupPayload(components: BackupComponents, exportedAt = new Date().toISOString()): BackupPayload {
+export function buildBackupPayload(components: BackupComponents, exportedAt = new Date().toISOString(), sourceDevice?: string): BackupPayload {
     return {
         schemaVersion: 1,
         exportedAt,
         plugin: "siyuan-quickgate",
+        ...(sourceDevice ? { sourceDevice } : {}),
         settings: components.settings,
         favorites: components.favorites,
         audit: components.audit,

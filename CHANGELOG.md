@@ -80,6 +80,10 @@
 - **触屏触控目标**（L587 部分）：coarse-pointer 媒体查询——qg 根内导航/面板条目/设置行主热区 ≥44px，常规按钮 36px（桌面鼠标不受影响）
 - 诊断包复制成功提示附「敏感场合请及时清理剪贴板」（L593 尾巴）
 
+### Added（备份来源设备 + 重置清向导进度 · R352，L623/docs/33 §7-3）
+- **备份载荷加 `sourceDevice`**（L623 来源设备字段）：导出时写入 deviceName，导入对话框显示"来源设备：X"——仅展示，本机 deviceName 恒保留不随备份迁移
+- **恢复默认设置一并清除首跑向导进度**（docs/33 §7-3 落地）：重置时清空 wizard-state.json——重开设置回到完整七步首跑（向导进度受重置前防线备份保护）
+
 ### Added（workflow.cancel 实现 · R351，docs/36 I1~I2）
 - **workflow.cancel op**（契约 27 个）：外部客户端/面板可请求取消运行中的工作流——写 `bridge/cancel.json`，execute 循环每步开始前检查；已完成步骤保留不回滚，回执标注 `stopped: "user-cancel"` + completed/pending 步骤列表；幂等 recorded（已停止再取消仍 recorded）；kernel-sync 路由不支持（FRONTEND_ONLY，收 unsupported+NDJSON 指引）
 - 新增取消检查点单测 2 条（中途取消保留已完成步骤 / 全程 false 无取消标注）

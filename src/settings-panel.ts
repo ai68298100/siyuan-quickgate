@@ -238,7 +238,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             audit: parseOr(await readText("/storage/petal/siyuan-quickgate/audit.json"), null),
             processed: host.store.processed,
             resultsNdjson: await readText(`${host.settings.bridgeBasePath}/results.ndjson`),
-        }, new Date().toISOString());
+        }, new Date().toISOString(), host.settings.deviceName || undefined);
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
@@ -1155,6 +1155,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 // in 收窄（strict:false 下布尔判别收窄不可靠，R314 实测）
                 if ("error" in parsed) { showMessage(`备份导入失败：${parsed.error}`, 6000, "error"); return; }
                 const payload = parsed.payload;
+                const payloadSourceDevice = typeof (payload as { sourceDevice?: unknown }).sourceDevice === "string"
+                    ? (payload as { sourceDevice: string }).sourceDevice
+                    : null; // L623：来源设备仅供展示
                 // 各段走 normalize* 校验链：settings/processed 由 store 承接，favorites/audit 落回载体
                 const s = normalizeSettings(payload.settings);
                 const fav = normalizeFavorites(payload.favorites);
@@ -1182,7 +1185,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 const selDialog = new Dialog({
                     title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>导入备份 · 选择分组</span></span>`,
                     content: `<div style="padding:14px 16px">` +
-                        `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-bottom:10px">备份时间：${esc(payload.exportedAt)}。勾选要导入的分组（未勾选的保持当前数据不动）：</div>` +
+                        `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-bottom:10px">备份时间：${esc(payload.exportedAt)}${payloadSourceDevice ? ` · 来源设备：${esc(payloadSourceDevice)}` : ""}。勾选要导入的分组（未勾选的保持当前数据不动）：</div>` +
                         `<div style="display:flex;flex-direction:column;gap:8px">` +
                         groups.map((g) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5">` +
                             `<input type="checkbox" data-imp-group="${g.key}" checked style="margin-top:2px;flex:none" /><span>${esc(g.label)}</span></label>`).join("") +
@@ -1382,6 +1385,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     }
                     // L624 部分：快照重置前设置——状态概览页提供本会话内撤销
                     preResetSnapshot = JSON.parse(JSON.stringify(host.settings)) as QuickGateSettings;
+                    // docs/33 §7-3：重置一并清除首跑向导进度——回到完整首跑（受上述防线备份保护）
+                    try { await host.kernelApi.putFileText(WIZARD_PATH, ""); } catch { /* 清理失败不阻断重置 */ }
+                    wizardState = null;
                     const deviceName = host.settings.deviceName;
                     host.settings = { ...DEFAULT_SETTINGS, deviceName };
                     host.store.settings = host.settings;
