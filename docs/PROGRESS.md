@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R350（规格先行：长任务取消 workflow.cancel L572）
+
+- 新增 design/docs/36-长任务取消规格.md：现状语义盘点（确认窗✅/内核执行❌不可中断/步骤间❌无通道/迟到完成❌如实标注）、cancel.json 取消通道（步骤间+确认前检查点）、workflow.cancel op（契约 24 个，幂等 recorded）、回执标注（completed/pending 步骤列表 + user-cancel）、恢复中心联动排除、四场景边界、五条验收、I1~I2 实现切分、开放问题两项（cancel.json 清理时机/暂停=非目标建议）。
+- design/README 文档地图收录；TODO L572 注记更新。
+- 实现绑定门槛：workflow 真实使用反馈。
+
 ## 2026-10-07 · R349（docs/34 关键假设实证 + safe-area 收尾）
 
 - **Web Locks steal 行为实证（E4·靶场 Chromium，Electron 同引擎族）**：`{ifAvailable:false, steal:true}` 立即授予锁 ✓；原持有者请求以 AbortError 拒绝 ✓（§3.4 release 容错必要性的直接证据）；steal 回调持锁期间 ifAvailable 重取失败 ✓。docs/34 §7 开放问题 3 已回写关闭。靶场 file:// 挂死教训：改 localhost http 服务（安全上下文）。
