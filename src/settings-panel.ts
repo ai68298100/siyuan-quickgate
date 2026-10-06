@@ -61,6 +61,7 @@ export interface SettingsPanelHost {
     bridgeAlive(): boolean;
     consecutiveFailures(): number;
     lateCompletions(): number;
+    flushAudit(): void;
     openDialog(content: string): { element: HTMLElement; destroy(): void };
 }
 
@@ -915,33 +916,85 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 const s = normalizeSettings(payload.settings);
                 const fav = normalizeFavorites(payload.favorites);
                 const processed = normalizeProcessed(payload.processed);
-                confirm(
-                    "小驴快门 · 导入全量备份",
-                    `备份时间：${payload.exportedAt}\n将覆盖当前 设置/收藏/审计/回执/处理台账（桥会自动重启生效）。确认导入？`,
-                    async () => {
-                        try {
-                            const base = host.settings.bridgeBasePath;
-                            host.store.processed = processed;
-                            host.settings = s;
-                            host.store.settings = s;
-                            await host.store.saveProcessed();
-                            await host.store.saveSettings();
-                            await host.kernelApi.putFileText("/storage/petal/siyuan-quickgate/favorites.json", JSON.stringify(fav, null, 2));
-                            await host.kernelApi.putFileText(`${base}/results.ndjson`, payload.resultsNdjson);
-                            await host.stopBridge();
-                            if (host.settings.bridgeEnabled && !host.isMobileGuard()) {
-                                await host.startBridge();
-                                host.startEventBridge();
+                const backupAudit = typeof payload.audit === "object" && payload.audit !== null && Array.isArray((payload.audit as { entries?: unknown }).entries)
+                    ? (payload.audit as { entries: AuditEntry[] }).entries
+                    : [];
+                // L623 部分：选择性分组 + 差异预览（不再无脑全量覆盖）
+                const sRec = s as unknown as Record<string, unknown>;
+                const curRec = host.settings as unknown as Record<string, unknown>;
+                const diffSettingsKeys = Object.keys(DEFAULT_SETTINGS).filter((k) =>
+                    JSON.stringify(sRec[k]) !== JSON.stringify(curRec[k]));
+                const curFavRaw = await host.kernelApi.getFileText("/storage/petal/siyuan-quickgate/favorites.json");
+                let curFavParsed: unknown = null;
+                try { curFavParsed = curFavRaw ? JSON.parse(curFavRaw) : null; } catch { curFavParsed = null; }
+                const curFav = normalizeFavorites(curFavParsed); // getFileText 返回字符串——必须 JSON.parse 后再进 normalize（否则 typeof!==object 回落空，R337 同型教训）
+                const resultLines = payload.resultsNdjson.trim() ? payload.resultsNdjson.trim().split("\n").filter(Boolean).length : 0;
+                const groups: Array<{ key: string; label: string }> = [
+                    { key: "settings", label: `设置（${diffSettingsKeys.length} 个键与当前不同${diffSettingsKeys.length ? `：${diffSettingsKeys.slice(0, 4).join("、")}${diffSettingsKeys.length > 4 ? "…" : ""}` : ""}；设备名始终保留本机）` },
+                    { key: "favorites", label: `收藏与最近使用（备份 ${fav.favorites.length}+${fav.recent.length} 条，当前 ${curFav.favorites.length}+${curFav.recent.length} 条）` },
+                    { key: "audit", label: `审计（备份 ${backupAudit.length} 条，当前 ${host.auditLog.length} 条）` },
+                    { key: "results", label: `回执（备份 ${resultLines} 行，整文件替换）` },
+                    { key: "processed", label: `处理台账（备份 ${Object.keys(processed.processed).length} 条）` },
+                ];
+                const selDialog = new Dialog({
+                    title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>导入备份 · 选择分组</span></span>`,
+                    content: `<div style="padding:14px 16px">` +
+                        `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-bottom:10px">备份时间：${esc(payload.exportedAt)}。勾选要导入的分组（未勾选的保持当前数据不动）：</div>` +
+                        `<div style="display:flex;flex-direction:column;gap:8px">` +
+                        groups.map((g) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5">` +
+                            `<input type="checkbox" data-imp-group="${g.key}" checked style="margin-top:2px;flex:none" /><span>${esc(g.label)}</span></label>`).join("") +
+                        `</div>` +
+                        `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">` +
+                        `<button class="b3-button" data-imp-cancel>取消</button>` +
+                        `<button class="b3-button b3-button--primary" data-imp-apply>导入所选</button></div></div>`,
+                    width: "min(560px, 92vw)",
+                    height: "auto",
+                });
+                selDialog.element.querySelector("[data-imp-cancel]")?.addEventListener("click", () => selDialog.destroy());
+                selDialog.element.querySelector("[data-imp-apply]")?.addEventListener("click", () => {
+                    const picked = new Set(Array.from(selDialog.element.querySelectorAll<HTMLInputElement>("input[data-imp-group]:checked")).map((c) => c.dataset.impGroup as string));
+                    if (picked.size === 0) { showMessage("未勾选任何分组", 2500, "error"); return; }
+                    confirm(
+                        "小驴快门 · 导入所选分组",
+                        `将导入：${Array.from(picked).join("、")}（其余分组保持不动）。设置导入时桥会按新设置自动重启。确认导入？`,
+                        async () => {
+                            try {
+                                if (picked.has("settings")) {
+                                    s.deviceName = host.settings.deviceName; // device 路由身份属本机自动管理字段，不随备份迁移
+                                    host.settings = s;
+                                    host.store.settings = s;
+                                    await host.store.saveSettings();
+                                }
+                                if (picked.has("processed")) {
+                                    host.store.processed = processed;
+                                    await host.store.saveProcessed();
+                                }
+                                if (picked.has("favorites")) {
+                                    await host.kernelApi.putFileText("/storage/petal/siyuan-quickgate/favorites.json", JSON.stringify(fav, null, 2));
+                                }
+                                if (picked.has("audit")) {
+                                    host.auditLog = backupAudit;
+                                    host.flushAudit(); // 导入的审计立即写回载体（否则要等下一次 pushAudit 的节流）
+                                }
+                                if (picked.has("results")) {
+                                    await host.kernelApi.putFileText(`${host.settings.bridgeBasePath}/results.ndjson`, payload.resultsNdjson);
+                                }
+                                await host.stopBridge();
+                                if (host.settings.bridgeEnabled && !host.isMobileGuard()) {
+                                    await host.startBridge();
+                                    host.startEventBridge();
+                                }
+                                showMessage(`已导入 ${picked.size} 个分组（桥已按当前设置重启）`, 3500);
+                                selDialog.destroy();
+                                dialog.destroy();
+                                host.openSettingPanel("queue");
+                            } catch (e) {
+                                showMessage(`导入失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
                             }
-                            showMessage("全量备份已导入（桥已重启生效）", 3500);
-                            dialog.destroy();
-                            host.openSettingPanel("queue");
-                        } catch (e) {
-                            showMessage(`导入失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
-                        }
-                    },
-                    () => { },
-                );
+                        },
+                        () => { },
+                    );
+                });
             } catch (e) {
                 showMessage(`读取备份失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }

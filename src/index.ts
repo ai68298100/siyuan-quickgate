@@ -359,7 +359,7 @@ export default class QuickGatePlugin extends Plugin {
         }, 5000);
     }
 
-    private flushAudit() {
+    flushAudit() { // R338：公开——设置面板「导入备份（审计分组）」写回载体需要
         if (this.auditTimer) { clearTimeout(this.auditTimer); this.auditTimer = undefined; }
         void this.saveData("audit.json", { schemaVersion: 1, entries: this.auditLog }).catch(() => {});
     }
