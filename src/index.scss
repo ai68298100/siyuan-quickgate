@@ -679,6 +679,17 @@
       align-self: flex-start;
       margin-bottom: 4px;
     }
+    /* L587 部分：safe-area——移动端全面屏/刘海下内容不贴边（env() 在非安全上下文为 0，桌面无影响） */
+    .qg-content {
+      padding-left: max(14px, env(safe-area-inset-left));
+      padding-right: max(14px, env(safe-area-inset-right));
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    .qg-footer {
+      padding-left: max(18px, env(safe-area-inset-left));
+      padding-right: max(18px, env(safe-area-inset-right));
+      padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
     /* 窄屏行改为两段式：标题/说明通栏、控件换行通栏——否则 ctrl max-width:46%
        会把 label 挤成竖排断行（轮询间隔实测踩坑）；图标收起减负（同面板窄屏先例） */
     .qg-row { flex-wrap: wrap; }

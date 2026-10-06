@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R349（docs/34 关键假设实证 + safe-area 收尾）
+
+- **Web Locks steal 行为实证（E4·靶场 Chromium，Electron 同引擎族）**：`{ifAvailable:false, steal:true}` 立即授予锁 ✓；原持有者请求以 AbortError 拒绝 ✓（§3.4 release 容错必要性的直接证据）；steal 回调持锁期间 ifAvailable 重取失败 ✓。docs/34 §7 开放问题 3 已回写关闭。靶场 file:// 挂死教训：改 localhost http 服务（安全上下文）。
+- L587 尾巴：窄屏 safe-area CSS（env() max() 补 content/footer 内边距，非安全上下文 env=0 桌面无影响）。
+- 233 测全绿 + tsc 0 错 + 构建双门过 + 部署逐字节一致。
+
 ## 2026-10-07 · R348（docs/34 I1~I3 实现：心跳 + 失联检测 + steal 接管）
 
 - I1：新增 `src/services/heartbeat.ts`（shouldWriteHeartbeat 限流 ≥2s / read+write / classifyHeartbeat 三档）+ index.ts `windowId`/`lastHeartbeatMs` + beginPolling tick 包装限流落盘 heartbeat.json（失败静默→检测方"无法判断"降级）。
