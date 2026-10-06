@@ -1314,7 +1314,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     ? { cls: "warn", text: "⚠ 可继续，存在需注意项" }
                     : { cls: "ok", text: "✓ 全部正常，无需恢复动作" };
             const summaryColor = `color:var(--b3-theme-${summary.cls === "err" ? "error" : summary.cls === "warn" ? "warning, var(--b3-theme-secondary)" : "success"})`;
+            // L571 再部分：处置前防线索份——有异常项时提供「下载全量备份」动作行
+            const backupRow = (hasErr || hasWarn)
+                ? `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 2px;border-bottom:1px solid var(--b3-border-color)">` +
+                  `${dot("off")}<span style="flex:1;min-width:0;font-size:12px;line-height:1.6">处置建议：动手前先下载全量备份（设置+收藏+审计+回执+台账）</span>` +
+                  `<button class="b3-button b3-button--small" data-role="wiz-backup">下载全量备份</button></div>`
+                : "";
             body.innerHTML = `<div style="font-size:12px;font-weight:600;${summaryColor};margin-bottom:6px">${esc(summary.text)}</div>` +
+                backupRow +
                 items.map((it) => `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 2px;border-bottom:1px solid var(--b3-border-color)">` +
                     `${dot(it.dot)}<span style="flex:1;min-width:0;font-size:12px;line-height:1.6">${esc(it.text)}</span>` +
                     (it.action ? `<button class="b3-button b3-button--small" data-role="wiz-action">${esc(it.action.label)}</button>` : "") +
@@ -1326,6 +1333,13 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 const run = actions[i]?.run;
                 if (!run) return;
                 btn.addEventListener("click", () => void Promise.resolve(run()).then(() => void refresh()));
+            });
+            body.querySelector('[data-role="wiz-backup"]')?.addEventListener("click", (ev) => {
+                const btn = ev.currentTarget as HTMLButtonElement;
+                void downloadFullBackup().then(() => {
+                    btn.textContent = "已下载";
+                    showMessage("全量备份已下载（防线）", 2500);
+                }).catch((e) => showMessage(`备份失败：${e instanceof Error ? e.message : String(e)}`, 5000, "error"));
             });
         };
         void refresh();
