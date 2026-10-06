@@ -12,11 +12,13 @@ export interface BridgeClaimHandle {
 
 export interface BridgeClaimer {
     claim(name: string): Promise<BridgeClaimHandle | null | undefined>;
+    /** L571/L627 失联接管：steal 破坏已持锁（docs/34 §3.3）；5s 超时防环境不支持时挂死 */
+    claimSteal?(name: string): Promise<BridgeClaimHandle | null | undefined>;
 }
 
 /** Locks API 最小形状（仅用到的部分，避免引 DOM lib 差异） */
 interface LocksLike {
-    request(name: string, opts: { ifAvailable: boolean }, cb: (lock: unknown) => Promise<void> | void): Promise<void>;
+    request(name: string, opts: { ifAvailable: boolean; steal?: boolean }, cb: (lock: unknown) => Promise<void> | void): Promise<void>;
 }
 
 /**
@@ -25,23 +27,29 @@ interface LocksLike {
 export function createNavigatorClaimer(locks?: LocksLike): BridgeClaimer | undefined {
     const api = locks ?? (globalThis as { navigator?: { locks?: LocksLike } }).navigator?.locks;
     if (!api || typeof api.request !== "function") return undefined;
+    const requestLock = (name: string, opts: { ifAvailable: boolean; steal?: boolean }) =>
+        new Promise<BridgeClaimHandle | null | undefined>((resolve) => {
+            let settled = false;
+            const done = (v: BridgeClaimHandle | null | undefined) => { if (!settled) { settled = true; resolve(v); } };
+            let releaseResolve: (() => void) | undefined;
+            const held = new Promise<void>((r) => { releaseResolve = r; });
+            held.catch(() => { /* 被 steal 打断时此 promise reject——已由 steal 方接管，静默（docs/34 §3.4） */ });
+            void api
+                .request(name, opts, (lock) => {
+                    if (!lock) {
+                        done(null); // 被占用
+                        return;
+                    }
+                    done({
+                        release: async () => releaseResolve?.(),
+                    });
+                    return held; // 持锁直到 release
+                })
+                .catch(() => done(undefined)); // API 异常=环境不支持
+            if (opts.steal) setTimeout(() => done(undefined), 5000); // steal 不被支持时会排队等锁——超时防挂死
+        });
     return {
-        claim: (name) =>
-            new Promise((resolve) => {
-                let releaseResolve: (() => void) | undefined;
-                const held = new Promise<void>((r) => { releaseResolve = r; });
-                void api
-                    .request(name, { ifAvailable: true }, (lock) => {
-                        if (!lock) {
-                            resolve(null); // 被占用
-                            return;
-                        }
-                        resolve({
-                            release: async () => releaseResolve?.(),
-                        });
-                        return held; // 持锁直到 release
-                    })
-                    .catch(() => resolve(undefined)); // API 异常=环境不支持
-            }),
+        claim: (name) => requestLock(name, { ifAvailable: true }),
+        claimSteal: (name) => requestLock(name, { ifAvailable: false, steal: true }),
     };
 }

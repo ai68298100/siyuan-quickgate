@@ -96,6 +96,12 @@
 
 ### Added（账本待办落地，R337 · L566/L571 部分）
 - **捕获写入可撤销**（L566 部分）：捕获成功卡新增「撤销写入」——`deleteBlock` 删除刚写入的块，confirm 二次把关 + 「已编辑勿撤」提示，按钮态防重
+
+### Added（失联检测与接管实现 · R348，docs/34 I1~I3）
+- **消费权心跳**（I1）：持有窗口每次 tick 后限流 ≥2s 落盘 `bridge/heartbeat.json`（holder=deviceName#windowSeq）；新增 `src/services/heartbeat.ts`（限流判定/读写/三档分类：healthy ≤15s / stale 15~60s / suspect >60s / unknown）
+- **claimSteal**（I3 前置）：`bridge-claim` 新增 steal 认领（`{ ifAvailable:false, steal:true }` + 5s 超时防环境不支持挂死；被 steal 打断的原持锁 reject 静默容错）
+- **恢复向导失联检测与接管**（I2+I3）：检测② 分档——他窗心跳正常（互斥运行中）/ 卡死嫌疑（15~60s）/ 高度疑似失联（>60s）/ 无法判断（诚实不猜）；stale/suspect 提供「接管消费权」（confirm 含他窗状态、待处理数、接管后建议），经 `takeoverBridge`（steal）执行；连接页消费权行附他窗心跳标注
+- 连接页消费权行附他窗心跳状态标注（健康/卡死嫌疑/高度失联）
 - **桥恢复向导**（L571 部分）：连接页新增入口——六项状态检测（桥开关/本窗口轮询/退避/积压+坏行+最老待处理/广播/内核路由）三档汇总，行内动作（重启桥/清空队列带预览/导出诊断包）执行后自动重检；`buildDiagJson`/`clearQueueWithPreview` 抽为共享实现（诊断按钮/队列危险区同源）
 
 ### Added（账本待办落地，R338 · L623 部分）

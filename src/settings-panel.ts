@@ -26,6 +26,7 @@ import manifestJson from "./assets/ecosystem-manifests.json";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 import { countRecoveryItems } from "./recovery-center";
 import { countNotifications } from "./notification-center-ui";
+import { classifyHeartbeat, heartbeatPath, readHeartbeat } from "./services/heartbeat";
 
 const PLUGIN_NAME = "siyuan-quickgate";
 const PLUGIN_VERSION = "0.7.5";
@@ -66,6 +67,8 @@ export interface SettingsPanelHost {
     readDailyStatus(): Promise<{ docId: string | null; exists: boolean }>;
     /** 首跑向导步骤 6 可选样例写入用（复用快速捕获，R347 L562） */
     captureQuick(text: string, target: "daily" | "inbox"): Promise<{ ok: boolean; message: string; blockId?: string; docId?: string }>;
+    /** 失联接管（docs/34 §3.3 · R348）：steal 破坏他窗锁并接管消费权 */
+    takeoverBridge(): Promise<{ ok: boolean; holder: string | null }>;
     openDialog(content: string): { element: HTMLElement; destroy(): void };
 }
 
@@ -862,6 +865,19 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         const claimCard = document.createElement("div");
         claimCard.className = "qg-card";
         claimCard.style.cssText = "display:flex;gap:8px;align-items:center;padding:10px 14px;flex-wrap:wrap";
+        // L627：消费权行附他窗心跳状态（有他窗持有且本窗口未消费时）
+        void (async () => {
+            if (host.settings.bridgeEnabled && !host.poller?.isRunning) {
+                try {
+                    const hb = await readHeartbeat(host.kernelApi, heartbeatPath(host.settings.bridgeBasePath));
+                    const cls = classifyHeartbeat(hb, Date.now());
+                    if (cls.level !== "unknown") {
+                        const age = cls.ageMs !== null ? (cls.ageMs >= 60_000 ? `${Math.round(cls.ageMs / 60_000)} 分` : `${Math.round(cls.ageMs / 1000)} 秒`) : "";
+                        claimCard.querySelector("span")?.insertAdjacentText("beforeend", ` · 他窗心跳 ${age} 前（${cls.level === "healthy" ? "正常" : cls.level === "stale" ? "卡死嫌疑" : "高度疑似失联"}）——恢复向导可接管`);
+                    }
+                } catch { /* 心跳读取失败静默——主行已有状态 */ }
+            }
+        })();
         claimCard.innerHTML = `<span style="font-size:12px;color:var(--b3-theme-on-surface)">桥消费权：${host.poller?.isRunning ? "本窗口持有（Web Lock 认领）" : "未由本窗口持有"}</span>`;
         const recoveryLink = document.createElement("button");
         recoveryLink.className = "b3-button b3-button--small";
@@ -1415,20 +1431,46 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             } else {
                 items.push({ dot: "ok", text: "外部命令桥：已开启" });
             }
-            // ② 本窗口轮询
+            // ② 本窗口轮询（L571/L627：消费权他窗持有→读心跳分档，stale/suspect 提供接管）
             if (host.poller?.isRunning) {
                 items.push({ dot: "ok", text: `本窗口轮询运行中（间隔 ${host.settings.pollMs}ms）` });
             } else if (host.settings.bridgeEnabled) {
-                items.push({
-                    dot: "err", text: "桥已开启但本窗口轮询未运行——多为消费权被另一窗口持有或启动失败",
-                    action: {
-                        label: "重启桥", run: async () => {
-                            await host.stopBridge();
-                            const started = await host.startBridge();
-                            showMessage(started ? "桥已重启" : "重启未启动：消费权可能仍被另一窗口持有", 3500, started ? "info" : "error");
+                const hb = await readHeartbeat(host.kernelApi, heartbeatPath(host.settings.bridgeBasePath));
+                const cls = classifyHeartbeat(hb, Date.now());
+                const ageText = cls.ageMs !== null ? (cls.ageMs >= 60_000 ? `${Math.round(cls.ageMs / 60_000)} 分` : `${Math.round(cls.ageMs / 1000)} 秒`) : "";
+                if (cls.level === "healthy") {
+                    items.push({ dot: "ok", text: `桥已开启，消费权由另一窗口持有（心跳正常，${ageText}前）——双窗口互斥运行中` });
+                } else if (cls.level === "unknown") {
+                    items.push({
+                        dot: "warn", text: "桥已开启但本窗口未消费，且无法读取他窗心跳——无法判断（诚实不猜）",
+                    });
+                } else {
+                    const suspectText = cls.level === "suspect"
+                        ? `他窗心跳 ${ageText} 前（高度疑似失联）`
+                        : `他窗心跳 ${ageText} 前（卡死嫌疑）`;
+                    items.push({
+                        dot: "err", text: `桥已开启但本窗口未消费——${suspectText}；积压命令将由接管窗口消费`,
+                        action: {
+                            label: "接管消费权", run: async () => {
+                                const pendingText = (await host.kernelApi.getFileText(`${host.settings.bridgeBasePath}/commands.ndjson`)) ?? "";
+                                const pendingN = pendingText.trim() ? pendingText.trim().split("\n").filter(Boolean).length : 0;
+                                const grade = cls.level === "suspect"
+                                    ? `另一窗口已 ${ageText} 前无心跳（高度疑似失联）。`
+                                    : `另一窗口心跳 ${ageText} 前（卡死嫌疑）。若该窗口仍在使用，请先在其「连接与通道」停用桥。`;
+                                confirm(
+                                    "小驴快门 · 接管桥消费权",
+                                    `${grade}\n${pendingN} 条未消费命令将被本窗口接管消费（台账防双执行；接管后建议在原窗口停用桥）。确认接管？`,
+                                    async () => {
+                                        const r = await host.takeoverBridge();
+                                        showMessage(r.ok ? `已接管消费权${r.holder ? `（自 ${r.holder}）` : ""}` : "接管失败（锁竞争或环境不支持）", 3500, r.ok ? "info" : "error");
+                                        void refresh();
+                                    },
+                                    () => {},
+                                );
+                            },
                         },
-                    },
-                });
+                    });
+                }
             }
             // ③ 退避
             const backoff = host.poller && host.poller.consecutiveFailures > 0 ? host.poller.consecutiveFailures : 0;

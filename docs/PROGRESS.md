@@ -2,6 +2,13 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R348（docs/34 I1~I3 实现：心跳 + 失联检测 + steal 接管）
+
+- I1：新增 `src/services/heartbeat.ts`（shouldWriteHeartbeat 限流 ≥2s / read+write / classifyHeartbeat 三档）+ index.ts `windowId`/`lastHeartbeatMs` + beginPolling tick 包装限流落盘 heartbeat.json（失败静默→检测方"无法判断"降级）。
+- I3 前置：bridge-claim 新增 `claimSteal`（`{ifAvailable:false, steal:true}` + 5s 超时防不支持环境挂死 + 被打断 held reject 静默容错，docs/34 §3.4）。
+- I2+I3：恢复向导检测② 分档——他窗心跳正常（互斥运行）/ stale 嫌疑 / suspect 高度失联 / unknown 诚实不猜；stale/suspect 行内「接管消费权」（confirm 含他窗档位、待处理数、"接管后建议原窗停桥"）→ `takeoverBridge`（index.ts steal 接管 + 标注"接管自 <holder>"）；连接页消费权行附他窗心跳标注。
+- 新增 tests/heartbeat.test.ts 7 测（限流/三档/损坏降级/往返/steal 选项与容错）。233 测全绿（+7）+ tsc 0 错。双窗口真机接管实测仍 pending（docs/34 §5 验收 1~6）。
+
 ## 2026-10-07 · R347（L562 实现：七步可恢复首跑状态机，docs/33 I1~I4）
 
 - 按 docs/33 规格实现：wizard-state.json 载体（load/save/损坏降级）+ 七步 renderWizard 重写（步骤 2 能力勾选 / 步骤 3 defer 路径 / 步骤 5 样例只读+证据 / 步骤 6 样例写入可撤销 / 步骤 7 completedAt 完成语义）；每步变更即持久化，关闭/重启续跑。

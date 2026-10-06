@@ -16,6 +16,7 @@ import { probeCommandRegistry } from "./services/registry";
 import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted, planMaterialization } from "./services/eventbridge";
 import { IdempotencyRegistry } from "./services/idempotency";
 import { BridgeClaimHandle, BridgeClaimer, createNavigatorClaimer } from "./services/bridge-claim";
+import { heartbeatPath, readHeartbeat, shouldWriteHeartbeat, writeHeartbeat } from "./services/heartbeat";
 import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry, BridgeCommand } from "./types/bridge";
 import { openQuickGateSettings } from "./settings-panel";
@@ -151,6 +152,9 @@ export default class QuickGatePlugin extends Plugin {
     /** 桥消费权认领（L452 多窗口互斥）：持有=本窗口跑轮询；null=他窗占用；undefined=无 Locks 环境（单窗口假设） */
     private bridgeClaim?: BridgeClaimHandle;
     private bridgeClaimer?: BridgeClaimer;
+    /** L571/L627 心跳：本窗口序号（deviceName#seq 作 holder 标识，Math.random 非加密用途仅 UI 展示——R50 同先例）与上次心跳落盘时间 */
+    private windowId = Math.random().toString(16).slice(2, 6);
+    private lastHeartbeatMs = 0;
     /** 内核路由探针结果（设置面板打开时一次性探测；undefined=未探测） */
     kernelRouteProbe?: boolean;
 
@@ -285,12 +289,44 @@ export default class QuickGatePlugin extends Plugin {
         this.poller = new SingleFlightPoller({
             intervalMs: this.settings.pollMs,
             backoffMaxMs: this.settings.backoffMaxMs,
-            tick: () => service.tick(),
+            tick: () =>
+                service.tick().then((r) => {
+                    // L571/L627 心跳（docs/34 §3.1）：限流 ≥2s 落盘；失败静默——检测方按"无法判断"降级
+                    const now = Date.now();
+                    if (shouldWriteHeartbeat(this.lastHeartbeatMs, now)) {
+                        this.lastHeartbeatMs = now;
+                        void writeHeartbeat(this.kernelApi, heartbeatPath(this.settings.bridgeBasePath), {
+                            holder: `${this.settings.deviceName || "win"}#${this.windowId}`,
+                            ts: new Date(now).toISOString(),
+                            pollMs: this.settings.pollMs,
+                        }).catch(() => {});
+                    }
+                    return r;
+                }),
             shouldRun: () => this.settings.bridgeEnabled,
         });
         this.poller.start();
         this.startBroadcastSub();
         console.info(`[${PLUGIN_NAME}] 桥已启动，间隔 ${this.settings.pollMs}ms${claimNote}`);
+    }
+
+    /**
+     * 失联接管（docs/34 §3.3 · L571/L627）：steal 破坏他窗锁并接管消费权。
+     * 安全不变量：台账先查防双消费（接管窗与苏醒窗的毫秒级理论竞窗已在规格 §3.3 登记，
+     * 建议用户接管后在原窗口停用桥）。返回被接管 holder 供 UI 标注。
+     */
+    async takeoverBridge(): Promise<{ ok: boolean; holder: string | null }> {
+        const claimer = this.bridgeClaimer;
+        if (!claimer?.claimSteal) return { ok: false, holder: null };
+        const hb = await readHeartbeat(this.kernelApi, heartbeatPath(this.settings.bridgeBasePath));
+        await this.stopBridge();
+        const handle = await claimer.claimSteal("siyuan-quickgate-bridge");
+        if (handle === null || handle === undefined) return { ok: false, holder: hb?.holder ?? null };
+        this.bridgeClaim = handle ?? undefined;
+        const service = new BridgeService(this.deps());
+        this.activeService = service;
+        this.beginPolling(service, hb ? `（接管自 ${hb.holder}）` : "（接管：原持有方无心跳记录）");
+        return { ok: true, holder: hb?.holder ?? null };
     }
 
     /** v1.5 广播快路径（独立开关，默认关）：SSE 订阅 qg-cmd 频道，毫秒级命令通道。幂等。 */
