@@ -46,6 +46,8 @@ export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
     });
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;
     dialog.element.querySelector('[data-role="refresh"]')?.addEventListener("click", () => void refresh());
+    // 打开后聚焦刷新按钮（键盘入口点；纯浏览用户不受影响）
+    (dialog.element.querySelector('[data-role="refresh"]') as HTMLButtonElement | null)?.focus({ preventScroll: true });
 
     const refresh = async () => {
         let receiptLines: string[] = [];

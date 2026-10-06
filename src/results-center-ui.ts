@@ -16,7 +16,7 @@ const PAGE_SIZE = 50;
 
 export async function openResultsCenter(host: ResultsCenterHost): Promise<void> {
     const dialog = host.ui.openDialog(
-        `<div id="qg-results" style="min-width:min(640px, 92vw);padding:14px 16px;font-size:12px">` +
+        `<div id="qg-results" style="padding:14px 16px;font-size:12px">` +
         `<div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>回执中心</span>` +
         `<span style="font-size:11px;color:var(--b3-theme-on-surface-light)">外部命令回执留档（results.ndjson）</span><span class="sp"></span>` +
         `<button class="b3-button b3-button--small" data-role="reload" title="重新读取 results.ndjson">刷新</button>` +
@@ -144,9 +144,6 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
         apply();
     };
     root.querySelector("[data-role=reload]")?.addEventListener("click", () => void reload());
-    // 打开即聚焦搜索（键盘流：打开后直接输入即可过滤）
-    qInput.focus();
-    // CSV 导出（R302 增量）：导出当前筛选结果（与显示同源）
     root.querySelector("[data-role=csv]")?.addEventListener("click", () => {
         const sinceSel = root.querySelector("[data-role=since]") as HTMLSelectElement | null;
         const rows = filterReceipts(all, { status: statusSel.value, q: qInput.value, since: (sinceSel?.value as "today" | "7d" | "all" | undefined) ?? "all" });
@@ -166,8 +163,7 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
         URL.revokeObjectURL(a.href);
         host.ui.showMessage(`已导出 ${rows.length} 条（CSV，UTF-8 BOM）`, 3000, "info");
     });
-    // 打开即聚焦搜索（键盘流：打开后直接输入即可过滤）
-    qInput.focus();
+    // 打开即聚焦搜索（键盘流：打开后直接输入即可过滤；原先重复调用两次已收敛为一）
 
     // 首次装载（含状态归纳）
     const base = host.settings.bridgeBasePath;

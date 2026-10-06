@@ -1211,4 +1211,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
     });
 
     show(initialPage); // 首跑向导或状态概览；支持 queue/connection 等直达（通知中心动作跳转用）
+    // 打开即聚焦搜索（R330：键盘流入口；首跑向导语境搜索条隐藏则不抢焦点）
+    if (!root.classList.contains("qg-firstrun")) {
+        setTimeout(() => { if (document.body.contains(root)) searchInput.focus({ preventScroll: true }); }, 50);
+    }
 }

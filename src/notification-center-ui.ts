@@ -60,6 +60,10 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
     dialog.element.querySelector(".b3-dialog__container")?.setAttribute("style", "width:min(640px, 92vw)");
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;
     dialog.element.querySelector('[data-role="refresh"]')?.addEventListener("click", () => void refresh());
+    // 键盘导航（R315/R330）：容器 tabindex=-1 并在打开后聚焦——否则焦点留在外部触发按钮，
+    // ↑↓/Enter 根本收不进本对话框（靶场实测踩坑）
+    (dialog.element.querySelector("#qg-notify") as HTMLElement | null)?.setAttribute("tabindex", "-1");
+    (dialog.element.querySelector("#qg-notify") as HTMLElement | null)?.focus({ preventScroll: true });
     // 键盘导航（R315）：↑↓ 移动高亮，Enter 触发当前条目动作（与命令面板交互习惯一致）
     let items: NotificationItem[] = [];
     let active = 0;
