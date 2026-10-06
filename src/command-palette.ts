@@ -258,6 +258,24 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                 title: e.title, sub: e.pluginDisplayName, kbd: e.accelerator,
                 isActive: i === active, attrs: { i: String(i) },
             });
+            // L552 部分：复制命令信封（宿主命令 → commands.run 信封；粘贴到 lv-cli send / Quicker 即发）
+            const copyEnv = document.createElement("button");
+            copyEnv.className = "qg-palette-copy";
+            copyEnv.title = "复制命令信封 JSON（commands.run，可粘贴到 lv-cli / Quicker 发命令）";
+            copyEnv.setAttribute("aria-label", `复制 ${e.title} 的命令信封`);
+            copyEnv.textContent = "{}";
+            copyEnv.onclick = (ev) => {
+                ev.stopPropagation();
+                const envelope = {
+                    v: 1,
+                    id: `ui-${Date.now()}-${Math.floor(Math.random() * 65536).toString(16)}`,
+                    op: "commands.run",
+                    args: { plugin: e.plugin, command: e.id },
+                    createdAt: new Date().toISOString(),
+                };
+                void navigator.clipboard.writeText(JSON.stringify(envelope)).then(() => showMessage("命令信封已复制（commands.run，id 由桥记账）", 2200, "info"));
+            };
+            item.appendChild(copyEnv);
             // ★ 收藏切换（R311）：按钮独立于整行执行热区
             const star = document.createElement("button");
             star.className = "qg-palette-star";
@@ -275,10 +293,31 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             head.className = "qg-palette-group";
             head.textContent = "能力动作（快门桥）";
             list.appendChild(head);
-            caps.forEach((c, j) => list.appendChild(mkItem({
-                mark: " ", title: c.label, sub: c.op, kbd: "参数",
-                isActive: cmdCount() + j === active, attrs: { cap: c.op },
-            })));
+            caps.forEach((c, j) => {
+                const capItem = mkItem({
+                    mark: " ", title: c.label, sub: c.op, kbd: "参数",
+                    isActive: cmdCount() + j === active, attrs: { cap: c.op },
+                });
+                // L552 部分：能力动作的信封即自身 op（args 由「参数」表单填写）
+                const copyEnv = document.createElement("button");
+                copyEnv.className = "qg-palette-copy";
+                copyEnv.title = "复制命令信封 JSON（可粘贴到 lv-cli / Quicker 后补 args）";
+                copyEnv.setAttribute("aria-label", `复制 ${c.label} 的命令信封`);
+                copyEnv.textContent = "{}";
+                copyEnv.onclick = (ev) => {
+                    ev.stopPropagation();
+                    const envelope = {
+                        v: 1,
+                        id: `ui-${Date.now()}-${Math.floor(Math.random() * 65536).toString(16)}`,
+                        op: c.op,
+                        args: {},
+                        createdAt: new Date().toISOString(),
+                    };
+                    void navigator.clipboard.writeText(JSON.stringify(envelope)).then(() => showMessage(`命令信封已复制（${c.op}，args 待填）`, 2200, "info"));
+                };
+                capItem.appendChild(copyEnv);
+                list.appendChild(capItem);
+            });
         }
         list.querySelector(".qg-palette-item.active")?.scrollIntoView({ block: "nearest" });
     };

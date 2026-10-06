@@ -614,6 +614,19 @@
     &:hover, &:focus-visible { background: var(--b3-theme-primary-lightest); color: var(--b3-theme-warning, var(--b3-theme-secondary)); }
   }
   .qg-palette-item.active .qg-palette-star { color: var(--b3-theme-primary); }
+  /* {} 复制命令信封（L552 部分）：ghost 悬停显形，不与行主体抢视觉 */
+  .qg-palette-copy {
+    flex: none; width: 22px; height: 22px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; border: none; border-radius: 5px;
+    color: var(--b3-theme-on-surface-light);
+    font-family: var(--b3-font-family-code, ui-monospace, Consolas, monospace);
+    font-size: 10px; line-height: 1; cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--qg-t1) var(--qg-ease), background var(--qg-t1) var(--qg-ease), color var(--qg-t1) var(--qg-ease);
+    &:hover, &:focus-visible { opacity: 1; background: var(--b3-theme-primary-lightest); color: var(--b3-theme-primary); }
+  }
+  .qg-palette-item:hover .qg-palette-copy { opacity: 1; }
   .qg-palette-empty { font-size: 12px; color: var(--b3-theme-on-surface); padding: 10px 2px 6px; }
   .qg-palette-fallbacks { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; }
   /* 参数表单（二段式）：字段密度独立于大搜索框——此规则必须位于上方 .b3-text-field 之后才能胜出 */

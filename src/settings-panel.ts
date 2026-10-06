@@ -658,19 +658,44 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 }
             } catch { /* 读取失败保留 0 并在下方面板给原因 */ }
             let pending = 0;
+            let oldestMin: number | null = null; // 最老待处理年龄（分钟；L605 部分：超 TTL 可见）
             try {
                 const text = (await host.kernelApi.getFileText(`${host.settings.bridgeBasePath}/commands.ndjson`)) ?? "";
-                pending = text.trim() ? text.trim().split("\n").filter(Boolean).length : 0;
+                const lines = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
+                pending = lines.length;
+                const now = Date.now();
+                for (const l of lines) {
+                    try {
+                        const c = JSON.parse(l) as { createdAt?: string };
+                        const t = c.createdAt ? Date.parse(c.createdAt) : NaN;
+                        if (Number.isFinite(t)) {
+                            const age = (now - t) / 60000;
+                            if (oldestMin === null || age > oldestMin) oldestMin = age;
+                        }
+                    } catch { /* 坏行跳过 */ }
+                }
             } catch { /* 同上 */ }
-            return { pending, bytes };
+            return { pending, bytes, oldestMin };
         };
-        void stat().then(({ pending, bytes }) => {
+        void stat().then(({ pending, bytes, oldestMin }) => {
+            // L605 部分：待处理超 60s TTL（信封缺省窗口）即示警——积压可灰可见，不再只是数字
+            const oldestOverTtl = pending > 0 && oldestMin !== null && oldestMin >= 1;
+            const oldestCell = pending === 0
+                ? { v: "–", l: "最老待处理", warn: false }
+                : {
+                    v: oldestMin === null ? "–" : oldestMin >= 60 ? `${Math.round(oldestMin / 60)}时` : `${Math.max(1, Math.round(oldestMin))}分`,
+                    l: oldestOverTtl ? "最老待处理（超 TTL）" : "最老待处理",
+                    warn: oldestOverTtl,
+                };
+            const warnStyle = ' style="border-color:color-mix(in srgb, var(--b3-theme-warning, var(--b3-theme-secondary)) 45%, transparent)"';
+            const warnNum = ' style="color:var(--b3-theme-warning, var(--b3-theme-secondary))"';
             kpi.innerHTML = [
-                { v: pending, l: "待处理命令" },
-                { v: Object.keys(host.store.processed.processed).length, l: "处理台账" },
-                { v: host.activeService?.lateCompletions ?? 0, l: "迟到完成" },
-                { v: `${(bytes / 1024).toFixed(1)}K`, l: "载体占用" },
-            ].map((k) => `<div class="kv"><b>${kpiValue(k.v)}</b><span>${esc(k.l)}</span></div>`).join("");
+                { v: pending, l: "待处理命令", warn: false },
+                oldestCell,
+                { v: Object.keys(host.store.processed.processed).length, l: "处理台账", warn: false },
+                { v: host.activeService?.lateCompletions ?? 0, l: "迟到完成", warn: false },
+                { v: `${(bytes / 1024).toFixed(1)}K`, l: "载体占用", warn: false },
+            ].map((k) => `<div class="kv"${k.warn ? warnStyle : ""}><b${k.warn ? warnNum : ""}>${kpiValue(k.v)}</b><span>${esc(k.l)}</span></div>`).join("");
         });
 
         const tableCard = document.createElement("div");
@@ -950,7 +975,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     `<span class="qg-chip ${receiptKind(a.status)}">${esc(a.status)}</span>` +
                     `<span class="qg-dim qg-num qg-audit-ms">${esc(fmtElapsedMs(a.elapsedMs))}</span>` +
                     `<button class="b3-button b3-button--small qg-copy-btn" data-qg-copy="${idx}">复制</button></div>`;
-            }).join("") || `<div class="qg-empty">无匹配条目——调整关键词或日期。</div>`;
+            }).join("") || `<div class="qg-empty">无匹配条目——调整关键词或日期；入门见 <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/GETTING-STARTED.md">上手指南</a>。</div>`;
             return `<div style="display:flex;gap:6px;margin-bottom:8px">` +
                 `<input id="qg-audit-filter" class="b3-text-field" style="flex:1" placeholder="筛选：op / 状态 / 插件" value="${esc(state.kw)}" />` +
                 `<input id="qg-audit-date" type="date" class="b3-text-field" style="width:150px" value="${state.date}" title="按日期筛选" />` +
@@ -1022,7 +1047,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 `<div class="qg-mono qg-fav-id">${esc(r.plugin)}/${esc(r.command)} · ${esc(fmtLocalStamp(r.at, false))}</div></div>` +
                 `<button class="b3-button b3-button--small qg-copy-btn" data-qg-rec-del="${i}">移除</button></div>`;
             return `<div class="qg-page-title" style="margin:2px 0 6px">收藏（${s.favorites.length}）</div>` +
-                (s.favorites.map(favRow).join("") || `<div class="qg-empty">暂无收藏——面板/CLI 经 favorites.add 添加。</div>`) +
+                (s.favorites.map(favRow).join("") || `<div class="qg-empty">暂无收藏——面板条目右侧 ☆ 或 CLI/MCP 经 favorites.add 添加；命令用法见 <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/GETTING-STARTED.md">上手指南</a>。</div>`) +
                 `<div class="qg-page-title" style="margin:12px 0 6px">最近使用（${s.recent.length}）</div>` +
                 (s.recent.map(recRow).join("") || `<div class="qg-empty">暂无最近使用。</div>`) +
                 `<div style="margin-top:12px"><button class="b3-button b3-button--small qg-btn-danger" data-qg-rec-clear ${s.recent.length === 0 ? "disabled" : ""}>清空全部最近使用</button></div>`;
