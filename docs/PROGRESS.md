@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R329（微打磨收尾 + 生产构建部署主工作区）
+
+- 微打磨：回执中心行补悬停反馈（`qg-card.hoverable` 规则收编进共享块）；恢复中心「已处置记录」summary 链接化（去内联样式，hover 变主色）。
+- **生产构建 + 部署**：`npm run build`（clean+app+kernel）→ check-release（无 Token/路径泄露）+ check-package（kernels/双 js/zip 断言）双门过 → 部署主工作区 data/plugins/siyuan-quickgate → `diff -rq` 逐字节一致；顺带清掉工作区两个旧版残留（ecosystem-manifests-*.cjs 旧构建物 / README.zh-CN.md，新构建无引用）。**重启思源（tools/restart-siyuan.bat）后生效。**
+- 218 测全绿 + tsc 0 错 + 回归截图（主批+子界面 15 张）无恙。
+
 ## 2026-10-07 · R328（交互 pending 态 + 宽度一致性 + 错误态验证）
 
 - 按钮 pending 态：`withPending` 助手（禁用+文案切换+finally 恢复）用于桥自检三处；向导自检运行中禁用两颗按钮；命令面板执行派发期间禁用、失败恢复可重试——补齐质感规则里的 loading/disabled 态（防连点重复派发）。

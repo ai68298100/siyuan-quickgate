@@ -150,7 +150,10 @@
     border-radius: 8px;
     background: var(--b3-theme-background);
     padding: 12px 14px;
+    transition: border-color var(--qg-t1) var(--qg-ease);
   }
+  /* 可悬停卡（结果中心行等列表卡）：悬停描边提一档（设置块内的同规则由此收编） */
+  .qg-card.hoverable:hover { border-color: var(--b3-theme-on-surface-light); }
   .qg-card.danger { background: color-mix(in srgb, var(--b3-theme-error) 4%, transparent); }
   .qg-card.accent {
     border-color: var(--b3-theme-primary);
@@ -183,6 +186,13 @@
   .qg-hint { font-size: 12px; color: var(--b3-theme-on-surface); line-height: 1.7; }
   /* 数字/时间列等宽对齐（回执表、KPI 的跟手数字） */
   .qg-num { font-variant-numeric: tabular-nums; }
+
+  /* 折叠块（恢复中心·已处置记录）：summary 链接化暗示可点 */
+  details > summary {
+    cursor: pointer; color: var(--b3-theme-on-surface); font-size: 11px;
+    transition: color var(--qg-t1) var(--qg-ease);
+  }
+  details > summary:hover { color: var(--b3-theme-primary); }
 
   /* ── 审计列表行（时间 | 插件/命令 | 状态 | 耗时 | 复制）── */
   .qg-audit-list { font-size: 12px; }
@@ -391,8 +401,7 @@
   .qg-page-sub { font-size: 11px; color: var(--b3-theme-on-surface-light); margin: 0 0 12px; }
 
   /* ══════════ 卡片 ══════════ */
-  .qg-card { margin-bottom: 10px; transition: border-color var(--qg-t1) var(--qg-ease); }
-  .qg-card.hoverable:hover { border-color: var(--b3-theme-on-surface-light); }
+  .qg-card { margin-bottom: 10px; }
   .qg-card.danger {
     border-style: dashed;
     display: flex; gap: 10px; align-items: center; padding: 10px 14px; flex-wrap: wrap;

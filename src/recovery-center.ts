@@ -119,7 +119,7 @@ export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
             .sort((a, b) => (a[1].at < b[1].at ? 1 : -1))
             .slice(0, 30);
         if (entries.length === 0) return "";
-        return `<details style="margin-top:10px"><summary style="cursor:pointer;color:var(--b3-theme-on-surface);font-size:11px">已处置记录（${entries.length}，最近 30 条）</summary>` +
+        return `<details style="margin-top:10px"><summary>已处置记录（${entries.length}，最近 30 条）</summary>` +
             `<div style="margin-top:4px;color:var(--b3-theme-on-surface)">${entries.map(([id, r]) =>
                 `<div>${esc(r.at.slice(11, 19))} <span class="qg-mono">${esc(id)}</span> → ${esc(r.action)}</div>`).join("")}</div></details>`;
     };

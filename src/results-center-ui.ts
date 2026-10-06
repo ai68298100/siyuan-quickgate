@@ -51,7 +51,7 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
             : r.status === "rejected" || r.status === "expired" ? "warn"
             : r.status === "failed" || r.status === "unknown" ? "err" : "mute";
         const div = document.createElement("div");
-        div.className = "qg-card";
+        div.className = "qg-card hoverable";
         div.style.cssText = "padding:7px 10px;margin-bottom:6px";
         const top = document.createElement("div");
         top.style.cssText = "display:flex;gap:8px;align-items:center";
