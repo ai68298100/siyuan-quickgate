@@ -80,6 +80,11 @@
 - `flushAudit` 公开化：审计分组导入后立即写回载体（不再等 pushAudit 节流）
 - 修复：收藏当前计数读取把 `getFileText` 字符串直传 normalize 导致恒显示 0（R337 同型教训，生产路径）
 
+### Added/Perf（账本待办落地，R340 · L600/L552 部分）
+- **命令面板千条压测达标**（L600 部分）：输入防抖 120ms（与设置搜索同口径）+ 渲染截断前 100 条（超出提示继续输入缩小范围，顺序稳定）+ 键盘/点击索引统一 visible 切片；靶场千条合成命令实测击键落定 p50 167ms（防抖 120 + 渲染 ~46ms）、无掉帧
+- **能力动作表单写入标注**（L552 部分）：表单阶段按 op 注解双档提示——destructive（plugin.api/workflow.execute）红框「写入或修改数据」、其他写 op 琥珀「写入数据」，口径与 MCP annotations 同源（新增导出 `opWriteAnnotation`）
+- 修复：收藏当前计数读取把 `getFileText` 字符串直传 normalize 导致恒显示 0（R337 同型教训，生产路径）
+
 ### Docs
 - 原型 [design/ui-prototype/mvp1.html](design/ui-prototype/mvp1.html) 补 ⑤命令面板/⑥通知中心/⑦恢复中心/⑧回执中心四屏；既有四屏同步新能力（设置搜索条/快速捕获去向/备份卡/入口按钮组）与实现位置注记
 - README 双语新增「插件内 UI」节 + 路线行；测试数 210→218

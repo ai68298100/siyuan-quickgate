@@ -9,7 +9,7 @@ import { expandSearchKeyword } from "./services/search-alias";
 import { normalizeFavorites } from "./services/favorites";
 import { runCommand, RegistryProbeResult } from "./services/registry";
 import { installFocusTrap } from "./services/focus-trap";
-import { getArgsSpec } from "./mcp/tools";
+import { getArgsSpec, opWriteAnnotation } from "./mcp/tools";
 import type { Dialog, showMessage } from "siyuan";
 import type { KernelApi } from "./services/kernelApi";
 import type { QuickGateSettings, AuditEntry } from "./types/bridge";
@@ -186,6 +186,10 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
     let stage: "list" | "form" = "list";
     let formOp = "";
 
+    let renderDebounce = 0;
+    const RENDER_LIMIT = 100; // L600 部分：渲染截断——千条命令下每键全量重建 DOM 会卡，先出前 100 条保顺序稳定
+    let visibleEntries: PaletteEntry[] = []; // 截断后实际渲染的切片（键盘/点击索引统一用它）
+
     const render = () => {
         if (stage === "form") { renderForm(); return; }
         entries = buildPaletteEntries(all, favorites, recent, input.value);
@@ -253,7 +257,10 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             }
             return div;
         };
-        entries.forEach((e, i) => {
+        // L600 部分：渲染截断（先出前 100 条，顺序稳定；超出部分提示继续输入缩小范围）
+        const visible = entries.length > RENDER_LIMIT ? entries.slice(0, RENDER_LIMIT) : entries;
+        visibleEntries = visible;
+        visible.forEach((e, i) => {
             const item = mkItem({
                 // mark 全用单色文本字形（★/↺）——彩色 emoji（🕐）在 Windows 上视觉重量突兀
                 mark: e.favorite ? "★" : e.recent ? "↺" : undefined,
@@ -290,6 +297,12 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             item.appendChild(star);
             list.appendChild(item);
         });
+        if (entries.length > RENDER_LIMIT) {
+            const more = document.createElement("div");
+            more.className = "qg-palette-empty";
+            more.textContent = `共 ${entries.length} 条匹配，已显示前 ${RENDER_LIMIT} 条——继续输入缩小范围。`;
+            list.appendChild(more);
+        }
         if (caps.length > 0) {
             const head = document.createElement("div");
             head.className = "qg-palette-group";
@@ -340,6 +353,21 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                 `<div class="qg-form-desc">${esc(f.description)}</div>${ctl}</div>`;
         }).join("");
         list.innerHTML = `<div style="font-size:13px;font-weight:600;margin-bottom:10px">${esc(label)} <span style="font-weight:400;color:var(--b3-theme-on-surface);font-size:11px">— 填写参数后执行</span></div>` +
+            // L552 部分：副作用标注（口径与 MCP annotations 同源）——destructive 红框、写操作琥珀提示
+            (() => {
+                const ann = opWriteAnnotation(formOp);
+                if (ann.destructive) {
+                    return `<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 10px;margin-bottom:10px;border:1px solid color-mix(in srgb, var(--b3-theme-error) 35%, transparent);border-radius:6px;background:color-mix(in srgb, var(--b3-theme-error) 6%, transparent);font-size:12px;line-height:1.6">` +
+                        `<span class="qg-chip err" style="flex:none;margin-top:1px">写入</span>` +
+                        `<span>此动作会<b>写入或修改数据</b>——执行前请核对参数；确认门控仍会在派发层拦截。</span></div>`;
+                }
+                if (ann.write) {
+                    return `<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 10px;margin-bottom:10px;border:1px solid color-mix(in srgb, var(--b3-theme-warning, var(--b3-theme-secondary)) 30%, transparent);border-radius:6px;background:color-mix(in srgb, var(--b3-theme-warning, var(--b3-theme-secondary)) 7%, transparent);font-size:12px;line-height:1.6">` +
+                        `<span class="qg-chip warn" style="flex:none;margin-top:1px">写入</span>` +
+                        `<span>此动作会写入数据（打卡 / 人脉 / 收藏 / 文档）；确认门控仍会在派发层拦截。</span></div>`;
+                }
+                return "";
+            })() +
             (fieldHtml || `<div style="color:var(--b3-theme-on-surface);font-size:12px;margin-bottom:8px">该动作无参数。</div>`) +
             `<div style="display:flex;gap:8px;margin-top:12px">` +
             `<button class="b3-button b3-button--outline" data-form="back">返回</button>` +
@@ -424,16 +452,23 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         showMessage(r.ok ? `已执行：${e.title}` : r.message, r.ok ? 2500 : 5000, r.ok ? "info" : "error");
     };
 
-    input.addEventListener("input", () => { active = 0; if (stage === "list") render(); });
+    // L600 部分：输入防抖 120ms——千条命令下每键全量过滤+重建会掉帧（settings 搜索同口径）
+    const navMaxIndex = () => Math.min(entries.length, RENDER_LIMIT) + list.querySelectorAll("[data-cap]").length - 1;
+    input.addEventListener("input", () => {
+        active = 0;
+        if (stage !== "list") return;
+        if (renderDebounce) window.clearTimeout(renderDebounce);
+        renderDebounce = window.setTimeout(() => { renderDebounce = 0; render(); }, 120);
+    });
     input.addEventListener("keydown", (ev) => {
         if (stage === "form") return; // 表单阶段由字段自身处理键盘
-        const capCount = list.querySelectorAll("[data-cap]").length;
-        if (ev.key === "ArrowDown") { ev.preventDefault(); active = Math.min(active + 1, entries.length + capCount - 1); render(); }
+        if (renderDebounce) { window.clearTimeout(renderDebounce); renderDebounce = 0; render(); } // 键盘导航前先落定最新结果
+        if (ev.key === "ArrowDown") { ev.preventDefault(); active = Math.min(active + 1, navMaxIndex()); render(); }
         else if (ev.key === "ArrowUp") { ev.preventDefault(); active = Math.max(active - 1, 0); render(); }
         else if (ev.key === "Enter") {
             ev.preventDefault();
-            if (active < entries.length) {
-                const picked = entries[active];
+            if (active < visibleEntries.length) {
+                const picked = visibleEntries[active];
                 if (picked) void runEntry(picked);
             } else {
                 const capEl = list.querySelectorAll("[data-cap]")[active - entries.length] as HTMLElement | undefined;
@@ -452,7 +487,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         const capItem = (ev.target as HTMLElement).closest("[data-cap]") as HTMLElement | null;
         if (capItem?.dataset.cap) { stage = "form"; formOp = capItem.dataset.cap; render(); return; }
         const item = (ev.target as HTMLElement).closest("[data-i]") as HTMLElement | null;
-        if (item) { void runEntry(entries[Number(item.dataset.i)]); return; }
+        if (item) { void runEntry(visibleEntries[Number(item.dataset.i)]); return; }
         const fb = (ev.target as HTMLElement).closest("[data-fb]") as HTMLElement | null;
         if (!fb) return;
         if (fb.dataset.fb === "capture") {

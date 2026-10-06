@@ -35,6 +35,12 @@ const READ_ONLY_OPS: ReadonlySet<string> = new Set([
 /** 破坏性（可删改数据）而非仅副作用：plugin.api 任意调用、workflow.execute 执行计划 */
 const DESTRUCTIVE_OPS: ReadonlySet<string> = new Set(["plugin.api", "workflow.execute"]);
 
+/** 面板/CLI 等前端面复用 MCP 注解口径（L552 部分）：该 op 的副作用标注；未登记 op 保守视为有副作用 */
+export function opWriteAnnotation(op: string): { write: boolean; destructive: boolean } {
+    const readOnly = READ_ONLY_OPS.has(op);
+    return { write: !readOnly, destructive: !readOnly && DESTRUCTIVE_OPS.has(op) };
+}
+
 /** 幂等（同一调用重复执行无额外副作用；R234 调研候选①）——config.discover 有 opt-in 创建故不在列 */
 const IDEMPOTENT_OPS: ReadonlySet<string> = new Set([
     "bridge.ping", "commands.list", "commands.search", "favorites.list", "favorites.add",

@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R340（账本待办落地：面板千条压测达标 + 写入双档标注）
+
+- L600 部分：命令面板输入防抖 120ms + 渲染截断前 100 条（超出提示继续输入）+ 键盘/点击索引统一 visibleEntries 切片（Enter/ArrowDown 范围同步钳制）。靶场 stress=1000 合成注册表实测：击键落定 p50 167ms（防抖 120 + 渲染 ~46ms）、111 匹配显示前 100、顺序稳定、无掉帧。工具链：mock-host 支持 &stress=N 合成注册表。
+- L552 部分：能力动作表单写入双档标注——`opWriteAnnotation`（tools.ts 新导出，复用 MCP annotations 口径）：destructive 红框「写入或修改数据」、其他写 op 琥珀「写入数据」，只读 op 无提示。
+- TODO L600/L552 注记更新。218 测全绿 + tsc 0 错。
+
 ## 2026-10-07 · R339（账本待办落地：队列页载体明细卡）
 
 - L630 部分：队列页「载体明细」卡——commands/results/events/audit/favorites 逐文件行数/字节/裁剪规则说明，合计占用、最老/最新回执时间（fmtLocalStamp）、清理前导出引导；只读统计异步填充（失败不打断主 KPI）。
