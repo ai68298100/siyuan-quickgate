@@ -210,6 +210,40 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         return JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics), null, 2);
     };
 
+    /** 载体明细（L630 部分）：逐文件行数/字节 + 最老/最新回执时间（只读统计，不做任何改动） */
+    const buildStorageDetail = async (): Promise<{ rows: Array<{ file: string; lines: string; bytesK: string; note: string }>; totalBytesK: string; oldestReceipt: string; newestReceipt: string } | null> => {
+        const readText = async (p: string) => (await host.kernelApi.getFileText(p)) ?? "";
+        const base = host.settings.bridgeBasePath;
+        const rows: Array<{ file: string; lines: string; bytesK: string; note: string }> = [];
+        let totalBytes = 0;
+        let oldestReceipt = "–";
+        let newestReceipt = "–";
+        const fileStat = async (file: string, p: string, note: string): Promise<void> => {
+            const text = await readText(p);
+            const b = new TextEncoder().encode(text).length;
+            totalBytes += b;
+            const lines = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
+            rows.push({ file, lines: String(lines.length), bytesK: (b / 1024).toFixed(1), note });
+        };
+        await fileStat("commands.ndjson", `${base}/commands.ndjson`, "待消费命令，执行即移除；超 TTL 可在上方清理");
+        await fileStat("results.ndjson", `${base}/results.ndjson`, "滚动窗口 200 行");
+        await fileStat("events.ndjson", "/storage/petal/siyuan-checkin/bridge/events.ndjson", "事件物化（惰性压缩，删除标记共存）");
+        await fileStat("audit.json", "/storage/petal/siyuan-quickgate/audit.json", `审计上限 ${host.settings.auditMax} 条`);
+        await fileStat("favorites.json", "/storage/petal/siyuan-quickgate/favorites.json", "收藏与最近使用");
+        // 最老/最新回执时间（results 头尾）
+        try {
+            const text = await readText(`${base}/results.ndjson`);
+            const lines = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
+            const ts = (l: string | undefined) => {
+                if (!l) return null;
+                try { const r = JSON.parse(l) as { finishedAt?: string }; return r.finishedAt ? fmtLocalStamp(r.finishedAt) : null; } catch { return null; }
+            };
+            oldestReceipt = ts(lines[0]) ?? "–";
+            newestReceipt = ts(lines[lines.length - 1]) ?? "–";
+        } catch { /* 统计失败不影响主 KPI */ }
+        return { rows, totalBytesK: (totalBytes / 1024).toFixed(1), oldestReceipt, newestReceipt };
+    };
+
     /** 清空命令队列（带预览确认；队列页危险区与桥恢复向导共用） */
     const clearQueueWithPreview = async (onDone?: () => void): Promise<void> => {
         try {
@@ -807,6 +841,20 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 { v: host.activeService?.lateCompletions ?? 0, l: "迟到完成", warn: false },
                 { v: `${(bytes / 1024).toFixed(1)}K`, l: "载体占用", warn: false },
             ].map((k) => `<div class="kv"${k.warn ? warnStyle : ""}><b${k.warn ? warnNum : ""}>${kpiValue(k.v)}</b><span>${esc(k.l)}</span></div>`).join("");
+
+            // L630 部分：载体明细卡（逐文件行数/占用 + 裁剪规则 + 最老/最新回执；只读统计，异步填充不阻塞主 KPI）
+            void buildStorageDetail().then((detail) => {
+                if (!detail || !document.body.contains(kpi)) return;
+                const detailCard = document.createElement("div");
+                detailCard.className = "qg-card";
+                detailCard.style.padding = "0 14px 6px";
+                detailCard.innerHTML = `<div class="qg-card-title" style="padding:10px 0 6px">载体明细 <span style="margin-left:auto;font-size:11px;font-weight:400;color:var(--b3-theme-on-surface)">合计 ${esc(detail.totalBytesK)}K · 最老回执 ${esc(detail.oldestReceipt)} / 最新 ${esc(detail.newestReceipt)}</span></div>` +
+                    `<table class="qg-receipts"><thead><tr><th>载体</th><th>行/条数</th><th>占用</th><th style="font-weight:400">说明与裁剪规则</th></tr></thead><tbody>` +
+                    detail.rows.map((r) => `<tr><td class="qg-mono">${esc(r.file)}</td><td class="qg-num">${esc(r.lines)}</td><td class="qg-num">${esc(r.bytesK)}K</td><td class="qg-dim" style="font-size:11px">${esc(r.note)}</td></tr>`).join("") +
+                    `</tbody></table>` +
+                    `<div style="font-size:11px;color:var(--b3-theme-on-surface);padding:6px 0 8px;line-height:1.7">清理前请先用上方按钮导出（结果中心 / 导出审计 JSON / 全量备份）。</div>`;
+                kpi.after(detailCard);
+            }).catch(() => { /* 明细统计失败不打断主 KPI */ });
         });
 
         const tableCard = document.createElement("div");
