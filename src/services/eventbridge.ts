@@ -79,11 +79,20 @@ export function normalizeCheckinEventDeleted(detail: unknown, emittedAt: string)
     return out;
 }
 
-/** 追加事件行（滚动上限与 results 一致） */
-export function appendEventLine(existingText: string, event: HubEvent, cap = 200): string {
+/** 追加事件行（滚动上限与 results 一致；L630 R-A：可选天数裁剪，默认关零开销） */
+export function appendEventLine(existingText: string, event: HubEvent, opts?: { cap?: number; retentionDays?: number; nowMs?: number }): string {
+    const cap = opts?.cap ?? 200;
     const lines = existingText.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n").filter((l) => l.trim() !== "");
     lines.push(JSON.stringify(event));
-    return lines.slice(-cap).join("\n") + "\n";
+    const trimmed = lines.slice(-cap);
+    if (opts?.retentionDays && opts.retentionDays > 0) {
+        const cutoff = (opts.nowMs ?? Date.now()) - opts.retentionDays * 86_400_000;
+        const kept = trimmed.filter((l) => {
+            try { return Date.parse((JSON.parse(l) as HubEvent).emittedAt) >= cutoff; } catch { return true; } // 坏行按保留处理
+        });
+        return kept.join("\n") + "\n";
+    }
+    return trimmed.join("\n") + "\n";
 }
 
 /**

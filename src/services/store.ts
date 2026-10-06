@@ -109,6 +109,10 @@ export function normalizeSettings(raw: unknown): QuickGateSettings {
     if (obj.captureTarget === "daily" || obj.captureTarget === "inbox") {
         s.captureTarget = obj.captureTarget;
     }
+    // 天数保留（L630 R-A）：非负整数天（≤3650）；默认 0=关（行为与旧版一致）——不进设置页，改 bridge-settings.json 生效
+    if (typeof obj.retentionDays === "number" && Number.isInteger(obj.retentionDays) && obj.retentionDays >= 0 && obj.retentionDays <= 3650) {
+        s.retentionDays = obj.retentionDays;
+    }
     return s;
 }
 

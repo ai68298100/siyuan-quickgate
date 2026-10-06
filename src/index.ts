@@ -200,7 +200,7 @@ export default class QuickGatePlugin extends Plugin {
             const old = (await this.kernelApi.getFileText(path)) ?? "";
             let text = old;
             for (const e of plan.toAppend) {
-                text = appendEventLine(text, e);
+                text = appendEventLine(text, e, { retentionDays: this.settings.retentionDays });
             }
             await this.kernelApi.putFileText(path, text);
             for (const key of plan.toMark) this.idempotency.mark(key);
@@ -345,6 +345,11 @@ export default class QuickGatePlugin extends Plugin {
         this.auditLog.push(e);
         if (this.auditLog.length > this.settings.auditMax) {
             this.auditLog = this.auditLog.slice(-this.settings.auditMax);
+        }
+        // L630 R-A：天数保留（默认 0=关）——与条数裁剪叠加；无 finishedAt 字段，time 即 ISO
+        if (this.settings.retentionDays > 0) {
+            const cutoff = Date.now() - this.settings.retentionDays * 86_400_000;
+            this.auditLog = this.auditLog.filter((a) => { try { return Date.parse(a.time) >= cutoff; } catch { return true; } });
         }
         this.scheduleAuditFlush(); // R2：节流合并写，避免每条命令一次 saveData
     }

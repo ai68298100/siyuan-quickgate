@@ -111,4 +111,21 @@ describe("eventbridge（D-0009 事件物化）", () => {
         const out = await enqueue(async () => "after-failure");
         expect(out).toBe("after-failure");
     });
+
+    it("L630 R-A · appendEventLine 天数裁剪（默认关；>0 剔除超期行，时间不可解析按保留）", () => {
+        const ev = (k: string, emittedAt: string) => ({
+            name: "checkin:event-recorded", source: "s", emittedAt, payload: null, idempotencyKey: k,
+        });
+        const now = Date.parse("2026-10-06T10:00:00Z");
+        let text = "";
+        text = appendEventLine(text, ev("old", "2026-09-01T00:00:00Z"), { retentionDays: 30, nowMs: now });
+        text = appendEventLine(text, ev("new", "2026-10-01T00:00:00Z"), { retentionDays: 30, nowMs: now });
+        const keys = text.trim().split("\n").map((l) => (JSON.parse(l) as { idempotencyKey: string }).idempotencyKey);
+        expect(keys).toEqual(["new"]); // 超期行被剔除
+        // 默认关：同样的数据不裁
+        let text2 = "";
+        text2 = appendEventLine(text2, ev("old", "2026-09-01T00:00:00Z"));
+        text2 = appendEventLine(text2, ev("new", "2026-10-01T00:00:00Z"));
+        expect(text2.trim().split("\n").length).toBe(2);
+    });
 });

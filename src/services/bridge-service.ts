@@ -202,7 +202,7 @@ export class BridgeService {
         if (raw === null || raw.trim() === "") {
             if (receipts.length > 0) {
                 let t = (await this.deps.api.getFileText(results)) ?? "";
-                for (const r of receipts) t = appendReceipt(t, r);
+                for (const r of receipts) t = appendReceipt(t, r, { retentionDays: this.deps.settings().retentionDays });
                 await this.deps.api.putFileText(results, t);
                 await this.deps.store.saveProcessed().catch(() => {});
             }
@@ -276,7 +276,7 @@ export class BridgeService {
         if (receipts.length > 0) {
             let resultsText = (await this.deps.api.getFileText(results)) ?? "";
             for (const r of receipts) {
-                resultsText = appendReceipt(resultsText, r);
+                resultsText = appendReceipt(resultsText, r, { retentionDays: this.deps.settings().retentionDays });
             }
             await this.deps.api.putFileText(results, resultsText);
         }
@@ -323,7 +323,7 @@ export class BridgeService {
                 try {
                     const resultsPath = this.paths().results;
                     const old = (await this.deps.api.getFileText(resultsPath)) ?? "";
-                    await this.deps.api.putFileText(resultsPath, appendReceipt(old, expiredReceipt));
+                    await this.deps.api.putFileText(resultsPath, appendReceipt(old, expiredReceipt, { retentionDays: this.deps.settings().retentionDays }));
                 } catch { /* 忽略 */ }
             }
             return { executed: false, receipt: expiredReceipt };

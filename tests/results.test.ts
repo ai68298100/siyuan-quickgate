@@ -37,3 +37,27 @@ describe("results.appendReceipt / findReceiptById", () => {
         expect(findReceiptById(text, "broken")).toBeUndefined();
     });
 });
+
+describe("L630 R-A · retentionDays 天数保留（默认关零开销）", () => {
+    const receiptAt = (id: string, finishedAt: string): BridgeReceipt => ({ ...receipt(id), finishedAt });
+
+    it("retentionDays>0：追加后剔除超期行，保留期内与时间不可解析行（按保留处理）不动", () => {
+        const now = Date.parse("2026-10-06T10:00:00Z");
+        let text = "";
+        text = appendReceipt(text, receiptAt("old", "2026-09-01T00:00:00Z"), { retentionDays: 30, nowMs: now });
+        text = appendReceipt(text, receiptAt("new", "2026-10-01T00:00:00Z"), { retentionDays: 30, nowMs: now });
+        text = appendReceipt(text, "{broken", { retentionDays: 30, nowMs: now }); // 产出时间不可解析行（JSON 字符串字面量）→ 按保留处理
+        const ids = text.trim().split("\n").map((l) => { try { return (JSON.parse(l) as BridgeReceipt).id ?? "?"; } catch { return "?"; } });
+        expect(ids).toContain("new");
+        expect(text).toContain("{broken"); // 坏行不因天数裁剪丢失（人工核对权保留）
+        expect(ids).not.toContain("old");
+    });
+
+    it("retentionDays=0（默认）：行为与旧版逐字节一致——超期行仅按条数窗口裁剪", () => {
+        let text = "";
+        text = appendReceipt(text, receiptAt("old", "2025-01-01T00:00:00Z"));
+        text = appendReceipt(text, receiptAt("new", "2026-10-01T00:00:00Z"));
+        const ids = text.trim().split("\n").map((l) => (JSON.parse(l) as BridgeReceipt).id);
+        expect(ids).toEqual(["old", "new"]); // 无天数概念，只按条数
+    });
+});

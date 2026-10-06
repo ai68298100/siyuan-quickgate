@@ -210,7 +210,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         return JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics), null, 2);
     };
 
-    /** 载体明细（L630 部分）：逐文件行数/字节 + 最老/最新回执时间（只读统计，不做任何改动） */
+    /** 载体明细（L630 部分）：逐文件行数/字节 + 坏行计数 + 最老/最新回执时间（只读统计，不做任何改动） */
     const buildStorageDetail = async (): Promise<{ rows: Array<{ file: string; lines: string; bytesK: string; note: string }>; totalBytesK: string; oldestReceipt: string; newestReceipt: string } | null> => {
         const readText = async (p: string) => (await host.kernelApi.getFileText(p)) ?? "";
         const base = host.settings.bridgeBasePath;
@@ -218,18 +218,22 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         let totalBytes = 0;
         let oldestReceipt = "–";
         let newestReceipt = "–";
-        const fileStat = async (file: string, p: string, note: string): Promise<void> => {
+        const fileStat = async (file: string, p: string, note: string, kind: "ndjson" | "json"): Promise<void> => {
             const text = await readText(p);
             const b = new TextEncoder().encode(text).length;
             totalBytes += b;
             const lines = text.trim() ? text.trim().split("\n").filter(Boolean) : [];
-            rows.push({ file, lines: String(lines.length), bytesK: (b / 1024).toFixed(1), note });
+            let bad = 0;
+            if (kind === "ndjson") {
+                for (const l of lines) { try { JSON.parse(l); } catch { bad++; } } // R-B：坏行计数可见化
+            }
+            rows.push({ file, lines: String(lines.length), bytesK: (b / 1024).toFixed(1), note: bad > 0 ? `${note}（⚠ 坏行 ${bad} 条）` : note });
         };
-        await fileStat("commands.ndjson", `${base}/commands.ndjson`, "待消费命令，执行即移除；超 TTL 可在上方清理");
-        await fileStat("results.ndjson", `${base}/results.ndjson`, "滚动窗口 200 行");
-        await fileStat("events.ndjson", "/storage/petal/siyuan-checkin/bridge/events.ndjson", "事件物化（惰性压缩，删除标记共存）");
-        await fileStat("audit.json", "/storage/petal/siyuan-quickgate/audit.json", `审计上限 ${host.settings.auditMax} 条`);
-        await fileStat("favorites.json", "/storage/petal/siyuan-quickgate/favorites.json", "收藏与最近使用");
+        await fileStat("commands.ndjson", `${base}/commands.ndjson`, "待消费命令，执行即移除；超 TTL 可在上方清理", "ndjson");
+        await fileStat("results.ndjson", `${base}/results.ndjson`, "滚动窗口 200 行", "ndjson");
+        await fileStat("events.ndjson", "/storage/petal/siyuan-checkin/bridge/events.ndjson", "事件物化（惰性压缩，删除标记共存）", "ndjson");
+        await fileStat("audit.json", "/storage/petal/siyuan-quickgate/audit.json", `审计上限 ${host.settings.auditMax} 条`, "json");
+        await fileStat("favorites.json", "/storage/petal/siyuan-quickgate/favorites.json", "收藏与最近使用", "json");
         // 最老/最新回执时间（results 头尾）
         try {
             const text = await readText(`${base}/results.ndjson`);

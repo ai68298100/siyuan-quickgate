@@ -107,6 +107,8 @@ export interface QuickGateSettings {
     mobileBridgeEnabled: boolean;
     /** 快速捕获默认去向（R301：daily=今日日记 / inbox=收集箱；面板选择器记忆上次选择） */
     captureTarget: "daily" | "inbox";
+    /** 天数保留（L630 R-A · 默认 0=关）：>0 时 results/events/audit 追加裁剪追加"且 createdAt/finishedAt ≥ N 天前"；不进设置页（改 bridge-settings.json 生效——L458 内部参数先例） */
+    retentionDays: number;
 }
 
 export const DEFAULT_SETTINGS: QuickGateSettings = {
@@ -124,6 +126,7 @@ export const DEFAULT_SETTINGS: QuickGateSettings = {
     broadcastEnabled: false,
     mobileBridgeEnabled: false,
     captureTarget: "daily",
+    retentionDays: 0,
 };
 
 /** 命令注册表条目（spike① 已实证：id=langKey；形状见 services/registry.ts 头注与 WALKTHROUGH ①） */
