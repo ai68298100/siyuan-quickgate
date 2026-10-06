@@ -1084,7 +1084,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 });
                 preview.element.querySelector("[data-qg-diag-copy]")?.addEventListener("click", () => {
                     void navigator.clipboard.writeText(diagJson).then(() => {
-                        showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
+                        showMessage("诊断包已复制到剪贴板（脱敏）；敏感场合请及时清理剪贴板", 3500);
                         preview.destroy();
                     });
                 });

@@ -262,6 +262,15 @@
 
   /* 键盘可达性基线（L282 · R234，保留） */
   :focus-visible { outline: 2px solid var(--b3-theme-primary); outline-offset: 1px; }
+
+  /* L587 部分：粗指针（触屏）设备最小触控目标——主热区 44px；视觉密度不变，桌面鼠标不受影响 */
+  @media (pointer: coarse) {
+    .qg-nav-item,
+    .qg-palette-item,
+    .qg-row { min-height: 44px; }
+    .b3-button:not(.b3-button--small) { min-height: 36px; }
+    .qg-kpi .kv { min-height: 56px; }
+  }
 }
 
 /* 四中心列表卡间距（设置面板的卡片间距在 #qg-settings 块内单独给 10px） */

@@ -586,7 +586,7 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 - [x] 【R73-P0·开关状态机】桥/广播开关快速开→关→开时串行化启动与停止，期间锁定按钮；启动失败自动回滚并保留原因，禁止旧 poller/SSE 与新订阅重叠。 → ✅ R234 对照销账：竞态危害已由双层消除——①Web Lock 认领（L452，双窗口互斥）②startBridge 幂等 guard（poller.isRunning）+ startBroadcastSub 幂等（broadcastSub.running）——快速开→关→开不再产生双 poller/双订阅；开关等待完成再提示（startBridge 改 async 返回实际启动结果，失败如实提示他窗占用）。按钮锁定 UI 未做（幂等+认领已消除竞态危害，锁定属装饰性）——裁剪声明
 - [ ] 【R73-P0·键盘】打开后焦点落搜索/首控件，Tab 顺序稳定，Enter/Space/Esc 行为一致，确认框 focus trap，关闭后焦点回到触发器；仅键盘完成首跑、开关、导出和诊断。 → ◐ R331/R336 部分：打开即聚焦 + 全部对话框 destroyCallback 焦点回归 + **focus trap 已落地**（src/services/focus-trap.ts，设置/面板/恢复/通知/回执五面 Tab 循环实测回圈）；Enter/Space 语义与 Tab 顺序全量走查、全键盘完成首跑仍 pending（宿主 confirm 的 trap 属思源原生对话框范围）。
 - [ ] 【R73-P0·动态反馈】页内状态使用 `role=status/alert` 或等价可感知区域；文案统一为发生了什么、影响、下一步、复制诊断，不能只依赖颜色或短 toast。 → ◐ R331 部分：状态页最近回执 role=status（aria-live=polite）、通知/恢复列表 role=region+aria-label、面板执行消息 role=status 已落地；轮询间隔校验早有 role=alert；全量状态文案统一仍 pending。
-- [ ] 【R73-P1·移动】按钮/开关/菜单触控目标至少 44 CSS px；验收横竖屏、safe-area、键盘顶起和窄屏输入不被遮挡，移动默认不暗启轮询。
+- [ ] 【R73-P1·移动】按钮/开关/菜单触控目标至少 44 CSS px；验收横竖屏、safe-area、键盘顶起和窄屏输入不被遮挡，移动默认不暗启轮询。 → ◐ R342 部分：coarse-pointer 媒体查询已落地（qg 根内 nav/palette/row 主热区 ≥44px、常规按钮 36px、KPI 56px，桌面鼠标不受影响）；横竖屏/safe-area/键盘顶起真机验收仍 pending（需移动真机）。
 - [ ] 【R73-P1·缩放】320px 宽和 200% 缩放下不横向滚动；长按钮换行，日志/诊断可滚动，焦点始终可见。 → ◐ R334 部分：320px 全屏扫（11 界面 × 亮暗，documentElement.scrollWidth 断言）零横向溢出已验证（footer/filterbar/nhead wrap + 表格 break-all 既有规则覆盖）；200% 缩放等价窄视口以同法覆盖；焦点可见性此前已有 :focus-visible 基线。
 - [ ] 【R73-P1·主题】亮、暗、高对比度和 reduced-motion 走查；边框/错误/成功对比度合格，状态不只用颜色表达。
 - [ ] 【R73-P1·空态】桥关闭、无插件、无历史、无回执、无收藏、无权限统一显示原因、主动作、次动作和帮助链接。 → ◐ R332 部分：审计无匹配与收藏空态补「上手指南」帮助链接已落地（此前各面已各有原因+主动作）；无插件/无权限空态与统一范式仍 pending。
@@ -607,7 +607,7 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 - [ ] 【R74-P1·阈值】界面显示队列/事件/审计行数、字节、最老/最新时间和预计滚动点，在 70/90/100% 给提醒、导出和清理操作。 → ◐ R335 追加：处理台账容量可见化（X / 500 上限，≥80% 预警色）已落地；70/90/100% 分级提醒、事件/审计侧与预计滚动点仍 pending。
 - [ ] 【R74-P1·移动资源】记录桥轮询、SSE、物化的 CPU/内存/电量/流量；休眠和后台自适应退避，回前台恢复并显示原因。
 - [ ] 【R74-P1·请求】Kernel API、桥和 MCP 增加可取消请求、全局超时、读重试与写同 ID 禁重试分类；单调时钟计算耗时，墙钟只用于 finishedAt。
-- [ ] 【R74-P1·SSE】按 WHATWG 语义测试多 data 行、事件块空行、CRLF、BOM、EOF、id/Last-Event-ID；若依赖单行 JSON，写入协议门禁。
+- [ ] 【R74-P1·SSE】按 WHATWG 语义测试多 data 行、事件块空行、CRLF、BOM、EOF、id/Last-Event-ID；若依赖单行 JSON，写入协议门禁。 → ◐ R342 部分：广播 SSE 协议边界电池 tests/broadcast-protocol.test.ts 已落地（5 测：CRLF 消费 / 跨 chunk 分片组装 / UTF-8 BOM 剥离 / **多行 JSON 门禁**（静默拒绝且不崩流）/ EOF 静默立即重连且不带 Last-Event-ID）；空行与坏行覆盖此前已有；NDJSON 载体同型电池与真机 SSE 仍 pending。
 - [ ] 【R74-P1·广播】观测 reconnect、error、frame、drop、queue depth 和关闭释放；burst 下定义逐帧串行、并发或丢弃策略。
 - [ ] 【R74-P1·统计窗口】运行统计显示会话 ID、启动时间、采样窗口、uptime、last success/error/kind、队列最老年龄、drop/parse error；重载归零不得称为累计，health snapshot 可直接复制到 Issue。
 - [ ] 【R74-P1·回执观察】MCP/CLI/PowerShell 多调用共享 receipt watcher 或按 ID 订阅，支持 cursor、退避和并发上限，避免每个工具每 300ms 重读全量 results 文件。

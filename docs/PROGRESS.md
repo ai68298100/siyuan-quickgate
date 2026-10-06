@@ -2,6 +2,13 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R342（账本待办落地：SSE 协议边界电池 + 触控目标 + 剪贴板提示）
+
+- L608 部分：新增 tests/broadcast-protocol.test.ts（5 测）——CRLF/跨 chunk 分片/BOM/多行 JSON 门禁/EOF 重连无 Last-Event-ID。协议口径固化：广播 message 必须单行 JSON 信封（内核 postMessage message 本即单字符串，客户端不做 WHATWG 多 data 行聚合）；EOF 走静默立即重连（reconnects 计数语义=异常断开，与 EOF 区分——首版测试预期写错已修）。
+- L587 部分：coarse-pointer 触控目标（nav/palette/row ≥44px、按钮 36px、KPI 56px，桌面不受影响）。
+- L593 尾巴：诊断复制成功提示附剪贴板清理提醒。
+- 223 测全绿（+5）+ tsc 0 错。
+
 ## 2026-10-07 · R341（账本待办落地：恢复向导防线备份 + 用户结果卡文档）
 
 - L571 再部分：桥恢复向导在有 err/warn 项时出现「下载全量备份」动作行（downloadFullBackup 共享实现，完成转「已下载」）——处置前先留底。
