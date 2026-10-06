@@ -29,6 +29,17 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
         `<option value="all">全部时间</option><option value="today">今天</option><option value="7d">近 7 天</option></select>` +
         `<input class="b3-text-field" data-role="q" placeholder="搜索 id / op / 消息" style="flex:1;min-width:160px" />` +
         `</div>` +
+        // L568 部分：状态图例——每类含义 + 下一步（用户不需要背协议词汇）
+        `<details data-role="legend" style="margin-bottom:8px"><summary>状态说明（各状态含义与下一步）</summary>` +
+        `<div class="qg-status-legend">` +
+        `<div><span class="qg-chip ok">recorded</span><span>已执行并写入回执——无需操作；同 id 重发会得到 duplicate。</span></div>` +
+        `<div><span class="qg-chip ok">duplicate</span><span>同 id 重复投递，已按幂等跳过——无需重试。</span></div>` +
+        `<div><span class="qg-chip warn">rejected</span><span>被确认门控 / 黑名单 / 名单拒绝——调整设置后换新 id 重新发起。</span></div>` +
+        `<div><span class="qg-chip err">failed</span><span>执行失败——到恢复中心换新 id 重试，或按 id 人工核对。</span></div>` +
+        `<div><span class="qg-chip mute">unsupported</span><span>op 不在白名单或插件缺席——核对 op 拼写与插件安装状态。</span></div>` +
+        `<div><span class="qg-chip warn">expired</span><span>超过 TTL（缺省 60s）未被消费——直接重新发起即可（新 id）。</span></div>` +
+        `<div><span class="qg-chip err">unknown</span><span>执行中途中断，结果未知——<b>禁止盲目换 id 重试</b>副作用操作；先到恢复中心人工核对。</span></div>` +
+        `</div></details>` +
         `<div data-role="list"></div>` +
         `<div style="display:flex;gap:8px;align-items:center;margin-top:8px">` +
         `<span data-role="count" style="color:var(--b3-theme-on-surface)"></span><span style="flex:1"></span>` +

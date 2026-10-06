@@ -13,6 +13,7 @@ import { Dialog, showMessage, confirm, getFrontend } from "siyuan";
 
 import { KernelApi } from "./services/kernelApi";
 import { BridgeStore } from "./services/store";
+import { PROCESSED_CAP } from "./services/store";
 import { BridgeService, EcosystemManifest } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
 import { BroadcastSubscriber } from "./services/broadcast";
@@ -739,6 +740,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         void stat().then(({ pending, bytes, oldestMin }) => {
             // L605 部分：待处理超 60s TTL（信封缺省窗口）即示警——积压可灰可见，不再只是数字
             const oldestOverTtl = pending > 0 && oldestMin !== null && oldestMin >= 1;
+            // L605 再部分：处理台账容量可见化（上限 500，≥80% 预警）
+            const ledgerCount = Object.keys(host.store.processed.processed).length;
+            const ledgerRatio = ledgerCount / PROCESSED_CAP;
             const oldestCell = pending === 0
                 ? { v: "–", l: "最老待处理", warn: false }
                 : {
@@ -751,7 +755,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             kpi.innerHTML = [
                 { v: pending, l: "待处理命令", warn: false },
                 oldestCell,
-                { v: Object.keys(host.store.processed.processed).length, l: "处理台账", warn: false },
+                { v: ledgerCount, l: `处理台账 / ${PROCESSED_CAP}`, warn: ledgerRatio >= 0.8 },
                 { v: host.activeService?.lateCompletions ?? 0, l: "迟到完成", warn: false },
                 { v: `${(bytes / 1024).toFixed(1)}K`, l: "载体占用", warn: false },
             ].map((k) => `<div class="kv"${k.warn ? warnStyle : ""}><b${k.warn ? warnNum : ""}>${kpiValue(k.v)}</b><span>${esc(k.l)}</span></div>`).join("");
@@ -942,16 +946,34 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         diagBtn.className = "b3-button b3-button--outline";
         diagBtn.style.marginTop = "8px";
         diagBtn.textContent = "导出诊断包（到剪贴板）";
-        diagBtn.onclick = async () => {
+        diagBtn.onclick = () => withPending(diagBtn, "组装中…", async () => {
             try {
                 // 统计须取自当前活动服务实例：临时 new 的服务计数全零，诊断包会失真（桥关时才回落新实例）
                 const service = host.activeService ?? new BridgeService(host.deps() as never);
-                await navigator.clipboard.writeText(JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics), null, 2));
-                showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
+                const diagJson = JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics), null, 2);
+                // L593 部分：复制前先展示脱敏预览（用户可见将复制的内容），确认后才写入剪贴板
+                const preview = new Dialog({
+                    title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>诊断包预览（脱敏）</span></span>`,
+                    content: `<div style="padding:12px 14px">` +
+                        `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-bottom:8px;line-height:1.6">不含 Token / 正文 / 个人路径；含设置、统计、审计尾部 50 条。确认后将写入剪贴板（请勿粘贴到公开场合前二次检查）。</div>` +
+                        `<pre style="max-height:300px;overflow:auto;font-size:11px;line-height:1.5;margin:0;padding:8px 10px;border:1px solid var(--b3-border-color);border-radius:6px;background:var(--b3-theme-surface);white-space:pre-wrap;word-break:break-all">${esc(diagJson)}</pre>` +
+                        `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">` +
+                        `<button class="b3-button" data-qg-diag-cancel>取消</button>` +
+                        `<button class="b3-button b3-button--primary" data-qg-diag-copy>确认复制</button></div></div>`,
+                    width: "min(640px, 92vw)",
+                    height: "auto",
+                });
+                preview.element.querySelector("[data-qg-diag-copy]")?.addEventListener("click", () => {
+                    void navigator.clipboard.writeText(diagJson).then(() => {
+                        showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
+                        preview.destroy();
+                    });
+                });
+                preview.element.querySelector("[data-qg-diag-cancel]")?.addEventListener("click", () => preview.destroy());
             } catch (e) {
                 showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
-        };
+        });
         diagCard.appendChild(diagBtn);
         content.appendChild(diagCard);
 

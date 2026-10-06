@@ -239,6 +239,15 @@
 
   .qg-empty { text-align: center; color: var(--b3-theme-on-surface); font-size: 12px; padding: 18px 0 8px; }
 
+  /* 状态图例（回执中心·L568 部分）：每类含义 + 下一步 */
+  .qg-status-legend {
+    margin-top: 6px; padding: 8px 10px; border: 1px solid var(--b3-border-color); border-radius: 6px;
+    font-size: 11px; color: var(--b3-theme-on-surface); line-height: 1.9;
+    & > div { display: flex; gap: 8px; align-items: flex-start; }
+    & .qg-chip { flex: none; margin-top: 2px; }
+    & > div > span:last-child { flex: 1; min-width: 0; }
+  }
+
   /* 恢复中心复选框：思源全局样式会隐藏裸 checkbox——显式恢复可见性（R305） */
   input[type="checkbox"][data-check-id],
   input[type="checkbox"][data-act="select-all"] {
