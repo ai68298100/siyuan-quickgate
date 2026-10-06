@@ -273,6 +273,8 @@
 
   /* 设置搜索条（G2-04：跨分组过滤）——降权：surface 融底、聚焦才出边框 */
   .qg-searchbar { padding: 10px 16px 8px; }
+  /* 首跑向导语境下隐藏（欢迎页无跨组搜索需求；跳过向导即恢复） */
+  &.qg-firstrun .qg-searchbar { display: none; }
   .qg-searchbar .b3-text-field {
     width: 100%;
     font-size: 12px;

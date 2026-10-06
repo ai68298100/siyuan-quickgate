@@ -203,7 +203,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         content.innerHTML = pageHeader("状态概览", "通道实时状态 · 每 3 秒自动刷新") +
             `<div class="qg-grid2" data-role="cards"></div>` +
             `<div class="qg-kpi" data-role="kpi"></div>` +
-            `<div class="qg-card" data-role="next"><div class="qg-card-title">下一步</div><div class="qg-hint" style="font-size:12px;color:var(--b3-theme-on-surface)"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" data-role="next-btns"></div></div>` +
+            `<div class="qg-card" data-role="next"><div class="qg-card-title">下一步<span style="flex:1"></span><span style="display:flex;gap:6px" data-role="next-side"></span></div><div class="qg-hint" style="font-size:12px;color:var(--b3-theme-on-surface)"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" data-role="next-btns"></div></div>` +
             `<div class="qg-card" style="padding:0 14px 4px"><div class="qg-card-title" style="padding:10px 0 6px">最近回执 <span data-role="asof" style="margin-left:auto"></span></div><div data-role="receipts" style="min-height:24px"></div></div>`;
 
         const pingBtn = document.createElement("button");
@@ -218,31 +218,26 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         paletteBtn.className = "b3-button b3-button--outline";
         paletteBtn.textContent = "命令面板";
         paletteBtn.onclick = () => { dialog.destroy(); host.openCommandPalette(); };
+        // 通知/恢复中心是次级入口：收进卡头右侧小按钮——主行只留主动作（五钮平铺换行会有孤行）
         const notifyBtn = document.createElement("button");
-        notifyBtn.className = "b3-button b3-button--outline";
+        notifyBtn.className = "b3-button b3-button--small";
         notifyBtn.dataset.role = "notify";
         notifyBtn.textContent = "通知";
         notifyBtn.onclick = () => { dialog.destroy(); host.openNotificationCenter(); };
-        root.querySelector("[data-role=next-btns]")?.append(notifyBtn);
-        void countNotifications(host).then((n) => {
-            if (n > 0 && document.body.contains(notifyBtn)) {
-                notifyBtn.textContent = `通知（${n}）`;
-                notifyBtn.classList.add("b3-button--text");
-            }
-        });
         const recoveryBtn = document.createElement("button");
-        recoveryBtn.className = "b3-button b3-button--outline";
+        recoveryBtn.className = "b3-button b3-button--small";
         recoveryBtn.dataset.role = "recovery";
         recoveryBtn.textContent = "恢复中心";
         recoveryBtn.onclick = () => { dialog.destroy(); host.openRecoveryCenter(); };
-        root.querySelector("[data-role=next-btns]")?.append(pingBtn, ecoBtn, paletteBtn, recoveryBtn);
+        root.querySelector("[data-role=next-side]")?.append(notifyBtn, recoveryBtn);
+        void countNotifications(host).then((n) => {
+            if (n > 0 && document.body.contains(notifyBtn)) notifyBtn.textContent = `通知（${n}）`;
+        });
         // G5：有 unknown/失败/过期候选时按钮带计数徽章（异步刷新）
         void countRecoveryItems(host).then((n) => {
-            if (n > 0 && document.body.contains(recoveryBtn)) {
-                recoveryBtn.textContent = `恢复中心（${n}）`;
-                recoveryBtn.classList.add("b3-button--text");
-            }
+            if (n > 0 && document.body.contains(recoveryBtn)) recoveryBtn.textContent = `恢复中心（${n}）`;
         });
+        root.querySelector("[data-role=next-btns]")?.append(pingBtn, ecoBtn, paletteBtn);
 
         const refresh = async () => {
             if (!document.body.contains(root) || current !== "status") return;
@@ -1105,6 +1100,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
     const show = (page: string) => {
         if (pageTimer) { window.clearInterval(pageTimer); pageTimer = 0; }
         current = page;
+        // 首跑向导期间隐藏搜索条（欢迎语境下是噪音；跳过向导进入分组页即恢复）
+        root.classList.toggle("qg-firstrun", page === "status" && host.store.firstRun && !host.settings.bridgeEnabled);
         renderNav();
         content.innerHTML = "";
         builders[page]?.();
