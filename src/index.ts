@@ -609,9 +609,13 @@ export default class QuickGatePlugin extends Plugin {
         this.openSettingPanel("connection");
     }
 
-    /** 裸对话框（通知中心等宿主注入用；宽度与四中心其余面对齐 640） */
+    /** 裸对话框（通知中心等宿主注入用；宽度与四中心其余面对齐 640；销毁后焦点回归触发元素——L585 部分） */
     openDialog(content: string): { element: HTMLElement; destroy(): void } {
-        const d = new Dialog({ content, width: "min(640px, 92vw)", height: "auto" });
+        const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const d = new Dialog({
+            content, width: "min(640px, 92vw)", height: "auto",
+            destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
+        });
         return { element: d.element, destroy: () => d.destroy() };
     }
 

@@ -584,8 +584,8 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 - [x] 【R73-P0·校验】pollMs、TTL、auditMax、path、deviceName、allowlist 对空值、边界、非法字符、超长文本给 inline 错误；保存显示 saving/saved/error，失败恢复旧值。 → ✅ R234 对照销账：pollMs 行内校验+失败还原既有（role=alert）；allowlist 补 pluginId 形状校验（siyuan-* 不符剔除并列出）+ 保存反馈；blacklist 补保存反馈；TTL/path/deviceName=无 UI 字段（L458 裁定代码默认），校验在 normalizeSettings 层（整数/前缀/长度防御既有，store.ts R78 加固）。saving/saved 三态=即改即存模型下以轻提示承载（对照声明）
 - [x] 【R73-P0·状态区】桥、事件桥、广播、内核路由、MCP 只读/写分别显示运行状态、最近成功/失败和退避状态；开关等待启动/停止完成再提示。 → ✅ R234 补齐销账：状态概览（role=status）新增内核路由探针 badge（开面板一次性 ping /plugin/private/.../exec）+ 轮询退避状态（consecutiveFailures>0 显式「退避中×N」）；桥/广播/事件物化运行态+成功/拒绝/失败/过期计数+数据截至时间既有；开关等待启动完成再提示（L506 startBridge 改 async 认领后提示）。MCP 状态=stdio 独立进程不可自观测（注记：由 MCP 客户端侧连接状态呈现）
 - [x] 【R73-P0·开关状态机】桥/广播开关快速开→关→开时串行化启动与停止，期间锁定按钮；启动失败自动回滚并保留原因，禁止旧 poller/SSE 与新订阅重叠。 → ✅ R234 对照销账：竞态危害已由双层消除——①Web Lock 认领（L452，双窗口互斥）②startBridge 幂等 guard（poller.isRunning）+ startBroadcastSub 幂等（broadcastSub.running）——快速开→关→开不再产生双 poller/双订阅；开关等待完成再提示（startBridge 改 async 返回实际启动结果，失败如实提示他窗占用）。按钮锁定 UI 未做（幂等+认领已消除竞态危害，锁定属装饰性）——裁剪声明
-- [ ] 【R73-P0·键盘】打开后焦点落搜索/首控件，Tab 顺序稳定，Enter/Space/Esc 行为一致，确认框 focus trap，关闭后焦点回到触发器；仅键盘完成首跑、开关、导出和诊断。
-- [ ] 【R73-P0·动态反馈】页内状态使用 `role=status/alert` 或等价可感知区域；文案统一为发生了什么、影响、下一步、复制诊断，不能只依赖颜色或短 toast。
+- [ ] 【R73-P0·键盘】打开后焦点落搜索/首控件，Tab 顺序稳定，Enter/Space/Esc 行为一致，确认框 focus trap，关闭后焦点回到触发器；仅键盘完成首跑、开关、导出和诊断。 → ◐ R331 部分：打开即聚焦（设置搜索/回执中心搜索/通知容器/恢复刷新按钮）+ 全部对话框 destroyCallback 焦点回归已落地；Tab 顺序稳定性、focus trap、全键盘完成首跑仍 pending。
+- [ ] 【R73-P0·动态反馈】页内状态使用 `role=status/alert` 或等价可感知区域；文案统一为发生了什么、影响、下一步、复制诊断，不能只依赖颜色或短 toast。 → ◐ R331 部分：状态页最近回执 role=status（aria-live=polite）、通知/恢复列表 role=region+aria-label、面板执行消息 role=status 已落地；轮询间隔校验早有 role=alert；全量状态文案统一仍 pending。
 - [ ] 【R73-P1·移动】按钮/开关/菜单触控目标至少 44 CSS px；验收横竖屏、safe-area、键盘顶起和窄屏输入不被遮挡，移动默认不暗启轮询。
 - [ ] 【R73-P1·缩放】320px 宽和 200% 缩放下不横向滚动；长按钮换行，日志/诊断可滚动，焦点始终可见。
 - [ ] 【R73-P1·主题】亮、暗、高对比度和 reduced-motion 走查；边框/错误/成功对比度合格，状态不只用颜色表达。
@@ -623,7 +623,7 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 
 - [x] 【R75-P0·数据地图】建立设置字段→存储位置→是否同步→敏感级别→默认值→迁移版本表，覆盖 settings、processed、audit、bridge 文件、storage/local、device。 → ✅ R283 销账：L458 审计（R229）已逐字段裁定并在 QuickGateSettings 类型注释+api.md 落表（存储位置/默认值/是否暴露/自动管理）；schemaVersion 迁移护栏在 normalize*（R78 加固）
 - [ ] 【R75-P0·导入】配置导入/导出带 schemaVersion、来源设备/时间、差异预览和选择性分组；Token/敏感连接字段默认不导出，冲突策略可选。
-- [ ] 【R75-P0·重置】支持单项、分组、全部恢复默认；全部重置前自动备份并说明是否停止桥/清队列，完成后可撤销恢复上一份。
+- [ ] 【R75-P0·重置】支持单项、分组、全部恢复默认；全部重置前自动备份并说明是否停止桥/清队列，完成后可撤销恢复上一份。 → ◐ R331 部分：全部恢复默认前自动下载全量备份已落地（downloadFullBackup 共享实现，导出失败中止重置；确认文案说明桥停止/设备名保留）；单项/分组重置与「撤销恢复上一份」仍 pending。
 - [ ] 【R75-P1·迁移】持久化每次迁移的成功、跳过、非法字段和 schema 版本；旧字段不可静默丢弃，诊断不含配置值。
 - [ ] 【R75-P1·版本回退】对未知 schemaVersion、malformed 配置和 processed 台账版本做备份、迁移结果提示和失败回滚；禁止按旧默认静默运行或清空台账造成重复执行。
 - [ ] 【R75-P1·多前端】显示主消费者、只读副本、争用中和接管动作；接管前显示待处理数，失联后才能安全接管。

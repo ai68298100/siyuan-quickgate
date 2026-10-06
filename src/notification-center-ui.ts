@@ -55,7 +55,7 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
         `<div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>通知中心</span>` +
         `<span style="font-size:11px;color:var(--b3-theme-on-surface-light)">需要关注的事态（↑↓ 选择 · Enter 跳转）</span><span class="sp"></span>` +
         `<button class="b3-button b3-button--small" data-role="refresh">刷新</button></div>` +
-        `<div data-role="body"></div></div>`,
+        `<div data-role="body" role="region" aria-label="通知列表"></div></div>`,
     );
     dialog.element.querySelector(".b3-dialog__container")?.setAttribute("style", "width:min(640px, 92vw)");
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;

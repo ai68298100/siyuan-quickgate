@@ -166,11 +166,14 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         })));
     let all = collect(probe);
 
+    // 焦点回归（L585 部分）：面板销毁后焦点回到触发元素
+    const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = new Dialog({
         title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>命令面板</span><span class="qg-title-ver">↑↓ 选择 · Enter 执行 · Esc 关闭</span></span>`,
         content: `<div id="qg-palette"><input class="b3-text-field" data-role="q" placeholder="搜索命令（中英/拼音别名；收藏与最近自动置顶）" /><div data-role="list"></div></div>`,
         width: "min(620px, 92vw)",
         height: "auto",
+        destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
     });
     const root = dialog.element.querySelector("#qg-palette") as HTMLElement;
     const input = root.querySelector("[data-role=q]") as HTMLInputElement;
@@ -300,7 +303,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             `<div style="display:flex;gap:8px;margin-top:12px">` +
             `<button class="b3-button b3-button--outline" data-form="back">返回</button>` +
             `<button class="b3-button b3-button--primary" data-form="exec">执行</button></div>` +
-            `<div data-form="msg" style="margin-top:8px;font-size:12px"></div>`;
+            `<div data-form="msg" role="status" aria-live="polite" style="margin-top:8px;font-size:12px"></div>`;
         list.scrollTop = 0; // 从列表切表单时清除残留滚动，标题不被裁
         list.querySelector('[data-form="back"]')?.addEventListener("click", () => { stage = "list"; render(); });
         list.querySelector('[data-form="exec"]')?.addEventListener("click", () => void execForm());

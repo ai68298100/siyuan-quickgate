@@ -38,11 +38,14 @@ const esc = (t: unknown) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;
 
 export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
     const { Dialog, showMessage } = host.ui;
+    // 焦点回归（L585 部分）：对话框销毁后焦点回到触发元素
+    const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = new Dialog({
         // 头部统一走内容区 qg-dlg-head（原生 title 留空即 fn__none，避免双标题）
-        content: `<div id="qg-recovery" style="min-width:min(560px, 92vw);padding:14px 16px;font-size:12px"><div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>恢复中心</span><span style="font-size:11px;color:var(--b3-theme-on-surface-light)">unknown / 失败 / 过期回执的人工处置面</span><span class="sp"></span><button class="b3-button b3-button--small" data-role="refresh">刷新</button></div><div data-role="body"></div></div>`,
+        content: `<div id="qg-recovery" style="min-width:min(560px, 92vw);padding:14px 16px;font-size:12px"><div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>恢复中心</span><span style="font-size:11px;color:var(--b3-theme-on-surface-light)">unknown / 失败 / 过期回执的人工处置面</span><span class="sp"></span><button class="b3-button b3-button--small" data-role="refresh">刷新</button></div><div data-role="body" role="region" aria-label="恢复项列表"></div></div>`,
         width: "min(640px, 92vw)",
         height: "auto",
+        destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
     });
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;
     dialog.element.querySelector('[data-role="refresh"]')?.addEventListener("click", () => void refresh());

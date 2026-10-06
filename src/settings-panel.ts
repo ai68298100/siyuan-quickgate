@@ -135,6 +135,8 @@ const chip = (text: string, kind: "ok" | "warn" | "mute" = "mute") => `<span cla
 
 export async function openQuickGateSettings(host: SettingsPanelHost, initialPage = "status"): Promise<void> {
     const firstRunTitle = host.store.firstRun;
+    // 焦点回归（L585 部分）：对话框销毁后焦点回到触发元素（思源 Dialog destroyCallback；失败不阻断）
+    const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = new Dialog({
         title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span>` +
             `<span>${firstRunTitle ? "小驴快门 · 欢迎" : "小驴快门 · 设置"}</span>` +
@@ -149,6 +151,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             `<span class="sp"></span><span>本插件不外传任何数据（<a target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/PRIVACY.md">数据边界</a>）</span></div></div>`,
         width: "min(760px, 92vw)",
         height: "auto",
+        destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
     });
     const root = dialog.element.querySelector("#qg-settings") as HTMLElement;
     const nav = root.querySelector(".qg-nav") as HTMLElement;
@@ -173,6 +176,25 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         await host.stopBridge();
         host.stopEventBridge(); // 关桥即退订，事件物化不得在桥关闭后继续写
         showMessage("外部命令桥已关闭", 3000);
+    };
+
+    /** 全量备份下载（队列页「导出全量备份」与「恢复默认设置」防线的共享实现；L624 部分：重置前先备份） */
+    const downloadFullBackup = async (): Promise<void> => {
+        const readText = async (p: string) => (await host.kernelApi.getFileText(p)) ?? "";
+        const parseOr = <T,>(text: string, fallback: T): T => { try { return JSON.parse(text) as T; } catch { return fallback; } };
+        const payload = buildBackupPayload({
+            settings: host.settings,
+            favorites: parseOr(await readText("/storage/petal/siyuan-quickgate/favorites.json"), null),
+            audit: parseOr(await readText("/storage/petal/siyuan-quickgate/audit.json"), null),
+            processed: host.store.processed,
+            resultsNdjson: await readText(`${host.settings.bridgeBasePath}/results.ndjson`),
+        }, new Date().toISOString());
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `quickgate-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
     };
 
     // —— 通用行构造（原型 .qg-row：图标 + 标题/说明 + 控件；clickable 时点行即切控件；wide 时控件通栏） ——
@@ -216,7 +238,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             `<div class="qg-grid2" data-role="cards"></div>` +
             `<div class="qg-kpi" data-role="kpi"></div>` +
             `<div class="qg-card" data-role="next"><div class="qg-card-title">下一步<span style="flex:1"></span><span style="display:flex;gap:6px" data-role="next-side"></span></div><div class="qg-hint" style="font-size:12px;color:var(--b3-theme-on-surface)"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" data-role="next-btns"></div></div>` +
-            `<div class="qg-card" style="padding:0 14px 4px"><div class="qg-card-title" style="padding:10px 0 6px">最近回执 <span data-role="asof" style="margin-left:auto"></span></div><div data-role="receipts" style="min-height:24px"></div></div>`;
+            `<div class="qg-card" style="padding:0 14px 4px"><div class="qg-card-title" style="padding:10px 0 6px">最近回执 <span data-role="asof" style="margin-left:auto"></span></div><div data-role="receipts" role="status" aria-live="polite" style="min-height:24px"></div></div>`;
 
         const pingBtn = document.createElement("button");
         pingBtn.className = "b3-button qg-btn-primary";
@@ -749,8 +771,6 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         };
         danger.appendChild(clearBtn);
         // ══════════ 全量备份/恢复（R9-A · R322）：四载体+台账拼装单 JSON ══════════
-        const readText = async (p: string) => (await host.kernelApi.getFileText(p)) ?? "";
-        const parseOr = <T,>(text: string, fallback: T): T => { try { return JSON.parse(text) as T; } catch { return fallback; } };
         const backupCard = document.createElement("div");
         backupCard.className = "qg-card";
         backupCard.innerHTML = `<div class="qg-card-title">全量备份 / 恢复</div>` +
@@ -763,27 +783,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         backupExportBtn.className = "b3-button qg-btn-primary";
         backupExportBtn.dataset.role = "qg-backup-export"; // e2e roundtrip 选择子
         backupExportBtn.textContent = "导出全量备份";
-        backupExportBtn.onclick = async () => {
+        backupExportBtn.onclick = () => withPending(backupExportBtn, "导出中…", async () => {
             try {
-                const base = host.settings.bridgeBasePath;
-                const payload = buildBackupPayload({
-                    settings: host.settings,
-                    favorites: parseOr(await readText("/storage/petal/siyuan-quickgate/favorites.json"), null),
-                    audit: parseOr(await readText("/storage/petal/siyuan-quickgate/audit.json"), null),
-                    processed: host.store.processed,
-                    resultsNdjson: await readText(`${base}/results.ndjson`),
-                }, new Date().toISOString());
-                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob);
-                a.download = `quickgate-backup-${new Date().toISOString().slice(0, 10)}.json`;
-                a.click();
-                URL.revokeObjectURL(a.href);
+                await downloadFullBackup();
                 showMessage("全量备份已下载", 3000);
             } catch (e) {
                 showMessage(`导出失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");
             }
-        };
+        });
         const importInput = document.createElement("input");
         importInput.type = "file";
         importInput.accept = ".json,application/json";
@@ -891,10 +898,18 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         resetBtn.textContent = "恢复默认设置";
         resetBtn.onclick = () => {
             // L503：全局恢复默认（保留 deviceName——device 路由身份属自动管理字段）
+            // L624 部分：确认后先自动下载全量备份（防线），导出失败即中止重置
             confirm(
                 "小驴快门 · 恢复默认设置",
-                "将恢复全部设置为出厂默认：桥/广播关闭、轮询 500ms、黑名单与允许名单还原、确认门控开启；桥若在运行会停止。设备名保留（本机身份不变）。当前自定义值不可找回。",
+                "将恢复全部设置为出厂默认：桥/广播关闭、轮询 500ms、黑名单与允许名单还原、确认门控开启；桥若在运行会停止。设备名保留（本机身份不变）。当前自定义值不可找回。\n\n确认后将先自动下载一份全量备份（设置+收藏+审计+回执+台账）作为防线。",
                 async () => {
+                    try {
+                        await downloadFullBackup();
+                        showMessage("防线索份已下载，正在恢复默认设置…", 2500, "info");
+                    } catch (e) {
+                        showMessage(`重置前自动备份失败，已中止重置：${e instanceof Error ? e.message : String(e)}（可到「队列与数据」手动「导出全量备份」后重试）`, 6000, "error");
+                        return;
+                    }
                     const deviceName = host.settings.deviceName;
                     host.settings = { ...DEFAULT_SETTINGS, deviceName };
                     host.store.settings = host.settings;
@@ -904,7 +919,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     if (host.broadcastSub?.running) await host.broadcastSub.stop();
                     dialog.destroy();
                     host.openSettingPanel(); // 重开面板反映默认值
-                    showMessage("已恢复默认设置（设备名保留）", 3000);
+                    showMessage("已恢复默认设置（设备名保留；防线索份已在下载目录）", 3000);
                 },
                 () => { },
             );
@@ -946,7 +961,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 (hits.length > shown.length ? `<button class="b3-button b3-button--small" data-more="1">加载更多（+20）</button>` : "") +
                 `</div>`;
         };
-        const d = new Dialog({ title: "审计日志", content: `<div style="padding:12px"><div id="qg-audit-body">${render()}</div></div>`, width: "min(640px, 92vw)" });
+        // 焦点回归（L585 部分）：销毁后焦点回到触发元素
+        const auditFocusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const d = new Dialog({
+            title: "审计日志",
+            content: `<div style="padding:12px"><div id="qg-audit-body">${render()}</div></div>`,
+            width: "min(640px, 92vw)",
+            destroyCallback: () => { try { auditFocusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
+        });
         d.element.addEventListener("input", (ev) => {
             const target = ev.target as HTMLInputElement;
             if (target.id === "qg-audit-filter") state.kw = target.value.trim().toLowerCase();
@@ -1005,7 +1027,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 (s.recent.map(recRow).join("") || `<div class="qg-empty">暂无最近使用。</div>`) +
                 `<div style="margin-top:12px"><button class="b3-button b3-button--small qg-btn-danger" data-qg-rec-clear ${s.recent.length === 0 ? "disabled" : ""}>清空全部最近使用</button></div>`;
         };
-        const d = new Dialog({ title: "收藏与最近使用", content: `<div style="padding:12px;font-size:12px"><div id="qg-fav-body"></div></div>`, width: "min(640px, 92vw)" });
+        // 焦点回归（L585 部分）：销毁后焦点回到触发元素
+        const favFocusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const d = new Dialog({
+            title: "收藏与最近使用",
+            content: `<div style="padding:12px;font-size:12px"><div id="qg-fav-body"></div></div>`,
+            width: "min(640px, 92vw)",
+            destroyCallback: () => { try { favFocusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
+        });
         const refresh = async () => {
             const body = d.element.querySelector("#qg-fav-body");
             if (body) body.innerHTML = render(await load());
