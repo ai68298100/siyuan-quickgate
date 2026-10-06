@@ -28,6 +28,9 @@ import { countNotifications } from "./notification-center-ui";
 const PLUGIN_NAME = "siyuan-quickgate";
 const PLUGIN_VERSION = "0.7.5";
 
+/** 重置撤销（L624 部分）：恢复默认后保留重置前设置快照；状态概览页提供本会话内撤销（模块级——重开会新面板仍可见） */
+let preResetSnapshot: QuickGateSettings | null = null;
+
 /** 宿主面（index.ts 提供运行态与操作；成员可见性为 public 以满足结构化类型） */
 export interface SettingsPanelHost {
     settings: QuickGateSettings;
@@ -235,6 +238,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             return;
         }
         content.innerHTML = pageHeader("状态概览", "通道实时状态 · 每 3 秒自动刷新") +
+            `<div data-role="undo-banner"></div>` +
             `<div class="qg-grid2" data-role="cards"></div>` +
             `<div class="qg-kpi" data-role="kpi"></div>` +
             `<div class="qg-card" data-role="next"><div class="qg-card-title">下一步<span style="flex:1"></span><span style="display:flex;gap:6px" data-role="next-side"></span></div><div class="qg-hint" style="font-size:12px;color:var(--b3-theme-on-surface)"></div><div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" data-role="next-btns"></div></div>` +
@@ -272,6 +276,39 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             if (n > 0 && document.body.contains(recoveryBtn)) recoveryBtn.textContent = `恢复中心（${n}）`;
         });
         root.querySelector("[data-role=next-btns]")?.append(pingBtn, ecoBtn, paletteBtn);
+
+        // 重置撤销横幅（L624 部分）：恢复默认后本会话内可一键撤销（恢复重置前设置并按需重启桥）
+        if (preResetSnapshot) {
+            const banner = root.querySelector("[data-role=undo-banner]") as HTMLElement;
+            banner.innerHTML = `<div class="qg-card accent" style="display:flex;gap:10px;align-items:center;padding:10px 14px;flex-wrap:wrap">` +
+                `<span style="font-size:12px">已恢复默认设置——本会话内可撤销（恢复重置前全部设置，桥按该设置重启）。</span>` +
+                `<span style="flex:1"></span>` +
+                `<button class="b3-button b3-button--primary" data-role="undo-reset">撤销重置</button>` +
+                `<button class="b3-button" data-role="undo-dismiss">不再提醒</button></div>`;
+            (banner.querySelector("[data-role=undo-reset]") as HTMLElement).onclick = () => {
+                const snap = preResetSnapshot;
+                preResetSnapshot = null;
+                if (!snap) return;
+                void (async () => {
+                    host.settings = JSON.parse(JSON.stringify(snap)) as QuickGateSettings;
+                    host.store.settings = host.settings;
+                    await host.store.saveSettings();
+                    await host.stopBridge();
+                    host.stopEventBridge();
+                    if (host.broadcastSub?.running) await host.broadcastSub.stop();
+                    if (host.settings.bridgeEnabled && !host.isMobileGuard()) {
+                        await host.startBridge();
+                        host.startEventBridge();
+                    }
+                    showMessage("已撤销重置：恢复重置前设置（桥按该设置重启）", 3000, "info");
+                    show("status");
+                })();
+            };
+            (banner.querySelector("[data-role=undo-dismiss]") as HTMLElement).onclick = () => {
+                preResetSnapshot = null;
+                banner.innerHTML = "";
+            };
+        }
 
         const refresh = async () => {
             if (!document.body.contains(root) || current !== "status") return;
@@ -346,6 +383,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
     const renderWizard = () => {
         let pingState: "idle" | "running" | "ok" | "err" = "idle";
         let pingMsg = "";
+        let pingMs = 0;
+        let pingEvidence = ""; // L564 部分：自检证据（可复制，含时间/结果/耗时/通道）
         let envState: "running" | "ok" | "err" = "running";
         let envMsg = "检查内核与存储……";
         content.innerHTML = `<p class="qg-page-title" style="font-size:14px;color:var(--b3-theme-on-background)">三步接通外部自动化<span style="font-weight:400;color:var(--b3-theme-on-surface)">　——　Quicker / 快捷指令 / CLI 复用同一条命令通道</span></p>` +
@@ -403,6 +442,19 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 btn.disabled = pingState === "running";
                 btn.onclick = () => void runPing();
                 pingCard.appendChild(btn);
+                // L564 部分：自检完成后提供可复制证据（时间/结果/耗时/通道——贴进 issue 或留档）
+                if (pingState === "ok" || pingState === "err") {
+                    const evBtn = document.createElement("button");
+                    evBtn.className = "b3-button b3-button--outline";
+                    evBtn.style.marginTop = "8px";
+                    evBtn.style.marginLeft = "6px";
+                    evBtn.textContent = "复制证据";
+                    evBtn.title = "复制本次自检证据 JSON（时间/结果/耗时/通道）";
+                    evBtn.onclick = () => {
+                        void navigator.clipboard.writeText(pingEvidence).then(() => showMessage("自检证据已复制", 2000, "info"));
+                    };
+                    pingCard.appendChild(evBtn);
+                }
             }
             bodyEl.appendChild(pingCard);
             // 步骤 4：完成
@@ -421,15 +473,20 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         };
         const runPing = async () => {
             pingState = "running"; render();
+            const started = performance.now();
             try {
                 const service = new BridgeService(host.deps() as never);
                 const r = await service.tick();
+                pingMs = Math.round(performance.now() - started);
                 pingState = "ok";
                 pingMsg = "";
+                pingEvidence = JSON.stringify({ time: new Date().toISOString(), result: "ok", executed: r.executed, receipts: r.receipts, elapsedMs: pingMs, channel: "wizard", op: "bridge.ping" });
                 showMessage(`自检通过：处理 ${r.executed} 条，回执 ${r.receipts} 条`, 3000, "info");
             } catch (e) {
+                pingMs = Math.round(performance.now() - started);
                 pingState = "err";
                 pingMsg = `自检失败：${e instanceof Error ? e.message : String(e)}（内核不可达或桥目录不可写——见下方原因，修好后可重试）`;
+                pingEvidence = JSON.stringify({ time: new Date().toISOString(), result: "err", error: e instanceof Error ? e.message : String(e), elapsedMs: pingMs, channel: "wizard", op: "bridge.ping" });
             }
             render();
         };
@@ -896,6 +953,56 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         diagCard.appendChild(diagBtn);
         content.appendChild(diagCard);
 
+        // 环境预检（L561 部分）：SiYuan 版本 / 前端形态 / 桥目录可写性三档核对（外部客户端项如实标注"无法在此检查"）
+        const preflightCard = document.createElement("div");
+        preflightCard.className = "qg-card";
+        preflightCard.innerHTML = `<div class="qg-card-title">环境预检</div>` +
+            `<div class="qg-hint" style="font-size:12px">安装/启用前的环境核对，结果分三档：✓ 可继续 / ⚠ 需注意 / ✕ 阻塞。</div>` +
+            `<div data-role="preflight-result" style="margin-top:8px"></div>`;
+        const preBtn = document.createElement("button");
+        preBtn.className = "b3-button b3-button--outline";
+        preBtn.style.marginTop = "8px";
+        preBtn.textContent = "运行环境预检";
+        preBtn.onclick = () => withPending(preBtn, "预检中…", async () => {
+            const box = preflightCard.querySelector("[data-role=preflight-result]") as HTMLElement;
+            const MIN_APP = [3, 8, 0]; // 与 plugin.json minAppVersion 同源（集市门槛前手填，改版需同步）
+            const checks: Array<{ dot: "ok" | "warn" | "err"; text: string }> = [];
+            // ① SiYuan 版本 ≥ minAppVersion
+            try {
+                const v = await host.kernelApi.post<string>("/api/system/version", {});
+                const nums = String(v).split(".").map((n) => parseInt(n, 10));
+                const cmp = [0, 1, 2].map((i) => (Number.isFinite(nums[i]) ? nums[i] : 0));
+                const ge = cmp[0] > MIN_APP[0] || (cmp[0] === MIN_APP[0] && (cmp[1] > MIN_APP[1] || (cmp[1] === MIN_APP[1] && cmp[2] >= MIN_APP[2])));
+                checks.push(ge
+                    ? { dot: "ok", text: `SiYuan v${v} ≥ 最低要求 v${MIN_APP.join(".")}` }
+                    : { dot: "err", text: `SiYuan v${v} 低于最低要求 v${MIN_APP.join(".")}——请先升级思源` });
+            } catch (e) {
+                checks.push({ dot: "err", text: `SiYuan 版本探测失败：${e instanceof Error ? e.message : String(e)}——内核不可达？` });
+            }
+            // ② 前端形态
+            const fe = getFrontend();
+            checks.push(fe === "desktop" || fe === "desktop-window" || fe === "browser-desktop"
+                ? { dot: "ok", text: `前端形态：${fe}（桥全功能可用）` }
+                : { dot: "warn", text: `前端形态：${fe}——移动端桥默认关闭（需在「连接与通道」显式开启）` });
+            // ③ 桥目录可写性（专用探针文件，写入成功即通过；内容可留作痕迹，不破坏任何载体）
+            try {
+                await host.kernelApi.putFileText("/storage/petal/siyuan-quickgate/preflight-probe.json", JSON.stringify({ probe: true, at: new Date().toISOString() }));
+                checks.push({ dot: "ok", text: "桥目录可写（/storage/petal/siyuan-quickgate/）" });
+            } catch (e) {
+                checks.push({ dot: "err", text: `桥目录不可写：${e instanceof Error ? e.message : String(e)}——外部命令桥无法落载体` });
+            }
+            // ④ 外部客户端项：如实标注不可在此检查
+            checks.push({ dot: "warn", text: "Quicker / CLI 客户端版本与 Token 配置无法在本面板检查——见 GETTING-STARTED 安装页" });
+            const blocked = checks.some((c) => c.dot === "err");
+            const warned = checks.some((c) => c.dot === "warn");
+            const summary = blocked ? `<div style="font-size:12px;font-weight:600;color:var(--b3-theme-error);margin-bottom:4px">✕ 存在阻塞项——按上述条目处理后重跑</div>`
+                : warned ? `<div style="font-size:12px;font-weight:600;color:var(--b3-theme-warning, var(--b3-theme-secondary));margin-bottom:4px">⚠ 可继续，存在需注意项</div>`
+                    : `<div style="font-size:12px;font-weight:600;color:var(--b3-theme-success);margin-bottom:4px">✓ 全部通过，可继续</div>`;
+            box.innerHTML = summary + checks.map((c) => `<div style="display:flex;gap:7px;align-items:flex-start;font-size:12px;padding:2px 0">${dot(c.dot)}<span>${esc(c.text)}</span></div>`).join("");
+        });
+        preflightCard.appendChild(preBtn);
+        content.appendChild(preflightCard);
+
         const ecoCard = document.createElement("div");
         ecoCard.className = "qg-card";
         ecoCard.innerHTML = `<div class="qg-card-title">小驴生态能力目录</div><div style="font-size:12px;color:var(--b3-theme-on-surface)">状态 / 版本对照 / 缺失原因 / 入口，逐插件卡片。</div>`;
@@ -935,6 +1042,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                         showMessage(`重置前自动备份失败，已中止重置：${e instanceof Error ? e.message : String(e)}（可到「队列与数据」手动「导出全量备份」后重试）`, 6000, "error");
                         return;
                     }
+                    // L624 部分：快照重置前设置——状态概览页提供本会话内撤销
+                    preResetSnapshot = JSON.parse(JSON.stringify(host.settings)) as QuickGateSettings;
                     const deviceName = host.settings.deviceName;
                     host.settings = { ...DEFAULT_SETTINGS, deviceName };
                     host.store.settings = host.settings;
@@ -944,7 +1053,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     if (host.broadcastSub?.running) await host.broadcastSub.stop();
                     dialog.destroy();
                     host.openSettingPanel(); // 重开面板反映默认值
-                    showMessage("已恢复默认设置（设备名保留；防线索份已在下载目录）", 3000);
+                    showMessage("已恢复默认设置（设备名保留；可在状态概览页撤销）", 3000);
                 },
                 () => { },
             );

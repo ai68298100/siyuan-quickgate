@@ -2,6 +2,14 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R333（账本待办落地：环境预检 + 自检证据 + 重置撤销）
+
+- L561 部分：诊断页「环境预检」卡——三档核对（SiYuan 版本 vs minAppVersion 3.8.0 / 前端形态 mobile 警示 / 桥目录可写性探针文件 `/storage/petal/siyuan-quickgate/preflight-probe.json`）；Quicker/Token 项诚实标注"无法在本面板检查"。
+- L564 部分：向导自检「复制证据」按钮——JSON {time,result,executed,receipts,elapsedMs,channel,op}，成功/失败均可复制。
+- L624 再部分：重置撤销——模块级 preResetSnapshot + 状态概览页撤销横幅（accent 卡，本会话内有效）；撤销按恢复的设置重启桥；靶场端到端断言 bridgeEnabled true→false→true ✓、横幅出现/消失 ✓。
+- 靶场 mock 两处补齐：broadcastSub.stop 缺失（重置流程中断的真因）、__qgDebug.settings 别名（改暴露 settingsHost，面板覆写 host.settings 属性后读它才是真实值）。
+- TODO L561/L564/L624 三条 ◐ 注记更新。218 测全绿 + tsc 0 错。
+
 ## 2026-10-07 · R332（账本待办落地：复制命令信封 + 队列最老待处理 + 空态链接）
 
 - L552 部分：命令面板条目悬停「{} 复制命令信封」ghost 按钮——宿主命令→`commands.run` 信封、能力动作→自身 op 信封（args 待填）；剪贴板实测正确（打通面板↔lv-cli/Quicker/MCP 客户端的最后一米）。scss 补 qg-palette-copy（悬停显形 ghost）。
