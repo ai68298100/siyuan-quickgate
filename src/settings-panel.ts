@@ -822,9 +822,18 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         void stat().then(({ pending, bytes, oldestMin }) => {
             // L605 部分：待处理超 60s TTL（信封缺省窗口）即示警——积压可灰可见，不再只是数字
             const oldestOverTtl = pending > 0 && oldestMin !== null && oldestMin >= 1;
-            // L605 再部分：处理台账容量可见化（上限 500，≥80% 预警）
+            // L605 完整：处理台账三级阈值（上限 500，写满即静默淘汰最旧条目——90%+ 必须让用户知道）
             const ledgerCount = Object.keys(host.store.processed.processed).length;
             const ledgerRatio = ledgerCount / PROCESSED_CAP;
+            const ledgerLevel = ledgerRatio >= 1 ? 3 : ledgerRatio >= 0.9 ? 2 : ledgerRatio >= 0.7 ? 1 : 0;
+            const ledgerLabel = ledgerLevel === 3
+                ? `处理台账 ${ledgerCount}/${PROCESSED_CAP}（已写满——最旧条目正在被静默淘汰，请导出后清理）`
+                : ledgerLevel === 2
+                    ? `处理台账 ${ledgerCount}/${PROCESSED_CAP}（≥90%——请尽快导出审计并清理）`
+                    : ledgerLevel === 1
+                        ? `处理台账 ${ledgerCount}/${PROCESSED_CAP}（≥70%——可导出留底）`
+                        : `处理台账 / ${PROCESSED_CAP}`;
+            const ledgerWarn = ledgerLevel >= 2;
             const oldestCell = pending === 0
                 ? { v: "–", l: "最老待处理", warn: false }
                 : {
@@ -837,7 +846,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             kpi.innerHTML = [
                 { v: pending, l: "待处理命令", warn: false },
                 oldestCell,
-                { v: ledgerCount, l: `处理台账 / ${PROCESSED_CAP}`, warn: ledgerRatio >= 0.8 },
+                { v: ledgerCount, l: ledgerLabel, warn: ledgerWarn },
                 { v: host.activeService?.lateCompletions ?? 0, l: "迟到完成", warn: false },
                 { v: `${(bytes / 1024).toFixed(1)}K`, l: "载体占用", warn: false },
             ].map((k) => `<div class="kv"${k.warn ? warnStyle : ""}><b${k.warn ? warnNum : ""}>${kpiValue(k.v)}</b><span>${esc(k.l)}</span></div>`).join("");

@@ -41,6 +41,11 @@ export function opWriteAnnotation(op: string): { write: boolean; destructive: bo
     return { write: !readOnly, destructive: !readOnly && DESTRUCTIVE_OPS.has(op) };
 }
 
+/** 供前端命令面板等复用（L552 部分）：op 的一句话说明（未登记回落 op 名） */
+export function opDescription(op: string): string {
+    return DESCRIPTIONS[op] ?? op;
+}
+
 /** 幂等（同一调用重复执行无额外副作用；R234 调研候选①）——config.discover 有 opt-in 创建故不在列 */
 const IDEMPOTENT_OPS: ReadonlySet<string> = new Set([
     "bridge.ping", "commands.list", "commands.search", "favorites.list", "favorites.add",

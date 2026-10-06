@@ -9,7 +9,7 @@ import { expandSearchKeyword } from "./services/search-alias";
 import { normalizeFavorites } from "./services/favorites";
 import { runCommand, RegistryProbeResult } from "./services/registry";
 import { installFocusTrap } from "./services/focus-trap";
-import { getArgsSpec, opWriteAnnotation } from "./mcp/tools";
+import { getArgsSpec, opDescription, opWriteAnnotation } from "./mcp/tools";
 import type { Dialog, showMessage } from "siyuan";
 import type { KernelApi } from "./services/kernelApi";
 import type { QuickGateSettings, AuditEntry } from "./types/bridge";
@@ -352,7 +352,9 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             return `<div class="qg-form-item"><div class="qg-form-label">${esc(f.key)}${req}</div>` +
                 `<div class="qg-form-desc">${esc(f.description)}</div>${ctl}</div>`;
         }).join("");
-        list.innerHTML = `<div style="font-size:13px;font-weight:600;margin-bottom:10px">${esc(label)} <span style="font-weight:400;color:var(--b3-theme-on-surface);font-size:11px">— 填写参数后执行</span></div>` +
+        list.innerHTML = `<div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(label)} <span style="font-weight:400;color:var(--b3-theme-on-surface);font-size:11px">— 填写参数后执行</span></div>` +
+            // L552 再部分：op 一句话说明（与 MCP 工具描述同源）
+            `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-bottom:8px;line-height:1.6">${esc(opDescription(formOp))}</div>` +
             // L552 部分：副作用标注（口径与 MCP annotations 同源）——destructive 红框、写操作琥珀提示
             (() => {
                 const ann = opWriteAnnotation(formOp);
