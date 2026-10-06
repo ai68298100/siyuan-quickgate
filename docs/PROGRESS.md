@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R325（子对话框观感收敛：审计/收藏/生态目录/面板表单态）
+
+- 子界面首轮截图评估（tmp/ui-harness/subshots.mjs：审计/收藏/能力目录/面板表单态/空态兜底/设置搜索/确认框）——审计与收藏两对话框是最大洼地（完整 ISO UTC 串、无样式语义、行结构松散）。
+- 修复：审计行重排（`fmtLocalStamp` 本地时间戳/状态 chip/等宽耗时/悬停复制）；收藏重排（★↺ 着色、标题主行、时间本地、清空 danger 化）；生态目录 `stripDevNotes` 净化维护者注记（R2xx/Lxxx）+ 卡片排版；面板表单字段样式移入 #qg-palette 块胜出大搜索框特异性 + 切表单 scrollTop 重置；空态「捕获」主色化；清空队列预览时间本地化。
+- 218 测全绿 + tsc 0 错；主界面回归截图无恙。
+
 ## 2026-10-07 · R324（UI 原型对齐第二轮：靶场截图收敛 + 原型补新屏 + 提交轮）
 
 - 独立靶场 `tmp/ui-harness/`（gitignored，不混入插件产物）：esbuild 打包真实 UI 代码 + siyuan 模块替身（Dialog DOM 对齐真机 bundle）+ 内存 mock host + 本机安装真实 base.css/daylight/midnight 主题；Playwright 亮暗全量截图逐项比对原型。

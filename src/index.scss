@@ -182,6 +182,36 @@
   /* 数字/时间列等宽对齐（回执表、KPI 的跟手数字） */
   .qg-num { font-variant-numeric: tabular-nums; }
 
+  /* ── 审计列表行（时间 | 插件/命令 | 状态 | 耗时 | 复制）── */
+  .qg-audit-list { font-size: 12px; }
+  .qg-audit-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 4px; border-bottom: 1px solid var(--b3-border-color);
+    transition: background var(--qg-t1) var(--qg-ease);
+    &:last-child { border-bottom: none; }
+    &:hover { background: var(--b3-list-hover); }
+    .qg-audit-cmd { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .qg-audit-ms { flex: none; min-width: 48px; text-align: right; }
+    .qg-copy-btn { flex: none; opacity: 0; }
+    &:hover .qg-copy-btn, .qg-copy-btn:focus-visible { opacity: 1; }
+  }
+
+  /* ── 收藏/最近使用行（★|↺ | 标题+id | 移除）── */
+  .qg-fav-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 4px; border-bottom: 1px solid var(--b3-border-color);
+    transition: background var(--qg-t1) var(--qg-ease);
+    &:last-of-type { border-bottom: none; }
+    &:hover { background: var(--b3-list-hover); }
+    .qg-fav-star { flex: none; width: 18px; text-align: center; color: var(--b3-theme-warning, var(--b3-theme-secondary)); font-size: 12px; }
+    .qg-fav-star.dim { color: var(--b3-theme-on-surface-light); }
+    .qg-fav-main { flex: 1; min-width: 0; }
+    .qg-fav-title { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .qg-fav-id { color: var(--b3-theme-on-surface); margin-top: 1px; }
+    .qg-copy-btn { flex: none; opacity: 0; }
+    &:hover .qg-copy-btn, .qg-copy-btn:focus-visible { opacity: 1; }
+  }
+
   /* 四中心的对话框页头（标题左、动作右；裸 Dialog 无原生头，用这条分割线对齐设置面板头部语言） */
   .qg-dlg-head {
     display: flex; align-items: center; gap: 8px;
@@ -489,7 +519,8 @@
   @media (prefers-reduced-motion: reduce) {
     .qg-content > *, .qg-dot.live, .qg-skel span { animation: none; }
     .qg-nav-item, .qg-nav-item::before, .qg-stat-card, .qg-row, .qg-card,
-    .qg-step .ball, .qg-step::before, .b3-button, .qg-kpi .kv { transition: none; }
+    .qg-step .ball, .qg-step::before, .b3-button, .qg-kpi .kv,
+    .qg-audit-row, .qg-fav-row { transition: none; }
   }
 
   /* ══════════ 页脚（常驻：帮助 + 隐私边界）══════════ */
@@ -568,6 +599,14 @@
   .qg-palette-item.active .qg-palette-star { color: var(--b3-theme-primary); }
   .qg-palette-empty { font-size: 12px; color: var(--b3-theme-on-surface); padding: 10px 2px 6px; }
   .qg-palette-fallbacks { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; }
+  /* 参数表单（二段式）：字段密度独立于大搜索框——此规则必须位于上方 .b3-text-field 之后才能胜出 */
+  .qg-form-item { margin-bottom: 10px; }
+  .qg-form-label { font-size: 13px; font-weight: 600; }
+  .qg-form-desc { font-size: 11px; color: var(--b3-theme-on-surface); margin: 1px 0 4px; line-height: 1.5; }
+  .qg-form-field {
+    width: 100%; font-size: 12px; padding: 4px 10px; line-height: 20px; margin-bottom: 0;
+    font-family: var(--b3-font-family-code, ui-monospace, Consolas, monospace);
+  }
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
   }

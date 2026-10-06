@@ -19,7 +19,7 @@ import { BroadcastSubscriber } from "./services/broadcast";
 import { normalizeFavorites, FavoritesStore } from "./services/favorites";
 import { normalizeProcessed, normalizeSettings } from "./services/store";
 import { buildBackupPayload, parseBackupPayload } from "./data-backup";
-import { fmtElapsedMs, fmtReceiptTime } from "./results-center";
+import { fmtElapsedMs, fmtLocalStamp, fmtReceiptTime } from "./results-center";
 import manifestJson from "./assets/ecosystem-manifests.json";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
 import { countRecoveryItems } from "./recovery-center";
@@ -100,6 +100,10 @@ const kpiValue = (v: string | number) => {
     const m = String(v).match(/^([\d.,]+)(ms|K|s)$/);
     return m ? `${esc(m[1])}<small>${esc(m[2])}</small>` : esc(v);
 };
+
+/** 生态目录显示净化：manifest 的调研注记（R2xx 真机轮次 / Lxxx 账本行号）是维护者信息，不面向用户 */
+const stripDevNotes = (t: string) =>
+    t.replace(/[（(](?:R\d{2,3}|L\d{2,3})[^）)]*[）)]/g, "").replace(/\s{2,}/g, " ").trim();
 
 const ICONS: Record<string, string> = {
     home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h5v-6h4v6h5V10"/></svg>`,
@@ -717,7 +721,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 }
                 const preview = ls.length === 0
                     ? "队列当前为空。仍将清空回执文件并重置处理台账。"
-                    : `将丢弃 ${ls.length} 条未消费命令${oldest ? `（最早提交 ${oldest}）` : ""}，并清空回执文件与处理台账。`;
+                    : `将丢弃 ${ls.length} 条未消费命令${oldest ? `（最早提交 ${fmtLocalStamp(oldest)}）` : ""}，并清空回执文件与处理台账。`;
                 confirm("小驴快门 · 清空队列", preview + " 此操作不可撤销。", async () => {
                     try {
                         await host.kernelApi.putFileText(`${base}/commands.ndjson`, "");
@@ -916,15 +920,19 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             const { hits, shown } = view();
             const rows = shown.map((a) => {
                 const idx = host.auditLog.indexOf(a);
-                return `<div style="margin-bottom:2px">${esc(`${a.time} ${a.plugin}/${a.command} → ${a.status} (${a.elapsedMs}ms)`)} ` +
+                return `<div class="qg-audit-row">` +
+                    `<span class="qg-dim qg-num">${esc(fmtLocalStamp(a.time))}</span>` +
+                    `<span class="qg-mono qg-audit-cmd">${esc(a.plugin)}/${esc(a.command)}</span>` +
+                    `<span class="qg-chip ${receiptKind(a.status)}">${esc(a.status)}</span>` +
+                    `<span class="qg-dim qg-num qg-audit-ms">${esc(fmtElapsedMs(a.elapsedMs))}</span>` +
                     `<button class="b3-button b3-button--small qg-copy-btn" data-qg-copy="${idx}">复制</button></div>`;
-            }).join("") || "（无匹配）";
-            return `<div style="display:flex;gap:6px;margin-bottom:6px">` +
+            }).join("") || `<div class="qg-empty">无匹配条目——调整关键词或日期。</div>`;
+            return `<div style="display:flex;gap:6px;margin-bottom:8px">` +
                 `<input id="qg-audit-filter" class="b3-text-field" style="flex:1" placeholder="筛选：op / 状态 / 插件" value="${esc(state.kw)}" />` +
                 `<input id="qg-audit-date" type="date" class="b3-text-field" style="width:150px" value="${state.date}" title="按日期筛选" />` +
                 `<button id="qg-audit-export" class="b3-button b3-button--small" title="导出当前筛选命中（JSON）">导出筛选</button>` +
-                `</div><div style="white-space:pre-wrap;font-size:12px">${rows}</div>` +
-                `<div style="margin-top:6px;display:flex;gap:8px;align-items:center">` +
+                `</div><div class="qg-audit-list">${rows}</div>` +
+                `<div style="margin-top:8px;display:flex;gap:8px;align-items:center">` +
                 `<span style="color:var(--b3-theme-on-surface)">命中 ${hits.length} 条（显示 ${shown.length}）</span>` +
                 (hits.length > shown.length ? `<button class="b3-button b3-button--small" data-more="1">加载更多（+20）</button>` : "") +
                 `</div>`;
@@ -972,15 +980,21 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             await host.kernelApi.putFileText(favPath, JSON.stringify({ schemaVersion: 1, favorites: s.favorites, recent: s.recent }, null, 2));
         };
         const render = (s: FavoritesStore) => {
-            const favRows = s.favorites.map((f, i) =>
-                `<div style="margin-bottom:2px">★ ${esc(`${f.plugin}/${f.command}`)}（${esc(f.title)}） <button class="b3-button b3-button--small" data-qg-fav-del="${i}">移除</button></div>`).join("")
-                || '<div style="color:var(--b3-theme-on-surface)">暂无收藏——面板/CLI 经 favorites.add 添加</div>';
-            const recRows = s.recent.map((r, i) =>
-                `<div style="margin-bottom:2px">${esc(r.at.slice(0, 16).replace("T", " "))} ${esc(`${r.plugin}/${r.command}`)} <button class="b3-button b3-button--small" data-qg-rec-del="${i}">移除</button></div>`).join("")
-                || '<div style="color:var(--b3-theme-on-surface)">暂无最近使用</div>';
-            return `<div style="margin-bottom:6px"><b>收藏（${s.favorites.length}）</b></div>${favRows}` +
-                `<div style="margin:8px 0 6px"><b>最近使用（${s.recent.length}）</b></div>${recRows}` +
-                `<div style="margin-top:8px"><button class="b3-button b3-button--small" data-qg-rec-clear ${s.recent.length === 0 ? "disabled" : ""}>清空全部最近使用</button></div>`;
+            const favRow = (f: { plugin: string; command: string; title: string }, i: number) =>
+                `<div class="qg-fav-row"><span class="qg-fav-star">★</span>` +
+                `<div class="qg-fav-main"><div class="qg-fav-title">${esc(f.title || `${f.plugin}/${f.command}`)}</div>` +
+                `<div class="qg-mono qg-fav-id">${esc(f.plugin)}/${esc(f.command)}</div></div>` +
+                `<button class="b3-button b3-button--small qg-copy-btn" data-qg-fav-del="${i}">移除</button></div>`;
+            const recRow = (r: { plugin: string; command: string; title: string; at: string }, i: number) =>
+                `<div class="qg-fav-row"><span class="qg-fav-star dim">↺</span>` +
+                `<div class="qg-fav-main"><div class="qg-fav-title">${esc(r.title || `${r.plugin}/${r.command}`)}</div>` +
+                `<div class="qg-mono qg-fav-id">${esc(r.plugin)}/${esc(r.command)} · ${esc(fmtLocalStamp(r.at, false))}</div></div>` +
+                `<button class="b3-button b3-button--small qg-copy-btn" data-qg-rec-del="${i}">移除</button></div>`;
+            return `<div class="qg-page-title" style="margin:2px 0 6px">收藏（${s.favorites.length}）</div>` +
+                (s.favorites.map(favRow).join("") || `<div class="qg-empty">暂无收藏——面板/CLI 经 favorites.add 添加。</div>`) +
+                `<div class="qg-page-title" style="margin:12px 0 6px">最近使用（${s.recent.length}）</div>` +
+                (s.recent.map(recRow).join("") || `<div class="qg-empty">暂无最近使用。</div>`) +
+                `<div style="margin-top:12px"><button class="b3-button b3-button--small qg-btn-danger" data-qg-rec-clear ${s.recent.length === 0 ? "disabled" : ""}>清空全部最近使用</button></div>`;
         };
         const d = new Dialog({ title: "收藏与最近使用", content: `<div style="padding:12px;font-size:12px"><div id="qg-fav-body"></div></div>`, width: "min(640px, 92vw)" });
         const refresh = async () => {
@@ -1032,13 +1046,13 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     } else {
                         status = `<span style="color:var(--b3-theme-primary)">● 已安装启用</span>`;
                     }
-                    const maturityBadge = m.maturity === "stable" ? "stable" : m.maturity === "design" ? "design（无公开契约，不接入）" : "unlocated";
+                    const maturityBadge = m.maturity === "stable" ? "stable" : m.maturity === "design" ? "design" : "unlocated";
                     const caps = m.capabilities.length > 0 ? `能力 ${m.capabilities.length} 项（读写属性经 adapter 能力协商）` : "能力 0 项";
-                    return `<div class="qg-card" style="padding:8px 12px;margin-bottom:6px">` +
-                        `<div><b>${esc(m.displayName)}</b> <span style="color:var(--b3-theme-on-surface);font-size:11px">${esc(m.pluginId)} · ${esc(maturityBadge)}</span></div>` +
-                        `<div>状态：${status} · 清单 ${esc(m.version ?? "-")} / 实装 ${esc(iv ?? "-")}</div>` +
+                    return `<div class="qg-card" style="padding:10px 12px;margin-bottom:8px">` +
+                        `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b>${esc(m.displayName)}</b> <span class="qg-mono" style="color:var(--b3-theme-on-surface)">${esc(m.pluginId)}</span> <span class="qg-chip mute">${esc(maturityBadge)}</span></div>` +
+                        `<div style="margin-top:3px">状态：${status} · <span class="qg-num">清单 ${esc(m.version ?? "-")} / 实装 ${esc(iv ?? "-")}</span></div>` +
                         `<div style="color:var(--b3-theme-on-surface)">${esc(m.protocol ?? "协议未定义")} · ${esc(caps)}</div>` +
-                        `<div style="color:var(--b3-theme-on-surface)">${esc(m.hubIntegration)}${reason ? " · " + reason : ""}</div>` +
+                        `<div style="color:var(--b3-theme-on-surface);margin-top:2px">${esc(stripDevNotes(m.hubIntegration))}${reason ? " · " + reason : ""}</div>` +
                         `</div>`;
                 }).join("");
                 new Dialog({

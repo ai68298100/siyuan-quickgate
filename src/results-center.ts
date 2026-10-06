@@ -80,6 +80,16 @@ export function fmtReceiptTime(finishedAt: string): string {
     return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
 }
 
+/** 带日期的本地时间戳（审计/收藏等跨天场景）：MM-dd HH:mm:ss（withSeconds=false 省秒）；无效输入回落 "–" */
+export function fmtLocalStamp(iso: string, withSeconds = true): string {
+    const t = Date.parse(iso);
+    if (!Number.isFinite(t)) return "–";
+    const d = new Date(t);
+    const p = (n: number) => String(n).padStart(2, "0");
+    const base = `${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    return withSeconds ? `${base}:${p(d.getSeconds())}` : base;
+}
+
 /** 耗时人性化：<10s 显示 ms（等宽数字），≥10s 升秒保留 1 位（30012ms → 30.0s） */
 export function fmtElapsedMs(ms: number): string {
     if (!Number.isFinite(ms) || ms < 0) return "–";

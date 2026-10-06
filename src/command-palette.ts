@@ -203,7 +203,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             fallbacks.className = "qg-palette-fallbacks";
             if (q) {
                 const cap = document.createElement("button");
-                cap.className = "b3-button b3-button--outline";
+                cap.className = "b3-button b3-button--primary";
                 cap.dataset.fb = "capture";
                 cap.textContent = `捕获「${q.slice(0, 24)}${q.length > 24 ? "…" : ""}」`;
                 fallbacks.appendChild(cap);
@@ -290,17 +290,18 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             const ctl = f.type === "boolean"
                 ? `<input class="b3-switch" type="checkbox" data-f="${esc(f.key)}" />`
                 : f.type === "array" || f.type === "object"
-                    ? `<textarea class="b3-text-field" data-f="${esc(f.key)}" rows="2" placeholder='JSON，如 ["a","b"]'></textarea>`
-                    : `<input class="b3-text-field" data-f="${esc(f.key)}" type="${f.type === "number" ? "number" : "text"}" style="width:100%" />`;
-            return `<div style="margin-bottom:8px"><div style="font-size:12px;font-weight:500">${esc(f.key)}${req}</div>` +
-                `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin:1px 0 3px">${esc(f.description)}</div>${ctl}</div>`;
+                    ? `<textarea class="b3-text-field qg-form-field" data-f="${esc(f.key)}" rows="2" placeholder='JSON，如 ["a","b"]'></textarea>`
+                    : `<input class="b3-text-field qg-form-field" data-f="${esc(f.key)}" type="${f.type === "number" ? "number" : "text"}" />`;
+            return `<div class="qg-form-item"><div class="qg-form-label">${esc(f.key)}${req}</div>` +
+                `<div class="qg-form-desc">${esc(f.description)}</div>${ctl}</div>`;
         }).join("");
-        list.innerHTML = `<div style="font-size:13px;font-weight:600;margin-bottom:8px">${esc(label)} <span style="font-weight:400;color:var(--b3-theme-on-surface);font-size:11px">— 填写参数后执行</span></div>` +
+        list.innerHTML = `<div style="font-size:13px;font-weight:600;margin-bottom:10px">${esc(label)} <span style="font-weight:400;color:var(--b3-theme-on-surface);font-size:11px">— 填写参数后执行</span></div>` +
             (fieldHtml || `<div style="color:var(--b3-theme-on-surface);font-size:12px;margin-bottom:8px">该动作无参数。</div>`) +
-            `<div style="display:flex;gap:8px;margin-top:4px">` +
+            `<div style="display:flex;gap:8px;margin-top:12px">` +
             `<button class="b3-button b3-button--outline" data-form="back">返回</button>` +
             `<button class="b3-button b3-button--primary" data-form="exec">执行</button></div>` +
             `<div data-form="msg" style="margin-top:8px;font-size:12px"></div>`;
+        list.scrollTop = 0; // 从列表切表单时清除残留滚动，标题不被裁
         list.querySelector('[data-form="back"]')?.addEventListener("click", () => { stage = "list"; render(); });
         list.querySelector('[data-form="exec"]')?.addEventListener("click", () => void execForm());
         // 文本字段内 Enter 直执行（textarea 保留换行语义）
