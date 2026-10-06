@@ -20,6 +20,8 @@
 #qg-notify,
 #qg-recovery,
 #qg-palette,
+#qg-capture,
+#qg-capture-done,
 #qg-audit-body,
 #qg-fav-body {
   /* 思源 base.css 无全局 border-box（逐组件声明）——qg 组件的 padding/边框
@@ -630,5 +632,12 @@
       align-self: flex-start;
       margin-bottom: 4px;
     }
+    /* 窄屏行改为两段式：标题/说明通栏、控件换行通栏——否则 ctrl max-width:46%
+       会把 label 挤成竖排断行（轮询间隔实测踩坑）；图标收起减负（同面板窄屏先例） */
+    .qg-row { flex-wrap: wrap; }
+    .qg-row .ic { display: none; }
+    .qg-row .body { flex: 1 1 100%; }
+    .qg-row .ctrl { max-width: 100%; width: 100%; padding-top: 6px; }
+    .qg-kpi .kv { min-width: 40%; }
   }
 }

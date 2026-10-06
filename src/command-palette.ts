@@ -412,16 +412,19 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             // G3-04 + R7 结论②：目标二选一（先询问去向再写入；失败保留文本可改后重试）
             // R7-A：成功后给原文操作（打开原文 / 复制块引用）
             const text = input.value.trim();
-            const ask = new Dialog({
-                title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>捕获到哪儿？</span></span>`,
-                content: `<div style="padding:14px;display:flex;gap:8px;flex-wrap:wrap">` +
-                    (host.lastCaptureTarget() === "inbox"
-                        ? `<button class="b3-button b3-button--primary" data-target="inbox">收集箱（上次）</button><button class="b3-button" data-target="daily">今日日记</button>`
-                        : `<button class="b3-button b3-button--primary" data-target="daily">今日日记（上次）</button><button class="b3-button" data-target="inbox">收集箱</button>`) +
-                    `</div>`,
-                width: "min(360px, 92vw)",
-                height: "auto",
-            });
+                const ask = new Dialog({
+                    title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>捕获到哪儿？</span></span>`,
+                    content: `<div id="qg-capture" style="padding:14px 16px">` +
+                        `<div style="font-size:12px;color:var(--b3-theme-on-surface);margin-bottom:12px;line-height:1.6">` +
+                        `「${esc(text.slice(0, 40))}${text.length > 40 ? "…" : ""}」——选择写入去向（可在 设置→连接与通道 改默认值）：</div>` +
+                        `<div style="display:flex;gap:8px;flex-wrap:wrap">` +
+                        (host.lastCaptureTarget() === "inbox"
+                            ? `<button class="b3-button b3-button--primary" data-target="inbox">收集箱（上次）</button><button class="b3-button" data-target="daily">今日日记</button>`
+                            : `<button class="b3-button b3-button--primary" data-target="daily">今日日记（上次）</button><button class="b3-button" data-target="inbox">收集箱</button>`) +
+                        `</div><div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:10px">今日日记 = 追加 <span class="qg-mono">- HH:mm 内容</span>；收集箱 = 纯文本段落。</div></div>`,
+                    width: "min(420px, 92vw)",
+                    height: "auto",
+                });
             ask.element.addEventListener("click", (ev) => {
                 const b = (ev.target as HTMLElement).closest("[data-target]") as HTMLElement | null;
                 if (!b) return;
@@ -437,13 +440,13 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                     showMessage(r.message, 2500, "info");
                     const done = new Dialog({
                         title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>捕获成功</span></span>`,
-                        content: `<div style="padding:14px;font-size:12px;line-height:1.8">` +
-                            `<div>${esc(r.message)}</div>` +
-                            `<div style="margin-top:4px;color:var(--b3-theme-on-surface)">${r.blockId ? `块 ${esc(r.blockId)}` : ""}${r.blockId && r.docId ? " · " : ""}${r.docId ? `文档 ${esc(r.docId)}` : ""}</div>` +
-                            `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">` +
-                            (r.docId ? `<button class="b3-button b3-button--outline" data-cap-doc="${esc(r.docId)}">打开原文</button>` : "") +
-                            (r.blockId ? `<button class="b3-button b3-button--outline" data-cap-ref="${esc(r.blockId)}">复制块引用</button>` : "") +
-                            `<button class="b3-button b3-button--outline" data-cap-again>再记一条</button>` +
+                        content: `<div id="qg-capture-done" style="padding:14px 16px;font-size:12px;line-height:1.8">` +
+                            `<div style="display:flex;gap:8px;align-items:center"><span class="qg-chip ok">已写入</span><span>${esc(r.message)}</span></div>` +
+                            `<div style="margin-top:4px;color:var(--b3-theme-on-surface)" class="qg-mono">${r.blockId ? `块 ${esc(r.blockId)}` : ""}${r.blockId && r.docId ? " · " : ""}${r.docId ? `文档 ${esc(r.docId)}` : ""}</div>` +
+                            `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">` +
+                            (r.docId ? `<button class="b3-button" data-cap-doc="${esc(r.docId)}">打开原文</button>` : "") +
+                            (r.blockId ? `<button class="b3-button" data-cap-ref="${esc(r.blockId)}">复制块引用</button>` : "") +
+                            `<button class="b3-button b3-button--primary" data-cap-again>再记一条</button>` +
                             `<button class="b3-button" data-cap-close>关闭</button></div></div>`,
                         width: "min(520px, 92vw)",
                         height: "auto",
