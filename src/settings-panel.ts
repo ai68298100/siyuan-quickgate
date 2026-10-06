@@ -388,6 +388,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         let envState: "running" | "ok" | "err" = "running";
         let envMsg = "检查内核与存储……";
         content.innerHTML = `<p class="qg-page-title" style="font-size:14px;color:var(--b3-theme-on-background)">三步接通外部自动化<span style="font-weight:400;color:var(--b3-theme-on-surface)">　——　Quicker / 快捷指令 / CLI 复用同一条命令通道</span></p>` +
+            // L565 部分：双路径如实说明——不开桥也有可用的只读面
+            `<p style="font-size:11px;color:var(--b3-theme-on-surface);margin:0 0 10px;line-height:1.6">两条路径，按需选择：①<b>外部桥</b>（Quicker / CLI / 手机快捷指令）需完成下面的向导显式开启；②<b>不开桥也可用</b>——AI 助手经 <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/src/mcp/README.md">MCP 只读工具</a>、或内核同步路由的 7 个只读 op（见 <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>），桥关闭时同样工作。</p>` +
             `<div class="qg-steps" data-role="steps"></div><div data-role="body"></div>` +
             `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:8px">跳过向导，直接浏览<a data-role="skip" style="color:var(--b3-theme-primary);cursor:pointer">全部设置</a></div>`;
 
@@ -1220,8 +1222,13 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     }
                     const maturityBadge = m.maturity === "stable" ? "stable" : m.maturity === "design" ? "design" : "unlocated";
                     const caps = m.capabilities.length > 0 ? `能力 ${m.capabilities.length} 项（读写属性经 adapter 能力协商）` : "能力 0 项";
+                    // L554 部分：stable 插件给仓库入口（design 态插件未公开仓库，不显示链接——诚实边界）
+                    const repoLink = m.maturity === "stable"
+                        ? ` · <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/${esc(m.pluginId)}">仓库</a>` +
+                          `<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/${esc(m.pluginId)}/releases">Releases</a>`
+                        : "";
                     return `<div class="qg-card" style="padding:10px 12px;margin-bottom:8px">` +
-                        `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b>${esc(m.displayName)}</b> <span class="qg-mono" style="color:var(--b3-theme-on-surface)">${esc(m.pluginId)}</span> <span class="qg-chip mute">${esc(maturityBadge)}</span></div>` +
+                        `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b>${esc(m.displayName)}</b> <span class="qg-mono" style="color:var(--b3-theme-on-surface)">${esc(m.pluginId)}</span> <span class="qg-chip mute">${esc(maturityBadge)}</span>${repoLink}</div>` +
                         `<div style="margin-top:3px">状态：${status} · <span class="qg-num">清单 ${esc(m.version ?? "-")} / 实装 ${esc(iv ?? "-")}</span></div>` +
                         `<div style="color:var(--b3-theme-on-surface)">${esc(m.protocol ?? "协议未定义")} · ${esc(caps)}</div>` +
                         `<div style="color:var(--b3-theme-on-surface);margin-top:2px">${esc(stripDevNotes(m.hubIntegration))}${reason ? " · " + reason : ""}</div>` +
