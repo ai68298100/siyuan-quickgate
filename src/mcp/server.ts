@@ -1,7 +1,7 @@
 /**
  * MCP stdio 服务器核心（协议：JSON-RPC 2.0，换行分帧；方法面=initialize/ping/tools/list/tools/call）。
  * 纯请求→响应函数，无 IO——stdio 循环在 main.ts，单测直接打 handleRequest。
- * 安全（docs/10 §3.14）：writeEnabled=false 时写工具不进 tools/list，tools/call 调用也拒绝。
+ * 安全模型见 src/mcp/README.md：writeEnabled=false 时写工具不进 tools/list，tools/call 调用也拒绝。
  */
 import { buildToolDefs, filterTools, validateArgs } from "./tools.ts";
 import type { McpToolDef } from "./tools.ts";

@@ -2,6 +2,20 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.8.1 · 2026-10-07（GitHub 发布链与契约计数修复）
+
+### Fixed
+- 修复 MCP 协议冒烟仍按 26 个工具断言、实际契约已为 27 个的问题；工具总数改为从 `src/ops.ts` 的 `ALL_OPS` 单一事实来源读取。
+- 将 `vitest` 依赖声明提升到已修复安全问题的 `^4.1.11`，并改用 frozen lockfile 验证安装。
+
+### Changed
+- CI 收紧为只读权限、可取消陈旧运行、严格 frozen lockfile，并在发布包缺失时失败。
+- 依赖监测固定更新同一 Issue，增强上游版本抓取失败的可见性。
+- 新增 Dependabot、PR 模板和 Issue 必填校验；刷新双语 README、MCP/Agent 指南、安全策略与自动状态快照。
+
+### Release
+- GitHub Releases 提供 `package.zip`、SHA-256 校验文件和依赖清单；本版本不上思源集市。
+
 ## v0.8.0 · 2026-10-07（插件内 UI 层 + 首跑七步状态机 + 失联接管 + 取消通道；R283~R354 聚合）
 
 > 二十余轮迭代聚合发布，四条主线：①插件内 UI 成型（观感对齐 mvp1 原型）；②首跑七步可恢复状态机；③失联检测与消费权接管；④workflow.cancel 取消通道。逐轮明细见 [docs/PROGRESS.md](docs/PROGRESS.md)。

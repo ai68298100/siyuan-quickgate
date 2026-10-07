@@ -6,7 +6,7 @@ describe("MCP 规范 annotations", () => {
     const defs = buildToolDefs();
     const byName = new Map(defs.map((d) => [d.name, d]));
 
-    it("26 工具全部输出四注解且显式恒填（规范对 destructiveHint 缺省按 true 解读——不可依赖缺省）", () => {
+    it("27 工具全部输出四注解且显式恒填（规范对 destructiveHint 缺省按 true 解读——不可依赖缺省）", () => {
         expect(defs.length).toBe(27);
         for (const d of defs) {
             const a = d.annotations;

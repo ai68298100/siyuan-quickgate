@@ -1,7 +1,7 @@
 /**
- * MCP 工具映射（契约驱动）：23 op → MCP tools 一比一。
+ * MCP 工具映射（契约驱动）：由 src/ops.ts 的 ALL_OPS 一比一生成 MCP tools。
  * 单一事实来源仍是 src/ops.ts 的 ALL_OPS——tests/mcp-server.test.ts 强制两侧一致（R8 教训的延伸）。
- * 安全模型（docs/10 §3.14）：只读 op 默认暴露；写 op 需显式 mcpWriteEnabled。
+ * 安全模型见 src/mcp/README.md：只读 op 默认暴露；写 op 需显式 mcpWriteEnabled。
  */
 import { ALL_OPS } from "../ops.ts";
 

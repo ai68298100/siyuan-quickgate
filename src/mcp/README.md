@@ -25,7 +25,7 @@ Claude Desktop 配置（`claude_desktop_config.json`）：
 }
 ```
 
-## 安全模型（docs/10 §3.14）
+## 安全模型
 
 - **默认只读**：14 个只读工具（ping/清单/概览/搜索/上下文/诊断/事件拉取…）
 - **写工具默认隐藏**：`LV_MCP_WRITE=1` 才进 tools/list；tools/call 直接调写工具会被诚实拒绝
@@ -46,7 +46,7 @@ Claude Desktop 配置（`claude_desktop_config.json`）：
 
 ## 状态与边界
 
-- ✅ 单测 33 个测试文件、210 个测试全绿（契约一致性/安全过滤/JSON-RPC 语义/错误分支/参数 schema 纪律/内核路由三态/L655 状态机/MCP 加固）
+- ✅ Vitest 单测全绿（契约一致性/安全过滤/JSON-RPC 语义/错误分支/参数 schema 纪律/内核路由三态/L655 状态机/MCP 加固；数量以 CI 最近一次运行结果为准）
 - ✅ 裸 Node 协议烟测：initialize 握手 / tools/list（默认 14） / 写工具拒绝提示 / required 穿透
 - ✅ **协议级冒烟**（`node tools/mcp-smoke.mjs`）：无思源鉴权环境时 6 项协议断言通过；真实 `bridge.ping` 需有效 Authorization，不能将环境失败记为代码通过
 - ✅ **真机 e2e 全链（R81）**：三通道全部经真实前端消费（广播 recorded/内核路由 recorded/NDJSON 投递）

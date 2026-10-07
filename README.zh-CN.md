@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-[![Version](https://img.shields.io/badge/version-0.8.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.1-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
 
@@ -36,7 +36,7 @@
 
 ## 手动安装
 
-1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；SHA-256 清单随 Release 提供）。
+1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；GitHub 会在资产详情显示 SHA-256 digest）。当前 `v0.8.1` 仍是预发布版，需要稳定版本时请选择最新 stable release。
 2. 思源 → 设置 → 集市 → 下载页 → 右上角菜单 → **导入安装包**。
 3. 启用插件，打开设置，将**外部命令桥**打开（产品默认关闭）。
 4. **更新版本后需完全退出思源（托盘右键退出）再启动**——窗口重开不会刷新插件前端代码；可双击工作区的 `重启思源.bat`（仓库 `tools/restart-siyuan.bat`）一键完成。
@@ -57,7 +57,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 ### 面向 AI 助手：MCP
 
-[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 27 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，这是任何内置 MCP server 都没有覆盖的能力面（差异化论证见项目文档 docs/10 §3.14）。
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 27 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，并补充思源内置 MCP 未覆盖的小驴生态动作；协议与安全模型见 [MCP 指南](./src/mcp/README.md)。
 
 - **默认只暴露 14 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
 - `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
@@ -73,7 +73,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 ### 思源内置 Agent 集成（自动，零配置）
 
-思源 ≥3.8.6 下，插件经 `siyuan.agent.registerCapability` 向**内置 AI Agent** 原生注册三个能力：`quickgate_ping`（健康探针）、`quickgate_discover`（日记笔记本+收集箱发现）、`quickgate_capture`（一句话追加今日日记）——已实证进入 Agent 模型工具面（`/api/ai/lsCapabilities` 可见），无需任何配置。也可把 Agent 的外部 MCP 设置指向本仓库的 MCP stdio 服务获得全部 26 工具面——完整指南（含 ai.mcp.servers 字段级挂法与审批策略）：[docs/agent-integration.md](./docs/agent-integration.md)。
+思源 ≥3.8.6 下，插件经 `siyuan.agent.registerCapability` 向**内置 AI Agent** 原生注册三个能力：`quickgate_ping`（健康探针）、`quickgate_discover`（日记笔记本+收集箱发现）、`quickgate_capture`（一句话追加今日日记）——已实证进入 Agent 模型工具面（`/api/ai/lsCapabilities` 可见），无需任何配置。也可把 Agent 的外部 MCP 设置指向本仓库的 MCP stdio 服务获得全部 27 工具面——完整指南（含 ai.mcp.servers 字段级挂法与审批策略）：[docs/agent-integration.md](./docs/agent-integration.md)。
 
 ## 安全
 
@@ -91,7 +91,8 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | v0.7.0~0.7.3 | MCP stdio 服务器（AI 助手）+ 内核路由 3.8.6 真机打通（bug#9）+ 验收入口收敛 → 池清账八处正确性修复 + 版本/发布双门禁 + bug#11/12/13 |
 | **v0.7.4** | **template.new 路径穿越安全修复**（三通道守卫）+ 收藏/最近使用全链 + **思源内置 Agent 原生三能力**（零配置）+ 并发正确性（幂等注册表/桥消费权认领/多写者竞态缓解）+ 契约 23→27 op + manifest v2（真机校准） |
 | **v0.7.5** | 发布链补强：package.zip 解包断言（bug#9 回归门）+ Agent 集成指南 + 重启工具 + bug#17 登记（lifecycle 钩子噪音，功能零影响） |
-| **v0.8.0** | **首跑七步可恢复状态机**（wizard-state.json 续跑、样例只读/写入可撤销）· **失联检测与接管**（heartbeat + Web Locks steal）· **workflow.cancel 取消通道**（每步开始前检查点，已完成步骤保留）· 天数保留 retentionDays（默认关）· 备份来源设备 + 收藏合并导入 · UI 对齐原型打磨（R330~R353：KPI 爆版修复/时间本地化/键盘走查 7 检查全过） |
+| **v0.8.0** | **首跑七步可恢复状态机**（wizard-state.json 续跑、样例只读/写入可撤销）· **失联检测与接管**（heartbeat + Web Locks steal）· **workflow.cancel 取消通道**（每步开始前检查点，已完成步骤保留）· 天数保留 retentionDays（默认关）· 备份来源设备 + 收藏合并导入 · UI 对齐原型打磨 |
+| **v0.8.1** | CI/发布可复现性加固 · MCP 冒烟计数改为跟随单一 op 清单 · Dependabot 与 GitHub Issue/PR 流程整理 · 中英文文档与安全策略更新 |
 
 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)，路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 
@@ -100,14 +101,14 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # 验收门：单测(237) + MCP 协议冒烟(7)
+corepack pnpm accept  # 验收门：单测 + MCP 协议冒烟（协议层 6 项；真实 bridge.ping 另加 1 项环境检查）
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # 软链进工作空间联调
 ```
 
 部署后重启思源（或双击 `tools/restart-siyuan.bat`），再跑：
 
-- `npm run verify:restart`（可加 `SIYUAN_LOG=<工作空间>/temp/siyuan.log`）——完整验收数据：桥端到端延迟、内核路由 op、事件物化计数、广播存活、v1.5 快路径延迟、MCP 内核路由、内核日志增长。
-- `npm run verify:bg` —— 后台走查 7 项（含「前端 bundle 判别」：部署 index.js 后必须完全退出重启，该项应 pass）。
+- `corepack pnpm run verify:restart`（可加 `SIYUAN_LOG=<工作空间>/temp/siyuan.log`）——完整验收数据：桥端到端延迟、内核路由 op、事件物化计数、广播存活、v1.5 快路径延迟、MCP 内核路由、内核日志增长。
+- `corepack pnpm run verify:bg` —— 后台走查 7 项（含「前端 bundle 判别」：部署 index.js 后必须完全退出重启，该项应 pass）。
 
 许可证：[MIT](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) · 作者：[@ai68298100](https://github.com/ai68298100)

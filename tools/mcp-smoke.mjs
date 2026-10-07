@@ -5,8 +5,12 @@
  *   SIYUAN_TOKEN=xxx node tools/mcp-smoke.mjs
  */
 import { spawn } from "node:child_process";
+import { ALL_OPS } from "../src/ops.ts";
 
 const results = [];
+// Keep this protocol assertion aligned with src/ops.ts ALL_OPS instead of
+// duplicating a count that can drift when a new op is added.
+const EXPECTED_TOOL_COUNT = ALL_OPS.length;
 const check = (name, ok, detail = "") => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "✓" : "✗"} ${name}${detail ? ` — ${detail}` : ""}`);
@@ -75,7 +79,7 @@ try {
     // —— 写模式会话——
     const rw = await session(true);
     const list2 = await rw.call("tools/list", {});
-    check("LV_MCP_WRITE=1 时 26 工具全暴露", (list2.result?.tools ?? []).length === 26, `实际 ${(list2.result?.tools ?? []).length}`);
+    check(`LV_MCP_WRITE=1 时 ${EXPECTED_TOOL_COUNT} 工具全暴露`, (list2.result?.tools ?? []).length === EXPECTED_TOOL_COUNT, `实际 ${(list2.result?.tools ?? []).length}`);
     if (process.env.SMOKE_SKIP_LIVE === "1") {
         // CI 模式：无内核，跳过 live 回执断言（协议层已由前五断言覆盖）
         console.log("  (SMOKE_SKIP_LIVE=1：跳过 bridge.ping 真实回执断言)");

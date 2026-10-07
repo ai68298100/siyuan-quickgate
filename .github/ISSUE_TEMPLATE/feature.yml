@@ -7,13 +7,19 @@ body:
     attributes:
       label: 场景
       description: 想完成什么事？现在为什么做不了？
+    validations:
+      required: true
   - type: textarea
     id: proposal
     attributes:
       label: 建议方案
       description: op 形状 / 语义 / 幂等与确认策略
+    validations:
+      required: true
   - type: checkboxes
     id: discipline
+    validations:
+      required: true
     attributes:
       label: 边界确认
       options:

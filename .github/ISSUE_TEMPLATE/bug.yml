@@ -4,6 +4,8 @@ labels: ["bug"]
 body:
   - type: textarea
     id: what-happened
+    validations:
+      required: true
     attributes:
       label: 发生了什么
       description: 期望行为 vs 实际行为；附 results.ndjson 中的对应回执（脱敏后）
@@ -14,13 +16,19 @@ body:
       placeholder: |
         1. 用 lv-cli.mjs send --op ...
         2. ...
+    validations:
+      required: true
   - type: input
     id: env
     attributes:
       label: 环境
       placeholder: "思源 3.8.5 / Windows 11 / 快门 v0.1.0 / 桥开关状态"
+    validations:
+      required: true
   - type: checkboxes
     id: sanity
+    validations:
+      required: true
     attributes:
       label: 自查
       options:

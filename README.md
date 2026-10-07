@@ -2,7 +2,7 @@
 
 [中文文档](./README.zh-CN.md)
 
-[![Version](https://img.shields.io/badge/version-0.8.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.1-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (27 ops):
 
@@ -36,7 +36,7 @@ Visual language follows [design/ui-prototype/mvp1.html](./design/ui-prototype/mv
 
 ## Install (manual)
 
-1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) (prerelease-marked = public testing; SHA-256 checksums included).
+1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases). A prerelease is for public testing; GitHub shows the uploaded asset's SHA-256 digest. The current `v0.8.1` release is prerelease, so choose the latest stable release if you need the stable channel.
 2. SiYuan → Settings → Marketplace → Downloads → top-right menu → *Install from package* → pick the zip.
 3. Enable the plugin, open its settings, switch **External command bridge** on (default off by design).
 4. **After updating, fully quit SiYuan (tray → quit) and start it again** — reopening the window does not refresh plugin frontend code. Or just double-click `tools/restart-siyuan.bat`.
@@ -57,7 +57,7 @@ Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tr
 
 ### MCP for AI assistants
 
-[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 27 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, a surface no built-in MCP server covers (see project design docs, docs/10 §3.14, for the rationale).
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 27 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, including the Lv ecosystem actions that are outside SiYuan's built-in MCP surface. See the [MCP guide](./src/mcp/README.md) for the protocol and safety model.
 
 - **14 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
 - `plugin.api` / `workflow.execute` additionally carry the `destructiveHint` annotation
@@ -73,7 +73,7 @@ Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tr
 
 ### Built-in SiYuan Agent integration (automatic, no config)
 
-On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **built-in AI Agent** via `siyuan.agent.registerCapability`: `quickgate_ping` (health), `quickgate_discover` (diary notebook + inbox discovery) and `quickgate_capture` (append a line to today's daily note). Verified live on the Agent's model-facing tool list (`/api/ai/lsCapabilities`) — nothing to configure. Alternatively, point the Agent's external-MCP settings at this repo's MCP stdio server for the full 26-tool surface — full guide (field-level `ai.mcp.servers` setup + approval policy): [docs/agent-integration.md](./docs/agent-integration.md).
+On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **built-in AI Agent** via `siyuan.agent.registerCapability`: `quickgate_ping` (health), `quickgate_discover` (diary notebook + inbox discovery) and `quickgate_capture` (append a line to today's daily note). Verified live on the Agent's model-facing tool list (`/api/ai/lsCapabilities`) — nothing to configure. Alternatively, point the Agent's external-MCP settings at this repo's MCP stdio server for the full 27-tool surface — full guide (field-level `ai.mcp.servers` setup + approval policy): [docs/agent-integration.md](./docs/agent-integration.md).
 
 ## Safety
 
@@ -91,7 +91,8 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | v0.7.0–0.7.3 | MCP stdio server for AI assistants + kernel route live-verified on 3.8.6 (bug#9) + acceptance entry points → backlog cleanup (eight correctness fixes + version/release gates) + bug#11/12/13 |
 | **v0.7.4** | **template.new path-traversal security fix** (three-channel guard) + favorites/recents full chain + **built-in SiYuan Agent native capabilities** (zero config) + concurrency correctness (idempotency registry / bridge claim / multi-writer mitigation) + contract 23→27 ops + manifest v2 (live-calibrated) |
 | **v0.7.5** | release-chain hardening: package.zip unpack assertions (bug#9 regression gate) + Agent integration guide + restart tool + bug#17 documented (lifecycle hook noise, zero functional impact) |
-| **v0.8.0** | **resumable seven-step first-run wizard** (wizard-state.json resume, sample read/write with undo) · **liveness detection & takeover** (heartbeat + Web Locks steal) · **workflow.cancel channel** (checkpoint before each step, completed steps preserved) · day-based retention (retentionDays, off by default) · backup sourceDevice + favorites merge import · prototype-aligned UI polish (R330~R353: KPI wrap fix / localized times / keyboard walkthrough 7/7) |
+| **v0.8.0** | **resumable seven-step first-run wizard** (wizard-state.json resume, sample read/write with undo) · **liveness detection & takeover** (heartbeat + Web Locks steal) · **workflow.cancel channel** (checkpoint before each step, completed steps preserved) · day-based retention (retentionDays, off by default) · backup sourceDevice + favorites merge import · prototype-aligned UI polish |
+| **v0.8.1** | CI/release reproducibility hardening · MCP smoke count derived from the single op registry · Dependabot and GitHub issue/PR workflow hygiene · bilingual documentation and security policy refresh |
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 
@@ -100,14 +101,14 @@ Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # acceptance gate: unit tests (237) + MCP protocol smoke (7)
+corepack pnpm accept  # unit tests + MCP protocol smoke (6 protocol checks; live bridge.ping adds one environment-dependent check)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # symlink into your workspace for dev
 ```
 
 After deploying, restart SiYuan (or double-click `tools/restart-siyuan.bat`), then run:
 
-- `npm run verify:restart` (add `SIYUAN_LOG=<workspace>/temp/siyuan.log` for the log-growth readout) — full acceptance dataset: bridge e2e latency, kernel-route ops, event materialization counts, broadcast liveness, v1.5 fast-path latency, MCP kernel-route, kernel log growth.
-- `npm run verify:bg` — 7-check background walkthrough (including the "frontend bundle discriminator": after deploying index.js you must fully quit & restart SiYuan, and this check should pass).
+- `corepack pnpm run verify:restart` (add `SIYUAN_LOG=<workspace>/temp/siyuan.log` for the log-growth readout) — full acceptance dataset: bridge e2e latency, kernel-route ops, event materialization counts, broadcast liveness, v1.5 fast-path latency, MCP kernel-route, kernel log growth.
+- `corepack pnpm run verify:bg` — 7-check background walkthrough (including the "frontend bundle discriminator": after deploying index.js you must fully quit & restart SiYuan, and this check should pass).
 
 License: [MIT](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) · Author: [@ai68298100](https://github.com/ai68298100)

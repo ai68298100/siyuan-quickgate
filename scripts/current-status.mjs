@@ -2,16 +2,17 @@
 /**
  * 单一状态页快照（G0-01 · R315）：把"当前是什么状态"收敛到一个可再生的文档。
  * 数据源全部本地/离线：git（HEAD/tag/未提交数）、dist 构建产物（存在性+mtime）、
- * 测试数（从 PROGRESS 不可派生——保持人工声明，脚本只登记 check 链是否可跑）。
+ * 测试数不在快照中硬编码，避免与 Vitest 漂移；运行 `pnpm test` 查看权威数量。
  * 远端 Release 通过 git ls-remote tags 探测（网络不可达时诚实标注 unknown，不猜）。
  * 运行：node scripts/current-status.mjs → 重写 docs/current-status.md
  */
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync, statSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const { ALL_OPS } = await import(pathToFileURL(path.join(ROOT, "src/ops.ts")));
 const now = new Date();
 const nowLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
@@ -53,7 +54,7 @@ lines.push("");
 lines.push(`| 门 | 状态 |`);
 lines.push(`|---|---|`);
 lines.push(`| tsc --noEmit | ✓（生成时点通过） |`);
-lines.push(`| vitest（tests/） | 210 基线 + 增量（R310 时点 210；权威数字跑 \`pnpm test\`） |`);
+lines.push("| vitest（tests/） | 以最近一次 `pnpm test` 输出为准（快照不硬编码数量） |");
 lines.push(`| check 链（含数字门禁） | ✓（生成时点通过） |`);
 lines.push("");
 lines.push("## 通道与入口");
@@ -63,7 +64,7 @@ lines.push("|---|---|");
 lines.push("| 命令面板 | Ctrl+Alt+P 或 命令「小驴快门：命令面板」 |");
 lines.push("| NDJSON 桥 | `data/storage/petal/siyuan-quickgate/bridge/commands.ndjson`（默认关） |");
 lines.push("| 内核路由 | `POST /plugin/private/siyuan-quickgate/exec`（随 petal 启用） |");
-lines.push("| MCP stdio | `node src/mcp/main.ts`（26 tools，默认 14 只读） |");
+lines.push(`| MCP stdio | \`node src/mcp/main.ts\`（${ALL_OPS.length} tools，默认 14 只读） |`);
 lines.push("| 设置面板 | 设置 → 集市 → 已下载 → 小驴快门 → 齿轮 |");
 lines.push("");
 lines.push("## 文档");

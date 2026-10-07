@@ -4,14 +4,14 @@
 
 ## 这个仓库是什么
 
-思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 26 个 op 的公开契约。设计文档与总账本在本仓库 `design/` 目录（2026-10-05 起由原独立仓库 quicksrer 动作 subtree 并入，非代码）。
+思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 27 个 op 的公开契约。设计文档与总账本在本仓库 `design/` 目录（2026-10-05 起由原独立仓库 quicksrer 动作 subtree 并入，非代码）。
 
 ## 常用命令
 
 ```bash
 corepack pnpm install
 corepack pnpm check        # tsc + svelte-check（提交前必跑）
-corepack pnpm accept       # 验收门：单测(210) + MCP 协议冒烟(7)——无内核可跑
+corepack pnpm accept       # 验收门：单测 + MCP 协议冒烟（无内核 6 项；有内核再加 live 回执）
 corepack pnpm build        # dist/ + package.zip
 corepack pnpm build:mcp    # dist-mcp/（MCP 独立分发物）
 corepack pnpm verify:restart  # 真机九类数据（需思源运行+桥开启；SIYUAN_LOG 可选）
@@ -98,7 +98,7 @@ gh workflow run ci-e2e-experiment.yml && gh run watch
 ## 关键文档
 
 - docs/WALKTHROUGH.md — spike 实证记录（①~⑪ 状态与证据）
-- docs/api.md — 23 op 契约面（用户可见）
+- docs/api.md — 27 op 契约面（用户可见）
 - docs/DECISIONS.md — D-0001~D-0015 决策记录
 - docs/ROADMAP.md — M0~M3 路线与门槛
 - src/mcp/README.md — MCP 服务器（运行/配置/安全模型）

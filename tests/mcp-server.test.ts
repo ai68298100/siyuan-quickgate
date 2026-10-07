@@ -46,7 +46,7 @@ describe("MCP 工具映射（契约驱动）", () => {
         expect(Object.keys(byName.get("bridge.ping")!.inputSchema.properties)).toEqual([]);
     });
 
-    it("只读/写分类与破坏性标注符合安全模型（docs/10 §3.14）", () => {
+    it("只读/写分类与破坏性标注符合 MCP 安全模型", () => {
         const defs = buildToolDefs();
         const byName = new Map(defs.map((t) => [t.name, t]));
         expect(byName.get("bridge.ping")!.annotations.readOnlyHint).toBe(true);

@@ -21,13 +21,14 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - run: corepack pnpm install --no-frozen-lockfile
+      - run: corepack pnpm install --frozen-lockfile
       - name: Collect outdated deps
         run: corepack pnpm outdated --format list > outdated.txt || true
       - name: Fetch latest SiYuan release
         run: |
-          curl -s https://api.github.com/repos/siyuan-note/siyuan/releases/latest \
-            | grep -o '"tag_name": *"[^"]*"' | head -1 > siyuan-latest.txt || true
+          curl --fail-with-body --retry 3 --retry-delay 2 -sS \
+            https://api.github.com/repos/siyuan-note/siyuan/releases/latest \
+            | jq -r '.tag_name // "(获取失败)"' > siyuan-latest.txt
           cat siyuan-latest.txt
       - name: Build report
         run: |
@@ -49,7 +50,7 @@ jobs:
       - name: Create or update weekly issue
         uses: peter-evans/create-issue-from-file@v5
         with:
-          title: "依赖/上游监测 · ${{ github.event.schedule || 'manual' }}"
+          title: "依赖/上游监测"
           content-filepath: report.md
           labels: |
             dependencies

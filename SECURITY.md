@@ -4,7 +4,8 @@
 
 | Version | Supported |
 | --- | --- |
-| 0.7.x | ✅（当前维护线；0.7.5 为 prerelease） |
+| 0.8.x | ✅（当前维护线；v0.8.0 目前为 prerelease） |
+| 0.7.x | ⚠️ 仅接受可复现的安全报告，不承诺修复 |
 | < 0.7.0 | ⚠️ 仅接受可复现的安全报告，不承诺修复 |
 
 ## Reporting a Vulnerability

@@ -2,6 +2,14 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R356（v0.8.1 发布准备：GitHub 发布链与契约计数修复）
+
+- MCP 冒烟从硬编码 26 改为读取 `src/ops.ts` 的 `ALL_OPS`；当前源码、测试、文档和 bundle 均以 27/27/14 为准。
+- GitHub CI 改用 frozen lockfile、只读权限、并发取消和严格产物校验；依赖监测固定 Issue 标题并增强上游 API 失败可见性。
+- 新增 Dependabot 配置、PR 模板和 Issue 必填校验；`vitest` 声明提升至 `^4.1.11` 以对应安全修复。
+- 双语 README、MCP/Agent 指南、安全策略与 `current-status` 快照同步；本版本仅发布 GitHub Release，不推送思源集市。
+- 验收：`pnpm check`、237 测试、MCP 冒烟 6/6、完整 build、发布包链接/结构/泄露检查全部通过。
+
 ## 2026-10-07 · R355（v0.8.0 发版：CHANGELOG 收敛 + 发布链链接修复）
 
 - **v0.8.0 正式发版**（不上集市，GitHub Releases 唯一分发渠道）：版本三处（plugin.json / package.json / 版本常量）→ 0.8.0；CHANGELOG Unreleased（R283~R354 二十余轮）收敛为 `v0.8.0 · 2026-10-07` 正式版块——段内重复条目去重（sourceDevice 子弹 / 收藏计数修复各 ×2）、补 onStolen 防双消费与 Changed 小节（契约 26→27、测试 210→237）。
