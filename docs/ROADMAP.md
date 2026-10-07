@@ -1,7 +1,7 @@
 # ROADMAP
 
 > 里程碑与验收对应项目主仓库 TODO §5；此处只列本仓库视角的顺序与门槛。
-> 状态（2026-10-07，源码与 GitHub 发布线 v0.8.2）：**内核侧 spike 已闭环**（⑥⑧⑨⓪⑤ 早期探针 + ③ R68 复测批 + ⑩ spike⑩ 真机全线 + ⑪ R230 事件物化 e2e）；前端 spike ①②⑦ 已做 bundle 静态核实；快门已部署真机工作空间并启用。剩余真机项：DevTools 现场三项（④双窗口/⑦blockId/⑪现场事件）+ **前端加载判别**（bug#15：index.js 部署后需完全退出重启，e2e-bg「前端 bundle 判别」应 pass）。v0.8.2 已通过主 CI、237 项测试和发布前扫描；集市仍按约定不推送。
+> 状态（2026-10-07，源码与 GitHub 发布线 v0.8.3）：**内核侧 spike 已闭环**（⑥⑧⑨⓪⑤ 早期探针 + ③ R68 复测批 + ⑩ spike⑩ 真机全线 + ⑪ R230 事件物化 e2e）；前端 spike ①②⑦ 已做 bundle 静态核实；快门已部署真机工作空间并启用。剩余真机项：DevTools 现场三项（④双窗口/⑦blockId/⑪现场事件）+ **前端加载判别**（bug#15：index.js 部署后需完全退出重启，e2e-bg「前端 bundle 判别」应 pass）。v0.8.3 开发线继续通过主 CI、240 项测试和发布前扫描；集市仍按约定不推送。
 
 ## M0 spike（需思源真机，半天）→ 产出 docs/WALKTHROUGH.md（现为 11 项实操手册）
 ① 命令注册表形状 ✅bundle 静态核实（v0.6.3：i18n/displayName 挂载+customHotkey 回写机制；DevTools 可选复核）

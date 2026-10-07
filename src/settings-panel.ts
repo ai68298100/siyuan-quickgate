@@ -21,6 +21,7 @@ import { BroadcastSubscriber } from "./services/broadcast";
 import { normalizeFavorites, FavoritesStore } from "./services/favorites";
 import { normalizeProcessed, normalizeSettings } from "./services/store";
 import { buildBackupPayload, parseBackupPayload } from "./data-backup";
+import { buildHealthSnapshot, HealthSnapshotInput } from "./services/health-snapshot";
 import { fmtElapsedMs, fmtLocalStamp, fmtReceiptTime } from "./results-center";
 import manifestJson from "./assets/ecosystem-manifests.json";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge";
@@ -75,7 +76,7 @@ export interface SettingsPanelHost {
 }
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径；自 index.ts 迁入——唯一使用方是设置面板） */
-export function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], service: BridgeService, readMetrics?: { ok: number; missing: number; auth: number; unreachable: number; unexpected: number }, broadcastMetrics?: { connects: number; reconnects: number; received: number; lastEventAt: number | null }) {
+export function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], service: BridgeService, readMetrics?: { ok: number; missing: number; auth: number; unreachable: number; unexpected: number }, broadcastMetrics?: { connects: number; reconnects: number; received: number; lastEventAt: number | null }, healthInput?: Omit<HealthSnapshotInput, "audit">) {
     const st = service.stats;
     return {
         protocol: 1,
@@ -84,6 +85,7 @@ export function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry
         settings: { ...settings },
         ...(readMetrics ? { fileRead: { ...readMetrics } } : {}),
         ...(broadcastMetrics ? { broadcast: { ...broadcastMetrics } } : {}),
+        health: buildHealthSnapshot({ ...(healthInput ?? { sessionStartedAt: Date.now() }), audit: auditLog }),
         lateCompletions: service.lateCompletions,
         stats: { ...st, avgDispatchMs: st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null },
         auditTail: auditLog.slice(-50),
@@ -252,7 +254,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
     /** 诊断包 JSON 组装（诊断页按钮与桥恢复向导共用；统计取自活动服务实例避免全零失真） */
     const buildDiagJson = async (): Promise<string> => {
         const service = host.activeService ?? new BridgeService(host.deps() as never);
-        return JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics), null, 2);
+        const commandsText = await host.kernelApi.getFileText(`${host.settings.bridgeBasePath}/commands.ndjson`).catch(() => null);
+        return JSON.stringify(memDiagnostics(host.settings, host.auditLog, service, host.kernelApi.readMetrics, host.broadcastSub?.metrics, { sessionStartedAt: host.sessionStartedAt, commandsText }), null, 2);
     };
 
     /** 载体明细（L630 部分）：逐文件行数/字节 + 坏行计数 + 最老/最新回执时间（只读统计，不做任何改动） */
@@ -1881,7 +1884,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             diagBtn.onclick = async () => {
                 const { memDiagnostics } = await import("./settings-panel");
                 const service = host.activeService ?? new BridgeService(host.deps());
-                const mem = memDiagnostics(host.settings, host.auditLog, service);
+                const mem = memDiagnostics(host.settings, host.auditLog, service, undefined, undefined, { sessionStartedAt: host.sessionStartedAt });
                 await navigator.clipboard.writeText(JSON.stringify(mem, null, 2));
                 showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
             };

@@ -2,7 +2,7 @@
 
 [中文文档](./README.zh-CN.md)
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.2-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (27 ops):
 
@@ -36,7 +36,7 @@ Visual language follows [design/ui-prototype/mvp1.html](./design/ui-prototype/mv
 
 ## Install (manual)
 
-1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases). A prerelease is for public testing; GitHub shows the uploaded asset's SHA-256 digest. The current `v0.8.2` release is prerelease, so choose the latest stable release if you need the stable channel.
+1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases). A prerelease is for public testing; GitHub shows the uploaded asset's SHA-256 digest. The current `v0.8.3` release is prerelease, so choose the latest stable release if you need the stable channel.
 2. SiYuan → Settings → Marketplace → Downloads → top-right menu → *Install from package* → pick the zip.
 3. Enable the plugin, open its settings, switch **External command bridge** on (default off by design).
 4. **After updating, fully quit SiYuan (tray → quit) and start it again** — reopening the window does not refresh plugin frontend code. Or just double-click `tools/restart-siyuan.bat`.
@@ -94,6 +94,7 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | **v0.8.0** | **resumable seven-step first-run wizard** (wizard-state.json resume, sample read/write with undo) · **liveness detection & takeover** (heartbeat + Web Locks steal) · **workflow.cancel channel** (checkpoint before each step, completed steps preserved) · day-based retention (retentionDays, off by default) · backup sourceDevice + favorites merge import · prototype-aligned UI polish |
 | **v0.8.1** | CI/release reproducibility hardening · MCP smoke count derived from the single op registry · Dependabot and GitHub issue/PR workflow hygiene · bilingual documentation and security policy refresh |
 | **v0.8.2** | Runtime version source unified across entry/settings/diagnostics · container E2E failures made visible with strict gates, health probes, token masking, and diagnostic artifacts |
+| **v0.8.3** | Session health snapshot in diagnostics · command palette empty-state keyboard safety · combobox/listbox accessibility · stricter E2E startup readiness |
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 

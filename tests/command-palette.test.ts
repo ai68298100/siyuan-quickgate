@@ -2,7 +2,7 @@
  * G3-01 命令面板 MVP：条目合成纯逻辑（收藏置顶→最近次之→其余；别名过滤；去重）。
  */
 import { describe, expect, it } from "vitest";
-import { buildPaletteEntries, formFieldsFor, buildArgs, CAPABILITY_OPS, PaletteEntry } from "../src/command-palette";
+import { buildPaletteEntries, formFieldsFor, buildArgs, CAPABILITY_OPS, PaletteEntry, paletteNavMaxIndex, clampPaletteActiveIndex } from "../src/command-palette";
 import { buildToolDefs } from "../src/mcp/tools";
 
 const e = (plugin: string, id: string, title: string): PaletteEntry => ({
@@ -49,6 +49,18 @@ describe("buildPaletteEntries（G3-01 排序与过滤）", () => {
         expect(out.map((x) => `${x.plugin}/${x.id}`)).toEqual([
             "siyuan-checkin/record", "siyuan-checkin/summary", "siyuan-contacts/search", "siyuan-lumina/flash",
         ]);
+    });
+});
+
+describe("命令面板键盘导航边界", () => {
+    it("空结果时活动索引固定为 0，不能回用上一次结果的索引", () => {
+        expect(paletteNavMaxIndex(0, 0)).toBe(0);
+        expect(clampPaletteActiveIndex(7, 0, 0)).toBe(0);
+    });
+
+    it("命令超过渲染上限时只导航已渲染的前 100 项，再接能力动作", () => {
+        expect(paletteNavMaxIndex(240, 2)).toBe(101);
+        expect(clampPaletteActiveIndex(999, 240, 2)).toBe(101);
     });
 });
 

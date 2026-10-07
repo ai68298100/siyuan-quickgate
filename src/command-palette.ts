@@ -53,6 +53,19 @@ export interface PaletteEntry {
     recentAt?: string;
 }
 
+/** 命令面板键盘导航只覆盖实际渲染的条目（默认最多 100 条）。 */
+export function paletteNavMaxIndex(commandCount: number, capabilityCount: number, renderLimit = 100): number {
+    const commands = Math.min(Math.max(0, Math.trunc(commandCount)), Math.max(0, Math.trunc(renderLimit)));
+    const capabilities = Math.max(0, Math.trunc(capabilityCount));
+    return Math.max(0, commands + capabilities - 1);
+}
+
+/** 将过期活动索引收敛到当前可导航范围，空结果固定回到 0。 */
+export function clampPaletteActiveIndex(active: number, commandCount: number, capabilityCount: number, renderLimit = 100): number {
+    const safeActive = Number.isFinite(active) ? Math.trunc(active) : 0;
+    return Math.max(0, Math.min(safeActive, paletteNavMaxIndex(commandCount, capabilityCount, renderLimit)));
+}
+
 /**
  * 面板条目合成（纯函数）：收藏置顶（按收藏顺序）→ 最近使用（新→旧）→ 其余按注册表序；
  * 过滤：query 经别名展开（中英/拼音）对 title/id/plugin 任一命中；空 query 不过滤。
@@ -171,7 +184,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
     const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = new Dialog({
         title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>命令面板</span><span class="qg-title-ver">↑↓ 选择 · Enter 执行 · Esc 关闭</span></span>`,
-        content: `<div id="qg-palette"><input class="b3-text-field" data-role="q" placeholder="搜索命令（中英/拼音别名；收藏与最近自动置顶）" /><div data-role="list"></div></div>`,
+        content: `<div id="qg-palette"><input class="b3-text-field" data-role="q" role="combobox" aria-label="搜索命令" aria-controls="qg-palette-list" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list" placeholder="搜索命令（中英/拼音别名；收藏与最近自动置顶）" /><div id="qg-palette-list" data-role="list" role="listbox" aria-label="命令结果"></div></div>`,
         width: "min(620px, 92vw)",
         height: "auto",
         destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
@@ -198,11 +211,16 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         const caps = host.bridgeAlive()
             ? CAPABILITY_OPS.filter((c) => !kws || kws.some((k) => c.label.toLowerCase().includes(k) || c.op.toLowerCase().includes(k)))
             : [];
-        active = Math.min(active, Math.max(0, entries.length + caps.length - 1));
+        // 只允许导航到实际渲染的条目；超出 100 条时后续条目不会被隐藏的活动索引选中。
+        active = clampPaletteActiveIndex(active, entries.length, caps.length, RENDER_LIMIT);
         if (entries.length === 0 && caps.length === 0) {
             // R6-B fallback 兜底：无匹配时给可用的下一步，不做死面板；
             // 有输入文本时首位=快速捕获（G3-04：一句话进今日日记）
             const q = input.value.trim();
+            // 清空上一次结果，避免搜索无匹配后按 Enter 误执行旧条目。
+            visibleEntries = [];
+            active = 0;
+            input.removeAttribute("aria-activedescendant");
             list.textContent = "";
             const empty = document.createElement("div");
             empty.className = "qg-palette-empty";
@@ -229,9 +247,12 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         }
         // 列表用 DOM API 构建（textContent 免转义，杜绝注入面）
         list.textContent = "";
-        const mkItem = (opts: { mark?: string; title: string; sub?: string; kbd?: string; isActive: boolean; attrs?: Record<string, string> }) => {
+        const mkItem = (opts: { mark?: string; title: string; sub?: string; kbd?: string; isActive: boolean; id: string; attrs?: Record<string, string> }) => {
             const div = document.createElement("div");
             div.className = "qg-palette-item" + (opts.isActive ? " active" : "");
+            div.id = opts.id;
+            div.setAttribute("role", "option");
+            div.setAttribute("aria-selected", String(opts.isActive));
             for (const [k, v] of Object.entries(opts.attrs ?? {})) div.dataset[k] = v;
             if (opts.mark) {
                 const m = document.createElement("span");
@@ -265,7 +286,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                 // mark 全用单色文本字形（★/↺）——彩色 emoji（🕐）在 Windows 上视觉重量突兀
                 mark: e.favorite ? "★" : e.recent ? "↺" : undefined,
                 title: e.title, sub: e.pluginDisplayName, kbd: e.accelerator,
-                isActive: i === active, attrs: { i: String(i) },
+                isActive: i === active, id: `qg-palette-option-command-${i}`, attrs: { i: String(i) },
             });
             // L552 部分：复制命令信封（宿主命令 → commands.run 信封；粘贴到 lv-cli send / Quicker 即发）
             const copyEnv = document.createElement("button");
@@ -311,7 +332,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             caps.forEach((c, j) => {
                 const capItem = mkItem({
                     mark: " ", title: c.label, sub: c.op, kbd: "参数",
-                    isActive: cmdCount() + j === active, attrs: { cap: c.op },
+                    isActive: cmdCount() + j === active, id: `qg-palette-option-cap-${j}`, attrs: { cap: c.op },
                 });
                 // L552 部分：能力动作的信封即自身 op（args 由「参数」表单填写）
                 const copyEnv = document.createElement("button");
@@ -334,12 +355,16 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                 list.appendChild(capItem);
             });
         }
+        const activeOption = list.querySelector<HTMLElement>('[role="option"][aria-selected="true"]');
+        if (activeOption) input.setAttribute("aria-activedescendant", activeOption.id);
+        else input.removeAttribute("aria-activedescendant");
         list.querySelector(".qg-palette-item.active")?.scrollIntoView({ block: "nearest" });
     };
     const cmdCount = () => entries.length;
 
     /** R6-A 二段式参数面板：schema 驱动字段渲染，取消/返回无副作用 */
     const renderForm = () => {
+        input.removeAttribute("aria-activedescendant");
         const fields = formFieldsFor(formOp);
         const label = CAPABILITY_OPS.find((c) => c.op === formOp)?.label ?? formOp;
         const fieldHtml = fields.map((f) => {
@@ -455,7 +480,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
     };
 
     // L600 部分：输入防抖 120ms——千条命令下每键全量过滤+重建会掉帧（settings 搜索同口径）
-    const navMaxIndex = () => Math.min(entries.length, RENDER_LIMIT) + list.querySelectorAll("[data-cap]").length - 1;
+    const navMaxIndex = () => paletteNavMaxIndex(entries.length, list.querySelectorAll("[data-cap]").length, RENDER_LIMIT);
     input.addEventListener("input", () => {
         active = 0;
         if (stage !== "list") return;

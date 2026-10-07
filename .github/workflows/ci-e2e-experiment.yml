@@ -56,8 +56,8 @@ jobs:
             code=$(curl -sS -o /tmp/siyuan-version.json -w "%{http_code}" \
               -X POST http://127.0.0.1:6806/api/system/version \
               -H "Content-Type: application/json" -d '{}' || true)
-            if [ "$code" = "200" ]; then
-              echo "内核已就绪（第 $i 次探测）"
+            if [ "$code" = "200" ] || [ "$code" = "401" ] || [ "$code" = "403" ]; then
+              echo "内核已响应 HTTP $code（第 $i 次探测）"
               ready=1
               break
             fi
@@ -106,7 +106,7 @@ jobs:
             code=$(curl -sS -o /tmp/siyuan-version-after-restart.json -w "%{http_code}" \
               -X POST http://127.0.0.1:6806/api/system/version \
               -H "Content-Type: application/json" -d '{}' || true)
-            if [ "$code" = "200" ]; then ready=1; echo "重启后内核已就绪（第 $i 次探测）"; break; fi
+            if [ "$code" = "200" ] || [ "$code" = "401" ] || [ "$code" = "403" ]; then ready=1; echo "重启后内核已响应 HTTP $code（第 $i 次探测）"; break; fi
             sleep 2
           done
           if [ "$ready" -ne 1 ]; then docker logs siyuan --tail 200; exit 1; fi
@@ -114,10 +114,27 @@ jobs:
       - name: JWT 与内核路由验收（失败即红）
         run: |
           set -euo pipefail
-          response=$(curl --fail-with-body -sS -X POST "$SIYUAN_URL/plugin/private/siyuan-quickgate/exec" \
-            -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" \
-            -d '{"op":"registry.list","args":{}}')
+          route_ready=0
+          response=''
+          for i in $(seq 1 30); do
+            code=$(curl -sS -o /tmp/registry-response.json -w "%{http_code}" -X POST \
+              "$SIYUAN_URL/plugin/private/siyuan-quickgate/exec" \
+              -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" \
+              -d '{"op":"registry.list","args":{}}' || true)
+            response=$(cat /tmp/registry-response.json 2>/dev/null || true)
+            if [ "$code" = "200" ] && printf '%s' "$response" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);process.exit(j.code===0?0:1)}catch{process.exit(1)}})"; then
+              route_ready=1
+              echo "QuickGate 内核路由已就绪（第 $i 次探测）"
+              break
+            fi
+            sleep 2
+          done
           printf '%s\n' "$response"
+          if [ "$route_ready" -ne 1 ]; then
+            docker logs siyuan --tail 200
+            echo "QuickGate 私有路由未在 60 秒内就绪" >&2
+            exit 1
+          fi
           negative=$(curl -sS -o /tmp/negative-auth.txt -w "%{http_code}" -X POST "$SIYUAN_URL/plugin/private/siyuan-quickgate/exec" \
             -H "Content-Type: application/json" -d '{"op":"bridge.ping","args":{}}')
           test "$negative" = "401" || test "$negative" = "403"
