@@ -276,7 +276,15 @@ export default class QuickGatePlugin extends Plugin {
             this.beginPolling(service, "（无 Locks 环境：单窗口假设）");
             return true;
         }
-        const handle = await this.bridgeClaimer.claim("siyuan-quickgate-bridge");
+        const handle = await this.bridgeClaimer.claim("siyuan-quickgate-bridge", {
+            // L571/L627（docs/34 §3.4）：本窗口的锁被他窗 steal 接管时——立即停止本窗口消费
+            // （轮询/广播全停），防与接管窗口双消费。用户可见通知引导确认原窗口状态。
+            onStolen: () => {
+                console.warn(`[${PLUGIN_NAME}] 桥消费权已被另一窗口接管——本窗口停止轮询（防双消费）`);
+                showMessage("桥消费权已被另一窗口接管，本窗口已停止消费（如非本人操作请检查其他思源窗口）", 6000, "error");
+                void this.stopBridge();
+            },
+        });
         if (handle === null) {
             this.activeService = undefined;
             console.warn(`[${PLUGIN_NAME}] 桥消费权被另一思源窗口持有——本窗口不启动轮询（防同 id 双执行）`);
