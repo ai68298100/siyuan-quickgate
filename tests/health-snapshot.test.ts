@@ -17,6 +17,7 @@ describe("health snapshot（R74-P1 统计窗口）", () => {
         expect(snapshot.uptimeMs).toBe(5_000);
         expect(snapshot.lastSuccess).toEqual({ at: "1970-01-01T00:00:04.000Z", kind: "recorded", op: "z" });
         expect(snapshot.lastError).toEqual({ at: "1970-01-01T00:00:03.000Z", kind: "failed", op: "y" });
+        expect(snapshot.drops).toBe(0);
         expect(JSON.stringify(snapshot)).not.toContain("secret");
     });
 
@@ -36,6 +37,7 @@ describe("health snapshot（R74-P1 统计窗口）", () => {
             oldestAgeMs: 9_000,
             parseErrors: 1,
         });
+        expect(buildHealthSnapshot({ sessionStartedAt: 1_000, now: 2_000, dropped: 4 }).drops).toBe(4);
         expect(JSON.stringify(snapshot)).not.toContain("secret");
         expect(JSON.stringify(snapshot)).not.toContain("not-json");
     });
@@ -44,6 +46,20 @@ describe("health snapshot（R74-P1 统计窗口）", () => {
         const snapshot = buildHealthSnapshot({ sessionStartedAt: 1_000, now: 2_000 });
         expect(snapshot.lastSuccess).toBeNull();
         expect(snapshot.lastError).toBeNull();
+        expect(snapshot.drops).toBe(0);
         expect(snapshot.queue).toEqual({ pending: 0, oldestCreatedAt: null, oldestAgeMs: null, parseErrors: 0 });
+    });
+
+    it("跨重启旧审计不冒充本会话最近事件", () => {
+        const snapshot = buildHealthSnapshot({
+            sessionStartedAt: Date.parse("2026-10-07T00:00:10.000Z"),
+            now: Date.parse("2026-10-07T00:00:20.000Z"),
+            audit: [
+                { time: "2026-10-07T00:00:09.000Z", plugin: "p", command: "old args(secret)", status: "recorded", elapsedMs: 1 },
+                { time: "2026-10-07T00:00:11.000Z", plugin: "p", command: "new args(secret)", status: "failed", elapsedMs: 1 },
+            ],
+        });
+        expect(snapshot.lastSuccess).toBeNull();
+        expect(snapshot.lastError?.op).toBe("new");
     });
 });

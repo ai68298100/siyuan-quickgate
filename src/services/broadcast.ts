@@ -21,12 +21,36 @@ export interface BroadcastDeps {
     sleepImpl?: (ms: number) => Promise<void>;
 }
 
+/** SSE 观测指标；数值只描述当前前端实例，不是跨重启累计。 */
+export interface BroadcastMetrics {
+    connects: number;
+    reconnects: number;
+    /** 收到的 data: 行数（包括空载荷和被丢弃的坏载荷）。 */
+    frames: number;
+    /** 无法解析为合法单行信封而丢弃的 data: 行数。 */
+    dropped: number;
+    /** 连接错误或命令处理异常次数。 */
+    errors: number;
+    received: number;
+    lastEventAt: number | null;
+    lastErrorAt: number | null;
+}
+
 export class BroadcastSubscriber {
     private stopped = true;
     private loop: Promise<void> | null = null;
     private currentCtrl: AbortController | null = null;
-    /** L553 观测指标：连接次数 / 重连次数 / 合法信封数 / 最近事件时间（诊断包与设置页展示用） */
-    readonly metrics = { connects: 0, reconnects: 0, received: 0, lastEventAt: null as number | null };
+    /** L553/R74 观测指标：连接、帧、丢弃、错误与最近时间（诊断包与设置页展示用）。 */
+    readonly metrics: BroadcastMetrics = {
+        connects: 0,
+        reconnects: 0,
+        frames: 0,
+        dropped: 0,
+        errors: 0,
+        received: 0,
+        lastEventAt: null,
+        lastErrorAt: null,
+    };
 
     constructor(private deps: BroadcastDeps) {}
 
@@ -75,20 +99,41 @@ export class BroadcastSubscriber {
                         const line = buf.slice(0, idx).trim();
                         buf = buf.slice(idx + 1);
                         if (!line.startsWith("data:")) continue; // SSE 注释/事件行忽略，只取 data 帧
+                        this.metrics.frames += 1;
                         const payload = line.slice(5).trim();
-                        if (!payload) continue;
+                        if (!payload) {
+                            this.metrics.dropped += 1;
+                            continue;
+                        }
                         try {
                             const parsed = parseLine(payload, 0);
-                            if (parsed.kind !== "ok") continue; // 坏/空信封静默（外部面不回执）
+                            if (parsed.kind !== "ok") {
+                                this.metrics.dropped += 1;
+                                continue; // 坏/空信封静默（外部面不回执）
+                            }
                             this.metrics.received += 1;
                             this.metrics.lastEventAt = Date.now();
-                            await this.deps.onCommand(parsed.command);
-                        } catch { /* 单条坏消息不影响流 */ }
+                            try {
+                                await this.deps.onCommand(parsed.command);
+                            } catch (e) {
+                                // 消费方异常不能杀死 SSE 流；保留错误计数并继续接收后续帧。
+                                this.metrics.errors += 1;
+                                this.metrics.lastErrorAt = Date.now();
+                                this.deps.log?.(`广播命令处理失败：${e instanceof Error ? e.message : String(e)}`);
+                            }
+                        } catch {
+                            this.metrics.dropped += 1;
+                            /* 单条坏消息不影响流 */
+                        }
                     }
                 }
                 try { reader.cancel?.(); } catch { /* 流已断 */ }
+                // EOF 是即时广播流的正常断流，同样计入一次重连；不计为 error。
+                if (!this.stopped && !ctrl.signal.aborted) this.metrics.reconnects += 1;
             } catch (e) {
                 if (this.stopped || ctrl.signal.aborted) break;
+                this.metrics.errors += 1;
+                this.metrics.lastErrorAt = Date.now();
                 this.metrics.reconnects += 1;
                 this.deps.log?.(`广播订阅断开，${backoff}ms 后重连：${e instanceof Error ? e.message : String(e)}`);
                 await sleep(backoff);

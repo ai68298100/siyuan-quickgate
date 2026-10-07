@@ -2,6 +2,13 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R359（v0.8.4 广播可观测性与 E2E 隔离）
+
+- 广播订阅器增加 frames/dropped/errors/lastErrorAt 指标；空帧、坏信封、连接失败和消费异常分别可见，消费异常不会杀死后续流，EOF 会自动重连。
+- health snapshot 加入本会话 SSE 丢帧数，并过滤 sessionStartedAt 之前的旧审计；设置页新增「复制健康快照」，命令面板诊断沿用同一指标。
+- 命令面板空态 fallback 纳入 ↑/↓/Enter 导航；容器 E2E 使用 run_id/run_attempt 独立 volume，并在诊断上传后清理。
+- 验收：`pnpm check`、245 测试、工作流 YAML 解析通过；本版本不上思源集市。
+
 ## 2026-10-07 · R356（v0.8.1 发布准备：GitHub 发布链与契约计数修复）
 
 - MCP 冒烟从硬编码 26 改为读取 `src/ops.ts` 的 `ALL_OPS`；当前源码、测试、文档和 bundle 均以 27/27/14 为准。

@@ -18,6 +18,8 @@ concurrency:
 env:
   SIYUAN_IMAGE: ${{ inputs.siyuan_image || 'b3log/siyuan:latest' }}
   SIYUAN_CI_TOKEN: ci-fixed-api-token
+  # 每次运行使用独立卷，避免上一次执行的配置、插件和运行状态污染本次验收。
+  SIYUAN_VOLUME: siyuan-ws-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
   e2e:
@@ -35,7 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "::add-mask::$SIYUAN_CI_TOKEN"
-          docker run --rm -v siyuan-ws:/ws -e TK="$SIYUAN_CI_TOKEN" alpine sh -c \
+          docker run --rm -v "$SIYUAN_VOLUME:/ws" -e TK="$SIYUAN_CI_TOKEN" alpine sh -c \
             'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"},\"bazaar\":{\"trust\":true,\"petalDisabled\":false}}" "$TK" > /ws/conf/conf.json'
 
       - name: 启动思源容器（serve + bypass）
@@ -43,7 +45,7 @@ jobs:
           set -euo pipefail
           docker run -d --name siyuan \
             -p 127.0.0.1:6806:6806 \
-            -v siyuan-ws:/siyuan/workspace \
+            -v "$SIYUAN_VOLUME:/siyuan/workspace" \
             -e SIYUAN_ACCESS_AUTH_CODE_BYPASS=true \
             "$SIYUAN_IMAGE" \
             serve --workspace=/siyuan/workspace/
@@ -167,3 +169,9 @@ jobs:
             docker-inspect.json
             docker.log
           if-no-files-found: warn
+
+      - name: 清理本次 E2E 容器和临时卷
+        if: always()
+        run: |
+          docker rm -f siyuan >/dev/null 2>&1 || true
+          docker volume rm "$SIYUAN_VOLUME" >/dev/null 2>&1 || true

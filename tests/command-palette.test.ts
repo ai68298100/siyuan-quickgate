@@ -62,6 +62,11 @@ describe("命令面板键盘导航边界", () => {
         expect(paletteNavMaxIndex(240, 2)).toBe(101);
         expect(clampPaletteActiveIndex(999, 240, 2)).toBe(101);
     });
+
+    it("无匹配时 fallback 按钮纳入导航范围", () => {
+        expect(paletteNavMaxIndex(0, 0, 100, 4)).toBe(3);
+        expect(clampPaletteActiveIndex(99, 0, 0, 100, 4)).toBe(3);
+    });
 });
 
 describe("R6-A 参数化二段式（schema 驱动表单 + args 收敛）", () => {

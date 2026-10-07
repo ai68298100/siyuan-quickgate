@@ -12,6 +12,8 @@ export interface HealthSnapshotInput {
     sessionId?: string;
     audit?: AuditEntry[];
     commandsText?: string | null;
+    /** 当前 SSE 实例丢弃的 data 帧数；不作为跨重启累计值。 */
+    dropped?: number;
 }
 
 export interface HealthEvent {
@@ -29,6 +31,8 @@ export interface HealthSnapshot {
     sampleWindow: { scope: "session"; startedAt: string; sampledAt: string };
     lastSuccess: HealthEvent | null;
     lastError: HealthEvent | null;
+    /** 当前采样窗口内的外部帧丢弃数；队列坏行另见 queue.parseErrors。 */
+    drops: number;
     queue: {
         pending: number;
         oldestCreatedAt: string | null;
@@ -54,13 +58,13 @@ function auditOp(command: string): string {
     return op || "(unknown)";
 }
 
-function latestAudit(audit: AuditEntry[] | undefined, kinds: Set<string>): HealthEvent | null {
+function latestAudit(audit: AuditEntry[] | undefined, kinds: Set<string>, sessionStartedAt: number): HealthEvent | null {
     if (!audit) return null;
     for (let i = audit.length - 1; i >= 0; i -= 1) {
         const entry = audit[i];
         if (!entry || !kinds.has(entry.status) || typeof entry.time !== "string") continue;
         const at = Date.parse(entry.time);
-        if (!Number.isFinite(at)) continue;
+        if (!Number.isFinite(at) || at < sessionStartedAt) continue;
         return { at: entry.time, kind: entry.status, op: auditOp(entry.command) };
     }
     return null;
@@ -100,8 +104,9 @@ export function buildHealthSnapshot(input: HealthSnapshotInput): HealthSnapshot 
         sampledAt,
         uptimeMs: Math.max(0, now - started),
         sampleWindow: { scope: "session", startedAt, sampledAt },
-        lastSuccess: latestAudit(input.audit, successKinds),
-        lastError: latestAudit(input.audit, errorKinds),
+        lastSuccess: latestAudit(input.audit, successKinds, started),
+        lastError: latestAudit(input.audit, errorKinds, started),
+        drops: Math.max(0, Math.floor(validMs(input.dropped, 0))),
         queue: queueSnapshot(input.commandsText, now),
     };
 }

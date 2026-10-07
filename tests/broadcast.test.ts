@@ -55,6 +55,32 @@ describe("BroadcastSubscriber（v1.5 广播快路径）", () => {
         expect(got.map((c) => c.id)).toEqual(["a"]);
         expect(got[0].op).toBe("bridge.ping");
         expect(BROADCAST_CHANNEL).toBe("qg-cmd");
+        expect(sub.metrics).toMatchObject({ frames: 3, dropped: 2, received: 1, errors: 0 });
+    });
+
+    it("消费回调异常计入错误但后续帧仍继续消费", async () => {
+        let stream: ReturnType<typeof makeStream> | null = null;
+        const got: string[] = [];
+        const sub = new BroadcastSubscriber({
+            enabled: () => true,
+            onCommand: async (cmd) => {
+                got.push(cmd.id);
+                if (cmd.id === "throws") throw new Error("handler failed");
+            },
+            fetchImpl: (async (_url: RequestInfo | URL, init?: RequestInit) => {
+                stream = makeStream(init?.signal);
+                return { ok: true, status: 200, body: stream.body } as unknown as Response;
+            }) as unknown as typeof fetch,
+        });
+        sub.start();
+        await new Promise((r) => setTimeout(r, 15));
+        stream!.push(`data:${cmdEnvelope("throws")}\n`);
+        stream!.push(`data:${cmdEnvelope("after-error")}\n`);
+        await new Promise((r) => setTimeout(r, 120));
+        await sub.stop();
+        expect(got).toEqual(["throws", "after-error"]);
+        expect(sub.metrics).toMatchObject({ frames: 2, dropped: 0, received: 2, errors: 1 });
+        expect(sub.metrics.lastErrorAt).toEqual(expect.any(Number));
     });
 
     it("断流→指数退避重连后继续消费", async () => {

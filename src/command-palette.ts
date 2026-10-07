@@ -54,16 +54,17 @@ export interface PaletteEntry {
 }
 
 /** 命令面板键盘导航只覆盖实际渲染的条目（默认最多 100 条）。 */
-export function paletteNavMaxIndex(commandCount: number, capabilityCount: number, renderLimit = 100): number {
+export function paletteNavMaxIndex(commandCount: number, capabilityCount: number, renderLimit = 100, fallbackCount = 0): number {
     const commands = Math.min(Math.max(0, Math.trunc(commandCount)), Math.max(0, Math.trunc(renderLimit)));
     const capabilities = Math.max(0, Math.trunc(capabilityCount));
-    return Math.max(0, commands + capabilities - 1);
+    const fallbacks = Math.max(0, Math.trunc(fallbackCount));
+    return Math.max(0, commands + capabilities + fallbacks - 1);
 }
 
 /** 将过期活动索引收敛到当前可导航范围，空结果固定回到 0。 */
-export function clampPaletteActiveIndex(active: number, commandCount: number, capabilityCount: number, renderLimit = 100): number {
+export function clampPaletteActiveIndex(active: number, commandCount: number, capabilityCount: number, renderLimit = 100, fallbackCount = 0): number {
     const safeActive = Number.isFinite(active) ? Math.trunc(active) : 0;
-    return Math.max(0, Math.min(safeActive, paletteNavMaxIndex(commandCount, capabilityCount, renderLimit)));
+    return Math.max(0, Math.min(safeActive, paletteNavMaxIndex(commandCount, capabilityCount, renderLimit, fallbackCount)));
 }
 
 /**
@@ -212,14 +213,15 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             ? CAPABILITY_OPS.filter((c) => !kws || kws.some((k) => c.label.toLowerCase().includes(k) || c.op.toLowerCase().includes(k)))
             : [];
         // 只允许导航到实际渲染的条目；超出 100 条时后续条目不会被隐藏的活动索引选中。
-        active = clampPaletteActiveIndex(active, entries.length, caps.length, RENDER_LIMIT);
+        // 空态 fallback 也必须纳入键盘导航，否则无匹配时只能用鼠标点击下一步。
+        const fallbackCount = entries.length === 0 && caps.length === 0 ? (input.value.trim() ? 4 : 3) : 0;
+        active = clampPaletteActiveIndex(active, entries.length, caps.length, RENDER_LIMIT, fallbackCount);
         if (entries.length === 0 && caps.length === 0) {
             // R6-B fallback 兜底：无匹配时给可用的下一步，不做死面板；
             // 有输入文本时首位=快速捕获（G3-04：一句话进今日日记）
             const q = input.value.trim();
             // 清空上一次结果，避免搜索无匹配后按 Enter 误执行旧条目。
             visibleEntries = [];
-            active = 0;
             input.removeAttribute("aria-activedescendant");
             list.textContent = "";
             const empty = document.createElement("div");
@@ -228,17 +230,15 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             list.appendChild(empty);
             const fallbacks = document.createElement("div");
             fallbacks.className = "qg-palette-fallbacks";
-            if (q) {
-                const cap = document.createElement("button");
-                cap.className = "b3-button b3-button--primary";
-                cap.dataset.fb = "capture";
-                cap.textContent = `捕获「${q.slice(0, 24)}${q.length > 24 ? "…" : ""}」`;
-                fallbacks.appendChild(cap);
-            }
-            for (const [fb, label] of [["panel", "打开快门设置（健康页）"], ["diag", "复制诊断包"], ["guide", "上手指南"]] as const) {
+            const fallbackDefs: ReadonlyArray<readonly [string, string]> = q
+                ? [["capture", `捕获「${q.slice(0, 24)}${q.length > 24 ? "…" : ""}」`], ["panel", "打开快门设置（健康页）"], ["diag", "复制诊断包"], ["guide", "上手指南"]]
+                : [["panel", "打开快门设置（健康页）"], ["diag", "复制诊断包"], ["guide", "上手指南"]];
+            for (const [i, [fb, label]] of fallbackDefs.entries()) {
                 const b = document.createElement("button");
-                b.className = "b3-button b3-button--outline";
+                b.className = `b3-button ${fb === "capture" ? "b3-button--primary" : "b3-button--outline"}` + (i === active ? " active" : "");
                 b.dataset.fb = fb;
+                b.dataset.fbIndex = String(i);
+                b.setAttribute("aria-current", i === active ? "true" : "false");
                 b.textContent = label;
                 fallbacks.appendChild(b);
             }
@@ -480,7 +480,12 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
     };
 
     // L600 部分：输入防抖 120ms——千条命令下每键全量过滤+重建会掉帧（settings 搜索同口径）
-    const navMaxIndex = () => paletteNavMaxIndex(entries.length, list.querySelectorAll("[data-cap]").length, RENDER_LIMIT);
+    const navMaxIndex = () => paletteNavMaxIndex(
+        entries.length,
+        list.querySelectorAll("[data-cap]").length,
+        RENDER_LIMIT,
+        list.querySelectorAll("[data-fb]").length,
+    );
     input.addEventListener("input", () => {
         active = 0;
         if (stage !== "list") return;
@@ -498,9 +503,14 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                 const picked = visibleEntries[active];
                 if (picked) void runEntry(picked);
             } else {
+                const capCount = list.querySelectorAll("[data-cap]").length;
                 const capEl = list.querySelectorAll("[data-cap]")[active - entries.length] as HTMLElement | undefined;
                 const op = capEl?.dataset.cap;
                 if (op) { stage = "form"; formOp = op; render(); }
+                else {
+                    const fallback = list.querySelectorAll<HTMLButtonElement>("[data-fb]")[active - entries.length - capCount];
+                    fallback?.click();
+                }
             }
         }
     });

@@ -770,7 +770,7 @@ export default class QuickGatePlugin extends Plugin {
                 const { memDiagnostics } = await import("./settings-panel");
                 const service = this.activeService ?? new BridgeService(this.deps());
                 const commandsText = await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/commands.ndjson`).catch(() => null);
-                const mem = memDiagnostics(this.settings, this.auditLog, service, undefined, undefined, { sessionStartedAt: this.sessionStartedAt, commandsText });
+                const mem = memDiagnostics(this.settings, this.auditLog, service, undefined, this.broadcastSub?.metrics, { sessionStartedAt: this.sessionStartedAt, commandsText });
                 await navigator.clipboard.writeText(JSON.stringify(mem, null, 2));
                 showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
             },

@@ -648,6 +648,10 @@
   .qg-palette-item:hover .qg-palette-copy { opacity: 1; }
   .qg-palette-empty { font-size: 12px; color: var(--b3-theme-on-surface); padding: 10px 2px 6px; }
   .qg-palette-fallbacks { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; }
+  .qg-palette-fallbacks [aria-current="true"] {
+    outline: 2px solid color-mix(in srgb, var(--b3-theme-primary) 55%, transparent);
+    outline-offset: 1px;
+  }
   /* 参数表单（二段式）：字段密度独立于大搜索框——此规则必须位于上方 .b3-text-field 之后才能胜出 */
   .qg-form-item { margin-bottom: 10px; }
   .qg-form-label { font-size: 13px; font-weight: 600; }

@@ -17,7 +17,7 @@ import { PROCESSED_CAP } from "./services/store";
 import { installFocusTrap } from "./services/focus-trap";
 import { BridgeService, EcosystemManifest } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
-import { BroadcastSubscriber } from "./services/broadcast";
+import { BroadcastSubscriber, BroadcastMetrics } from "./services/broadcast";
 import { normalizeFavorites, FavoritesStore } from "./services/favorites";
 import { normalizeProcessed, normalizeSettings } from "./services/store";
 import { buildBackupPayload, parseBackupPayload } from "./data-backup";
@@ -76,7 +76,7 @@ export interface SettingsPanelHost {
 }
 
 /** 诊断包组装（脱敏：无 Token/正文/个人路径；自 index.ts 迁入——唯一使用方是设置面板） */
-export function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], service: BridgeService, readMetrics?: { ok: number; missing: number; auth: number; unreachable: number; unexpected: number }, broadcastMetrics?: { connects: number; reconnects: number; received: number; lastEventAt: number | null }, healthInput?: Omit<HealthSnapshotInput, "audit">) {
+export function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry[], service: BridgeService, readMetrics?: { ok: number; missing: number; auth: number; unreachable: number; unexpected: number }, broadcastMetrics?: BroadcastMetrics, healthInput?: Omit<HealthSnapshotInput, "audit">) {
     const st = service.stats;
     return {
         protocol: 1,
@@ -85,7 +85,11 @@ export function memDiagnostics(settings: QuickGateSettings, auditLog: AuditEntry
         settings: { ...settings },
         ...(readMetrics ? { fileRead: { ...readMetrics } } : {}),
         ...(broadcastMetrics ? { broadcast: { ...broadcastMetrics } } : {}),
-        health: buildHealthSnapshot({ ...(healthInput ?? { sessionStartedAt: Date.now() }), audit: auditLog }),
+        health: buildHealthSnapshot({
+            ...(healthInput ?? { sessionStartedAt: Date.now() }),
+            audit: auditLog,
+            ...(broadcastMetrics ? { dropped: broadcastMetrics.dropped } : {}),
+        }),
         lateCompletions: service.lateCompletions,
         stats: { ...st, avgDispatchMs: st.commands > 0 ? Math.round(st.totalDispatchMs / st.commands) : null },
         auditTail: auditLog.slice(-50),
@@ -464,7 +468,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             const cards = root.querySelector("[data-role=cards]") as HTMLElement;
             setHtml(cards, [
                 { name: "外部命令桥", d: host.poller?.isRunning ? "ok" : "off", live: host.poller?.isRunning === true, chip: host.poller?.isRunning ? chip("运行中", "ok") : chip("已停止", "warn"), sub: host.poller?.isRunning ? `本窗口消费 · 轮询 ${host.settings.pollMs}ms${backoff ? ` · 退避中×${backoff}` : ""}` : "默认关；在「连接与通道」开启" },
-                { name: "广播快路径", d: host.broadcastSub?.running ? "ok" : "off", live: host.broadcastSub?.running === true, chip: host.broadcastSub?.running ? chip("已开启", "ok") : chip("关", "mute"), sub: host.broadcastSub?.running ? `qg-cmd 频道 · 已收 ${host.broadcastSub.metrics.received} 条` : "默认关；需先开桥" },
+                { name: "广播快路径", d: host.broadcastSub?.running ? "ok" : "off", live: host.broadcastSub?.running === true, chip: host.broadcastSub?.running ? chip("已开启", "ok") : chip("关", "mute"), sub: host.broadcastSub?.running ? `qg-cmd 频道 · 已收 ${host.broadcastSub.metrics.received} 条 · 丢弃 ${host.broadcastSub.metrics.dropped} · 错误 ${host.broadcastSub.metrics.errors}` : "默认关；需先开桥" },
                 { name: "事件物化", d: host.eventBridgeHandler ? "ok" : "off", live: host.eventBridgeHandler !== undefined, chip: host.eventBridgeHandler ? chip("已接", "ok") : chip("未接", "mute"), sub: host.eventBridgeHandler ? `白名单监听中 · 台账 ${Object.keys(host.store.processed.processed).length} 条` : "桥开启时自动接入" },
                 { name: "内核路由", d: route.dot, live: host.kernelRouteProbe === true, chip: route.chip, sub: "/plugin/private 同步通道（不经桥开关）" },
             ].map((c) => `<div class="qg-stat-card"><div class="head"><span class="qg-dot ${c.d}${c.live ? " live" : ""}"></span>${esc(c.name)}<span style="margin-left:auto">${c.chip}</span></div><div class="sub">${esc(c.sub)}</div></div>`).join(""));
@@ -1316,6 +1320,22 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             }
         });
         diagCard.appendChild(diagBtn);
+        const healthBtn = document.createElement("button");
+        healthBtn.className = "b3-button b3-button--outline";
+        healthBtn.style.marginTop = "8px";
+        healthBtn.style.marginLeft = "8px";
+        healthBtn.textContent = "复制健康快照";
+        healthBtn.title = "只复制本会话运行窗口、队列和 SSE 丢帧统计";
+        healthBtn.onclick = () => withPending(healthBtn, "读取中…", async () => {
+            try {
+                const full = JSON.parse(await buildDiagJson()) as { health?: unknown };
+                await navigator.clipboard.writeText(JSON.stringify(full.health ?? {}, null, 2));
+                showMessage("健康快照已复制（不含 Token/正文）", 2500, "info");
+            } catch (e) {
+                showMessage(`复制失败：${e instanceof Error ? e.message : String(e)}`, 5000, "error");
+            }
+        });
+        diagCard.appendChild(healthBtn);
         content.appendChild(diagCard);
 
         // 环境预检（L561 部分）：SiYuan 版本 / 前端形态 / 桥目录可写性三档核对（外部客户端项如实标注"无法在此检查"）
