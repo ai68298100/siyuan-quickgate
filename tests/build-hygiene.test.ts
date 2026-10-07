@@ -16,4 +16,10 @@ describe("生产构建导入边界", () => {
         expect(settingsPanel).not.toMatch(dynamicSelfImport);
         expect(index).toMatch(/import\s*\{[^}]*memDiagnostics[^}]*\}\s*from\s*["']\.\/settings-panel["']/);
     });
+
+    it("设置面板搜索框具有可访问名称，设置行控件绑定视觉标题", () => {
+        const settingsPanel = readSource("settings-panel.ts");
+        expect(settingsPanel).toMatch(/data-role="qg-search"[^>]*aria-label="搜索设置"/);
+        expect(settingsPanel).toContain("aria-labelledby");
+    });
 });

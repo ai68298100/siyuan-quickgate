@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { BridgeClaimer, BridgeClaimHandle, createNavigatorClaimer } from "../src/services/bridge-claim";
 
 /** 可编程 Locks 假件：共享一个占用表，模拟多窗口 */
@@ -121,5 +121,28 @@ describe("L571/L627 · onStolen 被接管回调（docs/34 §3.4 双消费防线�
         expect(h).toBeTruthy();
         await new Promise((r) => setTimeout(r, 20));
         expect(selfNotified).toBe(0);
+    });
+
+    it("claimSteal 超时后迟到授予锁会立即释放，不永久占用消费权", async () => {
+        vi.useFakeTimers();
+        try {
+            const store = makeLocksStore();
+            const owner = claimerWith(store.locks);
+            const waiter = claimerWith(store.locks);
+            const h = await owner.claim("siyuan-quickgate-bridge");
+            expect(h).toBeTruthy();
+            const late = waiter.claimSteal!("siyuan-quickgate-bridge");
+            await vi.advanceTimersByTimeAsync(5000);
+            await expect(late).resolves.toBeUndefined();
+            await h!.release();
+            await vi.runAllTicks();
+            // 迟到的排队锁已自动释放，第三方可以立即认领。
+            const third = claimerWith(store.locks);
+            const h3 = await third.claim("siyuan-quickgate-bridge");
+            expect(h3).toBeTruthy();
+            await h3!.release();
+        } finally {
+            vi.useRealTimers();
+        }
     });
 });

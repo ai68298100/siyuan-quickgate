@@ -38,6 +38,8 @@ export function createNavigatorClaimer(locks?: LocksLike): BridgeClaimer | undef
     const requestLock = (name: string, opts: ClaimOptions & { ifAvailable: boolean; steal?: boolean }) =>
         new Promise<BridgeClaimHandle | null | undefined>((resolve) => {
             let settled = false;
+            let timedOut = false;
+            let timeoutId: ReturnType<typeof setTimeout> | undefined;
             const done = (v: BridgeClaimHandle | null | undefined) => { if (!settled) { settled = true; resolve(v); } };
             let releaseResolve: (() => void) | undefined;
             const held = new Promise<void>((r) => { releaseResolve = r; });
@@ -46,9 +48,18 @@ export function createNavigatorClaimer(locks?: LocksLike): BridgeClaimer | undef
             void api
                 .request(name, opts, (lock) => {
                     if (!lock) {
+                        if (timeoutId) clearTimeout(timeoutId);
                         done(null); // 被占用
                         return;
                     }
+                    // claimSteal 在不支持 steal 的实现上可能先超时、后才授予排队锁。
+                    // 超时结果已经返回给调用方，此时必须立即释放迟到的锁，不能把 held
+                    // 永久挂住，否则后续窗口会永远无法认领桥消费权。
+                    if (timedOut) {
+                        releaseResolve?.();
+                        return held;
+                    }
+                    if (timeoutId) clearTimeout(timeoutId);
                     done({
                         release: async () => releaseResolve?.(),
                     });
@@ -60,7 +71,7 @@ export function createNavigatorClaimer(locks?: LocksLike): BridgeClaimer | undef
                     opts.onStolen?.();
                     done(undefined);
                 });
-            if (opts.steal) setTimeout(() => done(undefined), 5000); // steal 不被支持时会排队等锁——超时防挂死
+            if (opts.steal) timeoutId = setTimeout(() => { timedOut = true; done(undefined); }, 5000); // steal 不被支持时会排队等锁——超时防挂死
         });
     return {
         claim: (name, o) => requestLock(name, { ifAvailable: true, ...o }),

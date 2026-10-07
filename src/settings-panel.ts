@@ -199,7 +199,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             `<span>${firstRunTitle ? "小驴快门 · 欢迎" : "小驴快门 · 设置"}</span>` +
             `<span class="qg-title-ver">${firstRunTitle ? "首次使用" : `v${PLUGIN_VERSION} · 协议 v1`}</span></span>`,
         content: `<div id="qg-settings">` +
-            `<div class="qg-searchbar"><input class="b3-text-field" data-role="qg-search" placeholder="搜索设置（跨分组；清空恢复当前页）" /></div>` +
+            `<div class="qg-searchbar"><input class="b3-text-field" data-role="qg-search" aria-label="搜索设置" placeholder="搜索设置（跨分组；清空恢复当前页）" /></div>` +
             `<div class="qg-main"><div class="qg-nav"></div><select class="qg-nav-fallback b3-select" aria-label="切换分组"></select><div class="qg-content"></div></div>` +
             `<div class="qg-footer"><span>帮助：<a target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/GETTING-STARTED.md">上手指南</a> · ` +
             `<a target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/FAQ.md">故障排查 FAQ</a> · ` +
@@ -231,8 +231,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             showMessage(started ? "外部命令桥已开启（本窗口消费）" : "另一思源窗口正在运行外部命令桥，本窗口未重复启动", 4000, "info");
             return;
         }
-        await host.stopBridge();
         host.stopEventBridge(); // 关桥即退订，事件物化不得在桥关闭后继续写
+        await host.stopBridge();
         showMessage("外部命令桥已关闭", 3000);
     };
 
@@ -336,6 +336,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
     };
 
     // —— 通用行构造（原型 .qg-row：图标 + 标题/说明 + 控件；clickable 时点行即切控件；wide 时控件通栏） ——
+    let rowSequence = 0;
     const row = (parent: HTMLElement, opts: { icon: string; label: string; chip?: string; hint?: string; ctrl: HTMLElement; onRowClick?: () => void; wide?: boolean }) => {
         const div = document.createElement("div");
         div.className = "qg-row" + (opts.onRowClick ? " clickable" : "") + (opts.wide ? " wide" : "");
@@ -346,6 +347,13 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         ctrl.className = "ctrl";
         ctrl.appendChild(opts.ctrl);
         div.appendChild(ctrl);
+        const labelEl = div.querySelector(".body .label") as HTMLElement;
+        const labelId = `qg-setting-label-${++rowSequence}`;
+        labelEl.id = labelId;
+        // 行标题是视觉上的 label；同步绑定原生控件，让读屏在 Tab 到控件时读出用途。
+        ctrl.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input,select,textarea").forEach((el) => {
+            el.setAttribute("aria-labelledby", labelId);
+        });
         if (opts.onRowClick) {
             div.addEventListener("click", (ev) => {
                 // 点行体切换；点到控件本体（switch/input/textarea/button）时不重复触发

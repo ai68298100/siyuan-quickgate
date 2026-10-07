@@ -11,6 +11,7 @@ import { KernelApi } from "./services/kernelApi";
 import { BridgeStore, DataIO } from "./services/store";
 import { BridgeService, EditorContextResult } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
+import { SerialTransitionQueue } from "./services/serial-transition";
 import { BroadcastSubscriber, BROADCAST_CHANNEL } from "./services/broadcast";
 import { probeCommandRegistry } from "./services/registry";
 import { appendEventLine, createSingleFlight, normalizeCheckinEvent, normalizeCheckinEventDeleted, planMaterialization } from "./services/eventbridge";
@@ -42,6 +43,8 @@ export default class QuickGatePlugin extends Plugin {
     private lifecycleBooted = false;
     /** 卸载标记：停用后构造器自愈不得复活后台循环 */
     private tornDown = false;
+    /** 桥启停串行化：快速关开/改轮询间隔时，旧 stop 未释放消费权前不得插入新 start。 */
+    private readonly bridgeTransitions = new SerialTransitionQueue();
 
     /**
      * 热重载接管（bug#15 候选 · SiYuan 3.8.6 push_reload 实证）：
@@ -157,6 +160,8 @@ export default class QuickGatePlugin extends Plugin {
      * analytics-updated 不订阅（D-0011：高频触发会挤占滚动窗口）。总线不可用时静默降级。
      */
     eventBridgeHandler?: (e: Event) => void;
+    /** 事件桥代次；停桥后丢弃尚未开始写入的排队物化任务。 */
+    private eventBridgeGeneration = 0;
     broadcastSub?: BroadcastSubscriber;
     /** 桥消费权认领（L452 多窗口互斥）：持有=本窗口跑轮询；null=他窗占用；undefined=无 Locks 环境（单窗口假设） */
     private bridgeClaim?: BridgeClaimHandle;
@@ -173,11 +178,12 @@ export default class QuickGatePlugin extends Plugin {
         if (this.eventBridgeHandler) return;
         try {
             if (typeof window?.addEventListener !== "function") return;
+            const generation = ++this.eventBridgeGeneration;
             this.eventBridgeHandler = (e: Event) => {
                 const emittedAt = new Date().toISOString();
                 const detail = (e as CustomEvent).detail;
                 const recorded = e.type === "checkin:event-recorded" ? normalizeCheckinEvent(detail, emittedAt) : null;
-                void this.materializeHubEvents(e.type === "checkin:event-deleted" ? normalizeCheckinEventDeleted(detail, emittedAt) : recorded ? [recorded] : null);
+                void this.materializeHubEvents(e.type === "checkin:event-deleted" ? normalizeCheckinEventDeleted(detail, emittedAt) : recorded ? [recorded] : null, generation);
             };
             window.addEventListener("checkin:event-recorded", this.eventBridgeHandler);
             window.addEventListener("checkin:event-deleted", this.eventBridgeHandler);
@@ -185,6 +191,7 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     stopEventBridge() {
+        this.eventBridgeGeneration += 1;
         if (!this.eventBridgeHandler) return;
         try {
             window.removeEventListener("checkin:event-recorded", this.eventBridgeHandler);
@@ -196,13 +203,14 @@ export default class QuickGatePlugin extends Plugin {
     /** 批量物化：single-flight 串行（并发读改写会丢更新，R69-P1）；空列表不动文件 */
     private materializeEnqueue = createSingleFlight();
 
-    private materializeHubEvents(events: HubEvent[] | null) {
+    private materializeHubEvents(events: HubEvent[] | null, generation = this.eventBridgeGeneration) {
         if (!events || events.length === 0) return;
-        void this.materializeEnqueue(() => this.doMaterialize(events));
+        void this.materializeEnqueue(() => this.doMaterialize(events, generation));
     }
 
-    private async doMaterialize(events: HubEvent[]) {
+    private async doMaterialize(events: HubEvent[], generation: number) {
         try {
+            if (generation !== this.eventBridgeGeneration || !this.eventBridgeHandler) return;
             const path = "/storage/petal/siyuan-checkin/bridge/events.ndjson";
             // 写入侧幂等（L599/C9 合同 §3）：滚动裁剪后的重放事件不重复落行；
             // 先写后记账——putFile 失败时不 mark，避免事件永久丢失
@@ -217,6 +225,7 @@ export default class QuickGatePlugin extends Plugin {
             for (const e of plan.toAppend) {
                 text = appendEventLine(text, e, { retentionDays: this.settings.retentionDays });
             }
+            if (generation !== this.eventBridgeGeneration || !this.eventBridgeHandler) return;
             await this.kernelApi.putFileText(path, text);
             for (const key of plan.toMark) this.idempotency.mark(key);
             await this.idempotency.save();
@@ -273,6 +282,10 @@ export default class QuickGatePlugin extends Plugin {
 
     /** 启动桥（L506：异步认领，返回是否实际启动；false=消费权被另一窗口持有） */
     async startBridge(): Promise<boolean> {
+        return this.bridgeTransitions.run(() => this.startBridgeNow());
+    }
+
+    private async startBridgeNow(): Promise<boolean> {
         if (this.poller?.isRunning) {
             this.startBroadcastSub(); // 桥已在跑、仅广播开关变化时也要接上订阅（幂等）
             return true;
@@ -335,10 +348,14 @@ export default class QuickGatePlugin extends Plugin {
      * 建议用户接管后在原窗口停用桥）。返回被接管 holder 供 UI 标注。
      */
     async takeoverBridge(): Promise<{ ok: boolean; holder: string | null }> {
+        return this.bridgeTransitions.run(() => this.takeoverBridgeNow());
+    }
+
+    private async takeoverBridgeNow(): Promise<{ ok: boolean; holder: string | null }> {
         const claimer = this.bridgeClaimer;
         if (!claimer?.claimSteal) return { ok: false, holder: null };
         const hb = await readHeartbeat(this.kernelApi, heartbeatPath(this.settings.bridgeBasePath));
-        await this.stopBridge();
+        await this.stopBridgeNow();
         const handle = await claimer.claimSteal("siyuan-quickgate-bridge");
         if (handle === null || handle === undefined) return { ok: false, holder: hb?.holder ?? null };
         this.bridgeClaim = handle ?? undefined;
@@ -363,6 +380,10 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     async stopBridge() {
+        return this.bridgeTransitions.run(() => this.stopBridgeNow());
+    }
+
+    private async stopBridgeNow() {
         const poller = this.poller;
         // stop() 等待已开始的 tick；因此释放 Web Lock 前不会有旧消费者继续写回。
         if (poller) await poller.stop();
