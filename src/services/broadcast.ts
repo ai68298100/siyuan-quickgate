@@ -57,7 +57,6 @@ export class BroadcastSubscriber {
     start(): void {
         if (!this.stopped) return;
         this.stopped = false;
-        this.metrics.connects += 1;
         this.loop = this.runLoop();
     }
 
@@ -86,45 +85,64 @@ export class BroadcastSubscriber {
             try {
                 const resp = await fetchImpl(SSE_PATH, { signal: ctrl.signal });
                 if (!resp.ok || !resp.body) throw new Error(`SSE HTTP ${resp.status}`);
+                // 仅统计真正拿到可读 SSE body 的连接；start() 可能因 disabled
+                // 长时间空转，不能把“订阅意图”误报为已连接。
+                this.metrics.connects += 1;
                 backoff = 1000;
                 const reader = resp.body.getReader();
                 const decoder = new TextDecoder();
                 let buf = "";
+                const consumeLine = async (rawLine: string): Promise<void> => {
+                    const line = rawLine.trim();
+                    if (!line.startsWith("data:")) return; // SSE 注释/事件行忽略，只取 data 帧
+                    this.metrics.frames += 1;
+                    const payload = line.slice(5).trim();
+                    if (!payload) {
+                        this.metrics.dropped += 1;
+                        return;
+                    }
+                    try {
+                        const parsed = parseLine(payload, 0);
+                        if (parsed.kind !== "ok") {
+                            this.metrics.dropped += 1;
+                            return; // 坏/空信封静默（外部面不回执）
+                        }
+                        this.metrics.received += 1;
+                        this.metrics.lastEventAt = Date.now();
+                        try {
+                            await this.deps.onCommand(parsed.command);
+                        } catch (e) {
+                            // 消费方异常不能杀死 SSE 流；保留错误计数并继续接收后续帧。
+                            this.metrics.errors += 1;
+                            this.metrics.lastErrorAt = Date.now();
+                            this.deps.log?.(`广播命令处理失败：${e instanceof Error ? e.message : String(e)}`);
+                        }
+                    } catch {
+                        this.metrics.dropped += 1;
+                        /* 单条坏消息不影响流 */
+                    }
+                };
                 while (!this.stopped) {
                     const { done, value } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        // 流可能在换行前断开。SSE 的 EOF 会派发尚未结束的 data 行；
+                        // 刷出 TextDecoder 并消费尾帧，避免最后一条命令静默丢失。
+                        buf += decoder.decode();
+                        // stop() 与 read() 完成存在竞态：显式关闭后不再执行尾帧。
+                        if (buf && !this.stopped && !ctrl.signal.aborted) {
+                            const tail = buf;
+                            buf = "";
+                            await consumeLine(tail);
+                        }
+                        buf = "";
+                        break;
+                    }
                     buf += decoder.decode(value, { stream: true });
                     let idx: number;
                     while ((idx = buf.indexOf("\n")) >= 0) {
-                        const line = buf.slice(0, idx).trim();
+                        const line = buf.slice(0, idx);
                         buf = buf.slice(idx + 1);
-                        if (!line.startsWith("data:")) continue; // SSE 注释/事件行忽略，只取 data 帧
-                        this.metrics.frames += 1;
-                        const payload = line.slice(5).trim();
-                        if (!payload) {
-                            this.metrics.dropped += 1;
-                            continue;
-                        }
-                        try {
-                            const parsed = parseLine(payload, 0);
-                            if (parsed.kind !== "ok") {
-                                this.metrics.dropped += 1;
-                                continue; // 坏/空信封静默（外部面不回执）
-                            }
-                            this.metrics.received += 1;
-                            this.metrics.lastEventAt = Date.now();
-                            try {
-                                await this.deps.onCommand(parsed.command);
-                            } catch (e) {
-                                // 消费方异常不能杀死 SSE 流；保留错误计数并继续接收后续帧。
-                                this.metrics.errors += 1;
-                                this.metrics.lastErrorAt = Date.now();
-                                this.deps.log?.(`广播命令处理失败：${e instanceof Error ? e.message : String(e)}`);
-                            }
-                        } catch {
-                            this.metrics.dropped += 1;
-                            /* 单条坏消息不影响流 */
-                        }
+                        await consumeLine(line);
                     }
                 }
                 try { reader.cancel?.(); } catch { /* 流已断 */ }

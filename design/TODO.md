@@ -607,7 +607,7 @@ L298（spike⑩ 全部子项已由 R68/R235 完成）、L447（本轮梳理即�
 - [ ] 【R74-P1·阈值】界面显示队列/事件/审计行数、字节、最老/最新时间和预计滚动点，在 70/90/100% 给提醒、导出和清理操作。 → ◐ R332/R335/R339/R343 部分：队列页已落地——「最老待处理」格（≥1 分钟超 TTL 橙警）、载体明细卡（五文件行数/字节/裁剪规则/最老最新回执）、处理台账**三级阈值**（≥70% 提示可导出留底 / ≥90% 请尽快导出清理 / 100% 明示最旧条目正被静默淘汰）；事件侧容量与预计滚动点仍 pending（events 惰性压缩下增长受控）。
 - [ ] 【R74-P1·移动资源】记录桥轮询、SSE、物化的 CPU/内存/电量/流量；休眠和后台自适应退避，回前台恢复并显示原因。
 - [ ] 【R74-P1·请求】Kernel API、桥和 MCP 增加可取消请求、全局超时、读重试与写同 ID 禁重试分类；单调时钟计算耗时，墙钟只用于 finishedAt。
-- [ ] 【R74-P1·SSE】按 WHATWG 语义测试多 data 行、事件块空行、CRLF、BOM、EOF、id/Last-Event-ID；若依赖单行 JSON，写入协议门禁。 → ◐ R342 部分：广播 SSE 协议边界电池 tests/broadcast-protocol.test.ts 已落地（5 测：CRLF 消费 / 跨 chunk 分片组装 / UTF-8 BOM 剥离 / **多行 JSON 门禁**（静默拒绝且不崩流）/ EOF 静默立即重连且不带 Last-Event-ID）；空行与坏行覆盖此前已有；NDJSON 载体同型电池与真机 SSE 仍 pending。
+- [ ] 【R74-P1·SSE】按 WHATWG 语义测试多 data 行、事件块空行、CRLF、BOM、EOF、id/Last-Event-ID；若依赖单行 JSON，写入协议门禁。 → ◐ R360：广播协议边界电池已扩至 6 项，新增 EOF 无换行尾帧消费与 stop 竞态保护；单行 JSON 门禁、CRLF、分片、BOM、EOF 重连仍覆盖；多行 data 事件块与 NDJSON 载体同型电池、真机 SSE 仍 pending。
 - [ ] 【R74-P1·广播】观测 reconnect、error、frame、drop、queue depth 和关闭释放；burst 下定义逐帧串行、并发或丢弃策略。 → ◐ R359：已交付 reconnect/error/frame/drop 与关闭释放指标、消费异常续流、EOF 自动重连；queue depth 与 burst 策略仍 pending。
 - [ ] 【R74-P1·统计窗口】运行统计显示会话 ID、启动时间、采样窗口、uptime、last success/error/kind、队列最老年龄、drop/parse error；重载归零不得称为累计，health snapshot 可直接复制到 Issue。 → ✅ R359：health snapshot 加入 SSE drops，按 sessionStartedAt 过滤旧审计；设置页新增独立「复制健康快照」，诊断包继续保持脱敏并保留 queue.parseErrors。
 - [ ] 【R74-P1·回执观察】MCP/CLI/PowerShell 多调用共享 receipt watcher 或按 ID 订阅，支持 cursor、退避和并发上限，避免每个工具每 300ms 重读全量 results 文件。

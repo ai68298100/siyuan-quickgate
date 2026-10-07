@@ -648,7 +648,7 @@
   .qg-palette-item:hover .qg-palette-copy { opacity: 1; }
   .qg-palette-empty { font-size: 12px; color: var(--b3-theme-on-surface); padding: 10px 2px 6px; }
   .qg-palette-fallbacks { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; }
-  .qg-palette-fallbacks [aria-current="true"] {
+  .qg-palette-fallbacks [aria-selected="true"] {
     outline: 2px solid color-mix(in srgb, var(--b3-theme-primary) 55%, transparent);
     outline-offset: 1px;
   }

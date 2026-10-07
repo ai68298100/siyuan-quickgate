@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.4-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.5-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
 
@@ -36,7 +36,7 @@
 
 ## 手动安装
 
-1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；GitHub 会在资产详情显示 SHA-256 digest）。当前 `v0.8.4` 仍是预发布版，需要稳定版本时请选择最新 stable release。
+1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；GitHub 会在资产详情显示 SHA-256 digest）。当前 `v0.8.5` 仍是预发布版，需要稳定版本时请选择最新 stable release。
 2. 思源 → 设置 → 集市 → 下载页 → 右上角菜单 → **导入安装包**。
 3. 启用插件，打开设置，将**外部命令桥**打开（产品默认关闭）。
 4. **更新版本后需完全退出思源（托盘右键退出）再启动**——窗口重开不会刷新插件前端代码；可双击工作区的 `重启思源.bat`（仓库 `tools/restart-siyuan.bat`）一键完成。
@@ -96,6 +96,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | **v0.8.2** | 入口、设置页、诊断包统一读取运行时版本源 · 容器 E2E 改为严格门禁，补齐健康探测、Token 脱敏与失败诊断资产 |
 | **v0.8.3** | 诊断包加入会话健康快照 · 命令面板空态键盘安全 · combobox/listbox 无障碍关联 · E2E 启动就绪判定加固 |
 | **v0.8.4** | SSE 帧/丢弃/错误指标与会话隔离健康快照 · 一键复制健康快照 · 空态动作键盘导航 · E2E 独立卷与清理 |
+| **v0.8.5** | SSE 断流时保留无换行尾帧 · 仅统计可读连接 · 空态选项补齐读屏语义 |
 
 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)，路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 

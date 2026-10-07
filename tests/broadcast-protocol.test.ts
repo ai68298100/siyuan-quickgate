@@ -78,6 +78,20 @@ describe("L608 · 广播 SSE 协议边界电池", () => {
         await sub.stop();
     });
 
+    it("EOF 前没有换行的 data 尾帧仍消费，避免断流丢最后一条命令", async () => {
+        const got: BridgeCommand[] = [];
+        const streamRef = { current: null as ReturnType<typeof makeStream> | null };
+        const sub = makeSub(got, streamRef, []);
+        sub.start();
+        await new Promise((r) => setTimeout(r, 15));
+        streamRef.current!.push(envelopeLine("eof-tail").replace(/\n$/, ""));
+        streamRef.current!.close();
+        await new Promise((r) => setTimeout(r, 120));
+        expect(got.map((c) => c.id)).toEqual(["eof-tail"]);
+        expect(sub.metrics).toMatchObject({ frames: 1, received: 1, dropped: 0 });
+        await sub.stop();
+    });
+
     it("UTF-8 BOM 开头 → TextDecoder 剥离，首条仍消费", async () => {
         const got: BridgeCommand[] = [];
         const streamRef = { current: null as ReturnType<typeof makeStream> | null };

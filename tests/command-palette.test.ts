@@ -66,6 +66,9 @@ describe("命令面板键盘导航边界", () => {
     it("无匹配时 fallback 按钮纳入导航范围", () => {
         expect(paletteNavMaxIndex(0, 0, 100, 4)).toBe(3);
         expect(clampPaletteActiveIndex(99, 0, 0, 100, 4)).toBe(3);
+        // 清空搜索时只有面板/诊断/指南三个动作，仍应覆盖最后一个可选项。
+        expect(paletteNavMaxIndex(0, 0, 100, 3)).toBe(2);
+        expect(clampPaletteActiveIndex(99, 0, 0, 100, 3)).toBe(2);
     });
 });
 

@@ -226,10 +226,13 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             list.textContent = "";
             const empty = document.createElement("div");
             empty.className = "qg-palette-empty";
+            empty.setAttribute("role", "presentation");
             empty.textContent = q ? `无匹配命令「${q}」` : "无可用命令";
             list.appendChild(empty);
             const fallbacks = document.createElement("div");
             fallbacks.className = "qg-palette-fallbacks";
+            fallbacks.setAttribute("role", "group");
+            fallbacks.setAttribute("aria-label", "下一步操作");
             const fallbackDefs: ReadonlyArray<readonly [string, string]> = q
                 ? [["capture", `捕获「${q.slice(0, 24)}${q.length > 24 ? "…" : ""}」`], ["panel", "打开快门设置（健康页）"], ["diag", "复制诊断包"], ["guide", "上手指南"]]
                 : [["panel", "打开快门设置（健康页）"], ["diag", "复制诊断包"], ["guide", "上手指南"]];
@@ -238,11 +241,17 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                 b.className = `b3-button ${fb === "capture" ? "b3-button--primary" : "b3-button--outline"}` + (i === active ? " active" : "");
                 b.dataset.fb = fb;
                 b.dataset.fbIndex = String(i);
-                b.setAttribute("aria-current", i === active ? "true" : "false");
+                // 空态按钮也是 combobox 的可选项：保持 aria-activedescendant 与键盘索引一致，
+                // 让读屏用户能知道 ↑↓ 当前选中的下一步动作。
+                b.id = `qg-palette-option-fallback-${i}`;
+                b.setAttribute("role", "option");
+                b.setAttribute("aria-selected", String(i === active));
                 b.textContent = label;
                 fallbacks.appendChild(b);
             }
             list.appendChild(fallbacks);
+            const activeFallback = list.querySelector<HTMLElement>('[role="option"][aria-selected="true"]');
+            if (activeFallback) input.setAttribute("aria-activedescendant", activeFallback.id);
             return;
         }
         // 列表用 DOM API 构建（textContent 免转义，杜绝注入面）

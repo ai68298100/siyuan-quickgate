@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R360（v0.8.5 SSE 尾帧与空态无障碍）
+
+- 修复 SSE EOF 前无换行尾帧丢失；flush `TextDecoder` 后消费尾行，显式 stop 与 read 完成竞态下不误消费；连接指标只统计可读 body。
+- 命令面板空态 fallback 增加 group/option 语义、稳定 id、`aria-selected` 和输入框 `aria-activedescendant`，清空搜索的三项导航边界补测。
+- 验收：`pnpm check`、246 测试、MCP 冒烟 6/6、广播协议 13 测试通过；本版本不上思源集市。
+
 ## 2026-10-07 · R359（v0.8.4 广播可观测性与 E2E 隔离）
 
 - 广播订阅器增加 frames/dropped/errors/lastErrorAt 指标；空帧、坏信封、连接失败和消费异常分别可见，消费异常不会杀死后续流，EOF 会自动重连。

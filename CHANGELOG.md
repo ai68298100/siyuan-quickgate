@@ -2,6 +2,15 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.8.5 · 2026-10-07（SSE 断流边界与空态无障碍）
+
+### Fixed
+- 修复 SSE 在 EOF 前没有换行时最后一条 `data:` 命令被丢弃的问题，并避免显式停止时误消费残留尾帧。
+- 修正广播连接指标：只把成功取得可读 SSE body 的连接计入 connects。
+- 命令面板空态 fallback 补齐 `role`、稳定 id、`aria-selected` 与 `aria-activedescendant`，让键盘活动项对读屏可见。
+
+本版本不上思源集市，GitHub Releases 为分发渠道。
+
 ## v0.8.4 · 2026-10-07（广播可观测性与 E2E 隔离）
 
 ### Added
