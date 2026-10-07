@@ -2,7 +2,9 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
-## Unreleased（R283 安全加固 + 路线索引；R288~R324 插件内 UI 层）
+## v0.8.0 · 2026-10-07（插件内 UI 层 + 首跑七步状态机 + 失联接管 + 取消通道；R283~R354 聚合）
+
+> 二十余轮迭代聚合发布，四条主线：①插件内 UI 成型（观感对齐 mvp1 原型）；②首跑七步可恢复状态机；③失联检测与消费权接管；④workflow.cancel 取消通道。逐轮明细见 [docs/PROGRESS.md](docs/PROGRESS.md)。
 
 ### Added（插件内 UI 层，R288~R323 各轮聚合，逐轮明细见 docs/PROGRESS.md）
 - **分层设置面板**（R288 起）：状态概览健康首页（通道卡片/KPI/下一步/最近回执）· 首跑向导（真状态四步）· 连接与通道 · 安全与权限 · 队列与数据 · 诊断与生态 · 关于；顶部搜索条跨分组过滤（R297）；行内校验/危险开关确认/清空预览等行为纪律保留
@@ -84,8 +86,7 @@
 - **备份载荷加 `sourceDevice`**（L623 来源设备字段）：导出时写入 deviceName，导入对话框显示"来源设备：X"——仅展示，本机 deviceName 恒保留不随备份迁移
 - **收藏组导入合并策略**（L623 冲突策略）：导入对话框收藏组「合并」选项——并集去重（plugin/command 键，现有优先），默认仍覆盖替换
 
-### Added（备份来源设备 + 重置清向导进度 · R352，L623/docs/33 §7-3）
-- **备份载荷加 `sourceDevice`**（L623 来源设备字段）：导出时写入 deviceName，导入对话框显示"来源设备：X"——仅展示，本机 deviceName 恒保留不随备份迁移
+### Added（重置清向导进度 · R352，docs/33 §7-3）
 - **恢复默认设置一并清除首跑向导进度**（docs/33 §7-3 落地）：重置时清空 wizard-state.json——重开设置回到完整七步首跑（向导进度受重置前防线备份保护）
 
 ### Added（workflow.cancel 实现 · R351，docs/36 I1~I2）
@@ -114,7 +115,7 @@
 - **消费权心跳**（I1）：持有窗口每次 tick 后限流 ≥2s 落盘 `bridge/heartbeat.json`（holder=deviceName#windowSeq）；新增 `src/services/heartbeat.ts`（限流判定/读写/三档分类：healthy ≤15s / stale 15~60s / suspect >60s / unknown）
 - **claimSteal**（I3 前置）：`bridge-claim` 新增 steal 认领（`{ ifAvailable:false, steal:true }` + 5s 超时防环境不支持挂死；被 steal 打断的原持锁 reject 静默容错）
 - **恢复向导失联检测与接管**（I2+I3）：检测② 分档——他窗心跳正常（互斥运行中）/ 卡死嫌疑（15~60s）/ 高度疑似失联（>60s）/ 无法判断（诚实不猜）；stale/suspect 提供「接管消费权」（confirm 含他窗状态、待处理数、接管后建议），经 `takeoverBridge`（steal）执行；连接页消费权行附他窗心跳标注
-- 连接页消费权行附他窗心跳状态标注（健康/卡死嫌疑/高度失联）
+- **onStolen 防双消费**：claim 支持 onStolen 回调——锁被他窗 steal 时原窗口自动停止轮询并提示（真实浏览器 steal 路径 P1 拒绝实测；docs/34 §7-3 已关闭）
 - **桥恢复向导**（L571 部分）：连接页新增入口——六项状态检测（桥开关/本窗口轮询/退避/积压+坏行+最老待处理/广播/内核路由）三档汇总，行内动作（重启桥/清空队列带预览/导出诊断包）执行后自动重检；`buildDiagJson`/`clearQueueWithPreview` 抽为共享实现（诊断按钮/队列危险区同源）
 
 ### Added（账本待办落地，R338 · L623 部分）
@@ -125,11 +126,10 @@
 ### Added/Perf（账本待办落地，R340 · L600/L552 部分）
 - **命令面板千条压测达标**（L600 部分）：输入防抖 120ms（与设置搜索同口径）+ 渲染截断前 100 条（超出提示继续输入缩小范围，顺序稳定）+ 键盘/点击索引统一 visible 切片；靶场千条合成命令实测击键落定 p50 167ms（防抖 120 + 渲染 ~46ms）、无掉帧
 - **能力动作表单写入标注**（L552 部分）：表单阶段按 op 注解双档提示——destructive（plugin.api/workflow.execute）红框「写入或修改数据」、其他写 op 琥珀「写入数据」，口径与 MCP annotations 同源（新增导出 `opWriteAnnotation`）
-- 修复：收藏当前计数读取把 `getFileText` 字符串直传 normalize 导致恒显示 0（R337 同型教训，生产路径）
 
 ### Docs
 - 原型 [design/ui-prototype/mvp1.html](design/ui-prototype/mvp1.html) 补 ⑤命令面板/⑥通知中心/⑦恢复中心/⑧回执中心四屏；既有四屏同步新能力（设置搜索条/快速捕获去向/备份卡/入口按钮组）与实现位置注记
-- README 双语新增「插件内 UI」节 + 路线行；测试数 210→218
+- README 双语新增「插件内 UI」节 + 路线行
 
 ### Security
 - **plugin.api 原型链防护（TODO L651）**：`method` 此前直接索引桥对象——`constructor`/`hasOwnProperty` 等原型链成员可经透传调用；现要求**自有属性**（hasOwnProperty 检查），四成员回归测试（tests/plugin-api-guard.test.ts）
@@ -139,6 +139,10 @@
 
 ### Added
 - **TODO §0.5 开发路线索引**：144 条 pending 按 P0 自主/P1 用户动作/P2 环境/P3 上游/P4 产品级五层重组；本轮核对销账 6 条（L298/L447/L488/L557/L566/L615）
+
+### Changed
+- 契约 26→**27 op**（+workflow.cancel）；README 双语 / api.md / MCP README / design 31 / REPO-MAP 计数同步
+- 测试 210→**237**（SSE 协议边界 5 / 取消检查点 2 / 心跳 7 / 保留策略 3 / 收藏合并 / 原型链防护 4 等）
 
 ## v0.7.5 · 2026-10-05（v0.7.4 后增量：发布链补强 + Agent 集成指南 + 运维工具）
 

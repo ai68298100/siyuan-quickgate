@@ -2,7 +2,7 @@
 
 [中文文档](./README.zh-CN.md)
 
-[![Version](https://img.shields.io/badge/version-0.7.5-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.8.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (27 ops):
 
@@ -29,9 +29,10 @@
 
 Visual language follows [design/ui-prototype/mvp1.html](./design/ui-prototype/mvp1.html) (all `--b3-*` tokens, follows the host theme's light/dark mode, no hard-coded colors):
 
-- **Layered settings panel**: Status overview (health home: channel cards / run KPIs / next step / recent receipts) · First-run wizard (env check → bridge on → self-test, all real state) · Connections · Security · Queue & data (incl. **full backup/restore** and clear-queue preview) · Diagnostics & ecosystem · About; a top search bar filters settings **across groups**.
-- **Command palette** (`Ctrl+Alt+P`): search host commands (zh/en/pinyin aliases, favorites ★ / recents auto-pinned); "capability actions" run in two stages (fill params, then execute); empty-result fallback = one-line **quick capture** to today's daily note / inbox.
+- **Layered settings panel**: Status overview (health home: channel cards / run KPIs / next step / recent receipts) · First-run wizard (**resumable seven-step state machine**: env check → capability selection → bridge permission → connection probe → sample read → optional sample write (undoable) → done; wizard-state.json resume) · Connections · Security · Queue & data (incl. **full backup/restore** and clear-queue preview) · Diagnostics & ecosystem · About; a top search bar filters settings **across groups**.
+- **Command palette** (`Ctrl+Alt+P`): search host commands (zh/en/pinyin aliases, favorites ★ / recents auto-pinned); "capability actions" run in two stages (fill params, then execute, write-ops annotated); empty-result fallback = one-line **quick capture** to today's daily note / inbox.
 - **Notification / Recovery / Results centers**: aggregated attention items (one-click jump to the handling surface) · manual disposition of unknown/failed/expired receipts (retry with a new id / dismiss with record / batch) · `results.ndjson` query (status/time filters, keyword, paging, CSV/JSON export).
+- **Liveness detection & takeover**: when another window holds the consumer lock, its heartbeat status is shown; stale/suspect heartbeats offer one-click takeover (ledger prevents double consumption).
 
 ## Install (manual)
 
@@ -90,7 +91,7 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | v0.7.0–0.7.3 | MCP stdio server for AI assistants + kernel route live-verified on 3.8.6 (bug#9) + acceptance entry points → backlog cleanup (eight correctness fixes + version/release gates) + bug#11/12/13 |
 | **v0.7.4** | **template.new path-traversal security fix** (three-channel guard) + favorites/recents full chain + **built-in SiYuan Agent native capabilities** (zero config) + concurrency correctness (idempotency registry / bridge claim / multi-writer mitigation) + contract 23→27 ops + manifest v2 (live-calibrated) |
 | **v0.7.5** | release-chain hardening: package.zip unpack assertions (bug#9 regression gate) + Agent integration guide + restart tool + bug#17 documented (lifecycle hook noise, zero functional impact) |
-| **v0.7.5+ (working tree)** | in-plugin UI takes shape: layered settings + first-run wizard + health home · command palette / notification / recovery / results centers · full backup · prototype-aligned polish (border-box fix for KPI wrap / localized receipt times / dark-mode contrast / palette component styles) |
+| **v0.8.0** | **resumable seven-step first-run wizard** (wizard-state.json resume, sample read/write with undo) · **liveness detection & takeover** (heartbeat + Web Locks steal) · **workflow.cancel channel** (checkpoint before each step, completed steps preserved) · day-based retention (retentionDays, off by default) · backup sourceDevice + favorites merge import · prototype-aligned UI polish (R330~R353: KPI wrap fix / localized times / keyboard walkthrough 7/7) |
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 
@@ -99,7 +100,7 @@ Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # acceptance gate: unit tests (218) + MCP protocol smoke (7)
+corepack pnpm accept  # acceptance gate: unit tests (237) + MCP protocol smoke (7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # symlink into your workspace for dev
 ```

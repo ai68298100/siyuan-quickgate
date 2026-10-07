@@ -2,6 +2,14 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R355（v0.8.0 发版：CHANGELOG 收敛 + 发布链链接修复）
+
+- **v0.8.0 正式发版**（不上集市，GitHub Releases 唯一分发渠道）：版本三处（plugin.json / package.json / 版本常量）→ 0.8.0；CHANGELOG Unreleased（R283~R354 二十余轮）收敛为 `v0.8.0 · 2026-10-07` 正式版块——段内重复条目去重（sourceDevice 子弹 / 收藏计数修复各 ×2）、补 onStolen 防双消费与 Changed 小节（契约 26→27、测试 210→237）。
+- README 双语：徽章 → 0.8.0、里程碑表加 v0.8.0 行、插件内 UI 节补七步向导/失联接管/写入标注、测试数 237。
+- **发布链链接检查抓出 2 处违规并修复**：包内文档指向包外文件——PROGRESS 的 design/31 相对链接与 current-status 的 CHANGELOG 相对链接均改 GitHub permalink（v0.7.4 惯例）；生成器脚本同步改，重建后 16 md / 42 链接零违规。
+- 验收：check 五门禁全过（27/27/14 一致）· 237 测全绿 · build + check:release 三重检查通过（无泄露 / 链接 ✓ / kernels+zip 三件套 ✓）。
+- dist 部署进工作空间 + 逐文件 diff 验证；GitHub Release v0.8.0（prerelease + package.zip + SHA-256）。
+
 ## 2026-10-07 · R354（L623 冲突策略：收藏合并 + sourceDevice 展示）
 
 - L623 来源设备：BackupPayload 加 `sourceDevice`（导出时 deviceName，可选字段）；导入对话框显示"来源设备：X"——仅展示，本机 deviceName 恒保留不随备份迁移（R338 语义）。
@@ -424,7 +432,7 @@
 - 发布链补强：package.zip 解包断言、Agent 集成指南、重启工具、版本/包结构检查。
 - 当前本地验证：`pnpm check` 通过；26 个测试文件、163 个测试通过；协议冒烟在无思源有效 Authorization 时为 6/7，真实 `bridge.ping` 需鉴权环境，不能记为全绿。
 - 远端 v0.7.5 为 prerelease；v0.7.2 仍是当前正式 Latest。开发分支、tag Release 和本地未发布构建分开记录。
-- 详细产品取舍与后续执行泳道见 [产品评审与执行路线](../design/docs/31-产品评审与执行路线-2026-10-05.md)。
+- 详细产品取舍与后续执行泳道见 [产品评审与执行路线](https://github.com/ai68298100/siyuan-quickgate/blob/main/design/docs/31-%E4%BA%A7%E5%93%81%E8%AF%84%E5%AE%A1%E4%B8%8E%E6%89%A7%E8%A1%8C%E8%B7%AF%E7%BA%BF-2026-10-05.md)。
 
 ## 2026-10-03 · v0.7.3（R69 池清账八处修复 + 真机批 10/10 全绿 + bug#11/12/13）
 

@@ -26,7 +26,7 @@ import { openNotificationCenter } from "./notification-center-ui";
 import { openResultsCenter } from "./results-center-ui";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.7.5";
+const PLUGIN_VERSION = "0.8.0";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 export default class QuickGatePlugin extends Plugin {

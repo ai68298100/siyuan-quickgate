@@ -70,7 +70,7 @@ lines.push("## 文档");
 lines.push("");
 lines.push("- 使用：[docs/GETTING-STARTED.md](./GETTING-STARTED.md) · [FAQ](./FAQ.md)");
 lines.push("- 契约：[docs/api.md](./api.md) · [docs/contracts/](./contracts/)");
-lines.push("- 变更：[CHANGELOG.md](../CHANGELOG.md) · [PROGRESS](./PROGRESS.md)");
+lines.push("- 变更：[CHANGELOG.md](https://github.com/ai68298100/siyuan-quickgate/blob/main/CHANGELOG.md) · [PROGRESS](./PROGRESS.md)");
 
 writeFileSync(path.join(ROOT, "docs", "current-status.md"), lines.join("\n") + "\n", "utf8");
 console.log(`✓ docs/current-status.md 已生成（HEAD=${head}，tag=${latestTag}，release=${releaseTag}）`);

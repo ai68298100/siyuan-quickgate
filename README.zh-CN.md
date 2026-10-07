@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-[![Version](https://img.shields.io/badge/version-0.7.5-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![Version](https://img.shields.io/badge/version-0.8.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
 
@@ -29,9 +29,10 @@
 
 观感对齐 [design/ui-prototype/mvp1.html](./design/ui-prototype/mvp1.html)（全部 `--b3-*` 令牌、亮暗随宿主主题，不硬编码颜色）：
 
-- **分层设置面板**：状态概览（健康首页：通道卡片 / 运行 KPI / 下一步 / 最近回执）· 首跑向导（环境检查→开桥→连通自检，全部真状态）· 连接与通道 · 安全与权限 · 队列与数据（含**全量备份/恢复**与清空队列预览）· 诊断与生态 · 关于；顶部搜索条**跨分组过滤**设置项。
-- **命令面板**（`Ctrl+Alt+P`）：搜索宿主命令（中英/拼音别名，收藏★/最近自动置顶）；「能力动作」二段式（先填参数后执行）；空结果兜底 = 一句话**快速捕获**到今日日记 / 收集箱。
+- **分层设置面板**：状态概览（健康首页：通道卡片 / 运行 KPI / 下一步 / 最近回执）· 首跑向导（**七步可恢复状态机**：环境检查→选择能力→桥权限→连接探针→样例只读→可选样例写入→完成；wizard-state.json 续跑；样例写入可撤销）· 连接与通道 · 安全与权限 · 队列与数据（含**全量备份/恢复**与清空队列预览）· 诊断与生态 · 关于；顶部搜索条**跨分组过滤**设置项。
+- **命令面板**（`Ctrl+Alt+P`）：搜索宿主命令（中英/拼音别名，收藏★/最近自动置顶）；「能力动作」二段式（先填参数后执行，写动作双档标注）；空结果兜底 = 一句话**快速捕获**到今日日记 / 收集箱。
 - **通知中心 / 恢复中心 / 回执中心**：待关注事态聚合（一键跳转处理面）· unknown/失败/过期回执的人工处置（换新 id 重试 / 放弃并记录 / 批量）· `results.ndjson` 查询（状态/时间筛选、关键词、分页、导出 CSV/JSON）。
+- **失联检测与接管**：他窗持有消费权时显示心跳状态；卡死嫌疑/高度失联可一键接管（台账防双执行）。
 
 ## 手动安装
 
@@ -90,7 +91,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | v0.7.0~0.7.3 | MCP stdio 服务器（AI 助手）+ 内核路由 3.8.6 真机打通（bug#9）+ 验收入口收敛 → 池清账八处正确性修复 + 版本/发布双门禁 + bug#11/12/13 |
 | **v0.7.4** | **template.new 路径穿越安全修复**（三通道守卫）+ 收藏/最近使用全链 + **思源内置 Agent 原生三能力**（零配置）+ 并发正确性（幂等注册表/桥消费权认领/多写者竞态缓解）+ 契约 23→27 op + manifest v2（真机校准） |
 | **v0.7.5** | 发布链补强：package.zip 解包断言（bug#9 回归门）+ Agent 集成指南 + 重启工具 + bug#17 登记（lifecycle 钩子噪音，功能零影响） |
-| **v0.7.5+（当前工作区）** | 插件内 UI 成型：分层设置 + 首跑向导 + 健康首页 · 命令面板 / 通知 / 恢复 / 回执四中心 · 全量备份 · UI 对齐原型打磨（border-box 修正 KPI 爆版 / 回执时间本地化 / 暗色对比度 / 面板组件补样式） |
+| **v0.8.0** | **首跑七步可恢复状态机**（wizard-state.json 续跑、样例只读/写入可撤销）· **失联检测与接管**（heartbeat + Web Locks steal）· **workflow.cancel 取消通道**（每步开始前检查点，已完成步骤保留）· 天数保留 retentionDays（默认关）· 备份来源设备 + 收藏合并导入 · UI 对齐原型打磨（R330~R353：KPI 爆版修复/时间本地化/键盘走查 7 检查全过） |
 
 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)，路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 
@@ -99,7 +100,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 ```bash
 corepack pnpm install
 corepack pnpm check   # tsc + svelte-check
-corepack pnpm accept  # 验收门：单测(218) + MCP 协议冒烟(7)
+corepack pnpm accept  # 验收门：单测(237) + MCP 协议冒烟(7)
 corepack pnpm build   # dist/ + package.zip
 corepack pnpm make-link  # 软链进工作空间联调
 ```

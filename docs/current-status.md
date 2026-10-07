@@ -35,4 +35,4 @@
 
 - 使用：[docs/GETTING-STARTED.md](./GETTING-STARTED.md) · [FAQ](./FAQ.md)
 - 契约：[docs/api.md](./api.md) · [docs/contracts/](./contracts/)
-- 变更：[CHANGELOG.md](../CHANGELOG.md) · [PROGRESS](./PROGRESS.md)
+- 变更：[CHANGELOG.md](https://github.com/ai68298100/siyuan-quickgate/blob/main/CHANGELOG.md) · [PROGRESS](./PROGRESS.md)
