@@ -24,9 +24,9 @@ import { openCommandPalette } from "./command-palette";
 import { openRecoveryCenter } from "./recovery-center";
 import { openNotificationCenter } from "./notification-center-ui";
 import { openResultsCenter } from "./results-center-ui";
+import { PLUGIN_VERSION } from "./version";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.8.1";
 const CONFIRM_TIMEOUT_MS = 30000;
 
 export default class QuickGatePlugin extends Plugin {

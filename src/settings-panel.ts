@@ -27,9 +27,9 @@ import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry } from "./types/bridge"
 import { countRecoveryItems } from "./recovery-center";
 import { countNotifications } from "./notification-center-ui";
 import { classifyHeartbeat, heartbeatPath, readHeartbeat } from "./services/heartbeat";
+import { PLUGIN_VERSION } from "./version";
 
 const PLUGIN_NAME = "siyuan-quickgate";
-const PLUGIN_VERSION = "0.7.5";
 
 /** 重置撤销（L624 部分）：恢复默认后保留重置前设置快照；状态概览页提供本会话内撤销（模块级——重开会新面板仍可见） */
 let preResetSnapshot: QuickGateSettings | null = null;

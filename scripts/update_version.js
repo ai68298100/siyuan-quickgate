@@ -133,12 +133,12 @@ function incrementVersion(version, type) {
         await writeJsonFile(pluginJsonPath, pluginData);
         await writeJsonFile(packageJsonPath, packageData);
 
-        // R70·版本门禁：同步 src/index.ts 的 PLUGIN_VERSION（v0.7.3 曾漏改致运行时自报旧版本）
-        const indexPath = path.join(process.cwd(), 'src', 'index.ts');
-        if (fs.existsSync(indexPath)) {
-            const idxText = fs.readFileSync(indexPath, 'utf8');
-            const idxUpdated = idxText.replace(/const PLUGIN_VERSION = "\d+\.\d+\.\d+"/, `const PLUGIN_VERSION = "${newVersion}"`);
-            if (idxUpdated !== idxText) fs.writeFileSync(indexPath, idxUpdated, 'utf8');
+        // R70·版本门禁：同步唯一运行时版本源（避免入口/设置页/诊断包各自漂移）
+        const versionPath = path.join(process.cwd(), 'src', 'version.ts');
+        if (fs.existsSync(versionPath)) {
+            const versionText = fs.readFileSync(versionPath, 'utf8');
+            const versionUpdated = versionText.replace(/export const PLUGIN_VERSION = "\d+\.\d+\.\d+"/, `export const PLUGIN_VERSION = "${newVersion}"`);
+            if (versionUpdated !== versionText) fs.writeFileSync(versionPath, versionUpdated, 'utf8');
         }
 
         // R2：同步 README 徽章版本（固定文件名，无动态路径）
@@ -150,7 +150,7 @@ function incrementVersion(version, type) {
             }
         }
 
-        console.log(`\n✅  Version successfully updated to: \x1b[32m${newVersion}\x1b[0m (plugin/package/src/README synced)\n`);
+        console.log(`\n✅  Version successfully updated to: \x1b[32m${newVersion}\x1b[0m (plugin/package/src/version/README synced)\n`);
 
     } catch (error) {
         console.error('❌  Error:', error);

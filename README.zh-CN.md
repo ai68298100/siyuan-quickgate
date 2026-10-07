@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.1-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.2-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 **小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
 
@@ -36,7 +36,7 @@
 
 ## 手动安装
 
-1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；GitHub 会在资产详情显示 SHA-256 digest）。当前 `v0.8.1` 仍是预发布版，需要稳定版本时请选择最新 stable release。
+1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；GitHub 会在资产详情显示 SHA-256 digest）。当前 `v0.8.2` 仍是预发布版，需要稳定版本时请选择最新 stable release。
 2. 思源 → 设置 → 集市 → 下载页 → 右上角菜单 → **导入安装包**。
 3. 启用插件，打开设置，将**外部命令桥**打开（产品默认关闭）。
 4. **更新版本后需完全退出思源（托盘右键退出）再启动**——窗口重开不会刷新插件前端代码；可双击工作区的 `重启思源.bat`（仓库 `tools/restart-siyuan.bat`）一键完成。
@@ -93,6 +93,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | **v0.7.5** | 发布链补强：package.zip 解包断言（bug#9 回归门）+ Agent 集成指南 + 重启工具 + bug#17 登记（lifecycle 钩子噪音，功能零影响） |
 | **v0.8.0** | **首跑七步可恢复状态机**（wizard-state.json 续跑、样例只读/写入可撤销）· **失联检测与接管**（heartbeat + Web Locks steal）· **workflow.cancel 取消通道**（每步开始前检查点，已完成步骤保留）· 天数保留 retentionDays（默认关）· 备份来源设备 + 收藏合并导入 · UI 对齐原型打磨 |
 | **v0.8.1** | CI/发布可复现性加固 · MCP 冒烟计数改为跟随单一 op 清单 · Dependabot 与 GitHub Issue/PR 流程整理 · 中英文文档与安全策略更新 |
+| **v0.8.2** | 入口、设置页、诊断包统一读取运行时版本源 · 容器 E2E 改为严格门禁，补齐健康探测、Token 脱敏与失败诊断资产 |
 
 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)，路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 

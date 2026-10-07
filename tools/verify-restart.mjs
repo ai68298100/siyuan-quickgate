@@ -30,6 +30,7 @@ function loadEnv() {
 
 const { url, token } = loadEnv();
 const PLUGIN = "siyuan-quickgate";
+const profile = process.env.VERIFY_PROFILE ?? "full";
 const results = [];
 const check = (name, ok, detail = "") => {
     results.push({ name, ok });
@@ -187,8 +188,12 @@ async function main() {
         else console.log(`  (MCP 路由跳过/未通：${out.split("\n").find((x) => x.includes("error"))?.slice(0, 60) ?? "12s 无有效响应"}——桥关时此项应通，若不通查 kernel.js 加载)`);
     } catch (e) { console.log(`  (MCP 路由检查异常：${e.message})`); }
 
-    const failed = results.filter((x) => !x.ok).length;
-    console.log(`\n== 复测：${results.length - failed}/${results.length} 通过 ==`);
+    // 容器只提供内核，没有思源前端时，桥文件消费是环境缺口而非内核回归；
+    // 其余内核鉴权/路由检查仍保持硬门禁，避免用“预期缺席”吞掉真实失败。
+    const skippable = profile === "kernel" ? new Set(["③ 桥文件端到端"]) : new Set();
+    const failed = results.filter((x) => !x.ok && !skippable.has(x.name)).length;
+    const skipped = results.filter((x) => !x.ok && skippable.has(x.name)).length;
+    console.log(`\n== 复测（${profile}）：${results.length - failed - skipped}/${results.length} 通过，${skipped} 项因环境跳过 ==`);
     process.exit(failed ? 1 : 0);
 }
 

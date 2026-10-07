@@ -1,17 +1,17 @@
 # 快门当前状态（自动快照）
 
-> 由 `node scripts/current-status.mjs` 生成于 2026-10-07 16:43。再跑即刷新；不手改本文件。
+> 由 `node scripts/current-status.mjs` 生成于 2026-10-07 17:40。再跑即刷新；不手改本文件。
 
 ## 版本与构建
 
 | 项 | 值 |
 |---|---|
-| 分支 / HEAD | `main` / `6a63117` |
+| 分支 / HEAD | `main` / `84484cd` |
 | 源码版本 | `0.8.1` |
-| 最新 tag | `v0.8.0` |
-| 远端 release tag（本地探测） | `v0.8.0` |
+| 最新 tag | `v0.8.1` |
+| 远端 release tag（本地探测） | `v0.8.1` |
 | dist/index.js | 存在（构建于 2026-10-07 08:37） |
-| 工作区未提交项 | 25 个（git status --short） |
+| 工作区未提交项 | 8 个（git status --short） |
 
 ## 质量门（快照时点声明，权威以最近一次运行输出为准）
 

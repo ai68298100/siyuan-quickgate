@@ -1,91 +1,152 @@
 name: CI-E2E Experiment (SiYuan container)
 
 on:
-  push:
-    branches: [ci-e2e-experiment]
   workflow_dispatch:
+    inputs:
+      siyuan_image:
+        description: "已验证的 SiYuan 镜像（默认 latest；升级时请在运行记录中注明）"
+        required: false
+        default: "b3log/siyuan:latest"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-e2e-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  CI_ACCESS_CODE: ci-access
+  SIYUAN_IMAGE: ${{ inputs.siyuan_image || 'b3log/siyuan:latest' }}
+  SIYUAN_CI_TOKEN: ci-fixed-api-token
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
 
-      - name: 预置 conf（api.token=固定值）到 volume
+      - name: 预置 conf（不输出 Token）到 volume
         run: |
-          docker run --rm -v siyuan-ws:/ws -e TK="ci-fixed-api-token" alpine sh -c \
-            'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"},\"bazaar\":{\"trust\":true,\"petalDisabled\":false}}" "$TK" > /ws/conf/conf.json && cat /ws/conf/conf.json'
-          echo "conf 已预置：固定 api.token + 集市信任（内核插件启用前提，IsPetalsEnabled）"
+          set -euo pipefail
+          echo "::add-mask::$SIYUAN_CI_TOKEN"
+          docker run --rm -v siyuan-ws:/ws -e TK="$SIYUAN_CI_TOKEN" alpine sh -c \
+            'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"},\"bazaar\":{\"trust\":true,\"petalDisabled\":false}}" "$TK" > /ws/conf/conf.json'
 
-      - name: 启动思源容器（serve + bypass：localhost API 免凭据）
+      - name: 启动思源容器（serve + bypass）
         run: |
+          set -euo pipefail
           docker run -d --name siyuan \
             -p 127.0.0.1:6806:6806 \
             -v siyuan-ws:/siyuan/workspace \
             -e SIYUAN_ACCESS_AUTH_CODE_BYPASS=true \
-            b3log/siyuan:latest \
-            serve \
-            --workspace=/siyuan/workspace/
+            "$SIYUAN_IMAGE" \
+            serve --workspace=/siyuan/workspace/
 
-      - name: 等待内核就绪
+      - name: 等待内核就绪（失败即红）
         run: |
+          set -euo pipefail
+          ready=0
           for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:6806 || true)
-            if [ "$code" = "200" ] || [ "$code" = "401" ] || [ "$code" = "302" ]; then
-              echo "内核响应 HTTP $code（第 $i 次探测）"
+            code=$(curl -sS -o /tmp/siyuan-version.json -w "%{http_code}" \
+              -X POST http://127.0.0.1:6806/api/system/version \
+              -H "Content-Type: application/json" -d '{}' || true)
+            if [ "$code" = "200" ]; then
+              echo "内核已就绪（第 $i 次探测）"
+              ready=1
               break
             fi
             sleep 2
           done
-          sleep 10
+          if [ "$ready" -ne 1 ]; then
+            docker logs siyuan --tail 200
+            exit 1
+          fi
 
-      - name: 抓取内核 conf 的 api.token（cat + 宿主解析，容器无 node）
+      - name: 抓取并校验内核 Token
         run: |
-          RAW=$(docker exec siyuan cat /siyuan/workspace/conf/conf.json 2>/dev/null || echo '{}')
-          TOKEN=$(printf '%s' "$RAW" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const c=JSON.parse(d);console.log((c.api&&c.api.token)||'')}catch{console.log('')}})")
-          echo "内核 api.token 长度: ${#TOKEN}（前 4 位 ${TOKEN:0:4}）"
-          echo "SIYUAN_TOKEN=$TOKEN" >> $GITHUB_ENV
-          echo "SIYUAN_URL=http://127.0.0.1:6806" >> $GITHUB_ENV
+          set -euo pipefail
+          RAW=$(docker exec siyuan cat /siyuan/workspace/conf/conf.json)
+          TOKEN=$(printf '%s' "$RAW" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const c=JSON.parse(d);process.stdout.write(String(c.api?.token||''))})")
+          if [ -z "$TOKEN" ]; then
+            docker logs siyuan --tail 200
+            echo "内核 conf 未提供 api.token" >&2
+            exit 1
+          fi
+          echo "::add-mask::$TOKEN"
+          echo "SIYUAN_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          echo "SIYUAN_URL=http://127.0.0.1:6806" >> "$GITHUB_ENV"
 
-      - name: JWT 认证验证（需认证 API 实测，输出响应体定位 400）
+      - name: 构建并部署插件
         run: |
-          echo "用内核重写的 JWT 调需认证 API（registry.list 经路由）："
-          curl -s -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -d '{"op":"registry.list","args":{}}' -w "\n[HTTP %{http_code}]" || true
-          echo ""
-          echo "对照：内核 API（非私有路由，需认证）——notebook/lsNotebooks："
-          curl -s -X POST http://127.0.0.1:6806/api/notebook/lsNotebooks -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -w "\n[HTTP %{http_code}]" || true
-          echo ""
-          echo "内核日志（最近 400 相关）："
-          docker logs siyuan --tail 25 2>&1 | grep -iE "400|bad request|quickgate|plugin" || true
-          if [ "$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" -d '{"op":"registry.list","args":{}}')" = "429" ]; then echo "  429 限速窗口——冷却 120s"; sleep 120; fi
-
-      - name: 部署插件（dist/ → workspace plugins + 启用）
-        run: |
-          corepack pnpm install --no-frozen-lockfile
+          set -euo pipefail
+          corepack pnpm install --frozen-lockfile
           corepack pnpm run build
           docker exec siyuan mkdir -p /siyuan/workspace/data/plugins/siyuan-quickgate
           docker cp dist/. siyuan:/siyuan/workspace/data/plugins/siyuan-quickgate/
-          curl -s -X POST http://127.0.0.1:6806/api/petal/setPetalEnabled \
+          response=$(curl --fail-with-body -sS -X POST http://127.0.0.1:6806/api/petal/setPetalEnabled \
             -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" \
-            -d '{"frontend":"all","packageName":"siyuan-quickgate","enabled":true,"isPublish":false}' || true
+            -d '{"frontend":"all","packageName":"siyuan-quickgate","enabled":true,"isPublish":false}')
+          printf '%s\n' "$response"
+          printf '%s' "$response" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const j=JSON.parse(d);if(j.code!==0)process.exit(1)})"
 
-      - name: 预置桥开关并重启容器（加载 kernel.js + 清限速）
+      - name: 预置桥开关并重启容器
         run: |
+          set -euo pipefail
           docker exec siyuan sh -c 'mkdir -p /siyuan/workspace/data/storage/petal/siyuan-quickgate'
           docker exec siyuan sh -c 'echo "{\"schemaVersion\":1,\"bridgeEnabled\":true,\"broadcastEnabled\":true,\"pollMs\":500}" > /siyuan/workspace/data/storage/petal/siyuan-quickgate/bridge-settings.json'
           docker restart siyuan
-          sleep 25
-          docker logs siyuan --tail 40 2>&1 | grep -iE "kernel|petals|quickgate" || true
+          ready=0
+          for i in $(seq 1 60); do
+            code=$(curl -sS -o /tmp/siyuan-version-after-restart.json -w "%{http_code}" \
+              -X POST http://127.0.0.1:6806/api/system/version \
+              -H "Content-Type: application/json" -d '{}' || true)
+            if [ "$code" = "200" ]; then ready=1; echo "重启后内核已就绪（第 $i 次探测）"; break; fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then docker logs siyuan --tail 200; exit 1; fi
 
-      - name: 内核侧验收（verify-restart；③⑤v1.5 需前端，预期失败属正常）
+      - name: JWT 与内核路由验收（失败即红）
         run: |
-          corepack pnpm install --no-frozen-lockfile
-          node tools/verify-restart.mjs || true
+          set -euo pipefail
+          response=$(curl --fail-with-body -sS -X POST "$SIYUAN_URL/plugin/private/siyuan-quickgate/exec" \
+            -H "Authorization: Token $SIYUAN_TOKEN" -H "Content-Type: application/json" \
+            -d '{"op":"registry.list","args":{}}')
+          printf '%s\n' "$response"
+          negative=$(curl -sS -o /tmp/negative-auth.txt -w "%{http_code}" -X POST "$SIYUAN_URL/plugin/private/siyuan-quickgate/exec" \
+            -H "Content-Type: application/json" -d '{"op":"bridge.ping","args":{}}')
+          test "$negative" = "401" || test "$negative" = "403"
 
-      - name: MCP 真 e2e（bundle）
+      - name: 内核侧验收（前端缺席项明确跳过）
         run: |
+          set -o pipefail
+          VERIFY_PROFILE=kernel corepack pnpm run verify:restart 2>&1 | tee e2e-report.txt
+
+      - name: MCP 协议冒烟（失败即红）
+        run: |
+          set -euo pipefail
           corepack pnpm run build:mcp
-          SMOKE_TARGET=dist-mcp/mcp-quickgate.js node tools/mcp-smoke.mjs || true
+          SMOKE_TARGET=dist-mcp/mcp-quickgate.js SMOKE_SKIP_LIVE=1 node tools/mcp-smoke.mjs
+
+      - name: 收集容器诊断
+        if: always()
+        run: |
+          docker ps -a > docker-ps.txt || true
+          docker inspect siyuan > docker-inspect.json 2>&1 || true
+          docker logs siyuan > docker.log 2>&1 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-diagnostics
+          path: |
+            e2e-report.txt
+            docker-ps.txt
+            docker-inspect.json
+            docker.log
+          if-no-files-found: warn
