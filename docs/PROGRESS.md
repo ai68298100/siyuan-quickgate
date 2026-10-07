@@ -2,6 +2,13 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R353（软提醒 + 会话时长收尾）
+
+- L562 尾巴：状态概览「下一步」按钮区软提醒——首跑向导未完成（firstRun && !completedAt）时出现「继续首跑向导」按钮（绕过门禁直达当前步骤，进度已持久化）；靶场实测按钮出现 + 点击进向导步骤 1 ✓。
+- L610 部分：关于页会话运行时长（host.sessionStartedAt ≈ onload；"本会话已运行 N 分钟（自 HH:MM）"）。
+- 靶场 mock 补 sessionStartedAt + firstRun 默认 true（模拟首装未完成首跑用户——软提醒可见性验证）。
+- 235 测全绿 + tsc 0 错。
+
 ## 2026-10-07 · R352（L623 来源设备字段 + 重置清向导进度）
 
 - L623 来源设备：BackupPayload 加 `sourceDevice`（导出时 deviceName，可选字段）；导入对话框显示"来源设备：X"——仅展示，本机 deviceName 恒保留不随备份迁移（R338 语义）。

@@ -69,6 +69,8 @@ export interface SettingsPanelHost {
     captureQuick(text: string, target: "daily" | "inbox"): Promise<{ ok: boolean; message: string; blockId?: string; docId?: string }>;
     /** 失联接管（docs/34 §3.3 · R348）：steal 破坏他窗锁并接管消费权 */
     takeoverBridge(): Promise<{ ok: boolean; holder: string | null }>;
+    /** L610 部分：本会话启动时间（onload 时刻 ms）——关于页/状态页运行时长展示 */
+    sessionStartedAt: number;
     openDialog(content: string): { element: HTMLElement; destroy(): void };
 }
 
@@ -403,6 +405,16 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             if (n > 0 && document.body.contains(recoveryBtn)) recoveryBtn.textContent = `恢复中心（${n}）`;
         });
         root.querySelector("[data-role=next-btns]")?.append(pingBtn, ecoBtn, paletteBtn);
+
+        // L562 尾巴（软提醒）：首跑向导未完成时提供「继续首跑向导」入口——绕过门禁直达当前步骤（进度已持久化）
+        if (host.store.firstRun && !wizardState?.completedAt) {
+            const wizardBtn = document.createElement("button");
+            wizardBtn.className = "b3-button b3-button--outline";
+            wizardBtn.textContent = "继续首跑向导";
+            wizardBtn.title = "七步向导 · 进度已自动保存";
+            wizardBtn.onclick = () => void renderWizard();
+            root.querySelector("[data-role=next-btns]")?.append(wizardBtn);
+        }
 
         // 重置撤销横幅（L624 部分）：恢复默认后本会话内可一键撤销（恢复重置前设置并按需重启桥）
         if (preResetSnapshot) {
@@ -1358,10 +1370,15 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
 
     // ══════════ 页：关于 ══════════
     const pageAbout = () => {
+        // L610 部分：会话运行时长（host.sessionStartedAt ≈ onload；跨重启自然归零）
+        const upMs = Math.max(0, Date.now() - host.sessionStartedAt);
+        const upMin = Math.floor(upMs / 60000);
+        const uptimeText = `本会话已运行 ${upMin >= 1 ? `${upMin} 分钟` : "不到 1 分钟"}（自 ${new Date(host.sessionStartedAt).toTimeString().slice(0, 5)}）`;
         content.innerHTML = pageHeader("关于", "版本、数据边界与帮助入口（页脚常驻链接同此）") +
             `<div class="qg-card"><div class="qg-card-title">小驴快门 v${PLUGIN_VERSION} <span style="margin-left:auto">${chip("协议 v1", "mute")}</span></div>` +
             `<div style="font-size:12px;color:var(--b3-theme-on-surface);line-height:1.7">小驴生态联动中枢 + 外部网关：命令注册表、数据透传、编辑器上下文与 NDJSON 外部命令桥。` +
-            `数据流向与隐私边界见 PRIVACY.md（本插件不外传任何数据）。</div></div>`;
+            `数据流向与隐私边界见 PRIVACY.md（本插件不外传任何数据）。</div>` +
+            `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:6px">${esc(uptimeText)}</div></div>`;
         const danger = document.createElement("div");
         danger.className = "qg-card danger";
         danger.innerHTML = `<div style="font-size:12px;color:var(--b3-theme-on-surface)"><b style="color:var(--b3-theme-error)">恢复默认设置</b>　桥/广播关闭、轮询 500ms、名单还原、确认门控开启；设备名保留（本机身份不变）。当前自定义值不可找回。</div>`;

@@ -155,6 +155,8 @@ export default class QuickGatePlugin extends Plugin {
     /** L571/L627 心跳：本窗口序号（deviceName#seq 作 holder 标识，Math.random 非加密用途仅 UI 展示——R50 同先例）与上次心跳落盘时间 */
     private windowId = Math.random().toString(16).slice(2, 6);
     private lastHeartbeatMs = 0;
+    /** L610 部分：会话启动时间（实例构造 ≈ onload）——关于页运行时长展示 */
+    readonly sessionStartedAt = Date.now();
     /** 内核路由探针结果（设置面板打开时一次性探测；undefined=未探测） */
     kernelRouteProbe?: boolean;
 
