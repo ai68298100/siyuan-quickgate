@@ -28,8 +28,8 @@ for (const [name, v] of [["plugin.json", plugin], ["package.json", pkg], ["src/v
 if (!(plugin === pkg && pkg === src)) {
     fail(`三处不一致：plugin.json=${plugin} / package.json=${pkg} / src/version.ts=${src}`);
 }
-// L653：README 双语徽章版本同步（徽章漂移曾反复发生——counts/版本手改易漏）
-for (const readme of ["README.md", "README.zh-CN.md"]) {
+// R2：README 与安装包说明徽章版本同步（徽章漂移曾反复发生——版本手改易漏）
+for (const readme of ["README.md", "README.zh-CN.md", "docs/package-readme.md"]) {
     const md = fs.readFileSync(path.join(root, readme), "utf8");
     const b = md.match(/\[!\[Version\]\(https:\/\/img\.shields\.io\/badge\/version-([^)-]+)-blue\)/);
     if (!b) fail(`${readme} 未找到 Version 徽章`);

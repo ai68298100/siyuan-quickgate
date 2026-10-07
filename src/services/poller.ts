@@ -21,6 +21,8 @@ export class SingleFlightPoller {
     private failures = 0;
     private _lastTickMs = 0;
     private _lastDurationMs = 0;
+    /** 当前 tick（若有）。停止时等待它完成，避免释放消费权后仍有旧 tick 写入。 */
+    private activeTick?: Promise<unknown>;
 
     constructor(private opts: PollerOptions) {}
 
@@ -53,19 +55,34 @@ export class SingleFlightPoller {
         void this.loop();
     }
 
-    stop() {
+    /**
+     * 请求停止并等待当前 tick 完成。
+     *
+     * `stop()` 仍然立即令循环不再调度下一轮；返回的 Promise 只等待已经开始的
+     * tick，而不会等待退避定时器。生命周期关闭方可据此在释放 Web Lock/落盘前
+     * 确认旧消费者已经退出，避免热重载时两个实例短暂并行写回。
+     */
+    async stop(): Promise<void> {
         this.running = false;
+        // loop 自己会计数并吞掉 tick 错误；这里也必须吞掉同一 rejection，
+        // 否则失败 tick 会阻止 stopBridge 继续释放消费权。
+        await this.activeTick?.catch(() => {});
     }
 
     private async loop(): Promise<void> {
         const delay = this.opts.delay ?? ((ms) => new Promise<void>((r) => setTimeout(r, ms)));
         while (this.running && this.opts.shouldRun()) {
             const t0 = this.opts.now?.() ?? Date.now();
+            let tick: Promise<unknown>;
             try {
-                await this.opts.tick();
+                tick = this.opts.tick();
+                this.activeTick = tick;
+                await tick;
                 this.failures = 0;
             } catch {
                 this.failures += 1;
+            } finally {
+                this.activeTick = undefined;
             }
             const t1 = this.opts.now?.() ?? Date.now();
             this._lastTickMs = t1;

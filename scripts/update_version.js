@@ -141,8 +141,8 @@ function incrementVersion(version, type) {
             if (versionUpdated !== versionText) fs.writeFileSync(versionPath, versionUpdated, 'utf8');
         }
 
-        // R2：同步 README 徽章版本（固定文件名，无动态路径）
-        for (const readme of ['README.md', 'README.zh-CN.md']) {
+        // R2：同步仓库与安装包 README 徽章版本
+        for (const readme of ['README.md', 'README.zh-CN.md', 'docs/package-readme.md']) {
             if (fs.existsSync(readme)) {
                 const text = fs.readFileSync(readme, 'utf8');
                 const updated = text.replace(/version-\d+\.\d+\.\d+-blue/, `version-${newVersion}-blue`);
@@ -150,7 +150,7 @@ function incrementVersion(version, type) {
             }
         }
 
-        console.log(`\n✅  Version successfully updated to: \x1b[32m${newVersion}\x1b[0m (plugin/package/src/version/README synced)\n`);
+        console.log(`\n✅  Version successfully updated to: \x1b[32m${newVersion}\x1b[0m (plugin/package/src/version/README/package-readme synced)\n`);
 
     } catch (error) {
         console.error('❌  Error:', error);

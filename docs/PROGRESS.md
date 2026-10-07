@@ -2,6 +2,12 @@
 
 > 迭代记录（最新在上）。与根目录 CHANGELOG 同步。
 
+## 2026-10-07 · R361（v0.8.6 生命周期停机与热重载一致性）
+
+- `SingleFlightPoller.stop()` 改为等待当前 tick 完成后返回；桥在释放 Web Lock 前先完成停止，失败 tick 也不会阻塞释放。
+- `onunload` 等桥停止和审计 flush 后再写运行统计；热重载旧实例释放后补偿启动新实例，并用 `tornDown` 阻止停用实例复活。
+- 验收：poller 5/5、`pnpm check:types` 通过；本版本不上思源集市。
+
 ## 2026-10-07 · R360（v0.8.5 SSE 尾帧与空态无障碍）
 
 - 修复 SSE EOF 前无换行尾帧丢失；flush `TextDecoder` 后消费尾行，显式 stop 与 read 完成竞态下不误消费；连接指标只统计可读 body。

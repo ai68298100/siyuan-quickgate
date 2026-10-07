@@ -59,7 +59,13 @@ export default class QuickGatePlugin extends Plugin {
         g.__qgActiveInstance = this;
         if (prev && prev !== this) {
             try {
-                void prev.stopBridge();
+                // 新实例可能已在 onload 里抢锁；旧实例 tick 完成释放后再补一次启动，
+                // 解决热重载时短暂 claim=null 导致桥永久不启动的竞态。
+                void prev.stopBridge().then(() => {
+                    if (this.lifecycleBooted && !this.tornDown && !this.poller && this.settings.bridgeEnabled && !this.isMobileGuard()) {
+                        void this.startBridge().catch((e) => console.warn(`[${PLUGIN_NAME}] 热重载补偿启动失败：`, e));
+                    }
+                }).catch((e) => console.warn(`[${PLUGIN_NAME}] 热重载旧实例停机失败：`, e));
                 prev.stopEventBridge();
             } catch { /* 旧实例可能已半失效 */ }
         }
@@ -125,18 +131,21 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     onunload() {
-        // 优雅停机：单飞循环在当前 tick 结束后退出，不撕正在进行的写；广播订阅同步停止
+        // 优雅停机：先等待当前 tick 完成，再释放消费权，避免热重载时旧实例仍写回。
         this.tornDown = true; // 停用后构造器的热重载自愈不得复活后台循环
-        this.poller?.stop();
-        this.poller = undefined;
-        void this.broadcastSub?.stop();
-        this.broadcastSub = undefined;
-        void this.bridgeClaim?.release(); // 释放桥消费权（L452）
-        this.bridgeClaim = undefined;
+        const stopping = this.stopBridge().catch((e) => {
+            console.warn(`[${PLUGIN_NAME}] 停止桥时出现异常：`, e);
+        });
         this.stopEventBridge();
-        this.flushAudit();
-        // L554：运行统计快照回写（跨重启续计）
-        if (this.activeService) void this.store.saveStats(this.activeService.stats);
+        const auditFlushed = this.flushAudit();
+        // L554：等最后一个 tick 完成后再回写统计，避免 in-flight 结果丢失。
+        void Promise.allSettled([stopping, auditFlushed]).then(() => {
+            if (this.activeService) {
+                void this.store.saveStats(this.activeService.stats).catch((e) => {
+                    console.warn(`[${PLUGIN_NAME}] 保存运行统计失败：`, e);
+                });
+            }
+        });
         showMessage("小驴快门已停用；其桥目录随插件数据一并保留/清理", 3000, "info");
     }
 
@@ -282,7 +291,7 @@ export default class QuickGatePlugin extends Plugin {
             onStolen: () => {
                 console.warn(`[${PLUGIN_NAME}] 桥消费权已被另一窗口接管——本窗口停止轮询（防双消费）`);
                 showMessage("桥消费权已被另一窗口接管，本窗口已停止消费（如非本人操作请检查其他思源窗口）", 6000, "error");
-                void this.stopBridge();
+                void this.stopBridge().catch((e) => console.warn(`[${PLUGIN_NAME}] 被接管后停止桥失败：`, e));
             },
         });
         if (handle === null) {
@@ -354,7 +363,9 @@ export default class QuickGatePlugin extends Plugin {
     }
 
     async stopBridge() {
-        this.poller?.stop();
+        const poller = this.poller;
+        // stop() 等待已开始的 tick；因此释放 Web Lock 前不会有旧消费者继续写回。
+        if (poller) await poller.stop();
         this.poller = undefined;
         if (this.broadcastSub?.running) {
             await this.broadcastSub.stop();
@@ -410,9 +421,9 @@ export default class QuickGatePlugin extends Plugin {
         }, 5000);
     }
 
-    flushAudit() { // R338：公开——设置面板「导入备份（审计分组）」写回载体需要
+    flushAudit(): Promise<void> { // R338：公开——设置面板「导入备份（审计分组）」写回载体需要
         if (this.auditTimer) { clearTimeout(this.auditTimer); this.auditTimer = undefined; }
-        void this.saveData("audit.json", { schemaVersion: 1, entries: this.auditLog }).catch(() => {});
+        return this.saveData("audit.json", { schemaVersion: 1, entries: this.auditLog }).catch(() => {});
     }
 
     /**

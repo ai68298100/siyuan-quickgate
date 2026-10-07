@@ -1,7 +1,9 @@
 # 小驴快门（Lv QuickGate）· 安装包说明
 
+[![Version](https://img.shields.io/badge/version-0.8.6-blue)](https://github.com/ai68298100/siyuan-quickgate/releases)
+
 > 小驴生态联动中枢 + 外部网关：把思源笔记的命令、数据与编辑器上下文安全地开放给 Quicker、CLI 与 MCP 客户端。
-> 当前版本见下方徽章；**本文件随安装包分发**（面向安装后使用），面向开发者的工具/MCP 配置与完整文档在[源码仓库](https://github.com/ai68298100/siyuan-quickgate)。
+> **本文件随安装包分发**（面向安装后使用），面向开发者的工具/MCP 配置与完整文档在[源码仓库](https://github.com/ai68298100/siyuan-quickgate)。
 
 ## 安装（手动；集市暂未上架）
 

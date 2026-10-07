@@ -63,7 +63,7 @@ export interface SettingsPanelHost {
     bridgeAlive(): boolean;
     consecutiveFailures(): number;
     lateCompletions(): number;
-    flushAudit(): void;
+    flushAudit(): Promise<void>;
     /** 首跑向导步骤 5 样例只读探针用（index.ts 已有方法转公开，R347 L562） */
     readDailyStatus(): Promise<{ docId: string | null; exists: boolean }>;
     /** 首跑向导步骤 6 可选样例写入用（复用快速捕获，R347 L562） */
