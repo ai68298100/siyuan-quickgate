@@ -68,6 +68,21 @@ export function clampPaletteActiveIndex(active: number, commandCount: number, ca
 }
 
 /**
+ * 将活动索引映射到实际渲染的命令、能力动作或空态 fallback。
+ * 命令列表可能超过渲染上限；偏移必须使用可见命令数，而不是过滤结果总数。
+ */
+export function paletteActionIndex(active: number, visibleCommandCount: number, capabilityCount: number):
+    { kind: "command"; index: number } | { kind: "capability"; index: number } | { kind: "fallback"; index: number } {
+    const commandCount = Math.max(0, Math.trunc(visibleCommandCount));
+    const capabilities = Math.max(0, Math.trunc(capabilityCount));
+    const safeActive = Number.isFinite(active) ? Math.trunc(active) : 0;
+    if (safeActive < commandCount) return { kind: "command", index: Math.max(0, safeActive) };
+    const afterCommands = safeActive - commandCount;
+    if (afterCommands < capabilities) return { kind: "capability", index: Math.max(0, afterCommands) };
+    return { kind: "fallback", index: Math.max(0, afterCommands - capabilities) };
+}
+
+/**
  * 面板条目合成（纯函数）：收藏置顶（按收藏顺序）→ 最近使用（新→旧）→ 其余按注册表序；
  * 过滤：query 经别名展开（中英/拼音）对 title/id/plugin 任一命中；空 query 不过滤。
  * 同一命令既是收藏又是最近 → 只出现一次（以收藏位为准，保留两枚标记）。
@@ -490,7 +505,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
 
     // L600 部分：输入防抖 120ms——千条命令下每键全量过滤+重建会掉帧（settings 搜索同口径）
     const navMaxIndex = () => paletteNavMaxIndex(
-        entries.length,
+        visibleEntries.length,
         list.querySelectorAll("[data-cap]").length,
         RENDER_LIMIT,
         list.querySelectorAll("[data-fb]").length,
@@ -508,18 +523,18 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         else if (ev.key === "ArrowUp") { ev.preventDefault(); active = Math.max(active - 1, 0); render(); }
         else if (ev.key === "Enter") {
             ev.preventDefault();
-            if (active < visibleEntries.length) {
+            const capCount = list.querySelectorAll("[data-cap]").length;
+            const action = paletteActionIndex(active, visibleEntries.length, capCount);
+            if (action.kind === "command") {
                 const picked = visibleEntries[active];
                 if (picked) void runEntry(picked);
-            } else {
-                const capCount = list.querySelectorAll("[data-cap]").length;
-                const capEl = list.querySelectorAll("[data-cap]")[active - entries.length] as HTMLElement | undefined;
+            } else if (action.kind === "capability") {
+                const capEl = list.querySelectorAll("[data-cap]")[action.index] as HTMLElement | undefined;
                 const op = capEl?.dataset.cap;
                 if (op) { stage = "form"; formOp = op; render(); }
-                else {
-                    const fallback = list.querySelectorAll<HTMLButtonElement>("[data-fb]")[active - entries.length - capCount];
-                    fallback?.click();
-                }
+            } else {
+                const fallback = list.querySelectorAll<HTMLButtonElement>("[data-fb]")[action.index];
+                fallback?.click();
             }
         }
     });

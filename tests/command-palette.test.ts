@@ -2,7 +2,7 @@
  * G3-01 命令面板 MVP：条目合成纯逻辑（收藏置顶→最近次之→其余；别名过滤；去重）。
  */
 import { describe, expect, it } from "vitest";
-import { buildPaletteEntries, formFieldsFor, buildArgs, CAPABILITY_OPS, PaletteEntry, paletteNavMaxIndex, clampPaletteActiveIndex } from "../src/command-palette";
+import { buildPaletteEntries, formFieldsFor, buildArgs, CAPABILITY_OPS, PaletteEntry, paletteNavMaxIndex, clampPaletteActiveIndex, paletteActionIndex } from "../src/command-palette";
 import { buildToolDefs } from "../src/mcp/tools";
 
 const e = (plugin: string, id: string, title: string): PaletteEntry => ({
@@ -69,6 +69,13 @@ describe("命令面板键盘导航边界", () => {
         // 清空搜索时只有面板/诊断/指南三个动作，仍应覆盖最后一个可选项。
         expect(paletteNavMaxIndex(0, 0, 100, 3)).toBe(2);
         expect(clampPaletteActiveIndex(99, 0, 0, 100, 3)).toBe(2);
+    });
+
+    it("命令超过渲染上限时，能力动作偏移使用可见命令数", () => {
+        expect(paletteActionIndex(99, 100, 2)).toEqual({ kind: "command", index: 99 });
+        expect(paletteActionIndex(100, 100, 2)).toEqual({ kind: "capability", index: 0 });
+        expect(paletteActionIndex(101, 100, 2)).toEqual({ kind: "capability", index: 1 });
+        expect(paletteActionIndex(102, 100, 2)).toEqual({ kind: "fallback", index: 0 });
     });
 });
 

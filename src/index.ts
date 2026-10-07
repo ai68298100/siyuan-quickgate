@@ -19,7 +19,7 @@ import { BridgeClaimHandle, BridgeClaimer, createNavigatorClaimer } from "./serv
 import { heartbeatPath, readHeartbeat, shouldWriteHeartbeat, writeHeartbeat } from "./services/heartbeat";
 import { HubEvent } from "./services/events";
 import { DEFAULT_SETTINGS, QuickGateSettings, AuditEntry, BridgeCommand } from "./types/bridge";
-import { openQuickGateSettings } from "./settings-panel";
+import { memDiagnostics, openQuickGateSettings } from "./settings-panel";
 import { openCommandPalette } from "./command-palette";
 import { openRecoveryCenter } from "./recovery-center";
 import { openNotificationCenter } from "./notification-center-ui";
@@ -778,7 +778,6 @@ export default class QuickGatePlugin extends Plugin {
             audit: (e) => this.pushAudit(e),
             openSettingPanel: () => this.openSettingPanel(),
             copyDiagnostics: async () => {
-                const { memDiagnostics } = await import("./settings-panel");
                 const service = this.activeService ?? new BridgeService(this.deps());
                 const commandsText = await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/commands.ndjson`).catch(() => null);
                 const mem = memDiagnostics(this.settings, this.auditLog, service, undefined, this.broadcastSub?.metrics, { sessionStartedAt: this.sessionStartedAt, commandsText });

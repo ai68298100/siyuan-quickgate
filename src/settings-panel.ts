@@ -1902,7 +1902,6 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             diagBtn.className = "b3-button b3-button--outline b3-button--small";
             diagBtn.textContent = "复制诊断包";
             diagBtn.onclick = async () => {
-                const { memDiagnostics } = await import("./settings-panel");
                 const service = host.activeService ?? new BridgeService(host.deps());
                 const mem = memDiagnostics(host.settings, host.auditLog, service, undefined, undefined, { sessionStartedAt: host.sessionStartedAt });
                 await navigator.clipboard.writeText(JSON.stringify(mem, null, 2));

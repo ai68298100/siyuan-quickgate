@@ -9,8 +9,8 @@
 | 项 | 值 |
 |---|---|
 | 仓库 | GitHub: ai68298100/siyuan-quickgate（main 直推，个人项目） |
-| 当前版本 | **v0.8.6**（GitHub prerelease；plugin.json/package.json/PLUGIN_VERSION 三处门禁一致；集市暂不推送） |
-| CI 门 | tsc + 248 单测 + MCP smoke 6/6 + build + check:release（泄漏/链接/资产）+ check:manifest |
+| 当前版本 | **v0.8.7**（GitHub prerelease；plugin.json/package.json/PLUGIN_VERSION 三处门禁一致；集市暂不推送） |
+| CI 门 | tsc + 250 单测 + MCP smoke 6/6 + build + check:release（泄漏/链接/资产）+ check:manifest |
 | 设计/账本路径 | `design/`（TODO.md 总账本 · docs/01~30 · quicker-actions/ · templates/ · scripts/ · snapshot/） |
 | 账本快照命令 | `cd design && node scripts/todo-snapshot.mjs --write` |
 
@@ -40,6 +40,7 @@
 
 ## 4. 版本历史锚点
 
+- v0.8.7（2026-10-07）：命令面板截断列表键盘执行偏移修复、构建动态导入清理——CHANGELOG v0.8.7 节详
 - v0.8.6（2026-10-07）：poller 停机等待、热重载补偿启动、卸载审计/统计收尾与异常链收敛——CHANGELOG v0.8.6 节详
 - v0.8.5（2026-10-07）：SSE EOF 尾帧保留、可读连接计数、命令面板空态无障碍——CHANGELOG v0.8.5 节详
 - v0.7.4（2026-10-05）：R231~R258 聚合——template.new 路径穿越安全修复 + 收藏全链 + 内置 Agent 原生三能力 + 幂等注册表/桥认领/并发追加缓解 + manifest v2——CHANGELOG v0.7.4 节详
