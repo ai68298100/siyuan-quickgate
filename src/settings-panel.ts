@@ -1189,7 +1189,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 const resultLines = payload.resultsNdjson.trim() ? payload.resultsNdjson.trim().split("\n").filter(Boolean).length : 0;
                 const groups: Array<{ key: string; label: string }> = [
                     { key: "settings", label: `设置（${diffSettingsKeys.length} 个键与当前不同${diffSettingsKeys.length ? `：${diffSettingsKeys.slice(0, 4).join("、")}${diffSettingsKeys.length > 4 ? "…" : ""}` : ""}；设备名始终保留本机）` },
-                    { key: "favorites", label: `收藏与最近使用（备份 ${fav.favorites.length}+${fav.recent.length} 条，当前 ${curFav.favorites.length}+${curFav.recent.length} 条）` },
+                    { key: "favorites", label: `收藏与最近使用（备份 ${fav.favorites.length}+${fav.recent.length} 条，当前 ${curFav.favorites.length}+${curFav.recent.length} 条；可合并去重）` },
                     { key: "audit", label: `审计（备份 ${backupAudit.length} 条，当前 ${host.auditLog.length} 条）` },
                     { key: "results", label: `回执（备份 ${resultLines} 行，整文件替换）` },
                     { key: "processed", label: `处理台账（备份 ${Object.keys(processed.processed).length} 条）` },
@@ -1201,6 +1201,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                         `<div style="display:flex;flex-direction:column;gap:8px">` +
                         groups.map((g) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5">` +
                             `<input type="checkbox" data-imp-group="${g.key}" checked style="margin-top:2px;flex:none" /><span>${esc(g.label)}</span></label>`).join("") +
+                        `<label style="display:flex;gap:8px;align-items:center;font-size:11px;color:var(--b3-theme-on-surface);margin-top:6px">` +
+                        `<input type="checkbox" data-imp-merge-fav style="margin-top:0;flex:none" /><span>收藏组改为「合并」（保留现有并并入备份收藏，按 plugin/command 去重；默认覆盖替换）</span></label>` +
                         `</div>` +
                         `<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">` +
                         `<button class="b3-button" data-imp-cancel>取消</button>` +
@@ -1228,7 +1230,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                                     await host.store.saveProcessed();
                                 }
                                 if (picked.has("favorites")) {
-                                    await host.kernelApi.putFileText("/storage/petal/siyuan-quickgate/favorites.json", JSON.stringify(fav, null, 2));
+                                    // L623 冲突策略：收藏组合并（并集去重，现有优先）/ 覆盖（默认）——仅收藏列表合并，最近使用仍整组替换（时序数据合并没有意义）
+                                    const mergeFavorites = selDialog.element.querySelector<HTMLInputElement>("input[data-imp-merge-fav]")?.checked ?? false;
+                                    const favToWrite = mergeFavorites ? (() => {
+                                        const seen = new Set(curFav.favorites.map((f) => `${f.plugin}/${f.command}`));
+                                        const merged = [...curFav.favorites, ...fav.favorites.filter((f) => !seen.has(`${f.plugin}/${f.command}`))].slice(0, 100); // FAVORITES_CAP
+                                        return { ...fav, favorites: merged, recent: [...fav.recent] };
+                                    })() : fav;
+                                    await host.kernelApi.putFileText("/storage/petal/siyuan-quickgate/favorites.json", JSON.stringify(favToWrite, null, 2));
                                 }
                                 if (picked.has("audit")) {
                                     host.auditLog = backupAudit;
