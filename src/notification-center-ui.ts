@@ -56,7 +56,7 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
         `<div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>通知中心</span>` +
         `<span style="font-size:11px;color:var(--b3-theme-on-surface-light)">需要关注的事态（↑↓ 选择 · Enter 跳转）</span><span class="sp"></span>` +
         `<button class="b3-button b3-button--small" data-role="refresh">刷新</button></div>` +
-        `<div data-role="body" role="region" aria-label="通知列表"></div></div>`,
+        `<div data-role="body" role="region" aria-label="通知列表"><div class="qg-skel"><span></span><span></span><span></span></div></div></div>`,
     );
     dialog.element.querySelector(".b3-dialog__container")?.setAttribute("style", "width:min(640px, 92vw)");
     const body = dialog.element.querySelector("[data-role=body]") as HTMLElement;
@@ -87,7 +87,7 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
 
     const paintActive = () => {
         // 仅动作卡参与键盘序列——「最近成功」信息卡无跳转动作，混入会错位高亮/Enter 目标
-        const actionable = body.querySelectorAll<HTMLElement>(".qg-card:not(.qg-notify-info)");
+        const actionable = body.querySelectorAll<HTMLElement>(".qg-card:not(.qg-notify-card--info)");
         actionable.forEach((c, i) => {
             c.classList.toggle("active", i === active);
             c.style.borderColor = i === active ? "var(--b3-theme-primary)" : "";
@@ -107,8 +107,7 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
                 .find((o) => o && o.status === "recorded");
             if (lastRecorded) {
                 const card = document.createElement("div");
-                card.className = "qg-card qg-notify-info";
-                card.style.cssText = "display:flex;gap:10px;align-items:center;padding:8px 12px;margin-bottom:8px";
+                card.className = "qg-card qg-notify-card qg-notify-card--info";
                 const chip = document.createElement("span");
                 chip.className = "qg-chip ok";
                 chip.textContent = "最近成功";
@@ -121,12 +120,13 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
         } catch { /* 读取失败静默——通知主列表不受影响 */ }
         for (const n of items) {
             const card = document.createElement("div");
-            card.className = "qg-card";
-            card.style.cssText = "display:flex;gap:10px;align-items:flex-start;padding:10px 12px";
+            // qg-notify-card：布局入 SCSS，窄屏（≤520px）flex-wrap 让动作按钮落到第二行（375px 溢出裁切实测踩坑）
+            card.className = "qg-card qg-notify-card";
             const chip = document.createElement("span");
             chip.className = `qg-chip ${n.level === "err" ? "err" : n.level === "warn" ? "warn" : "mute"}`;
             chip.textContent = n.level === "err" ? "紧急" : n.level === "warn" ? "提醒" : "提示";
             const text = document.createElement("div");
+            text.className = "qg-notify-body";
             text.style.flex = "1";
             const t = document.createElement("div");
             t.style.fontWeight = "500";
@@ -149,6 +149,13 @@ export async function openNotificationCenter(host: NotificationCenterHost): Prom
                 card.appendChild(btn);
             }
             body.appendChild(card);
+        }
+        // 全空态（桥正常、无待恢复/积压/迟到、24h 内无失败、也无最近成功记录）——不给空白面板
+        if (body.children.length === 0) {
+            const empty = document.createElement("div");
+            empty.className = "qg-empty";
+            empty.textContent = "✓ 一切正常——没有需要关注的事态。";
+            body.appendChild(empty);
         }
         paintActive();
     };

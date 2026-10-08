@@ -2,6 +2,8 @@
 
 > 5 分钟从安装到第一条命令。故障排查见 [FAQ](./FAQ.md)；完整 op 契约见 [api.md](./api.md)。
 
+![小驴快门设置面板（状态概览）](../preview.png)
+
 ## 1. 安装（手动；集市暂缓）
 
 1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（prerelease=公开测试版）。
@@ -12,7 +14,7 @@
 
 | 想做什么 | 打开什么 | 在哪 |
 |---|---|---|
-| Quicker / CLI / 脚本发命令 | **外部命令桥** | 设置 → 小驴快门 → 基础连接 |
+| Quicker / CLI / 脚本发命令 | **外部命令桥** | 设置 → 小驴快门 → 连接与通道 |
 | 毫秒级命令通道 | **广播快路径** | 同上（需先开桥） |
 | AI 助手只读查询 | 无需设置 | MCP stdio（见仓库 README「MCP for AI assistants」） |
 | AI 助手写操作 | 环境变量 `LV_MCP_WRITE=1` | MCP 启动环境 |

@@ -43,7 +43,7 @@ export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
     const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = new Dialog({
         // 头部统一走内容区 qg-dlg-head（原生 title 留空即 fn__none，避免双标题）
-        content: `<div id="qg-recovery" style="min-width:min(560px, 92vw);padding:14px 16px;font-size:12px"><div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>恢复中心</span><span style="font-size:11px;color:var(--b3-theme-on-surface-light)">unknown / 失败 / 过期回执的人工处置面</span><span class="sp"></span><button class="b3-button b3-button--small" data-role="refresh">刷新</button></div><div data-role="body" role="region" aria-label="恢复项列表"></div></div>`,
+        content: `<div id="qg-recovery" style="padding:14px 16px;font-size:12px"><div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>恢复中心</span><span style="font-size:11px;color:var(--b3-theme-on-surface-light)">unknown / 失败 / 过期回执的人工处置面</span><span class="sp"></span><button class="b3-button b3-button--small" data-role="refresh">刷新</button></div><div data-role="body" role="region" aria-label="恢复项列表"></div></div>`,
         width: "min(640px, 92vw)",
         height: "auto",
         destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
@@ -61,7 +61,7 @@ export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
             ({ receiptLines, commandLines } = await loadLines(host));
         } catch (e) {
             // L652：读取异常要给原因与修复路径，不得显示为"没有待恢复"
-            body.innerHTML = `<div style="color:var(--b3-theme-error)">载体读取失败：${esc(e instanceof Error ? e.message : String(e))}——请确认思源内核可达后重试。</div>`;
+            body.innerHTML = `<div style="color:var(--qg-error-text)">载体读取失败：${esc(e instanceof Error ? e.message : String(e))}——请确认思源内核可达后重试。</div>`;
             return;
         }
         const items = buildRecoveryItems(receiptLines, commandLines, host.store.resolved.resolved);
@@ -110,10 +110,18 @@ export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
                 return;
             }
             if (act === "dismiss-selected") {
-                btn.addEventListener("click", () => void dismissSelected());
+                btn.addEventListener("click", () => {
+                    (btn as HTMLButtonElement).disabled = true; // 防连点：批量放弃循环写台账期间按钮失效，refresh 后重建
+                    void dismissSelected();
+                });
                 return;
             }
-            btn.addEventListener("click", () => void onAction(act, String((btn as HTMLElement).dataset.id)));
+            btn.addEventListener("click", () => {
+                // 防连点仅限写动作（重试/放弃）：处理中按钮失效，refresh 重建 DOM 后自然恢复；
+                // 复制类动作不 refresh——禁用会卡死重试路径，保持可点
+                if (act === "retry" || act === "dismiss") (btn as HTMLButtonElement).disabled = true;
+                void onAction(act, String((btn as HTMLElement).dataset.id));
+            });
         });
         body.querySelectorAll("input[data-check-id]").forEach((c) => {
             c.addEventListener("change", syncBatchButton);
@@ -139,7 +147,7 @@ export async function openRecoveryCenter(host: RecoveryHost): Promise<void> {
             `<span class="qg-chip ${kind}">${esc(it.status)}</span>` +
             `<span class="qg-mono">${esc(it.op)}</span>` +
             `<span class="qg-num" style="color:var(--b3-theme-on-surface)">${esc(fmtReceiptTime(it.finishedAt))}</span>` +
-            `<span style="margin-left:auto;display:flex;gap:6px">` +
+            `<span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">` +
             (it.canRetry ? `<button class="b3-button b3-button--small" data-act="retry" data-id="${esc(it.id)}">重试（换新 id）</button>` : "") +
             `<button class="b3-button b3-button--small qg-copy-btn" data-act="copy-cmd" data-id="${esc(it.id)}">复制原命令</button>` +
             `<button class="b3-button b3-button--small" data-act="dismiss" data-id="${esc(it.id)}">放弃并记录</button>` +

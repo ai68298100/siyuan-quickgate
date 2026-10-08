@@ -123,6 +123,23 @@ export function buildPaletteEntries(
 
 const esc = (t: unknown) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 
+/** 匹配高亮（Raycast/Alfred 范式）：首个命中的关键词片段主题色加粗——DOM 分段构建免注入；
+ *  最长关键词优先，避免短词遮住长词命中。title 与副标题（op/插件名）共用，让英文搜索词
+ *  （只命中 op/插件名，不命中中文标题）也能看出匹配原因。 */
+function fillHighlighted(el: HTMLElement, text: string, highlight?: string[]): void {
+    const kws = (highlight ?? []).filter((k) => k).sort((a, b) => b.length - a.length);
+    const lower = text.toLowerCase();
+    const hitKw = kws.find((k) => lower.includes(k));
+    if (!hitKw) { el.textContent = text; return; }
+    const idx = lower.indexOf(hitKw);
+    if (idx > 0) el.appendChild(document.createTextNode(text.slice(0, idx)));
+    const hit = document.createElement("span");
+    hit.className = "qg-palette-hit";
+    hit.textContent = text.slice(idx, idx + hitKw.length);
+    el.appendChild(hit);
+    el.appendChild(document.createTextNode(text.slice(idx + hitKw.length)));
+}
+
 /** 能力动作目录（R6-A 二段式）：精选的桥 op（schema 由 mcp/tools ARGS 表驱动） */
 export const CAPABILITY_OPS: ReadonlyArray<{ op: string; label: string }> = [
     { op: "checkin.record", label: "打卡记录" },
@@ -200,7 +217,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
     const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = new Dialog({
         title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>命令面板</span><span class="qg-title-ver">↑↓ 选择 · Enter 执行 · Esc 关闭</span></span>`,
-        content: `<div id="qg-palette"><input class="b3-text-field" data-role="q" role="combobox" aria-label="搜索命令" aria-controls="qg-palette-list" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list" placeholder="搜索命令（中英/拼音别名；收藏与最近自动置顶）" /><div id="qg-palette-list" data-role="list" role="listbox" aria-label="命令结果"></div></div>`,
+        content: `<div id="qg-palette"><input class="b3-text-field" data-role="q" role="combobox" aria-label="搜索命令" aria-controls="qg-palette-list" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list" placeholder="搜索命令（中英/拼音别名；收藏与最近自动置顶）" /><div id="qg-palette-list" data-role="list" role="listbox" aria-label="命令结果"></div><div class="qg-palette-foot" data-role="foot"></div></div>`,
         width: "min(620px, 92vw)",
         height: "auto",
         destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
@@ -209,11 +226,29 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
     installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
     const input = root.querySelector("[data-role=q]") as HTMLInputElement;
     const list = root.querySelector("[data-role=list]") as HTMLElement;
+    const foot = root.querySelector("[data-role=foot]") as HTMLElement;
+    // 上下文键位提示条（Raycast ActionPanel 范式）：随阶段联动；键帽用 kbd 语义——
+    // 同时让 ☆ 收藏 / {} 复制信封这类悬停才显形的动作有恒定可发现的入口提示（内容为固定模板）
+    const setFoot = (pairs: ReadonlyArray<readonly [string, string]>) => {
+        const html = pairs.map(([k, label]) => `<span class="qg-foot-pair"><span class="qg-palette-kbd">${k}</span>${esc(label)}</span>`).join(`<span class="qg-foot-sep">·</span>`);
+        if (foot.dataset.h !== html) {
+            foot.innerHTML = html;
+            foot.dataset.h = html;
+        }
+    };
     let entries: PaletteEntry[] = [];
     let active = 0;
     /** R6-A 二段式：list=搜索列表；form=能力动作参数面板（取消无副作用） */
     let stage: "list" | "form" = "list";
     let formOp = "";
+
+    /** 表单/列表两态的搜索框语义：参数阶段只读降透明——输入无效，明示「返回后再搜」 */
+    const setStageInput = (formStage: boolean) => {
+        const ph = formStage ? "参数阶段——点「返回」后可重新搜索" : "搜索命令（中英/拼音别名；收藏与最近自动置顶）";
+        if (input.readOnly !== formStage) input.readOnly = formStage;
+        if (input.placeholder !== ph) input.placeholder = ph;
+        input.classList.toggle("qg-stage-dim", formStage);
+    };
 
     let renderDebounce = 0;
     const RENDER_LIMIT = 100; // L600 部分：渲染截断——千条命令下每键全量重建 DOM 会卡，先出前 100 条保顺序稳定
@@ -221,6 +256,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
 
     const render = () => {
         if (stage === "form") { renderForm(); return; }
+        setStageInput(false);
         entries = buildPaletteEntries(all, favorites, recent, input.value);
         // 能力动作（R6-A）：桥运行时附加精选 op 分组（label/op 同入过滤）
         const kws = input.value.trim() ? expandSearchKeyword(input.value.trim()) : null;
@@ -232,6 +268,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         const fallbackCount = entries.length === 0 && caps.length === 0 ? (input.value.trim() ? 4 : 3) : 0;
         active = clampPaletteActiveIndex(active, entries.length, caps.length, RENDER_LIMIT, fallbackCount);
         if (entries.length === 0 && caps.length === 0) {
+            setFoot([["↑↓", "选择"], ["↵", "执行选中动作"], ["Esc", "关闭"]]);
             // R6-B fallback 兜底：无匹配时给可用的下一步，不做死面板；
             // 有输入文本时首位=快速捕获（G3-04：一句话进今日日记）
             const q = input.value.trim();
@@ -271,7 +308,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         }
         // 列表用 DOM API 构建（textContent 免转义，杜绝注入面）
         list.textContent = "";
-        const mkItem = (opts: { mark?: string; title: string; sub?: string; kbd?: string; isActive: boolean; id: string; attrs?: Record<string, string> }) => {
+        const mkItem = (opts: { mark?: string; title: string; sub?: string; kbd?: string; kbdFirst?: boolean; isActive: boolean; id: string; attrs?: Record<string, string>; highlight?: string[] }) => {
             const div = document.createElement("div");
             div.className = "qg-palette-item" + (opts.isActive ? " active" : "");
             div.id = opts.id;
@@ -286,19 +323,27 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             }
             const t = document.createElement("span");
             t.className = "qg-palette-title";
-            t.textContent = opts.title;
+            fillHighlighted(t, opts.title, opts.highlight);
+            t.title = opts.title; // 截断时的原生 tooltip（Raycast subtitle tooltip 同款）
             div.appendChild(t);
-            if (opts.sub) {
-                const s = document.createElement("span");
-                s.className = "qg-palette-sub";
-                s.textContent = opts.sub;
-                div.appendChild(s);
-            }
-            if (opts.kbd) {
+            // 原型行语言：宿主命令行 [快捷键] 在插件名副前（kbdFirst）；能力动作行 op 副标题在「参数」键前
+            const mkKbd = () => {
                 const k = document.createElement("kbd");
                 k.className = "qg-palette-kbd";
-                k.textContent = opts.kbd;
-                div.appendChild(k);
+                k.textContent = opts.kbd ?? "";
+                return k;
+            };
+            const mkSub = () => {
+                const s = document.createElement("span");
+                s.className = "qg-palette-sub";
+                fillHighlighted(s, opts.sub ?? "", opts.highlight); // 副标题同样高亮：英文词只命中 op/插件名时可见匹配原因
+                s.title = opts.sub ?? ""; // 截断时的原生 tooltip
+                return s;
+            };
+            if (opts.kbdFirst && opts.kbd && opts.sub) div.append(mkKbd(), mkSub());
+            else {
+                if (opts.sub) div.append(mkSub());
+                if (opts.kbd) div.append(mkKbd());
             }
             return div;
         };
@@ -309,7 +354,8 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             const item = mkItem({
                 // mark 全用单色文本字形（★/↺）——彩色 emoji（🕐）在 Windows 上视觉重量突兀
                 mark: e.favorite ? "★" : e.recent ? "↺" : undefined,
-                title: e.title, sub: e.pluginDisplayName, kbd: e.accelerator,
+                title: e.title, sub: e.pluginDisplayName, kbd: e.accelerator, kbdFirst: true,
+                highlight: kws ?? undefined,
                 isActive: i === active, id: `qg-palette-option-command-${i}`, attrs: { i: String(i) },
             });
             // L552 部分：复制命令信封（宿主命令 → commands.run 信封；粘贴到 lv-cli send / Quicker 即发）
@@ -356,6 +402,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             caps.forEach((c, j) => {
                 const capItem = mkItem({
                     mark: " ", title: c.label, sub: c.op, kbd: "参数",
+                    highlight: kws ?? undefined,
                     isActive: cmdCount() + j === active, id: `qg-palette-option-cap-${j}`, attrs: { cap: c.op },
                 });
                 // L552 部分：能力动作的信封即自身 op（args 由「参数」表单填写）
@@ -382,23 +429,30 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         const activeOption = list.querySelector<HTMLElement>('[role="option"][aria-selected="true"]');
         if (activeOption) input.setAttribute("aria-activedescendant", activeOption.id);
         else input.removeAttribute("aria-activedescendant");
+        // 上下文提示（Raycast ActionPanel 同款）：随列表内容切换——有能力动作时提示「参数」阶段
+        if (caps.length > 0) setFoot([["↑↓", "选择"], ["↵", "执行"], ["参数", "填参数后执行"], ["Esc", "关闭"]]);
+        else setFoot([["↑↓", "选择"], ["↵", "执行"], ["☆", "收藏"], ["{}", "复制信封"], ["Esc", "关闭"]]);
         list.querySelector(".qg-palette-item.active")?.scrollIntoView({ block: "nearest" });
     };
     const cmdCount = () => entries.length;
 
     /** R6-A 二段式参数面板：schema 驱动字段渲染，取消/返回无副作用 */
     const renderForm = () => {
+        setStageInput(true);
+        setFoot([["↵", "执行"], ["Tab", "切换字段"], ["Esc", "关闭"]]);
         input.removeAttribute("aria-activedescendant");
         const fields = formFieldsFor(formOp);
         const label = CAPABILITY_OPS.find((c) => c.op === formOp)?.label ?? formOp;
         const fieldHtml = fields.map((f) => {
-            const req = f.required ? ` <span style="color:var(--b3-theme-error)">*</span>` : "";
+            const req = f.required ? ` <span style="color:var(--qg-error-text)">*</span>` : "";
+            const fid = `qg-f-${esc(f.key)}`;
             const ctl = f.type === "boolean"
-                ? `<input class="b3-switch" type="checkbox" data-f="${esc(f.key)}" />`
+                ? `<input class="b3-switch" type="checkbox" id="${fid}" data-f="${esc(f.key)}" />`
                 : f.type === "array" || f.type === "object"
-                    ? `<textarea class="b3-text-field qg-form-field" data-f="${esc(f.key)}" rows="2" placeholder='JSON，如 ["a","b"]'></textarea>`
-                    : `<input class="b3-text-field qg-form-field" data-f="${esc(f.key)}" type="${f.type === "number" ? "number" : "text"}" />`;
-            return `<div class="qg-form-item"><div class="qg-form-label">${esc(f.key)}${req}</div>` +
+                    ? `<textarea class="b3-text-field qg-form-field" id="${fid}" data-f="${esc(f.key)}" rows="2" placeholder='JSON，如 ["a","b"]'></textarea>`
+                    : `<input class="b3-text-field qg-form-field" id="${fid}" data-f="${esc(f.key)}" type="${f.type === "number" ? "number" : "text"}" />`;
+            // label 与控件 for/id 关联：点标签即聚焦字段（读屏同读）
+            return `<div class="qg-form-item"><label class="qg-form-label" for="${fid}">${esc(f.key)}${req}</label>` +
                 `<div class="qg-form-desc">${esc(f.description)}</div>${ctl}</div>`;
         }).join("");
         list.innerHTML = `<div style="font-size:13px;font-weight:600;margin-bottom:2px">${esc(label)} <span style="font-weight:400;color:var(--b3-theme-on-surface);font-size:11px">— 填写参数后执行</span></div>` +
@@ -427,15 +481,18 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         list.scrollTop = 0; // 从列表切表单时清除残留滚动，标题不被裁
         list.querySelector('[data-form="back"]')?.addEventListener("click", () => { stage = "list"; render(); });
         list.querySelector('[data-form="exec"]')?.addEventListener("click", () => void execForm());
-        // 文本字段内 Enter 直执行（textarea 保留换行语义）
+        // 文本字段内 Enter 直执行（textarea 保留换行语义）；组字中的 Enter 属输入法确认，不执行
         list.querySelectorAll('input[data-f]').forEach((inp) => {
             inp.addEventListener("keydown", ((ev: KeyboardEvent) => {
+                if (ev.isComposing || ev.keyCode === 229) return;
                 if (ev.key === "Enter") { ev.preventDefault(); void execForm(); }
             }) as EventListener);
         });
     };
 
     const execForm = async () => {
+        const execBtn = list.querySelector('[data-form="exec"]') as HTMLButtonElement | null;
+        if (execBtn?.disabled) return; // 防重入：派发在途时按钮已禁用，字段内 Enter 不得重复派发
         const fields = formFieldsFor(formOp);
         const values: Record<string, string | boolean> = {};
         for (const f of fields) {
@@ -452,15 +509,22 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             const bad = m?.[1];
             if (bad) {
                 const el = list.querySelector(`[data-f="${bad}"]`) as HTMLElement | null;
-                if (el) { el.style.borderColor = "var(--b3-theme-error)"; el.style.boxShadow = "0 0 0 2px color-mix(in srgb, var(--b3-theme-error) 25%, transparent)"; }
+                if (el) {
+                    el.style.borderColor = "var(--b3-theme-error)";
+                    el.style.boxShadow = "0 0 0 2px color-mix(in srgb, var(--b3-theme-error) 25%, transparent)";
+                    // 长表单下错误信息在底部不可见：聚焦并滚动到问题字段，用户立即看到改哪里
+                    (el as HTMLInputElement | HTMLTextAreaElement).focus?.();
+                    el.scrollIntoView({ block: "nearest" });
+                }
+            } else {
+                msg.scrollIntoView({ block: "nearest" });
             }
-            msg.style.color = "var(--b3-theme-error)";
+            msg.style.color = "var(--qg-error-text)";
             msg.textContent = error;
             return;
         }
         msg.style.color = "var(--b3-theme-on-surface)";
         msg.textContent = "执行中……";
-        const execBtn = list.querySelector('[data-form="exec"]') as HTMLButtonElement | null;
         if (execBtn) execBtn.disabled = true; // 执行期间禁用，防双击重复派发
         const r = await host.dispatchOp(formOp, args ?? {});
         if (r.status === "recorded" || r.status === "duplicate") {
@@ -469,28 +533,34 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             return;
         }
         if (execBtn) execBtn.disabled = false; // 失败可修正参数后重试
-        msg.style.color = "var(--b3-theme-error)";
+        msg.style.color = "var(--qg-error-text)";
         msg.textContent = `${r.status}：${r.message}`;
     };
 
     /** R311：★ 收藏/取消收藏（favorites.add/remove 走完整簿记；本地 favorites 数组即时更新免重拉） */
     const toggleFavorite = async (plugin: string, command: string, title: string, starBtn: HTMLElement) => {
-        const isFav = starBtn.textContent === "★";
-        const r = await host.dispatchOp(isFav ? "favorites.remove" : "favorites.add", isFav
-            ? { plugin, command }
-            : { plugin, command, title });
-        if (r.status === "recorded") {
-            starBtn.textContent = isFav ? "☆" : "★";
-            starBtn.setAttribute("aria-label", isFav ? "收藏" : "取消收藏");
-            const key = `${plugin}/${command}`;
-            if (isFav) {
-                favorites = favorites.filter((f) => `${f.plugin}/${f.command}` !== key);
+        if (starBtn.dataset.busy) return; // 防连点：簿记在途时忽略重复点击（否则 add→remove 交错）
+        starBtn.dataset.busy = "1";
+        try {
+            const isFav = starBtn.textContent === "★";
+            const r = await host.dispatchOp(isFav ? "favorites.remove" : "favorites.add", isFav
+                ? { plugin, command }
+                : { plugin, command, title });
+            if (r.status === "recorded") {
+                starBtn.textContent = isFav ? "☆" : "★";
+                starBtn.setAttribute("aria-label", isFav ? "收藏" : "取消收藏");
+                const key = `${plugin}/${command}`;
+                if (isFav) {
+                    favorites = favorites.filter((f) => `${f.plugin}/${f.command}` !== key);
+                } else {
+                    favorites = [...favorites, { plugin, command }];
+                }
+                showMessage(isFav ? "已取消收藏" : "已收藏", 1500, "info");
             } else {
-                favorites = [...favorites, { plugin, command }];
+                showMessage(r.message || "收藏操作失败", 4000, "error");
             }
-            showMessage(isFav ? "已取消收藏" : "已收藏", 1500, "info");
-        } else {
-            showMessage(r.message || "收藏操作失败", 4000, "error");
+        } finally {
+            delete starBtn.dataset.busy;
         }
     };
 
@@ -518,10 +588,19 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
     });
     input.addEventListener("keydown", (ev) => {
         if (stage === "form") return; // 表单阶段由字段自身处理键盘
+        const kev = ev as KeyboardEvent;
+        if (kev.isComposing || kev.keyCode === 229) return; // 中文输入法组字中：Enter/Esc 属输入法确认/取消，不得触发面板
         if (renderDebounce) { window.clearTimeout(renderDebounce); renderDebounce = 0; render(); } // 键盘导航前先落定最新结果
-        if (ev.key === "ArrowDown") { ev.preventDefault(); active = Math.min(active + 1, navMaxIndex()); render(); }
-        else if (ev.key === "ArrowUp") { ev.preventDefault(); active = Math.max(active - 1, 0); render(); }
-        else if (ev.key === "Enter") {
+        if (kev.key === "ArrowDown") { kev.preventDefault(); active = Math.min(active + 1, navMaxIndex()); render(); }
+        else if (kev.key === "ArrowUp") { kev.preventDefault(); active = Math.max(active - 1, 0); render(); }
+        else if (kev.key === "Escape" && input.value) {
+            // 两段式 Esc（Raycast 同款）：有词先清词并拦住宿主关闭，空词才落到宿主关面板
+            kev.stopPropagation();
+            input.value = "";
+            active = 0;
+            render();
+        }
+        else if (kev.key === "Enter") {
             ev.preventDefault();
             const capCount = list.querySelectorAll("[data-cap]").length;
             const action = paletteActionIndex(active, visibleEntries.length, capCount);
@@ -612,7 +691,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                             `<button class="b3-button b3-button--primary" data-cap-again>再记一条</button>` +
                             (r.blockId ? `<button class="b3-button qg-btn-danger" data-cap-undo="${esc(r.blockId)}">撤销写入</button>` : "") +
                             `<button class="b3-button" data-cap-close>关闭</button></div>` +
-                            (r.blockId ? `<div style="margin-top:8px;font-size:11px;color:var(--b3-theme-on-surface)">撤销 = 删除刚写入的块（L566：测试写入可撤销）；若你已在思源中编辑过该块，请勿撤销。</div>` : "") +
+                            (r.blockId ? `<div style="margin-top:8px;font-size:11px;color:var(--b3-theme-on-surface)">撤销 = 删除刚写入的块（测试写入可撤销）；若你已在思源中编辑过该块，请勿撤销。</div>` : "") +
                             `</div>`,
                         width: "min(520px, 92vw)",
                         height: "auto",
@@ -637,10 +716,11 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                         void host.confirm(`撤销本次捕获：将删除刚写入的块 ${blockId}。若你已在思源中编辑过该块，请取消。`).then((ok) => {
                             if (!ok) return;
                             undoBtn.disabled = true;
-                            void host.kernelApi.post("/api/block/deleteBlock", { id: blockId }).then((resp) => {
-                                const okDel = (resp as { code?: number })?.code === 0;
-                                undoBtn.textContent = okDel ? "已撤销" : "撤销失败";
-                                host.ui.showMessage(okDel ? "已撤销本次捕获（块已删除）" : `撤销失败：${(resp as { msg?: string })?.msg ?? "内核未确认删除"}`, okDel ? 2500 : 5000, okDel ? "info" : "error");
+                            // kernelApi.post 语义：code!=0 抛错、成功返回解包 data——成败以 then/catch 判定，
+                            // 不得读返回值上的 code 字段（undefined!==0 会把成功误报为失败，靶场 E4 实测踩坑）
+                            void host.kernelApi.post("/api/block/deleteBlock", { id: blockId }).then(() => {
+                                undoBtn.textContent = "已撤销";
+                                host.ui.showMessage("已撤销本次捕获（块已删除）", 2500, "info");
                             }).catch((e: unknown) => {
                                 undoBtn.disabled = false;
                                 host.ui.showMessage(`撤销失败：${e instanceof Error ? e.message : String(e)}`, 5000, "error");

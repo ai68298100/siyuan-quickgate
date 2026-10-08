@@ -24,7 +24,8 @@
 #qg-capture-done,
 #qg-bridge-recovery,
 #qg-audit-body,
-#qg-fav-body {
+#qg-fav-body,
+#qg-import {
   /* 思源 base.css 无全局 border-box（逐组件声明）——qg 组件的 padding/边框
      全按 border-box 设计，缺这层 KPI/卡片的 flex 尺寸计算会失真（KPI 第 5 格换行爆版） */
   &,
@@ -37,6 +38,11 @@
   --qg-t2: 180ms;
   --qg-shadow-1: 0 1px 2px rgba(0, 0, 0, .04), 0 2px 8px rgba(0, 0, 0, .06);
   --qg-shadow-2: 0 2px 6px rgba(0, 0, 0, .07), 0 10px 28px rgba(0, 0, 0, .12);
+  /* 证据化配色（tmp/ui-preview/contrast.mjs 对两主题求解，≥4.5:1）：
+     文字向 on-background 收敛一档——亮主题加深、暗主题（原生 error/primary 过暗）提亮。
+     仅用于文字；边框/色点等非文字保留原生 token（组件对比 3:1 达标） */
+  --qg-error-text: color-mix(in srgb, var(--b3-theme-error) 76%, var(--b3-theme-on-background));
+  --qg-accent-text: color-mix(in srgb, var(--b3-theme-primary) 62%, var(--b3-theme-on-background));
 
   /* ── 按钮体系（原型 .btn：quiet 中性描边为默认，主动作唯一填充，危险红）── */
   .b3-button {
@@ -84,13 +90,13 @@
 
   /* 危险动作：红字红环（清空队列/恢复默认/放弃所选） */
   .qg-btn-danger {
-    color: var(--b3-theme-error);
+    color: var(--qg-error-text);
     background-color: transparent;
     box-shadow: inset 0 0 0 .6px color-mix(in srgb, var(--b3-theme-error) 40%, transparent);
 
     &:hover,
     &:focus {
-      color: var(--b3-theme-error);
+      color: var(--qg-error-text);
       background-color: color-mix(in srgb, var(--b3-theme-error) 8%, transparent);
       box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--b3-theme-error) 60%, transparent);
     }
@@ -107,7 +113,7 @@
     &:hover,
     &:focus {
       background: var(--b3-theme-primary-lightest);
-      color: var(--b3-theme-primary);
+      color: var(--qg-accent-text);
       box-shadow: none;
     }
   }
@@ -128,7 +134,9 @@
   input.b3-text-field:focus-visible,
   textarea.b3-text-field:focus-visible { outline: none; }
 
-  /* 开关（原型 36×18；思源旋钮位移硬编码 7/17px，这里整套接管） */
+  /* 开关（原型 36×18；思源旋钮位移硬编码 7/17px，这里整套接管。
+     旋钮两态均白色+微阴影（原型 .switch::after 语言）——思源默认 off 态旋钮是深灰
+     （--b3-switch-border），在灰轨道上对比弱、观感发闷） */
   input[type="checkbox"].b3-switch {
     width: 36px;
     height: 18px;
@@ -138,10 +146,12 @@
       width: 14px;
       height: 14px;
       left: 9px;
+      background-color: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
       transition: left var(--qg-t1) var(--qg-ease), background-color var(--qg-t1) var(--qg-ease), width var(--qg-t1) var(--qg-ease), height var(--qg-t1) var(--qg-ease);
     }
     &::before { left: 9px; transition: left var(--qg-t1) var(--qg-ease), background-color var(--qg-t1) var(--qg-ease); }
-    &:checked::after { left: 26px; width: 14px; height: 14px; }
+    &:checked::after { left: 26px; width: 14px; height: 14px; background-color: #fff; }
     &:checked::before { left: 26px; }
   }
 
@@ -174,12 +184,11 @@
     background: var(--b3-theme-surface); color: var(--b3-theme-on-surface);
     transition: filter var(--qg-t1) var(--qg-ease);
   }
-  /* 文字色向 on-background 混合一档：亮色主题略深、暗色主题（midnight 的 success/warning
-     色相偏暗）提亮一档——对齐原型 dark 分支 #8fdc7e/#f3c07b 的对比度意图，且仍全部走令牌 */
-  .qg-chip.ok { background: color-mix(in srgb, var(--b3-theme-success) 14%, transparent); color: color-mix(in srgb, var(--b3-theme-success) 80%, var(--b3-theme-on-background)); }
-  .qg-chip.warn { background: color-mix(in srgb, var(--b3-theme-warning, var(--b3-theme-secondary)) 14%, transparent); color: color-mix(in srgb, var(--b3-theme-warning, var(--b3-theme-secondary)) 78%, var(--b3-theme-on-background)); }
-  .qg-chip.err { background: color-mix(in srgb, var(--b3-theme-error) 12%, transparent); color: var(--b3-theme-error); }
-  .qg-chip.info { background: var(--b3-theme-primary-lightest); color: var(--b3-theme-primary); }
+  /* 文字色按对比度求解器定的配方（60/56/70%，底 10/10/9%）——两主题 ≥4.5:1 */
+  .qg-chip.ok { background: color-mix(in srgb, var(--b3-theme-success) 10%, transparent); color: color-mix(in srgb, var(--b3-theme-success) 60%, var(--b3-theme-on-background)); }
+  .qg-chip.warn { background: color-mix(in srgb, var(--b3-theme-warning, var(--b3-theme-secondary)) 10%, transparent); color: color-mix(in srgb, var(--b3-theme-warning, var(--b3-theme-secondary)) 56%, var(--b3-theme-on-background)); }
+  .qg-chip.err { background: color-mix(in srgb, var(--b3-theme-error) 9%, transparent); color: color-mix(in srgb, var(--b3-theme-error) 70%, var(--b3-theme-on-background)); }
+  .qg-chip.info { background: var(--b3-theme-primary-lightest); color: var(--qg-accent-text); }
   .qg-chip.mute { border: 1px solid var(--b3-border-color); }
 
   .qg-mono { font-family: var(--b3-font-family-code, ui-monospace, Consolas, monospace); font-size: 11px; }
@@ -187,13 +196,18 @@
   .qg-hint { font-size: 12px; color: var(--b3-theme-on-surface); line-height: 1.7; }
   /* 数字/时间列等宽对齐（回执表、KPI 的跟手数字） */
   .qg-num { font-variant-numeric: tabular-nums; }
+  /* 视觉隐藏（读屏可读）：无表头语境的表格头等补充语义 */
+  .qg-sr-only {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
 
   /* 折叠块（恢复中心·已处置记录）：summary 链接化暗示可点 */
   details > summary {
     cursor: pointer; color: var(--b3-theme-on-surface); font-size: 11px;
     transition: color var(--qg-t1) var(--qg-ease);
   }
-  details > summary:hover { color: var(--b3-theme-primary); }
+  details > summary:hover { color: var(--qg-accent-text); }
 
   /* ── 审计列表行（时间 | 插件/命令 | 状态 | 耗时 | 复制）── */
   .qg-audit-list { font-size: 12px; }
@@ -249,9 +263,9 @@
     & > div > span:last-child { flex: 1; min-width: 0; }
   }
 
-  /* 恢复中心复选框：思源全局样式会隐藏裸 checkbox——显式恢复可见性（R305） */
-  input[type="checkbox"][data-check-id],
-  input[type="checkbox"][data-act="select-all"] {
+  /* 裸复选框（恢复中心勾选 / 向导能力选择 / 导入分组）：思源全局把裸 checkbox 压成
+     1em 原生框且无 accent 色（R305）——统一恢复 15px + 主色 accent，排除 b3-switch */
+  input[type="checkbox"]:not(.b3-switch) {
     appearance: auto;
     width: 15px;
     height: 15px;
@@ -259,6 +273,9 @@
     cursor: pointer;
     flex: none;
   }
+
+  /* qg 根内的宿主链接类：文字链接用强调文字令牌（暗色 primary 文字 3.57 不达 4.5） */
+  a.b3-link { color: var(--qg-accent-text); }
 
   /* 键盘可达性基线（L282 · R234，保留） */
   :focus-visible { outline: 2px solid var(--b3-theme-primary); outline-offset: 1px; }
@@ -270,12 +287,29 @@
     .qg-row { min-height: 44px; }
     .b3-button:not(.b3-button--small) { min-height: 36px; }
     .qg-kpi .kv { min-height: 56px; }
+    /* 触屏无 hover：靠悬停显形的 ghost 复制钮改为常显，否则功能不可发现 */
+    .qg-copy-btn { opacity: 1 !important; }
   }
 }
 
 /* 四中心列表卡间距（设置面板的卡片间距在 #qg-settings 块内单独给 10px） */
 #qg-notify .qg-card,
 #qg-recovery .qg-card { margin-bottom: 8px; }
+
+/* 通知卡布局 */
+#qg-notify .qg-notify-card { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; }
+#qg-notify .qg-notify-card--info { align-items: center; padding: 8px 12px; }
+
+/* 窄屏（≤520px）：回执行两行化——op 折第二行占满，时间右对齐留首行（覆盖行内样式的压缩布局） */
+@media (max-width: 520px) {
+  #qg-results .qg-result-row { flex-wrap: wrap; row-gap: 2px; }
+  #qg-results .qg-result-op { flex: 1 1 100% !important; order: 3; white-space: normal !important; }
+  #qg-results .qg-result-time { margin-left: auto; }
+  /* 通知卡两行化：首行徽章+动作按钮，正文占满次行——body 自我压缩会挤成窄条而不触发换行（375px 实测踩坑） */
+  #qg-notify .qg-notify-card { flex-wrap: wrap; }
+  #qg-notify .qg-notify-body { flex: 1 1 100% !important; order: 3; }
+  #qg-notify .qg-notify-card > button { margin-left: auto; }
+}
 
 /* 对话框头部（思源 b3-dialog__header 内，位于各根作用域之外，故不嵌套） */.qg-title-wrap { display: inline-flex; align-items: center; gap: 9px; }
 .qg-title-logo {
@@ -370,7 +404,7 @@
   .qg-nav-item:hover { background: var(--b3-list-hover); }
   .qg-nav-item.active {
     background: var(--b3-theme-primary-lightest);
-    color: var(--b3-theme-primary);
+    color: var(--qg-accent-text);
     font-weight: 600;
   }
   .qg-nav-item.active::before { transform: translateY(-50%) scaleY(1); }
@@ -390,17 +424,6 @@
   }
   .qg-nav-item .qg-nav-dot.warn { background: var(--b3-theme-warning, var(--b3-theme-secondary)); }
   .qg-nav-item .qg-nav-dot.off { background: var(--b3-theme-on-surface-light); }
-
-  /* 导航底部品牌块 */
-  .qg-nav-brand {
-    margin-top: auto;
-    padding: 10px 10px 2px;
-    border-top: 1px solid var(--b3-border-color);
-    font-size: 10px;
-    line-height: 1.6;
-    color: var(--b3-theme-on-surface);
-  }
-  .qg-nav-brand b { display: block; font-size: 11px; color: var(--b3-theme-on-surface); font-weight: 600; }
 
   /* ══════════ 内容区 ══════════ */
   .qg-content {
@@ -422,6 +445,12 @@
     letter-spacing: .02em; margin: 0 0 2px;
   }
   .qg-page-sub { font-size: 11px; color: var(--b3-theme-on-surface-light); margin: 0 0 12px; }
+  /* 设置搜索命中片段（与命令面板 .qg-palette-hit 同语言；mark 默认黄底在此语境突兀，走主题色文字） */
+  .qg-search-hit {
+    background: none;
+    color: var(--qg-accent-text);
+    font-weight: 600;
+  }
 
   /* ══════════ 卡片 ══════════ */
   .qg-card { margin-bottom: 10px; }
@@ -447,14 +476,37 @@
   }
   .qg-stat-card .head { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
   .qg-stat-card .sub { font-size: 11px; color: var(--b3-theme-on-surface); margin-top: 3px; line-height: 1.5; }
+  /* 可下钻通道卡：hover 显形 → 箭头，键盘 Enter/Space 同效（role=button） */
+  .qg-stat-card.clickable { cursor: pointer; }
+  .qg-stat-card.clickable:focus-visible { border-color: var(--b3-theme-primary); }
+  .qg-stat-card .qg-stat-go {
+    color: var(--qg-accent-text);
+    opacity: 0;
+    transform: translateX(-3px);
+    transition: opacity var(--qg-t1) var(--qg-ease), transform var(--qg-t1) var(--qg-ease);
+  }
+  .qg-stat-card.clickable:hover .qg-stat-go,
+  .qg-stat-card.clickable:focus-visible .qg-stat-go { opacity: 1; transform: none; }
 
   /* ══════════ 设置行 ══════════ */
   .qg-row {
+    position: relative;
     display: flex; align-items: flex-start; gap: 12px;
     padding: 11px 6px; margin: 0 -6px;
     border-bottom: 1px solid var(--b3-border-color);
     border-radius: 6px;
     transition: background var(--qg-t1) var(--qg-ease);
+  }
+  /* 已自定义指示（VS Code「Modified」范式）：与默认不同的行左侧一条主色细杆，悬停有 title 说明 */
+  .qg-row.modified::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 9px;
+    bottom: 9px;
+    width: 3px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--b3-theme-primary) 55%, transparent);
   }
   .qg-row:last-child { border-bottom: none; }
   .qg-row.clickable { cursor: pointer; }
@@ -495,6 +547,8 @@
     padding: 4px 8px; border-bottom: 1px solid var(--b3-border-color);
   }
   table.qg-receipts td { padding: 5px 8px; border-bottom: 1px solid var(--b3-border-color); word-break: break-all; }
+  /* 数字/时间列右对齐（原型回执表的列语言：op 左、时间与耗时右缘分布） */
+  table.qg-receipts td.qg-num, table.qg-receipts th.qg-num { text-align: right; }
   table.qg-receipts tr:last-child td { border-bottom: none; }
   table.qg-receipts tbody tr { transition: background var(--qg-t1) var(--qg-ease); }
   table.qg-receipts tbody tr:hover td { background: var(--b3-list-hover); }
@@ -532,10 +586,15 @@
   }
   .qg-step.done .ball { background: var(--b3-theme-success); border-color: var(--b3-theme-success); color: var(--b3-theme-on-primary); transform: scale(1.05); }
   .qg-step.current .ball {
-    background: var(--b3-theme-background); border-color: var(--b3-theme-primary); color: var(--b3-theme-primary);
+    background: var(--b3-theme-background); border-color: var(--b3-theme-primary); color: var(--qg-accent-text);
     box-shadow: 0 0 0 3px var(--b3-theme-primary-lightest); transform: scale(1.05);
   }
-  .qg-step.current { color: var(--b3-theme-primary); font-weight: 600; }
+  .qg-step.current { color: var(--qg-accent-text); font-weight: 600; }
+  .qg-step.current .ball { color: var(--qg-accent-text); }
+  /* 已完成步骤可点击回跳（data-step-link）：hover 提示可点，避免「装饰性时间线」误读 */
+  .qg-step[data-step-link] { cursor: pointer; transition: color var(--qg-t1) var(--qg-ease); }
+  .qg-step[data-step-link]:hover { color: var(--qg-accent-text); }
+  .qg-step[data-step-link]:hover .ball { border-color: var(--b3-theme-primary); color: var(--qg-accent-text); transform: scale(1.08); }
 
   /* ══════════ 动画 ══════════ */
   @keyframes qg-page-in {
@@ -570,7 +629,7 @@
     font-size: 11px;
     color: var(--b3-theme-on-surface);
   }
-  .qg-footer a { color: var(--b3-theme-primary); text-decoration: none; }
+  .qg-footer a { color: var(--qg-accent-text); text-decoration: none; }
   .qg-footer a:hover { text-decoration: underline; }
   .qg-footer .sp { flex: 1; }
 }
@@ -586,8 +645,11 @@
     padding: 8px 12px;
     margin-bottom: 8px;
   }
+  /* 参数二段式阶段的搜索框：只读 + 降透明（qg-stage-dim），明示此处暂不受理输入 */
+  .qg-stage-dim { opacity: .55; }
   [data-role="list"] {
     max-height: 46vh; overflow: auto;
+    padding: 2px 8px 8px; /* 原型 .pal-list：行高亮块不贴容器左右缘 */
     scrollbar-width: thin;
     scrollbar-color: var(--b3-theme-surface-light) transparent;
     &::-webkit-scrollbar { width: 8px; }
@@ -602,7 +664,7 @@
   }
   .qg-palette-item:hover { background: var(--b3-list-hover); }
   .qg-palette-item.active { background: var(--b3-theme-primary-lightest); }
-  .qg-palette-item.active .qg-palette-title { color: var(--b3-theme-primary); font-weight: 600; }
+  .qg-palette-item.active .qg-palette-title { color: var(--qg-accent-text); font-weight: 600; }
   .qg-palette-group {
     font-size: 11px; font-weight: 600; color: var(--b3-theme-on-surface);
     letter-spacing: .02em;
@@ -620,8 +682,21 @@
     flex: none; font-family: var(--b3-font-family-code, ui-monospace, Consolas, monospace);
     font-size: 10px; color: var(--b3-theme-on-surface);
     border: 1px solid var(--b3-border-color); border-radius: 4px; padding: 0 5px;
+    background: color-mix(in srgb, var(--b3-theme-surface) 60%, transparent);
+    box-shadow: 0 1px 0 var(--b3-border-color); /* 键帽下缘一档厚（Raycast key cap 语言） */
     line-height: 16px;
   }
+  /* 上下文键位提示条（Raycast ActionPanel 范式）：随阶段联动，恒定可发现的动作入口 */
+  .qg-palette-foot {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    border-top: 1px solid var(--b3-border-color);
+    margin-top: 2px; padding: 7px 2px 0;
+    font-size: 11px; color: var(--b3-theme-on-surface);
+    .qg-foot-pair { display: inline-flex; gap: 4px; align-items: center; }
+    .qg-foot-sep { opacity: .55; }
+  }
+  /* 命中高亮（Raycast/Alfred 范式）：主题色加粗，不加底色——亮暗主题都干净 */
+  .qg-palette-hit { color: var(--qg-accent-text); font-weight: 600; }
   /* ★ 收藏切换（R311）：ghost 小钮——按下/hover 才显形，不与行主体抢视觉 */
   .qg-palette-star {
     flex: none; width: 22px; height: 22px; padding: 0;
@@ -632,7 +707,7 @@
     transition: background var(--qg-t1) var(--qg-ease), color var(--qg-t1) var(--qg-ease);
     &:hover, &:focus-visible { background: var(--b3-theme-primary-lightest); color: var(--b3-theme-warning, var(--b3-theme-secondary)); }
   }
-  .qg-palette-item.active .qg-palette-star { color: var(--b3-theme-primary); }
+  .qg-palette-item.active .qg-palette-star { color: var(--qg-accent-text); }
   /* {} 复制命令信封（L552 部分）：ghost 悬停显形，不与行主体抢视觉 */
   .qg-palette-copy {
     flex: none; width: 22px; height: 22px; padding: 0;
@@ -643,9 +718,13 @@
     font-size: 10px; line-height: 1; cursor: pointer;
     opacity: 0;
     transition: opacity var(--qg-t1) var(--qg-ease), background var(--qg-t1) var(--qg-ease), color var(--qg-t1) var(--qg-ease);
-    &:hover, &:focus-visible { opacity: 1; background: var(--b3-theme-primary-lightest); color: var(--b3-theme-primary); }
+    &:hover, &:focus-visible { opacity: 1; background: var(--b3-theme-primary-lightest); color: var(--qg-accent-text); }
   }
   .qg-palette-item:hover .qg-palette-copy { opacity: 1; }
+  /* 触屏无 hover：信封复制钮常显（同 .qg-copy-btn 触屏口径） */
+  @media (pointer: coarse) {
+    .qg-palette-copy { opacity: 1; }
+  }
   .qg-palette-empty { font-size: 12px; color: var(--b3-theme-on-surface); padding: 10px 2px 6px; }
   .qg-palette-fallbacks { display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 4px; }
   .qg-palette-fallbacks [aria-selected="true"] {
@@ -701,5 +780,11 @@
     .qg-row .body { flex: 1 1 100%; }
     .qg-row .ctrl { max-width: 100%; width: 100%; padding-top: 6px; }
     .qg-kpi .kv { min-width: 40%; }
+    /* 通道卡单列：两列会把卡名/徽章挤成竖排断字（375px 实测踩坑） */
+    .qg-grid2 { grid-template-columns: 1fr; }
+    /* 回执/载体明细表横向滚动替代破字换行（mono 文件名 mid-word 断裂实测踩坑） */
+    table.qg-receipts { display: block; overflow-x: auto; white-space: nowrap; }
+    /* 向导步骤标签窄屏缩一档，减少两行断词 */
+    .qg-step { font-size: 10px; }
   }
 }

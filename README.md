@@ -1,10 +1,20 @@
+<div align="center">
+
+<img src="./icon.png" width="88" alt="Lv QuickGate" />
+
 # Lv QuickGate (小驴快门)
 
-[中文文档](./README.zh-CN.md)
+**The Lv ecosystem hub & external gateway for SiYuan** — one public contract (27 ops) for Quicker / Shortcuts / CLI / AI assistants
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.8-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[中文文档](./README.zh-CN.md) · [Getting started](./docs/GETTING-STARTED.md) · [op contract](./docs/api.md) · [Download](https://github.com/ai68298100/siyuan-quickgate/releases)
 
-**Lv QuickGate** is the hub of the Lv plugin ecosystem and its external gateway for [SiYuan Note](https://b3log.org/siyuan). It lets outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (27 ops):
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+
+<img src="./preview.png" alt="Layered settings · command palette · four centers" width="820" />
+
+</div>
+
+Outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (27 ops):
 
 - `commands.*` — discover / search / run command-palette entries of any installed plugin (confirm-gated, audited; search understands zh/en/pinyin aliases — 打卡/daka/checkin all hit)
 - `checkin.*` / `contacts.*` — structured pass-through to the public bridges of Lv Check-in (API v5) and Lv Contacts (bridge v1)
@@ -36,7 +46,7 @@ Visual language follows [design/ui-prototype/mvp1.html](./design/ui-prototype/mv
 
 ## Install (manual)
 
-1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases). A prerelease is for public testing; GitHub shows the uploaded asset's SHA-256 digest. The current `v0.8.8` release is prerelease, so choose the latest stable release if you need the stable channel.
+1. Download `package.zip` from [Releases](https://github.com/ai68298100/siyuan-quickgate/releases). A prerelease is for public testing; GitHub shows the uploaded asset's SHA-256 digest. Releases from v0.9.0 on are stable (non-prerelease) — just pick the latest one.
 2. SiYuan → Settings → Marketplace → Downloads → top-right menu → *Install from package* → pick the zip.
 3. Enable the plugin, open its settings, switch **External command bridge** on (default off by design).
 4. **After updating, fully quit SiYuan (tray → quit) and start it again** — reopening the window does not refresh plugin frontend code. Or just double-click `tools/restart-siyuan.bat`.
@@ -100,6 +110,7 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | **v0.8.6** | Await in-flight bridge ticks before releasing the consumer lock · preserve audit and runtime stats during unload and hot reload |
 | **v0.8.7** | Fix keyboard execution offsets after the 100-command render limit · remove an ineffective dynamic import warning |
 | **v0.8.8** | Serialize bridge start/stop transitions · release late Web Lock grants after takeover timeout · improve settings screen-reader labels |
+| **v0.9.0** | **Full UI overhaul**: settings panel / palette / four centers aligned to the prototype (evidence-solved palette contrast ≥4.5:1, narrow-screen & touch support, 13-assertion real-kernel interaction e2e) · fixed capture-undo false failure · settings search hit highlighting · new icon & brand visuals |
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 

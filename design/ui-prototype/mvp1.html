@@ -262,6 +262,7 @@
   <a href="#f-notify">⑥ 通知中心</a>
   <a href="#f-recovery">⑦ 恢复中心</a>
   <a href="#f-results">⑧ 回执中心</a>
+  <a href="#f-v08">⑨ v0.8.x 新增件</a>
   <span class="spacer"></span>
   <span class="toggle" onclick="document.body.classList.toggle('dark');document.body.classList.toggle('light')">🌗 亮 / 暗</span>
 </div>
@@ -272,6 +273,10 @@
   新增屏实现：命令面板 src/command-palette.ts（#qg-palette）· 通知中心 src/notification-center-ui.ts（#qg-notify）·
   恢复中心 src/recovery-center.ts（#qg-recovery）· 回执中心 src/results-center-ui.ts（#qg-results）。
   v0.7.5 同步：设置搜索条为对话框框架常驻件（①③④ 同）；回执时间一律本地时区显示、耗时 ≥10s 升秒（30.0s）。
+  v0.8.x 同步：实现侧新增件补录见 ⑨（载体明细 / 回执状态图例 / 环境预检 / 桥恢复向导 / 面板命令信封复制 {} 与收藏星 /
+  恢复中心批处理与已处置台账 / 审计与收藏子对话框 / 导入备份分组预览）；面板行语言统一为「标题 → 快捷键 → 插件名 → 收藏星」。
+  v0.8.x 再同步：设置行新增「已自定义」语言——与默认不同的行左侧主色细杆（VS Code Modified 范式），关于页恢复默认卡显示差异数；
+  面板新增搜索命中高亮与底部上下文键位提示条（Raycast ActionPanel 范式）；状态概览通道卡可点击下钻对应分组页（hover 显形 → 箭头）。
 </p>
 
 <!-- ══════════════ ① 状态概览（健康首页 G2-02） ══════════════ -->
@@ -722,6 +727,56 @@
           </div>
         </div>
         <div class="count-line">共 14 条（已显示 14）　<span style="margin-left:auto"></span><button class="btn sm" style="display:none">加载更多</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ⑨ v0.8.x 新增件（实现侧已上线，原型补录 · 只追加不重构） ══════════════ -->
+<div class="frame" id="f-v08">
+  <h2>⑨ v0.8.x 新增件 — 载体明细 / 回执状态图例 / 环境预检 / 桥恢复向导</h2>
+  <div class="dialog">
+    <div class="dialog-header">
+      <div class="logo">门</div>
+      <div class="title">小驴快门 · 设置</div>
+      <div class="ver">v0.8.x</div>
+      <div class="x">✕</div>
+    </div>
+    <div class="dialog-body">
+      <div class="content" style="padding:14px 16px">
+        <p class="page-title">队列与数据 · 载体明细（逐文件行数/占用 + 裁剪规则 + 最老/最新回执）</p>
+        <div class="card" style="padding:0 14px 4px">
+          <div class="card-title" style="padding:10px 0 6px">载体明细 <span style="margin-left:auto;font-size:11px;font-weight:400;color:var(--b3-theme-on-surface)">合计 2.4K · 最老回执 10-07 21:56 / 最新 10-07 22:52</span></div>
+          <table class="receipts">
+            <tr><th>载体</th><th class="mono" style="text-align:right">行/条数</th><th class="mono" style="text-align:right">占用</th><th style="font-weight:400">说明与裁剪规则</th></tr>
+            <tr><td class="mono">commands.ndjson</td><td class="mono" style="text-align:right">2</td><td class="mono" style="text-align:right">0.2K</td><td style="color:var(--b3-theme-on-surface)">待消费命令，执行即移除；超 TTL 可在上方清理</td></tr>
+            <tr><td class="mono">results.ndjson</td><td class="mono" style="text-align:right">8</td><td class="mono" style="text-align:right">1.7K</td><td style="color:var(--b3-theme-on-surface)">滚动窗口 200 行</td></tr>
+            <tr><td class="mono">audit.json</td><td class="mono" style="text-align:right">1</td><td class="mono" style="text-align:right">0.0K</td><td style="color:var(--b3-theme-on-surface)">审计上限 200 条</td></tr>
+          </table>
+        </div>
+        <p class="page-title" style="margin-top:14px">回执中心 · 状态图例（每类含义 + 下一步，折叠常驻）</p>
+        <div class="card" style="font-size:11px;color:var(--b3-theme-on-surface);line-height:2">
+          <div style="display:flex;gap:8px;align-items:flex-start"><span class="chip ok" style="flex:none">recorded</span><span>已执行并写入回执——无需操作；同 id 重发会得到 duplicate。</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><span class="chip ok" style="flex:none">duplicate</span><span>同 id 重复投递，已按幂等跳过——无需重试。</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><span class="chip warn" style="flex:none">rejected</span><span>被确认门控 / 黑名单 / 名单拒绝——调整设置后换新 id 重新发起。</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><span class="chip err" style="flex:none">unknown</span><span>执行中途中断，结果未知——禁止盲目换 id 重试；先到恢复中心人工核对。</span></div>
+        </div>
+        <p class="page-title" style="margin-top:14px">诊断与生态 · 环境预检（三档结论：✓ / ⚠ / ✕）</p>
+        <div class="card">
+          <div class="card-title">环境预检 <span class="chip ok" style="margin-left:auto">可继续</span></div>
+          <div style="font-size:12px;color:var(--b3-theme-on-surface);margin-top:4px;line-height:1.7">
+            <span class="dot ok"></span> SiYuan v3.8.6 ≥ 最低要求　<span class="dot ok"></span> 前端形态 desktop　<span class="dot warn"></span> 外部客户端版本无法在此检查（见上手指南）
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px"><button class="btn">运行环境预检</button><button class="btn">导出诊断包（到剪贴板）</button></div>
+        </div>
+        <p class="page-title" style="margin-top:14px">桥恢复向导（连接页入口 · 检测 → 分级呈现 → 行内处置）</p>
+        <div class="card" style="padding:4px 14px">
+          <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--b3-border-color)"><span class="dot ok" style="margin-top:5px"></span><span style="flex:1;font-size:12px;line-height:1.6">外部命令桥：已开启</span></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--b3-border-color)"><span class="dot err" style="margin-top:5px"></span><span style="flex:1;font-size:12px;line-height:1.6">桥已开启但本窗口未消费——他窗心跳 5 分前（卡死嫌疑）；积压命令将由接管窗口消费</span><button class="btn sm">接管消费权</button></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--b3-border-color)"><span class="dot warn" style="margin-top:5px"></span><span style="flex:1;font-size:12px;line-height:1.6">命令队列积压 2 条（最早 10:22:41）</span><button class="btn sm">清空队列</button></div>
+          <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0"><span class="dot off" style="margin-top:5px"></span><span style="flex:1;font-size:12px;line-height:1.6;color:var(--b3-theme-on-surface)">广播快路径未运行（可选通道，不影响 NDJSON 桥）</span></div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--b3-theme-on-surface)">处置前防线索份：有异常项时向导首行提供「下载全量备份」；所有清理类动作带预览确认。</div>
       </div>
     </div>
   </div>

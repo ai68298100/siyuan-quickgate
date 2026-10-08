@@ -54,6 +54,7 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
     const listEl = root.querySelector("[data-role=list]") as HTMLElement;
     const countEl = root.querySelector("[data-role=count]") as HTMLElement;
     const moreBtn = root.querySelector("[data-role=more]") as HTMLButtonElement;
+    listEl.innerHTML = `<div class="qg-skel"><span></span><span></span><span></span></div>`; // 首载骨架（恢复中心同款语言）
 
     let all: ReceiptRow[] = [];
     let filtered: ReceiptRow[] = [];
@@ -67,12 +68,14 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
         div.className = "qg-card hoverable";
         div.style.cssText = "padding:7px 10px;margin-bottom:6px";
         const top = document.createElement("div");
+        // qg-result-row/op/time：窄屏（≤520px）op 折到第二行占满，时间/耗时/复制留首行（375px op 被压成 1 字符实测踩坑）
+        top.className = "qg-result-row";
         top.style.cssText = "display:flex;gap:8px;align-items:center";
         const chip = document.createElement("span");
         chip.className = `qg-chip ${kind}`;
         chip.textContent = r.status;
         const op = document.createElement("span");
-        op.className = "qg-mono";
+        op.className = "qg-mono qg-result-op";
         op.style.flex = "1";
         op.style.minWidth = "0";
         op.style.overflow = "hidden";
@@ -80,7 +83,7 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
         op.style.whiteSpace = "nowrap";
         op.textContent = r.op;
         const time = document.createElement("span");
-        time.className = "qg-dim qg-num";
+        time.className = "qg-dim qg-num qg-result-time";
         time.style.cssText = "flex:none";
         time.textContent = fmtReceiptTime(r.finishedAt);
         const ms = document.createElement("span");
@@ -157,6 +160,27 @@ export async function openResultsCenter(host: ResultsCenterHost): Promise<void> 
         apply();
     };
     root.querySelector("[data-role=reload]")?.addEventListener("click", () => void reload());
+    root.querySelector("[data-role=json]")?.addEventListener("click", () => {
+        const sinceSel = root.querySelector("[data-role=since]") as HTMLSelectElement | null;
+        const rows = filterReceipts(all, { status: statusSel.value, q: qInput.value, since: (sinceSel?.value as "today" | "7d" | "all" | undefined) ?? "all" });
+        if (rows.length === 0) {
+            host.ui.showMessage("当前筛选无数据可导出", 2500, "info");
+            return;
+        }
+        const payload = {
+            schemaVersion: 1,
+            exportedAt: new Date().toISOString(),
+            count: rows.length,
+            receipts: rows.map((r) => ({ id: r.id, op: r.op, status: r.status, finishedAt: r.finishedAt, elapsedMs: r.elapsedMs, message: r.message })),
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `quickgate-results-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        host.ui.showMessage(`已导出 ${rows.length} 条（JSON）`, 3000, "info");
+    });
     root.querySelector("[data-role=csv]")?.addEventListener("click", () => {
         const sinceSel = root.querySelector("[data-role=since]") as HTMLSelectElement | null;
         const rows = filterReceipts(all, { status: statusSel.value, q: qInput.value, since: (sinceSel?.value as "today" | "7d" | "all" | undefined) ?? "all" });

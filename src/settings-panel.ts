@@ -208,7 +208,11 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             `<span class="sp"></span><span>本插件不外传任何数据（<a target="_blank" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/PRIVACY.md">数据边界</a>）</span></div></div>`,
         width: "min(760px, 92vw)",
         height: "auto",
-        destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
+        destroyCallback: () => {
+            // 关面板即停状态页轮询（pageTimer 只在切页时清理——直接关闭会留下每 3s 空转的泄漏定时器）
+            if (pageTimer) { window.clearInterval(pageTimer); pageTimer = 0; }
+            try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ }
+        },
     });
     const root = dialog.element.querySelector("#qg-settings") as HTMLElement;
     installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
@@ -337,9 +341,15 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
 
     // —— 通用行构造（原型 .qg-row：图标 + 标题/说明 + 控件；clickable 时点行即切控件；wide 时控件通栏） ——
     let rowSequence = 0;
-    const row = (parent: HTMLElement, opts: { icon: string; label: string; chip?: string; hint?: string; ctrl: HTMLElement; onRowClick?: () => void; wide?: boolean }) => {
+    /** 与默认设置的差异标记（VS Code「Modified」范式）：一眼看清改过哪些、重置会丢什么；deviceName 为自动管理字段不算自定义 */
+    const isModified = (key: keyof QuickGateSettings) =>
+        key !== "deviceName" && key !== "schemaVersion" &&
+        JSON.stringify(host.settings[key]) !== JSON.stringify(DEFAULT_SETTINGS[key]);
+    const row = (parent: HTMLElement, opts: { icon: string; label: string; chip?: string; hint?: string; ctrl: HTMLElement; onRowClick?: () => void; wide?: boolean; settingKey?: keyof QuickGateSettings }) => {
         const div = document.createElement("div");
-        div.className = "qg-row" + (opts.onRowClick ? " clickable" : "") + (opts.wide ? " wide" : "");
+        div.className = "qg-row" + (opts.onRowClick ? " clickable" : "") + (opts.wide ? " wide" : "") +
+            (opts.settingKey && isModified(opts.settingKey) ? " modified" : "");
+        if (div.classList.contains("modified")) div.title = "已自定义（区别于默认设置）";
         div.innerHTML = `<div class="ic">${ICONS[opts.icon] ?? ""}</div>` +
             `<div class="body"><div class="label">${esc(opts.label)}${opts.chip ? " " + chip(opts.chip) : ""}</div>` +
             `${opts.hint ? `<div class="hint">${opts.hint}</div>` : ""}</div>`;
@@ -354,6 +364,17 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         ctrl.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input,select,textarea").forEach((el) => {
             el.setAttribute("aria-labelledby", labelId);
         });
+        if (opts.settingKey) {
+            // 已自定义标记实时刷新：改动保存后延迟一拍重判（host.settings 在控件 onchange 内同步更新，
+            // 延迟避开监听器注册顺序差异；经确认框放行的危险开关要等下次渲染页面才落位）
+            const syncModified = () => {
+                window.setTimeout(() => {
+                    if (!document.body.contains(div)) return;
+                    div.classList.toggle("modified", isModified(opts.settingKey!));
+                }, 0);
+            };
+            ctrl.addEventListener("change", syncModified);
+        }
         if (opts.onRowClick) {
             div.addEventListener("click", (ev) => {
                 // 点行体切换；点到控件本体（switch/input/textarea/button）时不重复触发
@@ -421,6 +442,24 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         });
         root.querySelector("[data-role=next-btns]")?.append(pingBtn, ecoBtn, paletteBtn);
 
+        // 通道卡下钻（Raycast「万物可导航」）：点卡直达对应分组页；Enter/Space 同效。
+        // 委托挂在容器上（refresh 的 setHtml 只换内容不换容器），注册一次即可
+        const cardsEl = root.querySelector("[data-role=cards]") as HTMLElement;
+        const gotoCard = (el: HTMLElement) => {
+            const target = el.dataset.goto;
+            if (target) show(target);
+        };
+        cardsEl.addEventListener("click", (ev) => {
+            const card = (ev.target as HTMLElement).closest("[data-goto]") as HTMLElement | null;
+            if (card) gotoCard(card);
+        });
+        cardsEl.addEventListener("keydown", (ev) => {
+            const kev = ev as KeyboardEvent;
+            if (kev.key !== "Enter" && kev.key !== " ") return;
+            const card = (ev.target as HTMLElement).closest("[data-goto]") as HTMLElement | null;
+            if (card) { kev.preventDefault(); gotoCard(card); }
+        });
+
         // L562 尾巴（软提醒）：首跑向导未完成时提供「继续首跑向导」入口——绕过门禁直达当前步骤（进度已持久化）
         if (host.store.firstRun && !wizardState?.completedAt) {
             const wizardBtn = document.createElement("button");
@@ -475,11 +514,12 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 : { dot: "off", chip: chip("不可达", "warn") };
             const cards = root.querySelector("[data-role=cards]") as HTMLElement;
             setHtml(cards, [
-                { name: "外部命令桥", d: host.poller?.isRunning ? "ok" : "off", live: host.poller?.isRunning === true, chip: host.poller?.isRunning ? chip("运行中", "ok") : chip("已停止", "warn"), sub: host.poller?.isRunning ? `本窗口消费 · 轮询 ${host.settings.pollMs}ms${backoff ? ` · 退避中×${backoff}` : ""}` : "默认关；在「连接与通道」开启" },
-                { name: "广播快路径", d: host.broadcastSub?.running ? "ok" : "off", live: host.broadcastSub?.running === true, chip: host.broadcastSub?.running ? chip("已开启", "ok") : chip("关", "mute"), sub: host.broadcastSub?.running ? `qg-cmd 频道 · 已收 ${host.broadcastSub.metrics.received} 条 · 丢弃 ${host.broadcastSub.metrics.dropped} · 错误 ${host.broadcastSub.metrics.errors}` : "默认关；需先开桥" },
-                { name: "事件物化", d: host.eventBridgeHandler ? "ok" : "off", live: host.eventBridgeHandler !== undefined, chip: host.eventBridgeHandler ? chip("已接", "ok") : chip("未接", "mute"), sub: host.eventBridgeHandler ? `白名单监听中 · 台账 ${Object.keys(host.store.processed.processed).length} 条` : "桥开启时自动接入" },
-                { name: "内核路由", d: route.dot, live: host.kernelRouteProbe === true, chip: route.chip, sub: "/plugin/private 同步通道（不经桥开关）" },
-            ].map((c) => `<div class="qg-stat-card"><div class="head"><span class="qg-dot ${c.d}${c.live ? " live" : ""}"></span>${esc(c.name)}<span style="margin-left:auto">${c.chip}</span></div><div class="sub">${esc(c.sub)}</div></div>`).join(""));
+                { name: "外部命令桥", state: "运行中", goto: "connection", gotoLabel: "连接与通道", d: host.poller?.isRunning ? "ok" : "off", live: host.poller?.isRunning === true, chip: host.poller?.isRunning ? chip("运行中", "ok") : chip("已停止", "warn"), sub: host.poller?.isRunning ? `本窗口消费 · 轮询 ${host.settings.pollMs}ms${backoff ? ` · 退避中×${backoff}` : ""}` : "默认关；在「连接与通道」开启" },
+                { name: "广播快路径", state: "已开启", goto: "connection", gotoLabel: "连接与通道", d: host.broadcastSub?.running ? "ok" : "off", live: host.broadcastSub?.running === true, chip: host.broadcastSub?.running ? chip("已开启", "ok") : chip("关", "mute"), sub: host.broadcastSub?.running ? `qg-cmd 频道 · 已收 ${host.broadcastSub.metrics.received} 条 · 丢弃 ${host.broadcastSub.metrics.dropped} · 错误 ${host.broadcastSub.metrics.errors}` : "默认关；需先开桥" },
+                { name: "事件物化", state: "已接入", goto: "queue", gotoLabel: "队列与数据", d: host.eventBridgeHandler ? "ok" : "off", live: host.eventBridgeHandler !== undefined, chip: host.eventBridgeHandler ? chip("已接", "ok") : chip("未接", "mute"), sub: host.eventBridgeHandler ? `白名单监听中 · 台账 ${Object.keys(host.store.processed.processed).length} 条` : "桥开启时自动接入" },
+                { name: "内核路由", state: host.kernelRouteProbe === undefined ? "探测中" : host.kernelRouteProbe ? "可用" : "不可达", goto: "diagnostics", gotoLabel: "诊断与生态", d: route.dot, live: host.kernelRouteProbe === true, chip: route.chip, sub: "/plugin/private 同步通道（不经桥开关）" },
+            ].map((c) => `<div class="qg-stat-card clickable" role="button" tabindex="0" data-goto="${c.goto}" aria-label="${esc(c.name)}：${esc(c.state)}，点击前往「${esc(c.gotoLabel)}」">` +
+                `<div class="head"><span class="qg-dot ${c.d}${c.live ? " live" : ""}"></span>${esc(c.name)}<span class="qg-stat-go" aria-hidden="true">→</span><span style="margin-left:auto">${c.chip}</span></div><div class="sub">${esc(c.sub)}</div></div>`).join(""));
             // KPI
             const kpi = root.querySelector("[data-role=kpi]") as HTMLElement;
             setHtml(kpi, st ? [
@@ -487,16 +527,19 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 { v: st.failed + st.expired, l: "失败 / 过期" }, { v: avg !== null ? `${avg}ms` : "–", l: "平均耗时" },
             ].map((k) => `<div class="kv"><b>${kpiValue(k.v)}</b><span>${esc(k.l)}</span></div>`).join("")
                 : `<div class="kv" style="flex:1"><b>–</b><span>服务未启动（桥关闭时不派发）</span></div>`);
-            // 下一步（G2-03：状态 → 动作，不给空白）
+            // 下一步（G2-03：状态 → 动作，不给空白；op 标识用 mono——原型 .mono 语言）
             const next = root.querySelector("[data-role=next] .qg-hint") as HTMLElement;
-            const nextText = !host.settings.bridgeEnabled
+            const nextHtml = !host.settings.bridgeEnabled
                 ? "外部命令桥未开启——开启后外部程序才能发命令进来。"
                 : host.kernelRouteProbe === false
                     ? "内核同步路由不可达（桥不受影响）——可到「诊断与生态」导出诊断包定位。"
                     : backoff > 0
                         ? `轮询连续失败 ${backoff} 次，已指数退避——请检查内核与存储是否可写。`
-                        : "通道就绪。可从 Quicker / CLI 发一条 bridge.ping 试运行，或核对小驴插件能力目录。";
-            if (next.textContent !== nextText) next.textContent = nextText;
+                        : "通道就绪。可从 Quicker / CLI 发一条 <span class=\"qg-mono\">bridge.ping</span> 试运行，或核对小驴插件能力目录。";
+            if (next.dataset.h !== nextHtml) {
+                next.innerHTML = nextHtml; // 固定模板，无外部输入
+                next.dataset.h = nextHtml;
+            }
             // 最近回执（结果文件尾部 3 条；载入中骨架屏；空态给原因不显示空白）
             const asof = root.querySelector("[data-role=asof]") as HTMLElement;
             const asofHtml = st?.lastActivityAt ? chip(`数据截至 ${new Date(st.lastActivityAt).toLocaleTimeString()}`, "mute") : "";
@@ -507,7 +550,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 const lines = text.trim() ? text.trim().split("\n").slice(-3) : [];
                 setHtml(box, lines.length === 0
                     ? `<div style="font-size:11px;color:var(--b3-theme-on-surface);padding:6px 0">暂无回执——桥开启后外部命令的回执会出现在这里。</div>`
-                    : `<table class="qg-receipts"><tbody>${lines.map((l) => {
+                    : `<table class="qg-receipts"><thead class="qg-sr-only"><tr><th>状态</th><th>op</th><th>时间</th><th>耗时</th></tr></thead><tbody>${lines.map((l) => {
                         try {
                             const r = JSON.parse(l) as { status?: string; op?: string; finishedAt?: string; elapsedMs?: number };
                             return `<tr><td><span class="qg-chip ${receiptKind(r.status)}">${esc(r.status ?? "?")}</span></td><td class="qg-mono">${esc(r.op ?? "?")}</td><td class="qg-dim qg-num">${esc(fmtReceiptTime(r.finishedAt ?? ""))}</td><td class="qg-dim qg-num">${esc(fmtElapsedMs(Number(r.elapsedMs)))}</td></tr>`;
@@ -515,7 +558,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     }).join("")}</tbody></table>`);
             } catch (e) {
                 // L652：读取异常要给原因，不得写成"暂无回执"
-                setHtml(box, `<div style="font-size:11px;color:var(--b3-theme-error);padding:6px 0">回执读取失败：${esc(e instanceof Error ? e.message : String(e))}</div>`);
+                setHtml(box, `<div style="font-size:11px;color:var(--qg-error-text);padding:6px 0">回执读取失败：${esc(e instanceof Error ? e.message : String(e))}</div>`);
             }
         };
         // 首屏骨架屏（异步回执未就绪时）
@@ -552,13 +595,25 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             if (!b || !ws) return;
             wizHandlers[b.dataset.wiz ?? ""]?.(b);
         });
+        // 已完成步骤球的键盘回跳（步骤球是 div[role=button]，Enter/Space 走这里）
+        content.addEventListener("keydown", (ev) => {
+            const kev = ev as KeyboardEvent;
+            if (kev.key !== "Enter" && kev.key !== " ") return;
+            const b = (kev.target as HTMLElement).closest("[data-step-link]") as HTMLElement | null;
+            if (!b || !ws) return;
+            kev.preventDefault();
+            void goto(Number(b.dataset.step));
+        });
         const rail = () => {
             const idx = Math.min(Math.max(ws.currentStep, 1), 7);
             return WIZARD_STEPS.map((label, i) => {
                 const n = i + 1;
                 const cls = n < idx ? "done" : n === idx ? "current" : "";
                 const ball = n < idx ? "✓" : String(n);
-                return `<div class="qg-step ${cls}"><div class="ball">${ball}</div>${esc(label)}</div>`;
+                // 已完成的步骤可点击回跳（去·返回语义）；未到的步骤不可跳（步骤间有依赖）。
+                // role=button + tabindex：键盘 Tab 到位后 Enter 回跳（keydown 委托在 content 上）
+                const back = n < idx ? ` data-wiz="goto" data-step="${n}" data-step-link="1" role="button" tabindex="0" title="回到这步（Enter）"` : "";
+                return `<div class="qg-step ${cls}"${back}><div class="ball">${ball}</div>${esc(label)}</div>`;
             }).join("");
         };
         const nextBtn = (step: number, label: string) =>
@@ -570,10 +625,10 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             `<a class="b3-link" target="_blank" rel="noopener" style="font-size:11px;align-self:center" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/FAQ.md">查看 FAQ</a></div>`;
 
         const render = () => {
-            content.innerHTML = pageHeader("首跑向导", `七步接通外部自动化 · 进度自动保存（docs/33）`) +
+            content.innerHTML = pageHeader("首跑向导", "七步接通外部自动化 · 进度自动保存") +
                 `<p style="font-size:11px;color:var(--b3-theme-on-surface);margin:0 0 10px;line-height:1.6">两条路径按需选择：①<b>外部桥</b>（Quicker / CLI / 手机快捷指令）走步骤 3~4；②<b>不开桥也可用</b>——<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/src/mcp/README.md">MCP 只读工具</a>与内核同步路由 7 只读 op（见<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>），桥关闭时同样工作。</p>` +
                 `<div class="qg-steps" data-role="steps">${rail()}</div><div data-role="body"></div>` +
-                `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:8px">跳过向导，直接浏览<a data-role="skip" style="color:var(--b3-theme-primary);cursor:pointer">全部设置</a>（进度已保存，随时回来续跑）</div>`;
+                `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:8px">跳过向导，直接浏览<a data-role="skip" style="color:var(--qg-accent-text);cursor:pointer">全部设置</a>（进度已保存，随时回来续跑）</div>`;
             const bodyEl = root.querySelector("[data-role=body]") as HTMLElement;
             root.querySelector("[data-role=skip]")?.addEventListener("click", () => show("connection"));
 
@@ -699,7 +754,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                         btn.className = "b3-button b3-button--outline";
                         btn.style.marginTop = "8px";
                         btn.textContent = "写入测试块";
-                        btn.onclick = () => void runSampleWrite();
+                        btn.onclick = () => withPending(btn, "写入中…", () => runSampleWrite()); // 真实写入：防连点双写
                         c.appendChild(btn);
                     }
                     const skip = document.createElement("button");
@@ -726,6 +781,19 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     c.appendChild(browse);
                     bodyEl.appendChild(c);
                 }
+            }
+
+            // 后退导航（步骤 2~6）：误点「下一步」可回上一查看；步骤 7 已完成不回退
+            if (ws.currentStep >= 2 && ws.currentStep <= 6) {
+                const backNav = document.createElement("div");
+                backNav.style.cssText = "display:flex;gap:8px;align-items:center;margin-top:2px";
+                const back = document.createElement("button");
+                back.className = "b3-button b3-button--outline b3-button--small";
+                back.dataset.wiz = "goto";
+                back.dataset.step = String(ws.currentStep - 1);
+                back.textContent = "上一步";
+                backNav.appendChild(back);
+                bodyEl.appendChild(backNav);
             }
         };
 
@@ -798,7 +866,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
 
         const enabledInput = switchCtrl(host.settings.bridgeEnabled, async (v) => { await applyBridgeEnabled(v); refreshNav(); });
         row(card, {
-            icon: "flow", label: "外部命令桥", chip: "默认关",
+            icon: "flow", label: "外部命令桥", chip: "默认关", settingKey: "bridgeEnabled",
             hint: "开启后外部程序（Quicker / CLI / MCP）可发命令。思源端弹确认、全程留审计。",
             ctrl: enabledInput,
             onRowClick: () => { enabledInput.checked = !enabledInput.checked; void applyBridgeEnabled(enabledInput.checked).then(refreshNav); },
@@ -811,7 +879,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             showMessage(`移动端桥已${v ? "允许" : "关闭"}（仅在移动端设备上生效）`, 3000);
         });
         row(card, {
-            icon: "phone", label: "移动端桥 opt-in", chip: "默认关",
+            icon: "phone", label: "移动端桥 opt-in", chip: "默认关", settingKey: "mobileBridgeEnabled",
             hint: "移动端上开启外部命令桥需单独打开此项。",
             ctrl: mobileInput,
             onRowClick: () => { mobileInput.checked = !mobileInput.checked; mobileInput.dispatchEvent(new Event("change")); },
@@ -829,7 +897,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             showMessage(`广播快路径已${v ? "开启（毫秒级命令通道 qg-cmd）" : "关闭"}`, 3000);
         });
         row(card, {
-            icon: "bolt", label: "广播快路径 v1.5", chip: "默认关",
+            icon: "bolt", label: "广播快路径 v1.5", chip: "默认关", settingKey: "broadcastEnabled",
             hint: "需先开桥；postMessage → qg-cmd 频道毫秒级执行。",
             ctrl: bcInput,
             onRowClick: () => { bcInput.checked = !bcInput.checked; bcInput.dispatchEvent(new Event("change")); },
@@ -846,7 +914,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         pollInput.value = String(host.settings.pollMs);
         const pollErr = document.createElement("span");
         pollErr.setAttribute("role", "alert");
-        pollErr.style.color = "var(--b3-theme-error)";
+        pollErr.style.color = "var(--qg-error-text)";
         pollErr.style.fontSize = "11px";
         const pollHint = document.createElement("span");
         pollHint.textContent = "热生效";
@@ -869,7 +937,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 pollInput.value = String(host.settings.pollMs);
             }
         };
-        row(card, { icon: "clock", label: "轮询间隔（ms）", hint: "200 ~ 60000；行内校验，非法值还原并提示原因；修改后立即生效（运行中的桥自动重启轮询）。", ctrl: pollWrap });
+        row(card, { icon: "clock", label: "轮询间隔（ms）", settingKey: "pollMs", hint: "200 ~ 60000；行内校验，非法值还原并提示原因；修改后立即生效（运行中的桥自动重启轮询）。", ctrl: pollWrap });
 
         // R301/R304：快速捕获默认去向（与命令面板选择器共享同一字段；选择器选择亦回写此处）
         const targetSel = document.createElement("select");
@@ -887,7 +955,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             await host.store.saveSettings();
             showMessage(`快速捕获默认去向已设为「${targetSel.selectedOptions[0]?.textContent ?? targetSel.value}」`, 2500, "info");
         };
-        row(card, { icon: "check", label: "快速捕获默认去向", hint: "命令面板「捕获」按钮的去向（选择器仍会记住上次使用并排前）。", ctrl: targetSel });
+        row(card, { icon: "check", label: "快速捕获默认去向", settingKey: "captureTarget", hint: "命令面板「捕获」按钮的去向（选择器仍会记住上次使用并排前）。", ctrl: targetSel });
 
         const claimCard = document.createElement("div");
         claimCard.className = "qg-card";
@@ -932,7 +1000,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             host.store.settings = host.settings;
             await host.store.saveSettings();
         });
-        row(card, { icon: "check", label: "命令执行前确认", chip: "默认开", hint: "思源端弹确认，30 秒超时拒绝。", ctrl: confirmInput });
+        row(card, { icon: "check", label: "命令执行前确认", chip: "默认开", settingKey: "confirmExec", hint: "思源端弹确认，30 秒超时拒绝。", ctrl: confirmInput });
 
         const rawInput = switchCtrl(host.settings.rawApiEnabled, async (v) => {
             if (v) {
@@ -958,7 +1026,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             host.store.settings = host.settings;
             await host.store.saveSettings();
         });
-        row(card, { icon: "shield", label: "plugin.api 高级透传", chip: "默认关", hint: "启用前确认；配合允许名单使用。", ctrl: rawInput });
+        row(card, { icon: "shield", label: "plugin.api 高级透传", chip: "默认关", settingKey: "rawApiEnabled", hint: "启用前确认；配合允许名单使用。", ctrl: rawInput });
 
         // L458：允许名单编辑（行内校验 pluginId 形状）
         const allowlistInput = document.createElement("textarea");
@@ -980,7 +1048,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 showMessage("允许名单已保存", 1500, "info");
             }
         };
-        row(card, { icon: "list", label: "plugin.api 允许名单", hint: "逗号分隔的 pluginId；默认仅含已完成契约审计的三个插件（打卡/人脉/雷切）——新加入即授权透传其窗口桥，请先完成契约审计。", ctrl: allowlistInput, wide: true });
+        row(card, { icon: "list", label: "plugin.api 允许名单", settingKey: "rawApiAllowlist", hint: "逗号分隔的 pluginId；默认仅含已完成契约审计的三个插件（打卡/人脉/雷切）——新加入即授权透传其窗口桥，请先完成契约审计。", ctrl: allowlistInput, wide: true });
 
         const blacklistInput = document.createElement("textarea");
         blacklistInput.className = "b3-text-field";
@@ -993,7 +1061,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             await host.store.saveSettings();
             showMessage("黑名单已保存", 1500, "info");
         };
-        row(card, { icon: "shield", label: "插件黑名单", hint: "逗号分隔；名单内插件不暴露命令。", ctrl: blacklistInput, wide: true });
+        row(card, { icon: "shield", label: "插件黑名单", settingKey: "blacklist", hint: "逗号分隔；名单内插件不暴露命令。", ctrl: blacklistInput, wide: true });
     };
 
     // ══════════ 页：队列与数据 ══════════
@@ -1001,7 +1069,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         content.innerHTML = pageHeader("队列与数据", "队列即 NDJSON 文件，重启不丢；台账滚动裁剪");
         const kpi = document.createElement("div");
         kpi.className = "qg-kpi";
+        kpi.innerHTML = `<div class="qg-skel"><span></span><span></span><span></span></div>`; // 骨架先行：消除异步两段 pop-in
         content.appendChild(kpi);
+        // 载体明细卡占位（同款骨架）：数据就绪后原位填充，不再让下方回执/危险区突然下移
+        const detailCard = document.createElement("div");
+        detailCard.className = "qg-card";
+        detailCard.style.padding = "0 14px 6px";
+        detailCard.innerHTML = `<div class="qg-card-title" style="padding:10px 0 6px">载体明细</div><div class="qg-skel"><span></span><span></span><span></span></div>`;
+        content.appendChild(detailCard);
 
         const stat = async () => {
             let bytes = 0;
@@ -1064,19 +1139,20 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 { v: `${(bytes / 1024).toFixed(1)}K`, l: "载体占用", warn: false },
             ].map((k) => `<div class="kv"${k.warn ? warnStyle : ""}><b${k.warn ? warnNum : ""}>${kpiValue(k.v)}</b><span>${esc(k.l)}</span></div>`).join("");
 
-            // L630 部分：载体明细卡（逐文件行数/占用 + 裁剪规则 + 最老/最新回执；只读统计，异步填充不阻塞主 KPI）
+            // L630 部分：载体明细卡（逐文件行数/占用 + 裁剪规则 + 最老/最新回执；只读统计）——占位已先行，此处原位填充
             void buildStorageDetail().then((detail) => {
-                if (!detail || !document.body.contains(kpi)) return;
-                const detailCard = document.createElement("div");
-                detailCard.className = "qg-card";
-                detailCard.style.padding = "0 14px 6px";
+                if (!detail || !document.body.contains(detailCard)) return;
                 detailCard.innerHTML = `<div class="qg-card-title" style="padding:10px 0 6px">载体明细 <span style="margin-left:auto;font-size:11px;font-weight:400;color:var(--b3-theme-on-surface)">合计 ${esc(detail.totalBytesK)}K · 最老回执 ${esc(detail.oldestReceipt)} / 最新 ${esc(detail.newestReceipt)}</span></div>` +
                     `<table class="qg-receipts"><thead><tr><th>载体</th><th>行/条数</th><th>占用</th><th style="font-weight:400">说明与裁剪规则</th></tr></thead><tbody>` +
                     detail.rows.map((r) => `<tr><td class="qg-mono">${esc(r.file)}</td><td class="qg-num">${esc(r.lines)}</td><td class="qg-num">${esc(r.bytesK)}K</td><td class="qg-dim" style="font-size:11px">${esc(r.note)}</td></tr>`).join("") +
                     `</tbody></table>` +
-                    `<div style="font-size:11px;color:var(--b3-theme-on-surface);padding:6px 0 8px;line-height:1.7">清理前请先用上方按钮导出（结果中心 / 导出审计 JSON / 全量备份）。</div>`;
-                kpi.after(detailCard);
-            }).catch(() => { /* 明细统计失败不打断主 KPI */ });
+                    `<div style="font-size:11px;color:var(--b3-theme-on-surface);padding:6px 0 8px;line-height:1.7">清理前请先用上方按钮留底（回执中心导出 / 复制审计 JSON / 全量备份）。</div>`;
+            }).catch(() => {
+                // 明细统计失败不打断主 KPI，但骨架不得永远转——给原因与出路
+                if (document.body.contains(detailCard)) {
+                    detailCard.innerHTML = `<div class="qg-card-title" style="padding:10px 0 6px">载体明细</div><div style="font-size:11px;color:var(--qg-error-text);padding:4px 0 8px">明细统计失败——不影响上方统计与清理动作；可到「诊断与生态」导出诊断包定位。</div>`;
+                }
+            });
         });
 
         const tableCard = document.createElement("div");
@@ -1086,7 +1162,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         const btns = tableCard.querySelector(".qg-card-title span") as HTMLElement;
         const rcBtn = document.createElement("button");
         rcBtn.className = "b3-button b3-button--outline b3-button--small";
-        rcBtn.textContent = "结果中心";
+        rcBtn.textContent = "回执中心";
         rcBtn.onclick = () => { dialog.destroy(); host.openResultsCenter(); };
         const auditBtn = document.createElement("button");
         auditBtn.className = "b3-button b3-button--outline b3-button--small";
@@ -1098,7 +1174,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         favBtn.onclick = () => showFavoritesDialog();
         const exportBtn = document.createElement("button");
         exportBtn.className = "b3-button b3-button--outline b3-button--small";
-        exportBtn.textContent = "导出审计 JSON";
+        exportBtn.textContent = "复制审计 JSON"; // 行为是写剪贴板而非下载——按实际行为命名，避免「导出=下载文件」的预期落差
         exportBtn.onclick = async () => {
             try {
                 await navigator.clipboard.writeText(JSON.stringify({ schemaVersion: 1, exportedAt: new Date().toISOString(), entries: host.auditLog }, null, 2));
@@ -1110,8 +1186,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         btns.append(rcBtn, auditBtn, favBtn, exportBtn);
         content.appendChild(tableCard);
 
-        // 最近回执 20 条（含逐条复制）
+        // 最近回执 20 条（含逐条复制）；载入前骨架屏——与状态概览页同款，避免异步空窗跳动
         const list = tableCard.querySelector("[data-role=list]") as HTMLElement;
+        list.innerHTML = `<div class="qg-skel"><span></span><span></span><span></span></div>`;
         void (async () => {
             try {
                 const text = (await host.kernelApi.getFileText(`${host.settings.bridgeBasePath}/results.ndjson`)) ?? "";
@@ -1135,14 +1212,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     void navigator.clipboard.writeText(line).then(() => showMessage("已复制回执行（JSON）", 2000, "info"));
                 };
             } catch (e) {
-                list.innerHTML = `<div style="font-size:11px;color:var(--b3-theme-error);padding:6px 0 8px">回执读取失败：${esc(e instanceof Error ? e.message : String(e))}</div>`;
+                list.innerHTML = `<div style="font-size:11px;color:var(--qg-error-text);padding:6px 0 8px">回执读取失败：${esc(e instanceof Error ? e.message : String(e))}</div>`;
             }
         })();
 
         // 危险区：清空队列（保留预览纪律；动作复用共享 clearQueueWithPreview）
         const danger = document.createElement("div");
         danger.className = "qg-card danger";
-        danger.innerHTML = `<div style="font-size:12px;color:var(--b3-theme-on-surface)"><b style="color:var(--b3-theme-error)">危险区</b>　清空前将预览：将丢弃条数、最老命令时间，并清空回执与处理台账（不可撤销）。</div>`;
+        danger.innerHTML = `<div style="font-size:12px;color:var(--b3-theme-on-surface)"><b style="color:var(--qg-error-text)">危险区</b>　清空前将预览：将丢弃条数、最老命令时间，并清空回执与处理台账（不可撤销）。</div>`;
         const clearBtn = document.createElement("button");
         clearBtn.className = "b3-button qg-btn-danger";
         clearBtn.style.marginLeft = "auto"; // 危险区 flex：按钮靠右（原型 .sp 布局）
@@ -1173,6 +1250,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         const importInput = document.createElement("input");
         importInput.type = "file";
         importInput.accept = ".json,application/json";
+        importInput.setAttribute("aria-label", "选择备份文件"); // 隐藏件也命名：读屏全表扫时不留无名节点
         importInput.style.display = "none";
         importInput.onchange = async () => {
             const file = importInput.files?.[0];
@@ -1211,7 +1289,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 ];
                 const selDialog = new Dialog({
                     title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>导入备份 · 选择分组</span></span>`,
-                    content: `<div style="padding:14px 16px">` +
+                    content: `<div id="qg-import" style="padding:14px 16px">` +
                         `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-bottom:10px">备份时间：${esc(payload.exportedAt)}${payloadSourceDevice ? ` · 来源设备：${esc(payloadSourceDevice)}` : ""}。勾选要导入的分组（未勾选的保持当前数据不动）：</div>` +
                         `<div style="display:flex;flex-direction:column;gap:8px">` +
                         groups.map((g) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5">` +
@@ -1351,7 +1429,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         preflightCard.className = "qg-card";
         preflightCard.innerHTML = `<div class="qg-card-title">环境预检</div>` +
             `<div class="qg-hint" style="font-size:12px">安装/启用前的环境核对，结果分三档：✓ 可继续 / ⚠ 需注意 / ✕ 阻塞。</div>` +
-            `<div data-role="preflight-result" style="margin-top:8px"></div>`;
+            `<div data-role="preflight-result" role="status" aria-live="polite" style="margin-top:8px"></div>`;
         const preBtn = document.createElement("button");
         preBtn.className = "b3-button b3-button--outline";
         preBtn.style.marginTop = "8px";
@@ -1388,7 +1466,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             checks.push({ dot: "warn", text: "Quicker / CLI 客户端版本与 Token 配置无法在本面板检查——见 GETTING-STARTED 安装页" });
             const blocked = checks.some((c) => c.dot === "err");
             const warned = checks.some((c) => c.dot === "warn");
-            const summary = blocked ? `<div style="font-size:12px;font-weight:600;color:var(--b3-theme-error);margin-bottom:4px">✕ 存在阻塞项——按上述条目处理后重跑</div>`
+            const summary = blocked ? `<div style="font-size:12px;font-weight:600;color:var(--qg-error-text);margin-bottom:4px">✕ 存在阻塞项——按上述条目处理后重跑</div>`
                 : warned ? `<div style="font-size:12px;font-weight:600;color:var(--b3-theme-warning, var(--b3-theme-secondary));margin-bottom:4px">⚠ 可继续，存在需注意项</div>`
                     : `<div style="font-size:12px;font-weight:600;color:var(--b3-theme-success);margin-bottom:4px">✓ 全部通过，可继续</div>`;
             box.innerHTML = summary + checks.map((c) => `<div style="display:flex;gap:7px;align-items:flex-start;font-size:12px;padding:2px 0">${dot(c.dot)}<span>${esc(c.text)}</span></div>`).join("");
@@ -1414,6 +1492,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         const upMs = Math.max(0, Date.now() - host.sessionStartedAt);
         const upMin = Math.floor(upMs / 60000);
         const uptimeText = `本会话已运行 ${upMin >= 1 ? `${upMin} 分钟` : "不到 1 分钟"}（自 ${new Date(host.sessionStartedAt).toTimeString().slice(0, 5)}）`;
+        // 与默认的差异数（deviceName 自动管理、schemaVersion 非设置项，isModified 已排除）——重置前让用户知道会丢多少自定义
+        const customCount = (Object.keys(DEFAULT_SETTINGS) as Array<keyof QuickGateSettings>)
+            .filter((k) => isModified(k)).length;
         content.innerHTML = pageHeader("关于", "版本、数据边界与帮助入口（页脚常驻链接同此）") +
             `<div class="qg-card"><div class="qg-card-title">小驴快门 v${PLUGIN_VERSION} <span style="margin-left:auto">${chip("协议 v1", "mute")}</span></div>` +
             `<div style="font-size:12px;color:var(--b3-theme-on-surface);line-height:1.7">小驴生态联动中枢 + 外部网关：命令注册表、数据透传、编辑器上下文与 NDJSON 外部命令桥。` +
@@ -1421,7 +1502,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:6px">${esc(uptimeText)}</div></div>`;
         const danger = document.createElement("div");
         danger.className = "qg-card danger";
-        danger.innerHTML = `<div style="font-size:12px;color:var(--b3-theme-on-surface)"><b style="color:var(--b3-theme-error)">恢复默认设置</b>　桥/广播关闭、轮询 500ms、名单还原、确认门控开启；设备名保留（本机身份不变）。当前自定义值不可找回。</div>`;
+        danger.innerHTML = `<div style="font-size:12px;color:var(--b3-theme-on-surface)"><b style="color:var(--qg-error-text)">恢复默认设置</b>　当前 ${customCount === 0 ? "没有与默认不同的设置项" : `<b>${customCount} 项设置与默认不同</b>（连接/安全页带主色边标的行）`}，将恢复出厂值：桥/广播关闭、轮询 500ms、名单还原、确认门控开启；设备名保留（本机身份不变）。当前自定义值不可找回。</div>`;
         const resetBtn = document.createElement("button");
         resetBtn.className = "b3-button qg-btn-danger";
         resetBtn.style.marginLeft = "auto";
@@ -1467,8 +1548,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
     // ══════════ 子对话框：桥恢复向导（L571 部分：检测 → 分级呈现 → 复用既有处置动作） ══════════
     const showBridgeRecoveryWizard = () => {
         const dlg = new Dialog({
-            title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>桥恢复向导</span></span>`,
-            content: `<div id="qg-bridge-recovery" style="padding:14px 16px;min-width:min(560px, 92vw)">` +
+            // 原生 title 留空（宿主 fn__none 隐藏头部，关闭按钮在容器上不受影响）——
+            // 内容区 qg-dlg-head 已含标题/副题/刷新，避免双标题（与恢复中心同款处理）
+            content: `<div id="qg-bridge-recovery" style="padding:14px 16px;">` +
                 `<div class="qg-dlg-head"><span class="qg-dlg-title"><span class="qg-title-logo">门</span>桥恢复向导</span>` +
                 `<span style="font-size:11px;color:var(--b3-theme-on-surface-light)">桥出问题了？逐项检测、按级处置</span>` +
                 `<span class="sp"></span><button class="b3-button b3-button--small" data-role="refresh">重新检测</button></div>` +
@@ -1651,10 +1733,10 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     `<span class="qg-dim qg-num qg-audit-ms">${esc(fmtElapsedMs(a.elapsedMs))}</span>` +
                     `<button class="b3-button b3-button--small qg-copy-btn" data-qg-copy="${idx}">复制</button></div>`;
             }).join("") || `<div class="qg-empty">无匹配条目——调整关键词或日期；入门见 <a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/GETTING-STARTED.md">上手指南</a>。</div>`;
-            return `<div style="display:flex;gap:6px;margin-bottom:8px">` +
-                `<input id="qg-audit-filter" class="b3-text-field" style="flex:1" placeholder="筛选：op / 状态 / 插件" value="${esc(state.kw)}" />` +
-                `<input id="qg-audit-date" type="date" class="b3-text-field" style="width:150px" value="${state.date}" title="按日期筛选" />` +
-                `<button id="qg-audit-export" class="b3-button b3-button--small" title="导出当前筛选命中（JSON）">导出筛选</button>` +
+            return `<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">` +
+                `<input id="qg-audit-filter" class="b3-text-field" style="flex:1;min-width:140px" placeholder="筛选：op / 状态 / 插件" value="${esc(state.kw)}" />` +
+                `<input id="qg-audit-date" type="date" class="b3-text-field" style="width:150px" value="${state.date}" title="按日期筛选" aria-label="按日期筛选" />` +
+                `<button id="qg-audit-export" class="b3-button b3-button--small" title="复制当前筛选命中（JSON）到剪贴板">复制筛选 JSON</button>` +
                 `</div><div class="qg-audit-list">${rows}</div>` +
                 `<div style="margin-top:8px;display:flex;gap:8px;align-items:center">` +
                 `<span style="color:var(--b3-theme-on-surface)">命中 ${hits.length} 条（显示 ${shown.length}）</span>` +
@@ -1664,8 +1746,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         // 焦点回归（L585 部分）：销毁后焦点回到触发元素
         const auditFocusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         const d = new Dialog({
-            title: "审计日志",
-            content: `<div style="padding:12px"><div id="qg-audit-body">${render()}</div></div>`,
+            // 头部与其余面板统一 logo 语言；条数入版本胶囊（打开时点静态）
+            title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>审计日志</span><span class="qg-title-ver">${host.auditLog.length} 条留痕</span></span>`,
+            content: `<div style="padding:14px 16px"><div id="qg-audit-body">${render()}</div></div>`,
             width: "min(640px, 92vw)",
             destroyCallback: () => { try { auditFocusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
         });
@@ -1730,8 +1813,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         // 焦点回归（L585 部分）：销毁后焦点回到触发元素
         const favFocusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         const d = new Dialog({
-            title: "收藏与最近使用",
-            content: `<div style="padding:12px;font-size:12px"><div id="qg-fav-body"></div></div>`,
+            title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>收藏与最近使用</span></span>`,
+            content: `<div style="padding:14px 16px;font-size:12px"><div id="qg-fav-body"></div></div>`,
             width: "min(640px, 92vw)",
             destroyCallback: () => { try { favFocusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
         });
@@ -1773,16 +1856,16 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     let status: string;
                     let reason = "";
                     if (iv === null) {
-                        status = `<span style="color:var(--b3-theme-on-surface)">● 未安装</span>`;
+                        status = chip("未安装", "mute");
                         reason = m.maturity === "stable" ? "缺失原因：未安装（集市暂缓，<a class=\"b3-link\" target=\"_blank\" href=\"https://github.com/ai68298100/siyuan-quickgate/releases\">GitHub Releases</a> 获取上游；或用本页诊断核对环境）" : "";
                     } else if (stale) {
-                        status = `<span style="color:var(--b3-theme-warning, #d97706)">● 版本漂移</span>`;
+                        status = chip("版本漂移", "warn");
                         reason = `缺失原因：实装 ${esc(iv)} ≠ 清单基准 ${esc(m.version)}（能力面可能变化，可校准清单）`;
                     } else if (!enabled) {
-                        status = `<span style="color:var(--b3-theme-warning, #d97706)">● 已停用</span>`;
+                        status = chip("已停用", "warn");
                         reason = "缺失原因：插件在思源插件列表中已停用";
                     } else {
-                        status = `<span style="color:var(--b3-theme-primary)">● 已安装启用</span>`;
+                        status = chip("已安装启用", "ok");
                     }
                     const maturityBadge = m.maturity === "stable" ? "stable" : m.maturity === "design" ? "design" : "unlocated";
                     const caps = m.capabilities.length > 0 ? `能力 ${m.capabilities.length} 项（读写属性经 adapter 能力协商）` : "能力 0 项";
@@ -1799,8 +1882,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                         `</div>`;
                 }).join("");
                 new Dialog({
-                    title: `生态能力目录（清单 v${manifest.version} · 校准 ${manifest.updatedAt ?? "未知"}）`,
-                    content: `<div style="padding:12px;font-size:12px">${cards}<div style="margin-top:6px;color:var(--b3-theme-on-surface)">诊断入口：设置→诊断与生态「导出诊断包」/ 仓库 tools（verify:bg）</div></div>`,
+                    title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>生态能力目录</span><span class="qg-title-ver">清单 v${esc(manifest.version)} · 校准 ${esc(manifest.updatedAt ?? "未知")}</span></span>`,
+                    content: `<div style="padding:14px 16px;font-size:12px">${cards}<div style="margin-top:6px;color:var(--b3-theme-on-surface)">诊断入口：设置→诊断与生态「导出诊断包」/ 仓库 tools（verify:bg）</div></div>`,
                     width: "min(640px, 92vw)",
                 });
             } catch (e) {
@@ -1858,6 +1941,19 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         const b = (ev.target as HTMLElement).closest("[data-page]") as HTMLElement | null;
         if (b?.dataset.page) show(b.dataset.page);
     });
+    // 侧导航方向键漫游（↑↓/Home/End）：Tab 到导航后无需连打 Tab 即可扫一遍分组（R131 键盘纪律同源）
+    nav.addEventListener("keydown", (ev) => {
+        const kev = ev as KeyboardEvent;
+        if (kev.key !== "ArrowDown" && kev.key !== "ArrowUp" && kev.key !== "Home" && kev.key !== "End") return;
+        const items = Array.from(nav.querySelectorAll<HTMLButtonElement>(".qg-nav-item"));
+        if (items.length === 0) return;
+        kev.preventDefault();
+        const cur = items.indexOf(document.activeElement as HTMLButtonElement);
+        const next = kev.key === "ArrowDown" ? Math.min(Math.max(cur, -1) + 1, items.length - 1)
+            : kev.key === "ArrowUp" ? Math.max(cur <= 0 ? items.length - 1 : cur - 1, 0)
+            : kev.key === "Home" ? 0 : items.length - 1;
+        items[next].focus();
+    });
     fallback.addEventListener("change", () => show(fallback.value));
     refreshNav = renderNav;
 
@@ -1872,6 +1968,24 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         { id: "diagnostics", label: "诊断与生态" },
     ];
     let searchDebounce = 0;
+    /** 搜索命中高亮（与命令面板 .qg-palette-hit 同语言）：只包裹行标签首个文本节点内的命中片段——
+     *  保留 chips 等子元素与 aria 绑定（.label 元素本身不动，仅拆分文本节点） */
+    const highlightRowLabel = (row: HTMLElement, q: string) => {
+        const label = row.querySelector<HTMLElement>(".body .label");
+        if (!label || !q) return;
+        const first = label.firstChild;
+        if (!first || first.nodeType !== Node.TEXT_NODE) return;
+        const text = first.textContent ?? "";
+        const idx = text.toLowerCase().indexOf(q.toLowerCase());
+        if (idx < 0) return;
+        const hit = document.createElement("mark");
+        hit.className = "qg-search-hit";
+        hit.textContent = text.slice(idx, idx + q.length);
+        const after = document.createTextNode(text.slice(idx + q.length));
+        first.textContent = text.slice(0, idx);
+        label.insertBefore(after, first.nextSibling);
+        label.insertBefore(hit, after);
+    };
     searchInput.addEventListener("input", () => {
         const q = searchInput.value.trim().toLowerCase();
         // 防抖 150ms（R298 性能）：搜索会顺序重建四个分组页，逐键全量重建是可省的开销
@@ -1935,10 +2049,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             jump.addEventListener("click", () => {
                 searchInput.value = "";
                 show(g.id); // 跳转后该页正常渲染（行已随迁移带过来，但整页上下文更完整）
+                searchInput.focus({ preventScroll: true }); // 回焦搜索：键盘流不因跳转中断（R330 同口径）
             });
             head.appendChild(jump);
             content.appendChild(head);
-            for (const r of g.rows) content.appendChild(r);
+            for (const r of g.rows) {
+                highlightRowLabel(r, searchInput.value.trim());
+                content.appendChild(r);
+            }
         }
         }, 150);
     });

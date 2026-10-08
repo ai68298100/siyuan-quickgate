@@ -1,10 +1,20 @@
+<div align="center">
+
+<img src="./icon.png" width="88" alt="小驴快门" />
+
 # 小驴快门（Lv QuickGate）
 
-[English](./README.md)
+**思源笔记的小驴生态联动中枢 + 外部网关** —— Quicker / 快捷指令 / CLI / AI 助手共用同一套公开契约（27 op）
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.8.8-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[English](./README.md) · [上手指南](./docs/GETTING-STARTED.md) · [op 契约](./docs/api.md) · [下载安装](https://github.com/ai68298100/siyuan-quickgate/releases)
 
-**小驴快门**是[思源笔记](https://b3log.org/siyuan)的**小驴生态联动中枢 + 外部网关**：Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+
+<img src="./preview.png" alt="分层设置面板 · 命令面板 · 四中心" width="820" />
+
+</div>
+
+Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
 
 - `commands.*` — 发现/搜索/执行任意已装插件的命令面板条目（默认确认门控 + 审计；搜索支持中英/拼音别名，如「打卡/daka/checkin」互达）
 - `checkin.*` / `contacts.*` — 向小驴打卡（API v5）、小驴人脉（bridge v1）的公开桥做结构化透传
@@ -36,7 +46,7 @@
 
 ## 手动安装
 
-1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；GitHub 会在资产详情显示 SHA-256 digest）。当前 `v0.8.8` 仍是预发布版，需要稳定版本时请选择最新 stable release。
+1. 从 [Releases](https://github.com/ai68298100/siyuan-quickgate/releases) 下载 `package.zip`（带 prerelease 标记的为公开测试版；GitHub 会在资产详情显示 SHA-256 digest）。v0.9.0 起为正式版（非 prerelease），直接选择最新 release 即可。
 2. 思源 → 设置 → 集市 → 下载页 → 右上角菜单 → **导入安装包**。
 3. 启用插件，打开设置，将**外部命令桥**打开（产品默认关闭）。
 4. **更新版本后需完全退出思源（托盘右键退出）再启动**——窗口重开不会刷新插件前端代码；可双击工作区的 `重启思源.bat`（仓库 `tools/restart-siyuan.bat`）一键完成。
@@ -100,6 +110,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | **v0.8.6** | 释放消费锁前等待进行中的桥 tick · 卸载和热重载时保留审计与运行统计 |
 | **v0.8.7** | 修复命令超过 100 条时能力动作的键盘执行偏移 · 清除无效动态导入构建警告 |
 | **v0.8.8** | 串行化桥启停过渡 · 释放接管超时后的迟到 Web Lock · 补齐设置页读屏控件名称 |
+| **v0.9.0** | **UI 全面打磨**：设置面板/命令面板/四中心对齐原型（配色证据化求解 ≥4.5:1、窄屏与触屏适配、交互 e2e 13 项真机断言）· 修复捕获撤销误报失败 · 设置搜索命中高亮 · 全新图标与品牌视觉 |
 
 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)，路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 

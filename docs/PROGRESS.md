@@ -622,3 +622,10 @@
 - 命令面板空结果会清空旧活动项，修复无匹配后 Enter 误执行上一条命令；补齐 combobox/listbox/option ARIA 关联，修正超过 100 条命令时的导航边界。
 - E2E 容器流程兼容带 Token 的 401/403 健康响应，并等待 QuickGate 私有路由注册完成后再验收。
 - 新增 3 项 health snapshot 测试与 2 项命令面板边界测试；当前 37 个测试文件 240 项通过。
+
+## 2026-10-08 · R364-R365（UI 全面打磨批 v0.9.0 · 预览环境 + 隔离靶场双轨）
+
+- **预览环境 UI 打磨（R343-R352 · 17 轮）**：以 design/ui-prototype/mvp1.html 为准绳建立 tmp/ui-preview 预览工程（真实宿主 base.css + daylight/midnight 主题变量 + stub 宿主），逐屏截图比对收敛——状态概览/首跑向导/分层设置/队列/命令面板/四中心/审计/收藏/生态/恢复向导全部对齐；对比度证据化（contrast.mjs 求解器定配方，chip 60/56/70%、--qg-accent-text/--qg-error-text 派生令牌，两主题 ≥4.5:1）；窄屏（375/320px）四处破损修复；a11y.mjs 15 屏巡检基线；新图标与品牌视觉（门字+橙点+百叶意象，social-preview 1280×640）。
+- **交互真机 e2e（R365 · e2e/ui-interactions.mjs）**：隔离靶场 guardScratch 写型套件，13 项硬断言——两段式 Esc（stopPropagation 拦截宿主成立的 E4 实证）、面板键盘导航+aria 同步、设置搜索命中高亮、「已自定义」边标实时刷新（同节点探针证无重渲染）、通道卡下钻、捕获全链（daily+inbox 双路径含撤销删块）、能力动作二段式真机执行（接管消费权驱动派发，实证只读 op 无确认门控）。过程坑入账：petal 写入触发插件重载瞬态（app.plugins 清空数秒，须 waitPluginAlive 轮询回归且清孤儿对话框，backup-roundtrip 同坑再现）；kernelApi.post 成功返回解包 data、失败抛错——成败判定不得读返回值 code 字段。
+- **修复三处真实缺陷**：①回执中心「导出 JSON」死按钮（无处理器）——补齐按筛选导出；②设置对话框关闭不停 3s 状态轮询（泄漏定时器）——destroyCallback 统一停表；③捕获撤销内核删除成功仍误报「撤销失败」（kernelApi 返回语义误读）——成败改按 then/catch，网络拦截断言 code=0+块真删。
+- **配套**：术语统一（结果中心→回执中心）；维护者行号泄漏清扫（L566/docs/33）；GETTING-STARTED 嵌预览图+导航名漂移修正；新增 150 命令/120 回执/200 审计压测模式。tsc 零错、254 测全绿；靶场 E4：ui-preview 19 张 + 交互 e2e 13/13 + 桥链路 11/11。
