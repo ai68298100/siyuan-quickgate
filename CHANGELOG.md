@@ -11,6 +11,7 @@
   - `exam.stats` / `exam.open`——考试 `window.siyuanExam`（statsRead 按需重算脱敏快照，无题目内容/key/路径；practice/wrongbook/mock/report 稳定入口）
   - 三家均进 workflow 白名单（写步骤带 confirm）；MCP 写注解同步（glean.status/home.memo 为写，其余只读；只读工具 14→18）
 - **AI 客户端矩阵文档**（docs/ai-clients.md）：MCP stdio / 内核 HTTP 路由 / 自定义工具三条接入路径按客户端分类（Claude、Codex、ZCode、反重力、千问、豆包、DeepSeek、WorkBuddy 等），含各客户端配置片段与写权限门控说明
+- **verify-restart.mjs 接入端口自动发现**：真机复测在 3.8.7-alpha 双内核下无需手动指定 SIYUAN_URL（e2e 等写型脚本按 R287 纪律保持显式指定，不自动指向在用工作区）
 - **工具 schema 导出器**（tools/export-toolschema.mjs）：从 tools.ts 单一来源一键导出 function-calling JSON / OpenAPI 3 两种形态，供不支持 MCP 的 Agent 以「自定义工具」接入
 - **工作区内核端口自动发现**（src/mcp/discover.ts）：思源 ≥3.8.7-alpha 双内核架构下 6806 归启动器内核、工作区内核为动态端口——MCP 服务器与 lv-cli 在未设 SIYUAN_URL 时自动定位（6806 快路径 → 扫描 SiYuan-Kernel 进程监听端口 → Token 鉴权判定，实测 <1s）；tools/restart-siyuan.bat 安装目录自动探测
 - 拾遗适配器含参数预校验（status/direction/limit/offset 与上游 normalizeFilter 同口径早失败）与 id 形状守卫（YYYYMMDDHHmmss-xxxxxxx）

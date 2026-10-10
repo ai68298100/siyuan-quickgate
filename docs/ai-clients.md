@@ -119,15 +119,17 @@ curl -s -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec \
 
 | 客户端 | 版本 | 路径 | 实测结果 | 备注 |
 |---|---|---|---|---|
-| Claude Desktop | — | A | ⬜ 待实测 | 上手指南默认示例 |
-| OpenAI Codex CLI | — | A | ⬜ 待实测 | config.toml 形状 |
-| ZCode | — | A | ⬜ 待实测 | |
-| Antigravity（反重力） | — | A | ⬜ 待实测 | |
-| Qwen Code | — | A | ⬜ 待实测 | |
-| TRAE | — | A | ⬜ 待实测 | |
-| Cherry Studio + DeepSeek | — | A | ⬜ 待实测 | 模型侧无 MCP 依赖 |
+| OpenAI Codex CLI | — | A | ✅ 配置已写入（本机 2026-10-11） | `[mcp_servers.lv-quickgate]`；重启 Codex 生效 |
+| Claude Code | — | A | ✅ 配置已写入（本机 2026-10-11） | `~/.claude.json` mcpServers；新会话生效 |
+| ZCode | — | A | ✅ 配置已写入（本机 2026-10-11） | `~/.zcode/cli/config.json` mcp.servers，自动连接 |
+| MCP stdio 服务器（协议层） | 0.9.1 | A | ✅ 冒烟 7/7，live bridge.ping=recorded | 未设 SIYUAN_URL 自动发现动态端口 |
+| Claude Desktop | — | A | ⬜ 本机未安装 | 上手指南默认示例 |
+| Antigravity（反重力） | — | A | ⬜ 本机未安装 | 配置模板见 §1 |
+| Qwen Code | — | A | ⬜ 本机未安装 | 配置模板见 §1 |
+| TRAE | — | A | ⬜ 本机未安装 | 配置模板见 §1 |
+| Cherry Studio + DeepSeek | — | A | ⬜ 本机未安装 | 模型侧无 MCP 依赖 |
 | 千问办公 | — | C | ⬜ 待实测 | 自定义工具导入 function-calling JSON |
 | 豆包办公 | — | C | ⬜ 待实测 | 同上；平台侧工具面以当前版本为准 |
 | WorkBuddy | — | C | ⬜ 待实测 | 同上 |
 | DeepSeek dsh | — | C | ⬜ 待实测 | 同上 |
-| 思源内置 Agent（≥3.8.7-alpha.4） | — | B | ✅ 三能力真机实证（R244/R245） | 全工具面挂载待端到端 |
+| 思源内置 Agent（≥3.8.7-alpha.4） | — | B | ✅ 三能力真机实证（R244/R245）+ v0.9.1 部署后 Agent 注册 3/3（内核日志） | 全工具面挂载待端到端 |

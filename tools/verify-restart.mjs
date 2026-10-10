@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-function loadEnv() {
+async function loadEnv() {
     const envPath = path.join(process.env.APPDATA ?? "", "siyuan", "env");
     let url = process.env.SIYUAN_URL ?? "";
     let token = process.env.SIYUAN_TOKEN ?? "";
@@ -25,10 +25,19 @@ function loadEnv() {
             if (k === "SIYUAN_TOKEN" && !token) token = v;
         }
     } catch { /* 无 env 文件时用环境变量/默认 */ }
+    if (!url && token) {
+        // 3.8.7-alpha 双内核：6806 可能归启动器内核——未显式给 URL 时自动发现工作区内核
+        try {
+            const { discoverWorkspaceKernel } = await import("../src/mcp/discover.ts");
+            const found = await discoverWorkspaceKernel({ token });
+            if (found) console.log(`[verify] 已自动发现工作区内核：${found}`);
+            url = found ?? "http://127.0.0.1:6806";
+        } catch { url = "http://127.0.0.1:6806"; }
+    }
     return { url: (url || "http://127.0.0.1:6806").replace(/\/$/, ""), token };
 }
 
-const { url, token } = loadEnv();
+const { url, token } = await loadEnv();
 const PLUGIN = "siyuan-quickgate";
 const profile = process.env.VERIFY_PROFILE ?? "full";
 const results = [];
