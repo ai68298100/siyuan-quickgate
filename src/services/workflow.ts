@@ -38,11 +38,17 @@ export const nextWorkflowPlanId = createPlanIdFactory();
 export const WORKFLOW_ALLOWED_OPS = new Set([
     "checkin.record", "checkin.items", "checkin.summary",
     "contacts.search", "contacts.ensure", "contacts.interaction",
+    "glean.list", "glean.get", "glean.status",
+    "home.summary", "home.memo", "home.open",
+    "exam.stats", "exam.open",
     "doc.open", "daily.status", "template.new", "editor.context",
 ]);
 
 /** 写影响面（需要确认标记） */
-export const WRITE_OPS = new Set(["checkin.record", "contacts.ensure", "contacts.interaction", "template.new"]);
+export const WRITE_OPS = new Set([
+    "checkin.record", "contacts.ensure", "contacts.interaction",
+    "glean.status", "home.memo", "template.new",
+]);
 
 /**
  * plan 期必填参数校验（R69-P1 早失败：坏计划在 plan 阶段拒绝，而非 execute 中途失败停止）。
@@ -61,6 +67,15 @@ export function validateStepArgs(op: string, args: Record<string, unknown>): str
         case "contacts.ensure":
         case "contacts.interaction":
             if (!hasArr("names") && !hasArr("docIds")) return op + " 缺 names/docIds";
+            return null;
+        case "glean.get":
+            if (!hasNonEmpty("id")) return "glean.get 缺 id";
+            return null;
+        case "glean.status":
+            if (!hasNonEmpty("id") || !hasNonEmpty("status")) return "glean.status 缺 id/status";
+            return null;
+        case "home.memo":
+            if (!hasNonEmpty("title") || !hasNonEmpty("dueDate")) return "home.memo 缺 title/dueDate";
             return null;
         default:
             return null;

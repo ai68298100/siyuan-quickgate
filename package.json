@@ -1,6 +1,6 @@
 {
   "name": "siyuan-quickgate",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "type": "module",
   "description": "Lv QuickGate: SiYuan ecosystem hub & external gateway (command registry, data pass-through, editor context, NDJSON bridge)",
   "repository": "https://github.com/ai68298100/siyuan-quickgate",
@@ -36,7 +36,8 @@
     "verify:restart": "node tools/verify-restart.mjs",
     "build:mcp": "node scripts/build-mcp.mjs",
     "accept": "run-s test smoke:mcp",
-    "verify:bg": "node --no-warnings ./tools/e2e-bg.mjs"
+    "verify:bg": "node --no-warnings ./tools/e2e-bg.mjs",
+    "export:schema": "node tools/export-toolschema.mjs"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",

@@ -6,11 +6,14 @@
  */
 import { spawn } from "node:child_process";
 import { ALL_OPS } from "../src/ops.ts";
+import { buildToolDefs } from "../src/mcp/tools.ts";
 
 const results = [];
 // Keep this protocol assertion aligned with src/ops.ts ALL_OPS instead of
 // duplicating a count that can drift when a new op is added.
 const EXPECTED_TOOL_COUNT = ALL_OPS.length;
+// 只读面计数同样从单一来源推导（buildToolDefs 的 write 注解），避免新 op 时冒烟漂移
+const EXPECTED_READONLY_COUNT = buildToolDefs().filter((d) => !d.write).length;
 const check = (name, ok, detail = "") => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "✓" : "✗"} ${name}${detail ? ` — ${detail}` : ""}`);
@@ -67,7 +70,7 @@ try {
     ro.notify("notifications/initialized");
     const list = await ro.call("tools/list", {});
     const names = (list.result?.tools ?? []).map((t) => t.name);
-    check("tools/list 默认只读 14 工具", names.length === 14, `实际 ${names.length}`);
+    check(`tools/list 默认只读 ${EXPECTED_READONLY_COUNT} 工具`, names.length === EXPECTED_READONLY_COUNT, `实际 ${names.length}`);
     check("写工具未暴露", !names.includes("checkin.record") && !names.includes("commands.run"));
     const denied = await ro.call("tools/call", { name: "checkin.record", arguments: { itemId: "x" } });
     check("tools/call 写工具诚实拒绝", denied.result?.isError === true && String(denied.result?.content?.[0]?.text ?? "").includes("LV_MCP_WRITE"));

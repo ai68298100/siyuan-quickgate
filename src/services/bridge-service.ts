@@ -16,6 +16,9 @@ import { executePlan, makePlan, WorkflowPlan, WORKFLOW_ALLOWED_OPS, nextWorkflow
 import {
     checkinItems, checkinRecord, checkinSummary,
     contactsSearch, contactsEnsure, contactsInteraction,
+    gleanList, gleanGet, gleanStatus,
+    homeSummary, homeMemo, homeOpen,
+    examStats, examOpen,
     BridgeResult,
 } from "./adapters";
 import { validateTemplatePath, validateTemplateContent } from "./path-guard";
@@ -41,6 +44,8 @@ const WRITE_OP_OWNER: Record<string, string> = {
     "checkin.record": "siyuan-checkin",
     "contacts.ensure": "siyuan-contacts",
     "contacts.interaction": "siyuan-contacts",
+    "glean.status": "siyuan-glean",
+    "home.memo": "siyuan-home",
     "template.new": "siyuan-quickgate",
     "workflow.execute": "siyuan-quickgate",
     "plugin.api": "siyuan-quickgate",
@@ -120,6 +125,10 @@ export interface BridgeServiceDeps {
     /** 公开桥获取器 */
     getCheckin: () => unknown;
     getContacts: () => unknown;
+    /** 拾遗/管家/考试公开桥（v0.9.x 扩展；缺席时适配器回 unsupported） */
+    getGlean: () => unknown;
+    getHome: () => unknown;
+    getExam: () => unknown;
     now?: () => number;
 }
 
@@ -526,6 +535,24 @@ export class BridgeService {
                 return await contactsEnsure(this.deps.getContacts as () => never, a);
             case "contacts.interaction":
                 return await contactsInteraction(this.deps.getContacts as () => never, a as { names?: unknown; docIds?: unknown; date?: unknown; place?: unknown; note?: unknown }, cmd.id);
+
+            // ---- 数据透传（glean.* / home.* / exam.*，v0.9.x 扩展）----
+            case "glean.list":
+                return await gleanList(this.deps.getGlean as () => never, a as { status?: unknown; site?: unknown; tag?: unknown; aiTag?: unknown; keyword?: unknown; direction?: unknown; limit?: unknown; offset?: unknown });
+            case "glean.get":
+                return await gleanGet(this.deps.getGlean as () => never, a as { id?: unknown });
+            case "glean.status":
+                return await gleanStatus(this.deps.getGlean as () => never, a as { id?: unknown; status?: unknown });
+            case "home.summary":
+                return await homeSummary(this.deps.getHome as () => never);
+            case "home.memo":
+                return await homeMemo(this.deps.getHome as () => never, a as { title?: unknown; dueDate?: unknown });
+            case "home.open":
+                return await homeOpen(this.deps.getHome as () => never, a as { target?: unknown });
+            case "exam.stats":
+                return await examStats(this.deps.getExam as () => never);
+            case "exam.open":
+                return await examOpen(this.deps.getExam as () => never, a as { target?: unknown });
 
             // ---- 便利 op ----
             case "doc.open": {

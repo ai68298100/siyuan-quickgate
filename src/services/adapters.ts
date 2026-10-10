@@ -274,4 +274,249 @@ export async function contactsInteraction(
     }
 }
 
+/* ---------------- 拾遗 v1（window.siyuanGlean，契约=上游 docs/BRIDGE.md） ---------------- */
+
+/** 拾遗五态（上游 domain/schema CLIP_STATUSES；写面校验用） */
+export const GLEAN_CLIP_STATUSES = ["inbox", "later", "reading", "done", "archived"] as const;
+
+export interface GleanBridgeLike {
+    apiVersion?: number;
+    version?: string;
+    listClips?: (filter?: unknown) => Promise<unknown[]>;
+    getClip?: (id: string) => Promise<unknown>;
+    setClipStatus?: (id: string, status: string) => Promise<void>;
+}
+
+/** 上游 getClip 的文档 id 形状：YYYYMMDDHHmmss-xxxxxxx（后七位小写字母/数字） */
+const GLEAN_DOC_ID = /^\d{14}-[0-9a-z]{7}$/;
+
+const GLEAN_MISSING = "小驴拾遗未安装或无 window.siyuanGlean v1 桥";
+
+/** 桥协商：apiVersion=1 才可用（strict:false 下不用判别联合守卫，直接回桥实例或 undefined） */
+function gleanBridgeOf(getBridge: () => unknown): GleanBridgeLike | undefined {
+    const b = getBridge() as GleanBridgeLike | undefined;
+    return b && b.apiVersion === 1 ? b : undefined;
+}
+
+export async function gleanList(
+    getBridge: () => unknown,
+    args: { status?: unknown; site?: unknown; tag?: unknown; aiTag?: unknown; keyword?: unknown; direction?: unknown; limit?: unknown; offset?: unknown }
+): Promise<BridgeResult> {
+    const b = gleanBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: GLEAN_MISSING };
+    if (typeof b.listClips !== "function") {
+        return { status: "unsupported", data: null, message: "拾遗桥缺少 listClips 方法" };
+    }
+    // 本地预校验（与上游 normalizeFilter 同口径早失败：TypeError/RangeError 归 rejected，不靠上游错误语义）
+    const status = args.status === undefined || args.status === null ? undefined : args.status;
+    if (status !== undefined && status !== "all" && !(GLEAN_CLIP_STATUSES as readonly unknown[]).includes(status)) {
+        return { status: "rejected", data: null, message: `status 须为 ${GLEAN_CLIP_STATUSES.join("/")} 或 all` };
+    }
+    for (const k of ["site", "tag", "aiTag", "keyword"] as const) {
+        if (args[k] !== undefined && typeof args[k] !== "string") {
+            return { status: "rejected", data: null, message: `${k} 须为字符串` };
+        }
+    }
+    const direction = args.direction === undefined ? undefined : args.direction;
+    if (direction !== undefined && direction !== "asc" && direction !== "desc") {
+        return { status: "rejected", data: null, message: "direction 须为 asc 或 desc" };
+    }
+    let limit: number | undefined;
+    if (args.limit !== undefined && args.limit !== null) {
+        if (!Number.isSafeInteger(args.limit) || (args.limit as number) < 1 || (args.limit as number) > 200) {
+            return { status: "rejected", data: null, message: "limit 须为 1–200 整数" };
+        }
+        limit = args.limit as number;
+    }
+    let offset: number | undefined;
+    if (args.offset !== undefined && args.offset !== null) {
+        if (!Number.isSafeInteger(args.offset) || (args.offset as number) < 0) {
+            return { status: "rejected", data: null, message: "offset 须为非负整数" };
+        }
+        offset = args.offset as number;
+    }
+    try {
+        const clips = (await b.listClips({
+            status, site: args.site, tag: args.tag, aiTag: args.aiTag, keyword: args.keyword,
+            direction, limit, offset,
+        })) as unknown[];
+        const list = Array.isArray(clips) ? clips : [];
+        return { status: "recorded", data: { clips: list, count: list.length }, message: `命中 ${list.length} 条` };
+    } catch (e) {
+        return { status: "failed", data: null, message: `拾遗读取失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function gleanGet(getBridge: () => unknown, args: { id?: unknown }): Promise<BridgeResult> {
+    const b = gleanBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: GLEAN_MISSING };
+    if (typeof b.getClip !== "function") {
+        return { status: "unsupported", data: null, message: "拾遗桥缺少 getClip 方法" };
+    }
+    if (typeof args.id !== "string" || !GLEAN_DOC_ID.test(args.id)) {
+        return { status: "rejected", data: null, message: "id 缺失或形状非法（YYYYMMDDHHmmss-xxxxxxx）" };
+    }
+    try {
+        const clip = await b.getClip(args.id);
+        return { status: "recorded", data: { clip: clip ?? null }, message: clip ? "已读取" : "不存在（或非已收录文档）" };
+    } catch (e) {
+        return { status: "failed", data: null, message: `拾遗读取失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function gleanStatus(getBridge: () => unknown, args: { id?: unknown; status?: unknown }): Promise<BridgeResult> {
+    const b = gleanBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: GLEAN_MISSING };
+    if (typeof b.setClipStatus !== "function") {
+        return { status: "unsupported", data: null, message: "拾遗桥缺少 setClipStatus 方法（上游版本过旧）" };
+    }
+    if (typeof args.id !== "string" || !GLEAN_DOC_ID.test(args.id)) {
+        return { status: "rejected", data: null, message: "id 缺失或形状非法（YYYYMMDDHHmmss-xxxxxxx）" };
+    }
+    if (!(GLEAN_CLIP_STATUSES as readonly unknown[]).includes(args.status)) {
+        return { status: "rejected", data: null, message: `status 须为 ${GLEAN_CLIP_STATUSES.join("/")}` };
+    }
+    try {
+        await b.setClipStatus(args.id, args.status as string);
+        return { status: "recorded", data: { id: args.id, status: args.status }, message: `已置为 ${args.status}` };
+    } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        // 上游写门控：settings.integration.bridgeWriteEnabled 关闭时明确拒绝（桥写开关在拾遗侧设置）
+        if (/writes are disabled/i.test(msg)) {
+            return { status: "rejected", data: null, message: "拾遗桥写开关未开启（拾遗设置 → 集成 → 桥写入）" };
+        }
+        if (/Not a confirmed reading library article/i.test(msg)) {
+            return { status: "rejected", data: null, message: "该 id 不是已收录的读库文章" };
+        }
+        return { status: "failed", data: null, message: `拾遗写入失败：${msg}` };
+    }
+}
+
+/* ---------------- 管家 v1（window.LvHome，契约=上游 docs/BRIDGE.md） ---------------- */
+
+export interface HomeBridgeLike {
+    protocol?: number;
+    capabilities?: readonly string[];
+    whenReady?: () => Promise<unknown>;
+    openButler?: () => void;
+    openReminders?: () => void;
+    addMemo?: (title: string, dueDate: string) => Promise<void>;
+    summary?: () => { overdue: number; soon: number; today: number; updatedAt: string };
+}
+
+const HOME_MISSING = "小驴管家未安装或无 window.LvHome v1 桥";
+
+/** 桥协商：protocol=1 才可用 */
+function homeBridgeOf(getBridge: () => unknown): HomeBridgeLike | undefined {
+    const b = getBridge() as HomeBridgeLike | undefined;
+    return b && b.protocol === 1 ? b : undefined;
+}
+
+export async function homeSummary(getBridge: () => unknown): Promise<BridgeResult> {
+    const b = homeBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: HOME_MISSING };
+    if (typeof b.summary !== "function") {
+        return { status: "unsupported", data: null, message: "管家桥缺少 summary 能力" };
+    }
+    try {
+        // 有界计数快照（overdue/soon/today），只读不含标题/日期/成员（上游 EC17 同边界）
+        const data = await b.summary();
+        return { status: "recorded", data, message: "已读取（提醒有界计数）" };
+    } catch (e) {
+        return { status: "failed", data: null, message: `管家读取失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function homeMemo(getBridge: () => unknown, args: { title?: unknown; dueDate?: unknown }): Promise<BridgeResult> {
+    const b = homeBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: HOME_MISSING };
+    if (typeof b.addMemo !== "function") {
+        return { status: "unsupported", data: null, message: "管家桥缺少 addMemo 能力" };
+    }
+    const title = typeof args.title === "string" ? args.title.trim() : "";
+    const dueDate = typeof args.dueDate === "string" ? args.dueDate.trim() : "";
+    if (!title || title.length > 200) {
+        return { status: "rejected", data: null, message: "title 缺失或超长（≤200 字符）" };
+    }
+    if (!dueDate) {
+        return { status: "rejected", data: null, message: "dueDate 缺失（到期日期，如 2026-10-15）" };
+    }
+    try {
+        await b.addMemo(title, dueDate);
+        return { status: "recorded", data: { title, dueDate }, message: "已记入备忘（运行态；无幂等键，勿重试同语义）" };
+    } catch (e) {
+        return { status: "failed", data: null, message: `备忘写入失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function homeOpen(getBridge: () => unknown, args: { target?: unknown }): Promise<BridgeResult> {
+    const b = homeBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: HOME_MISSING };
+    const target = args.target === "reminders" ? "reminders" : "butler";
+    const fn = target === "reminders" ? b.openReminders : b.openButler;
+    if (typeof fn !== "function") {
+        return { status: "unsupported", data: null, message: `管家桥缺少 ${target === "reminders" ? "openReminders" : "openButler"} 能力` };
+    }
+    try {
+        fn();
+        return { status: "recorded", data: { ok: true, target }, message: target === "reminders" ? "已打开提醒中枢" : "已打开管家总览" };
+    } catch (e) {
+        return { status: "failed", data: null, message: `管家导航失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+/* ---------------- 考试 lite（window.siyuanExam，契约=上游 docs/ecosystem-contracts.md §3） ---------------- */
+
+export interface ExamBridgeLike {
+    version?: string;
+    statsRead?: () => Promise<unknown>;
+    open?: () => void;
+    practice?: () => void;
+    wrongbook?: () => void;
+    mock?: () => void;
+    report?: () => void;
+}
+
+/** exam.open 支持的入口（与上游 siyuanExam 成员一一对应） */
+export const EXAM_OPEN_TARGETS = ["practice", "wrongbook", "mock", "report"] as const;
+
+const EXAM_MISSING = "小驴考试未安装或无 window.siyuanExam 公开 API";
+
+/** 桥协商：以 statsRead 为锚（上游 47-04/48-06 lite 的推荐读取形态） */
+function examBridgeOf(getBridge: () => unknown): ExamBridgeLike | undefined {
+    const b = getBridge() as ExamBridgeLike | undefined;
+    return b && typeof b.statsRead === "function" ? b : undefined;
+}
+
+export async function examStats(getBridge: () => unknown): Promise<BridgeResult> {
+    const b = examBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: EXAM_MISSING };
+    try {
+        // statsRead()：按需重算脱敏快照（作答量/正确率/消灭数/连击/时段分布；无题目内容/key/路径）
+        const data = await b.statsRead();
+        if (data === null || data === undefined) {
+            return { status: "recorded", data: { stats: null }, message: "练习应用未就绪（statsRead 返回 null）" };
+        }
+        return { status: "recorded", data: { stats: data }, message: "已读取（脱敏统计快照）" };
+    } catch (e) {
+        return { status: "failed", data: null, message: `考试统计读取失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function examOpen(getBridge: () => unknown, args: { target?: unknown }): Promise<BridgeResult> {
+    const b = examBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: EXAM_MISSING };
+    const target = EXAM_OPEN_TARGETS.find((t) => t === args.target) ?? "practice";
+    const fn = b[target as "open" | "practice" | "wrongbook" | "mock" | "report"];
+    if (typeof fn !== "function") {
+        return { status: "unsupported", data: null, message: `考试桥缺少 ${target} 入口` };
+    }
+    try {
+        (fn as () => void)();
+        return { status: "recorded", data: { ok: true, target }, message: `已打开练习台（${target}）` };
+    } catch (e) {
+        return { status: "failed", data: null, message: `考试导航失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
 export const _internal = { waitReady, REFETCH_WAIT_MS, READY_TIMEOUT_MS };

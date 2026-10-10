@@ -15,6 +15,10 @@ export const ALL_OPS = [
     // 数据透传
     "checkin.items", "checkin.record", "checkin.summary",
     "contacts.search", "contacts.ensure", "contacts.interaction",
+    // 数据透传（v0.9.x 扩展：拾遗 window.siyuanGlean v1 / 管家 window.LvHome v1 / 考试 window.siyuanExam lite）
+    "glean.list", "glean.get", "glean.status",
+    "home.summary", "home.memo", "home.open",
+    "exam.stats", "exam.open",
     // 便利 op
     "doc.open", "daily.status", "setting.open", "editor.context",
     // 生态中枢

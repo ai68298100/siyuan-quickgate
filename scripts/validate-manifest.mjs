@@ -15,7 +15,7 @@ const MATURITY = new Set(["stable", "design", "unlocated"]);
 const INGESTION = new Set(["none", "eventFile", "windowEvent"]);
 const EVENT_STATUS = new Set(["available", "observed", "design"]);
 const SEMVER = /^[0-9]+\.[0-9]+\.[0-9]+$/;
-const PLUGIN_ID = /^siyuan-[a-z][a-z0-9-]*$/;
+const PLUGIN_ID = /^(siyuan|xiaolv)-[a-z][a-z0-9-]*$/;
 const NS = /^[a-z][a-z0-9-]*$/;
 const EVENT_NAME = /^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$/;
 const DOMAIN = /^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)+$/;
@@ -35,7 +35,7 @@ const v = Number.isInteger(manifest.version) ? manifest.version : 1;
 const seen = new Set();
 for (const p of Array.isArray(manifest.plugins) ? manifest.plugins : []) {
     const at = p && typeof p.pluginId === "string" ? p.pluginId : "(pluginId 缺失)";
-    if (typeof p.pluginId !== "string" || !PLUGIN_ID.test(p.pluginId)) fail(`${at}: pluginId 须匹配 siyuan-* 小写连字符`);
+    if (typeof p.pluginId !== "string" || !PLUGIN_ID.test(p.pluginId)) fail(`${at}: pluginId 须匹配 siyuan-*/xiaolv-* 小写连字符`);
     else if (seen.has(p.pluginId)) fail(`pluginId 重复：${p.pluginId}`);
     else seen.add(p.pluginId);
     if (!MATURITY.has(p.maturity)) fail(`${at}: maturity 须为 stable|design|unlocated`);

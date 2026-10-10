@@ -2,6 +2,25 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.9.1 · 2026-10-11（生态适配扩展 27→35 op · manifest 校准 · AI 客户端矩阵）
+
+### Added
+- **数据透传扩容（27→35 op）**：三家上游公开桥接入（契约=各上游仓库 BRIDGE/生态契约文档，`src/ops.ts` 单一来源 + 契约 JSON + dispatch 三处一致由契约测试强制）：
+  - `glean.list` / `glean.get` / `glean.status`——拾遗 `window.siyuanGlean` v1（五态筛选分页/单篇读取/改状态；写面受拾遗侧 integration.bridgeWriteEnabled 门控，关闭时 rejected 透出；done 自动记 doneTime）
+  - `home.summary` / `home.memo` / `home.open`——管家 `window.LvHome` v1（提醒有界计数 overdue/soon/today，无标题/成员；快速备忘为运行态无幂等键；总览/提醒中枢受控导航）
+  - `exam.stats` / `exam.open`——考试 `window.siyuanExam`（statsRead 按需重算脱敏快照，无题目内容/key/路径；practice/wrongbook/mock/report 稳定入口）
+  - 三家均进 workflow 白名单（写步骤带 confirm）；MCP 写注解同步（glean.status/home.memo 为写，其余只读；只读工具 14→18）
+- **AI 客户端矩阵文档**（docs/ai-clients.md）：MCP stdio / 内核 HTTP 路由 / 自定义工具三条接入路径按客户端分类（Claude、Codex、ZCode、反重力、千问、豆包、DeepSeek、WorkBuddy 等），含各客户端配置片段与写权限门控说明
+- **工具 schema 导出器**（tools/export-toolschema.mjs）：从 tools.ts 单一来源一键导出 function-calling JSON / OpenAPI 3 两种形态，供不支持 MCP 的 Agent 以「自定义工具」接入
+- 拾遗适配器含参数预校验（status/direction/limit/offset 与上游 normalizeFilter 同口径早失败）与 id 形状守卫（YYYYMMDDHHmmss-xxxxxxx）
+
+### Changed
+- **生态清单校准（2026-10-11，对照本地仓库实装）**：管家 0.4.2 / 拾遗 1.3.3 / 考试 0.9.6 三家 design→stable 并登记窗口桥与能力（契约文档均已实装）；雷切 0.46.8 / 打卡 18.17.2 / 人脉 0.5.5 版本刷新；闪卡 0.209.3 维持 design（Gateway 未落地）；补录内测 xiaolv-common 0.3.9（无对外桥，design）——三处校验器（发布门/设计侧/schema.json）pluginId 正则同步放宽为 `siyuan-*|xiaolv-*`
+- `registry.list` 返回口径：七插件→八插件清单（生态插件清单）
+
+### Fixed
+- 新增适配器守卫模式与仓库 `strict:false` 口径对齐（判别联合在无 strictNullChecks 下不窄化——`ok:true/false` 守卫改为桥实例直返 + 常量错误文案）
+
 ## v0.9.0 · 2026-10-08（UI 全面打磨 · 真机交互回归 · 撤销误报修复）
 
 ### Fixed

@@ -4,22 +4,23 @@
 
 # 小驴快门（Lv QuickGate）
 
-**思源笔记的小驴生态联动中枢 + 外部网关** —— Quicker / 快捷指令 / CLI / AI 助手共用同一套公开契约（27 op）
+**思源笔记的小驴生态联动中枢 + 外部网关** —— Quicker / 快捷指令 / CLI / AI 助手共用同一套公开契约（35 op）
 
-[English](./README.md) · [上手指南](./docs/GETTING-STARTED.md) · [op 契约](./docs/api.md) · [下载安装](https://github.com/ai68298100/siyuan-quickgate/releases)
+[English](./README.md) · [上手指南](./docs/GETTING-STARTED.md) · [op 契约](./docs/api.md) · [AI 客户端矩阵](./docs/ai-clients.md) · [下载安装](https://github.com/ai68298100/siyuan-quickgate/releases)
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.0-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.1-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 <img src="./preview.png" alt="分层设置面板 · 命令面板 · 四中心" width="820" />
 
 </div>
 
-Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（27 个 op）——
+Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小驴系插件，共用同一套公开契约（35 个 op）——
 
 - `commands.*` — 发现/搜索/执行任意已装插件的命令面板条目（默认确认门控 + 审计；搜索支持中英/拼音别名，如「打卡/daka/checkin」互达）
 - `checkin.*` / `contacts.*` — 向小驴打卡（API v5）、小驴人脉（bridge v1）的公开桥做结构化透传
+- `glean.*` / `home.*` / `exam.*` — 拾遗读库（列表/详情/五态改状态，写面受拾遗侧桥写开关门控）、管家提醒有界计数与快速备忘、考试脱敏统计与练习台入口
 - `favorites.*` — 收藏与最近使用（命令面板体验：去重前移、隐私清除，载体独立于桥文件）
-- `registry.list` / `diagnostics.report` / `config.discover` — 小驴生态七插件清单（成熟度×实装版本）、脱敏诊断、日记笔记本+收集箱自动发现
+- `registry.list` / `diagnostics.report` / `config.discover` — 小驴生态插件清单（成熟度×实装版本）、脱敏诊断、日记笔记本+收集箱自动发现
 - `events.list` / `events.pull` — 白名单事件流（打卡记录/删除已自动物化；删除标记以 `:deleted` 幂等后缀与原行共存）
 - `workflow.plan` / `workflow.execute` — 受控编排（≤8 步、白名单 op、总确认 30s、失败停止不回滚）
 - `template.new` / `doc.open` / `daily.status` / `editor.context` / `setting.open` — 模板建文档、受控导航、编辑器上下文
@@ -67,9 +68,9 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 
 ### 面向 AI 助手：MCP
 
-[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 27 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，并补充思源内置 MCP 未覆盖的小驴生态动作；协议与安全模型见 [MCP 指南](./src/mcp/README.md)。
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) 把 35 个 op 经 stdio 暴露为 MCP tools——AI 客户端可以直接执行思源命令、记打卡、记人脉互动、跑受控工作流，并补充思源内置 MCP 未覆盖的小驴生态动作；协议与安全模型见 [MCP 指南](./src/mcp/README.md)。
 
-- **默认只暴露 14 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
+- **默认只暴露 18 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
 - `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
 - 快门侧防线全部共用：确认门控、黑名单、审计日志、plugin.api 允许名单
 
@@ -111,6 +112,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | **v0.8.7** | 修复命令超过 100 条时能力动作的键盘执行偏移 · 清除无效动态导入构建警告 |
 | **v0.8.8** | 串行化桥启停过渡 · 释放接管超时后的迟到 Web Lock · 补齐设置页读屏控件名称 |
 | **v0.9.0** | **UI 全面打磨**：设置面板/命令面板/四中心对齐原型（配色证据化求解 ≥4.5:1、窄屏与触屏适配、交互 e2e 13 项真机断言）· 修复捕获撤销误报失败 · 设置搜索命中高亮 · 全新图标与品牌视觉 |
+| **v0.9.1** | **生态适配扩展 27→35 op**：拾遗 siyuanGlean v1 / 管家 LvHome v1 / 考试 siyuanExam 接入（glean.*/home.*/exam.*）· manifest 校准（三家 design→stable + 补录 xiaolv-common，清单 8 款）· AI 客户端接入矩阵（docs/ai-clients.md）+ 工具 schema 导出器 |
 
 真机验证（M0 spike ①~⑪）进度见 [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md)，路线见 [docs/ROADMAP.md](./docs/ROADMAP.md)，决策记录见 [docs/DECISIONS.md](./docs/DECISIONS.md)（D-0001~D-0015）。
 

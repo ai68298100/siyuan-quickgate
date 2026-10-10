@@ -61,6 +61,7 @@ function make(mem: MemKernel) {
         openSetting: () => {},
         getCheckin: () => undefined,
         getContacts: () => undefined,
+        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
         loadPetals: async () => mem.petals,
         discoverConfig: async () => {
             const diary = mem.notebooks.find((n) => !n.closed && n.conf?.dailynoteSavePath);
@@ -96,9 +97,9 @@ describe("生态中枢 op（R1）", () => {
         expect(checkin.installed).toBe(true);
         expect(checkin.installedVersion).toBe("18.9.0");
         expect(checkin.maturity).toBe("stable");
-        // R228 真机校准：拾遗已定位=siyuan-glean（design），design 态不进 adapter
+        // v0.9.1 校准：拾遗 window.siyuanGlean v1 已实装（docs/BRIDGE.md）→ stable，adapter 已注册
         const glean = receipt.data.plugins.find((p: { pluginId: string }) => p.pluginId === "siyuan-glean");
-        expect(glean.maturity).toBe("design");
+        expect(glean.maturity).toBe("stable");
         expect(glean.installed).toBe(true);
     });
 

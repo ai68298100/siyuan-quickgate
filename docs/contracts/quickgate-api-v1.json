@@ -152,6 +152,89 @@
       "idempotency": "ref=envelope.id"
     },
     {
+      "op": "glean.list",
+      "args": {
+        "status": "'inbox'|'later'|'reading'|'done'|'archived'|'all'?",
+        "site": "string?",
+        "tag": "string?",
+        "aiTag": "string?",
+        "keyword": "string?",
+        "direction": "'asc'(默认)|'desc'",
+        "limit": "int?1-200",
+        "offset": "int?>=0"
+      },
+      "effect": "read",
+      "requires": "siyuan-glean v1 (window.siyuanGlean)",
+      "since": "0.9.1",
+      "note": "上游 listClips 透传：先筛选排序再分页；含完整公开字段白名单（id/title/status/tags/aiTags 等）"
+    },
+    {
+      "op": "glean.get",
+      "args": {
+        "id": "string (YYYYMMDDHHmmss-xxxxxxx)"
+      },
+      "effect": "read",
+      "requires": "siyuan-glean v1 (window.siyuanGlean)",
+      "since": "0.9.1",
+      "note": "不存在/非已收录文档回 clip:null"
+    },
+    {
+      "op": "glean.status",
+      "args": {
+        "id": "string (YYYYMMDDHHmmss-xxxxxxx)",
+        "status": "'inbox'|'later'|'reading'|'done'|'archived'"
+      },
+      "effect": "write",
+      "requires": "siyuan-glean v1 setClipStatus",
+      "since": "0.9.1",
+      "note": "上游写门控：拾遗设置 integration.bridgeWriteEnabled 关闭时 rejected 透出；done 自动记 doneTime"
+    },
+    {
+      "op": "home.summary",
+      "args": {},
+      "effect": "read",
+      "requires": "siyuan-home v1 (window.LvHome) summary",
+      "since": "0.9.1",
+      "note": "提醒有界计数 {overdue,soon,today,updatedAt}；不含标题/日期/成员（上游 EC17 边界）"
+    },
+    {
+      "op": "home.memo",
+      "args": {
+        "title": "string<=200",
+        "dueDate": "string"
+      },
+      "effect": "write",
+      "requires": "siyuan-home v1 addMemo",
+      "since": "0.9.1",
+      "note": "运行态备忘，无幂等键——超时禁止换 id 重试同语义（会重复记录）"
+    },
+    {
+      "op": "home.open",
+      "args": {
+        "target": "'butler'(默认)|'reminders'"
+      },
+      "effect": "navigation",
+      "requires": "siyuan-home v1 openButler/openReminders",
+      "since": "0.9.1"
+    },
+    {
+      "op": "exam.stats",
+      "args": {},
+      "effect": "read",
+      "requires": "siyuan-exam window.siyuanExam statsRead",
+      "since": "0.9.1",
+      "note": "按需重算脱敏快照（作答/正确率/消灭/连击/时段分布；无题目内容/key/路径）；应用未就绪回 stats:null"
+    },
+    {
+      "op": "exam.open",
+      "args": {
+        "target": "'practice'(默认)|'wrongbook'|'mock'|'report'"
+      },
+      "effect": "navigation",
+      "requires": "siyuan-exam window.siyuanExam",
+      "since": "0.9.1"
+    },
+    {
       "op": "doc.open",
       "args": {
         "id": "string"
@@ -190,7 +273,7 @@
       "args": {},
       "effect": "read",
       "since": "0.2.0",
-      "note": "生态七插件清单：manifest×loadPetals 合并"
+      "note": "生态插件清单：manifest×loadPetals 合并"
     },
     {
       "op": "diagnostics.report",

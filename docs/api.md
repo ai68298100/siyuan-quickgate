@@ -20,7 +20,7 @@
 | **随插件可用** | 插件启用即生效，无需任何开关 | 内核路由七 op（bridge.ping/registry.list/diagnostics.report/events.list·pull/config.discover/template.new） |
 | **需开桥** | 需在设置开启「外部命令桥」（默认关，Token 鉴权） | 全部前端 op 的 NDJSON 通道 |
 | **需广播开关** | 需另开「广播快路径」（默认关；毫秒级） | 全部前端 op 的广播通道 |
-| **需上游插件** | 需安装并启用对应小驴插件（能力协商，缺=unsupported） | checkin.*、contacts.*、commands.*（宿主命令） |
+| **需上游插件** | 需安装并启用对应小驴插件（能力协商，缺=unsupported） | checkin.*、contacts.*、commands.*（宿主命令）、glean.*、home.*、exam.* |
 | **需授权** | 需显式开关/名单/环境变量 | plugin.api（开关+名单）、MCP 写工具（LV_MCP_WRITE=1）、workflow.execute（确认） |
 | **仅桌面 / 待真机** | 依赖桌面 DOM 或尚未真机验证 | editor.context、setting.open（桌面）；标注「实验」的能力（manifest maturity=design 不注册） |
 
@@ -53,6 +53,14 @@
 | `contacts.search` | `{keyword?}` | `{people:[…]}` ≤50 | 走人脉 v1 `searchPeople` |
 | `contacts.ensure` | `{name}` | `{docId,name,created}` | 走 `ensurePerson` |
 | `contacts.interaction` | `{names?/docIds?, date?, place?, note?}` | `{recorded, people:[…]}` | names 兼容中英文逗号/顿号/分号/空白；`ref=信封 id` 幂等 |
+| `glean.list` | `{status?, site?, tag?, aiTag?, keyword?, direction?, limit?≤200, offset?}` | `{clips:[…], count}` | 走拾遗 v1 `window.siyuanGlean.listClips`；五态筛选 + 分页（先筛排后分页）；字段白名单见上游 docs/BRIDGE.md |
+| `glean.get` | `{id}` | `{clip|null}` | 走 `getClip`；id 形状 `YYYYMMDDHHmmss-xxxxxxx`；不存在回 null |
+| `glean.status` | `{id, status}` | `{id, status}` | 走 `setClipStatus`（五态）；**受拾遗侧桥写开关门控**（关闭时 rejected 透出）；done 自动记 doneTime |
+| `home.summary` | `{}` | `{overdue, soon, today, updatedAt}` | 走管家 v1 `window.LvHome.summary`；有界计数（无标题/成员，上游 EC17 边界） |
+| `home.memo` | `{title≤200, dueDate}` | `{title, dueDate}` | 走 `addMemo`；**运行态无幂等键**——超时禁止换 id 重试同语义 |
+| `home.open` | `{target?}` | `{ok, target}` | `butler`（默认，总览）或 `reminders`（提醒中枢）；受控导航 |
+| `exam.stats` | `{}` | `{stats|null}` | 走考试 `window.siyuanExam.statsRead()`（按需重算脱敏快照，无题目内容/key/路径）；应用未就绪回 null |
+| `exam.open` | `{target?}` | `{ok, target}` | `practice`（默认）/ `wrongbook` / `mock` / `report`；走 siyuanExam 稳定入口 |
 | `doc.open` | `{id}` | `{ok:true}` | 受控导航，不改数据 |
 | `daily.status` | `{}` | `{docId, exists}` | 只探测不创建 |
 | `setting.open` | `{}` | `{ok:true}` | 打开思源设置 |

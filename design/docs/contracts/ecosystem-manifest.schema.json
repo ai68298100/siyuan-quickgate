@@ -39,7 +39,7 @@
       "required": ["pluginId", "displayName", "maturity", "version", "protocol", "capabilities", "hubIntegration"],
       "additionalProperties": false,
       "properties": {
-        "pluginId": { "type": "string", "pattern": "^siyuan-[a-z][a-z0-9-]*$" },
+        "pluginId": { "type": "string", "pattern": "^(siyuan|xiaolv)-[a-z][a-z0-9-]*$" },
         "displayName": { "type": "string", "minLength": 1 },
         "maturity": { "$ref": "#/$defs/maturity" },
         "version": { "type": ["string", "null"], "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
