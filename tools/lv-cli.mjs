@@ -8,7 +8,7 @@
  *   node tools/lv-cli.mjs receipt --id <命令id> [--plugin siyuan-quickgate]
  * 说明：无快门时也可对打卡/人脉自己的桥目录发命令（--plugin 指定目标插件）。
  */
-const url = (process.env.SIYUAN_URL || "http://127.0.0.1:6806").replace(/\/$/, "");
+let url = (process.env.SIYUAN_URL || "").replace(/\/$/,""); // 空则 main() 里自动发现工作区内核
 const token = process.env.SIYUAN_TOKEN || "";
 const PLUGIN = "siyuan-quickgate";
 
@@ -102,6 +102,12 @@ async function receipt(plugin, id, maxWaitMs) {
 }
 
 async function main() {
+    if (!url) {
+        const { discoverWorkspaceKernel } = await import("../src/mcp/discover.ts");
+        const found = await discoverWorkspaceKernel({ token });
+        if (found) { url = found; console.error("[lv-cli] 已自动发现工作区内核：" + found + "（显式指定 SIYUAN_URL 可跳过探测）"); }
+        else url = "http://127.0.0.1:6806";
+    }
     const [command] = process.argv.slice(2);
     const plugin = arg("--plugin", PLUGIN);
     const waitRaw = arg("--wait", "8000");

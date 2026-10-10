@@ -21,13 +21,22 @@ const version = (() => {
     return "0.0.0";
 })();
 
-const url = (process.env.SIYUAN_URL || "http://127.0.0.1:6806").replace(/\/$/, "");
 const token = process.env.SIYUAN_TOKEN || "";
 if (!token) {
     console.error("错误：请设置 SIYUAN_TOKEN 环境变量（思源 设置→关于→API 令牌）");
     process.exit(1);
 }
 const writeEnabled = process.env.LV_MCP_WRITE === "1";
+
+// 未显式给 SIYUAN_URL 时自动发现工作区内核（3.8.7-alpha 双内核：6806 是启动器，
+// 工作区内核动态端口且 Token 不通用——见 docs/ai-clients.md §3.3）。失败回退 6806 让错误自然暴露。
+const url = (await (async () => {
+    if (process.env.SIYUAN_URL) return process.env.SIYUAN_URL.replace(/\/$/, "");
+    const { discoverWorkspaceKernel } = await import("./discover.ts");
+    const found = await discoverWorkspaceKernel({ token });
+    if (found) console.error(`[lv-quickgate] 已自动发现工作区内核：${found}（显式指定 SIYUAN_URL 可跳过探测）`);
+    return found ?? "http://127.0.0.1:6806";
+})());
 
 const client = new KernelBridgeClient({ url, token });
 const server = createMcpServer(client, { writeEnabled, version });

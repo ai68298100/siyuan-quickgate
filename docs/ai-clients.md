@@ -92,7 +92,8 @@ Content-Type: application/json
 
 思源 3.8.7-alpha 起按「启动器内核 + 工作区内核」双进程运行：**6806 由无工作区的启动器内核持有，工作区内核在每次启动时分配动态端口**（如 5993），且两者 Token 不通用。外部客户端的 `SIYUAN_URL` 必须指向**工作区内核**端口：
 
-- 端口会随重启变化——用 `netstat -ano | findstr LISTENING | findstr <SiYuan-Kernel PID>` 或思源 UI 查询；工作区内核同时监听 6808 辅助端口可作识别特征
+- **快门自带工具已内置自动发现**：MCP 服务器（`src/mcp/main.ts`）与 `lv-cli` 在**未设置 `SIYUAN_URL`** 时自动定位工作区内核（6806 老单内核快路径 → 扫描 SiYuan-Kernel 进程监听端口 → 以 Token 鉴权通过为准，实测 <1s）；显式给 `SIYUAN_URL` 则跳过探测
+- 手动查端口：`netstat -ano | findstr LISTENING | findstr <SiYuan-Kernel PID>`；工作区内核同时监听 6808 辅助端口可作识别特征
 - 单工作区老版本（≤3.8.6）仍是固定 6806，无需处理
 - NDJSON 桥（文件载体）不受影响，但读写文件同样要经工作区内核的 HTTP API
 
