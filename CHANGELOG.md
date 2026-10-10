@@ -14,6 +14,7 @@
 - **verify-restart.mjs 接入端口自动发现**：真机复测在 3.8.7-alpha 双内核下无需手动指定 SIYUAN_URL（e2e 等写型脚本按 R287 纪律保持显式指定，不自动指向在用工作区）
 - **工具 schema 导出器**（tools/export-toolschema.mjs）：从 tools.ts 单一来源一键导出 function-calling JSON / OpenAPI 3 两种形态，供不支持 MCP 的 Agent 以「自定义工具」接入
 - **工作区内核端口自动发现**（src/mcp/discover.ts）：思源 ≥3.8.7-alpha 双内核架构下 6806 归启动器内核、工作区内核为动态端口——MCP 服务器与 lv-cli 在未设 SIYUAN_URL 时自动定位（6806 快路径 → 扫描 SiYuan-Kernel 进程监听端口 → Token 鉴权判定，实测 <1s）；tools/restart-siyuan.bat 安装目录自动探测
+- 命令面板「能力动作」目录补 8 个新 op（9→17：拾遗×3/管家×3/考试×2；写动作自动获双档标注，schema 仍由 ARGS 单一来源驱动）
 - 拾遗适配器含参数预校验（status/direction/limit/offset 与上游 normalizeFilter 同口径早失败）与 id 形状守卫（YYYYMMDDHHmmss-xxxxxxx）
 
 ### Changed
