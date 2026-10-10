@@ -9,7 +9,10 @@
  *   I5 通道卡下钻：点状态卡 → 当前分组页切换
  *   I6 捕获全链：fallback 捕获 → 去向确认 → 成功卡（撤销写入含宿主确认框，soft 断言）
  *
- *   SIYUAN_BASE_URL=http://127.0.0.1:6807 SIYUAN_TOKEN=<靶场 token> \
+ *   SIYUAN_BASE_URL=http://127.0.0.1:6807 SIYUAN_TOKEN=<靶场 token>
+ *   【已知环境性瞬态（2026-10-11 双内核 3.8.7-alpha.6 实测）】I7/I8 可因「设置保存→petal 重载」
+ *   瞬态失败：diag 显示 bridgeEnabled:false/pollerRunning:false（UI 行显示已开桥但实例读到旧值）。
+ *   对照实验：改动前构建同靶场同序列复现同 diag——非代码回归，重跑或核对靶场 seed 即可。 \
  *   QG_PLAYWRIGHT_PATH=<playwright 模块目录> node e2e/ui-interactions.mjs
  */
 import { createRequire } from "node:module";
