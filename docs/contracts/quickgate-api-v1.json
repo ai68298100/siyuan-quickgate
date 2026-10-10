@@ -235,6 +235,47 @@
       "since": "0.9.1"
     },
     {
+      "op": "common.search",
+      "args": {
+        "keyword": "string?",
+        "itemType": "string?",
+        "tag": "string?",
+        "category": "string?",
+        "scope": "'all'(默认)|'favorites'|'recent'",
+        "limit": "int?<=200"
+      },
+      "effect": "read",
+      "requires": "xiaolv-common v1 (window.xiaolvCommon) search",
+      "since": "0.9.2",
+      "note": "上游 ActionResult 信封透传（ADR-0013 只读子集）；仅元数据出域（上游 searchForAgent 同边界：不含正文）"
+    },
+    {
+      "op": "common.get",
+      "args": {
+        "id": "string<=64"
+      },
+      "effect": "read",
+      "requires": "xiaolv-common v1 get",
+      "since": "0.9.2",
+      "note": "完整条目（含 markdown 内容）；not-found/invalid-input → rejected 透出 reason"
+    },
+    {
+      "op": "common.recent",
+      "args": {
+        "limit": "int?1-100"
+      },
+      "effect": "read",
+      "requires": "xiaolv-common v1 getRecent",
+      "since": "0.9.2"
+    },
+    {
+      "op": "common.favorites",
+      "args": {},
+      "effect": "read",
+      "requires": "xiaolv-common v1 getFavorites",
+      "since": "0.9.2"
+    },
+    {
       "op": "doc.open",
       "args": {
         "id": "string"

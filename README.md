@@ -4,17 +4,17 @@
 
 # Lv QuickGate (小驴快门)
 
-**The Lv ecosystem hub & external gateway for SiYuan** — one public contract (35 ops) for Quicker / Shortcuts / CLI / AI assistants
+**The Lv ecosystem hub & external gateway for SiYuan** — one public contract (39 ops) for Quicker / Shortcuts / CLI / AI assistants
 
 [中文文档](./README.zh-CN.md) · [Getting started](./docs/GETTING-STARTED.md) · [op contract](./docs/api.md) · [AI client matrix](./docs/ai-clients.md) · [Download](https://github.com/ai68298100/siyuan-quickgate/releases)
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.1-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.2-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 <img src="./preview.png" alt="Layered settings · command palette · four centers" width="820" />
 
 </div>
 
-Outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (35 ops):
+Outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scripts…) and sibling plugins share one public contract (39 ops):
 
 - `commands.*` — discover / search / run command-palette entries of any installed plugin (confirm-gated, audited; search understands zh/en/pinyin aliases — 打卡/daka/checkin all hit)
 - `checkin.*` / `contacts.*` — structured pass-through to the public bridges of Lv Check-in (API v5) and Lv Contacts (bridge v1)
@@ -67,7 +67,7 @@ Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tr
 
 ### MCP for AI assistants
 
-[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 35 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, including the Lv ecosystem actions that are outside SiYuan's built-in MCP surface. See the [MCP guide](./src/mcp/README.md) for the protocol and safety model.
+[`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 39 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, including the Lv ecosystem actions that are outside SiYuan's built-in MCP surface. See the [MCP guide](./src/mcp/README.md) for the protocol and safety model.
 
 - **14 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
 - `plugin.api` / `workflow.execute` additionally carry the `destructiveHint` annotation
@@ -111,7 +111,8 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | **v0.8.7** | Fix keyboard execution offsets after the 100-command render limit · remove an ineffective dynamic import warning |
 | **v0.8.8** | Serialize bridge start/stop transitions · release late Web Lock grants after takeover timeout · improve settings screen-reader labels |
 | **v0.9.0** | **Full UI overhaul**: settings panel / palette / four centers aligned to the prototype (evidence-solved palette contrast ≥4.5:1, narrow-screen & touch support, 13-assertion real-kernel interaction e2e) · fixed capture-undo false failure · settings search hit highlighting · new icon & brand visuals |
-| **v0.9.1** | **Ecosystem adapters 27→35 ops**: glean (siyuanGlean v1) / home (LvHome v1) / exam (siyuanExam) integration · manifest calibration (three plugins design→stable + xiaolv-common added, 8 entries) · AI client matrix (docs/ai-clients.md) + tool-schema exporter |
+| **v0.9.2** | **Ecosystem completion 35→39 op**: xiaolv-common window bridge shipped upstream (0.4.0 · ADR-0013 read-only subset) and integrated as common.search/get/recent/favorites (all read-only) |
+| **v0.9.1** | **Ecosystem adapters 27→35 op**: glean (siyuanGlean v1) / home (LvHome v1) / exam (siyuanExam) integration · manifest calibration (three plugins design→stable + xiaolv-common added, 8 entries) · AI client matrix (docs/ai-clients.md) + tool-schema exporter |
 
 Kernel-runtime verification (M0 spike ①–⑪) is tracked in [docs/WALKTHROUGH.md](./docs/WALKTHROUGH.md); roadmap in [docs/ROADMAP.md](./docs/ROADMAP.md); decision log in [docs/DECISIONS.md](./docs/DECISIONS.md) (D-0001–D-0015).
 

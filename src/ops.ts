@@ -19,6 +19,8 @@ export const ALL_OPS = [
     "glean.list", "glean.get", "glean.status",
     "home.summary", "home.memo", "home.open",
     "exam.stats", "exam.open",
+    // 数据透传（v0.9.2：小驴常用 window.xiaolvCommon v1 只读面，ADR-0013）
+    "common.search", "common.get", "common.recent", "common.favorites",
     // 便利 op
     "doc.open", "daily.status", "setting.open", "editor.context",
     // 生态中枢

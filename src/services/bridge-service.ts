@@ -19,6 +19,7 @@ import {
     gleanList, gleanGet, gleanStatus,
     homeSummary, homeMemo, homeOpen,
     examStats, examOpen,
+    commonSearch, commonGet, commonRecent, commonFavorites,
     BridgeResult,
 } from "./adapters";
 import { validateTemplatePath, validateTemplateContent } from "./path-guard";
@@ -125,10 +126,11 @@ export interface BridgeServiceDeps {
     /** 公开桥获取器 */
     getCheckin: () => unknown;
     getContacts: () => unknown;
-    /** 拾遗/管家/考试公开桥（v0.9.x 扩展；缺席时适配器回 unsupported） */
+    /** 拾遗/管家/考试/常用公开桥（v0.9.x 扩展；缺席时适配器回 unsupported） */
     getGlean: () => unknown;
     getHome: () => unknown;
     getExam: () => unknown;
+    getCommon: () => unknown;
     now?: () => number;
 }
 
@@ -553,6 +555,14 @@ export class BridgeService {
                 return await examStats(this.deps.getExam as () => never);
             case "exam.open":
                 return await examOpen(this.deps.getExam as () => never, a as { target?: unknown });
+            case "common.search":
+                return await commonSearch(this.deps.getCommon as () => never, a as { keyword?: unknown; itemType?: unknown; tag?: unknown; category?: unknown; scope?: unknown; limit?: unknown });
+            case "common.get":
+                return await commonGet(this.deps.getCommon as () => never, a as { id?: unknown });
+            case "common.recent":
+                return await commonRecent(this.deps.getCommon as () => never, a as { limit?: unknown });
+            case "common.favorites":
+                return await commonFavorites(this.deps.getCommon as () => never);
 
             // ---- 便利 op ----
             case "doc.open": {

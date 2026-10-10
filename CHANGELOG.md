@@ -2,6 +2,15 @@
 
 所有显著变更记录于此。格式参考 Keep a Changelog；版本遵循 SemVer。
 
+## v0.9.2 · 2026-10-11（生态适配收尾 35→39 op · 小驴常用接入）
+
+### Added
+- **数据透传扩容（35→39 op）**：小驴常用 `window.xiaolvCommon` v1 接入（上游 0.4.0 · ADR-0013 只读子集）——`common.search`（元数据检索）/`common.get`（完整条目）/`common.recent`/`common.favorites`，全部只读；上游 ActionResult 信封透传（not-found/invalid-input → rejected 透出 reason）；MCP 只读工具 18→22
+- 生态清单：xiaolv-common design→stable（0.4.0，windowBridge=xiaolvCommon · minProtocol v1）——manifest 8 款中 stable/design 双轨齐整（6 stable + 2 design）
+- workflow 白名单收编 common.* 四 op（只读步骤无确认标记）
+
+### 协作
+- 上游桥由本轮在上游仓库落地（xiaolv-common T-0031 · ADR-0013 · 0.4.0）：window.xiaolvCommon 挂载/卸载纪律对齐 LvHome 先例，写面留 v2
 ## v0.9.1 · 2026-10-11（生态适配扩展 27→35 op · manifest 校准 · AI 客户端矩阵）
 
 ### Added

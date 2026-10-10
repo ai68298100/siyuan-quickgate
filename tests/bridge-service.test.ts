@@ -59,7 +59,7 @@ function makeService(mem: MemKernel) {
         openSetting: () => {},
         getCheckin: () => undefined,
         getContacts: () => undefined,
-        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
     });
     return { service, store };
 }
@@ -168,7 +168,7 @@ describe("bridge-service 累计统计（可观测性）", () => {
             openSetting: () => {},
             getCheckin: () => undefined,
             getContacts: () => undefined,
-            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
             now: () => {
                 clock += steps[reads] ?? 0;
                 reads += 1;
@@ -226,7 +226,7 @@ describe("plugin.api 高级透传（安全敏感：开关+允许名单+manifest 
             openSetting: () => {},
             getCheckin: () => undefined,
             getContacts: () => undefined,
-            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
         });
         return service;
     }

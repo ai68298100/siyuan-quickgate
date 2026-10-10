@@ -535,6 +535,7 @@ export default class QuickGatePlugin extends Plugin {
             getGlean: () => (window as unknown as { siyuanGlean?: unknown }).siyuanGlean,
             getHome: () => (window as unknown as { LvHome?: unknown }).LvHome,
             getExam: () => (window as unknown as { siyuanExam?: unknown }).siyuanExam,
+            getCommon: () => (window as unknown as { xiaolvCommon?: unknown }).xiaolvCommon,
             loadPetals: () => this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() }),
             discoverConfig: () => this.discoverConfig(),
         };

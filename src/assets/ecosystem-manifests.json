@@ -1,7 +1,7 @@
 {
   "version": 2,
   "updatedAt": "2026-10-11",
-  "note": "小驴生态能力清单（docs/09 审查口径；C9 合同 v2 形状=docs/contracts/ecosystem-manifest-contract.md）。maturity: stable=已发布公开契约, design=设计态(已定位未定契约), unlocated=未定位。design/unlocated 只进 manifest 与诊断，不注册可执行 adapter。校准溯源：2026-10-02 R6 对照各仓库远端 main（雷切 0.44.1 +3 能力/打卡 18.16.0 +7 事件/人脉 0.4.1 桥不变）；2026-10-05 R228 真机校准（E4：loadPetals + data/plugins/*/plugin.json）修正三处 ID/版本漂移——闪卡 siyuan-flashcards→siyuan-lv-cards 0.154.0、拾遗 siyuan-shiyi(未定位)→siyuan-glean 1.1.0(design)、管家 siyuan-butler→siyuan-home 0.2.0；考试真机未安装。2026-10-11 v0.9.1 校准（对照本地仓库实装+上游契约文档）：管家 0.4.2 window.LvHome v1（docs/BRIDGE.md）、拾遗 1.3.3 window.siyuanGlean v1（docs/BRIDGE.md）、考试 0.9.6 window.siyuanExam lite（docs/ecosystem-contracts.md，成员探测、无协议版本常量）三家转 stable 并注册 adapter（glean.*/home.*/exam.*）；雷切 0.46.8/打卡 18.17.2/人脉 0.5.5 版本刷新；闪卡 0.209.3 Gateway 仍未落地维持 design；补录内测 xiaolv-common（无对外桥，design）。v2 新增字段：minProtocol（stable∧window.* 必填）/sourceOfTruth/ingestion/eventNamespace（有 events 必填）。",
+  "note": "小驴生态能力清单（docs/09 审查口径；C9 合同 v2 形状=docs/contracts/ecosystem-manifest-contract.md）。maturity: stable=已发布公开契约, design=设计态(已定位未定契约), unlocated=未定位。design/unlocated 只进 manifest 与诊断，不注册可执行 adapter。校准溯源：2026-10-02 R6 对照各仓库远端 main（雷切 0.44.1 +3 能力/打卡 18.16.0 +7 事件/人脉 0.4.1 桥不变）；2026-10-05 R228 真机校准（E4：loadPetals + data/plugins/*/plugin.json）修正三处 ID/版本漂移——闪卡 siyuan-flashcards→siyuan-lv-cards 0.154.0、拾遗 siyuan-shiyi(未定位)→siyuan-glean 1.1.0(design)、管家 siyuan-butler→siyuan-home 0.2.0；考试真机未安装。2026-10-11 v0.9.1 校准（对照本地仓库实装+上游契约文档）：管家 0.4.2 window.LvHome v1（docs/BRIDGE.md）、拾遗 1.3.3 window.siyuanGlean v1（docs/BRIDGE.md）、考试 0.9.6 window.siyuanExam lite（docs/ecosystem-contracts.md，成员探测、无协议版本常量）三家转 stable 并注册 adapter（glean.*/home.*/exam.*）；雷切 0.46.8/打卡 18.17.2/人脉 0.5.5 版本刷新；闪卡 0.209.3 Gateway 仍未落地维持 design；补录内测 xiaolv-common（design）；2026-10-11 v0.9.2：常用 0.4.0 window.xiaolvCommon v1 落地（ADR-0013 只读子集）→ stable 并接入 common.* 四 op。v2 新增字段：minProtocol（stable∧window.* 必填）/sourceOfTruth/ingestion/eventNamespace（有 events 必填）。",
   "plugins": [
     {
       "pluginId": "siyuan-speed-switch",
@@ -109,14 +109,15 @@
     {
       "pluginId": "xiaolv-common",
       "displayName": "小驴常用",
-      "maturity": "design",
-      "version": "0.3.9",
-      "protocol": null,
-      "minProtocol": null,
-      "sourceOfTruth": [],
+      "maturity": "stable",
+      "version": "0.4.0",
+      "protocol": "window.xiaolvCommon v1",
+      "minProtocol": "v1",
+      "windowBridge": "xiaolvCommon",
+      "sourceOfTruth": ["common.items"],
       "ingestion": "none",
-      "capabilities": [],
-      "hubIntegration": "内测（Beta）常用内容快速调用器；无对外窗口桥（design）；命令面已由 commands.* 覆盖；manifest v0.9.1 校准补录"
+      "capabilities": ["search", "get", "recent", "favorites", "getCapabilities"],
+      "hubIntegration": "common.search/get/recent/favorites 透传适配器（ADR-0013 只读子集；写面留 v2）；契约=常用 docs/adr/0013-external-window-bridge.md；命令面已由 commands.* 覆盖"
     }
   ]
 }

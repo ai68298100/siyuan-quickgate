@@ -4,6 +4,7 @@ import {
     gleanList, gleanGet, gleanStatus,
     homeSummary, homeMemo, homeOpen,
     examStats, examOpen,
+    commonSearch, commonGet, commonRecent, commonFavorites,
     CheckinBridgeLike, ContactsBridgeLike,
 } from "../src/services/adapters";
 
@@ -252,5 +253,50 @@ describe("exam 适配器（window.siyuanExam lite）", () => {
         expect((r.data as { target: string }).target).toBe("practice");
         const w = await examOpen(readyExam, { target: "wrongbook" });
         expect((w.data as { target: string }).target).toBe("wrongbook");
+    });
+});
+
+describe("common 适配器（window.xiaolvCommon v1 只读面）", () => {
+    const readyCommon = () => ({
+        protocol: 1,
+        protocolName: "xiaolv-common",
+        capabilities: ["search", "get", "recent", "favorites"],
+        search: async (q?: Record<string, unknown>) => ({ ok: true, protocol: "xiaolv-common", protocolVersion: 1, data: [{ id: "i1", itemType: "text", title: "条目一" }] }),
+        get: async (id: string) => (id === "i1" ? { ok: true, protocol: "xiaolv-common", protocolVersion: 1, data: { id: "i1", markdown: "内容" } } : { ok: false, reason: "not-found", message: "not found" }),
+        getRecent: async (limit?: number) => ({ ok: true, protocol: "xiaolv-common", protocolVersion: 1, data: [{ id: "r1", itemType: "text", title: "最近" }] }),
+        getFavorites: async () => ({ ok: true, protocol: "xiaolv-common", protocolVersion: 1, data: [] }),
+    });
+
+    it("缺桥/协议不符 → unsupported", async () => {
+        expect((await commonSearch(() => undefined, {})).status).toBe("unsupported");
+        expect((await commonSearch(() => ({ protocol: 2 }), {})).status).toBe("unsupported");
+        expect((await commonGet(() => undefined, { id: "x" })).status).toBe("unsupported");
+    });
+
+    it("search：keyword→text 收敛；limit 截断；信封透传 recorded", async () => {
+        const r = await commonSearch(readyCommon, { keyword: "关键词", limit: 50 });
+        expect(r.status).toBe("recorded");
+        expect((r.data as Array<{ id: string }>).length).toBe(1);
+        const r0 = await commonSearch(readyCommon, {});
+        expect(r0.status).toBe("recorded");
+    });
+
+    it("get：id 校验 rejected；not-found 走协议信封归 rejected 透出 reason", async () => {
+        expect((await commonGet(readyCommon, {})).status).toBe("rejected");
+        expect((await commonGet(readyCommon, { id: "x".repeat(65) })).status).toBe("rejected");
+        const miss = await commonGet(readyCommon, { id: "20240101120000-zzzzzzz" });
+        expect(miss.status).toBe("rejected");
+        expect(miss.message).toContain("not found");
+        const ok = await commonGet(readyCommon, { id: "i1" });
+        expect(ok.status).toBe("recorded");
+        expect((ok.data as { markdown: string }).markdown).toBe("内容");
+    });
+
+    it("recent/favorites：越界 limit 由服务钳制；信封异常形状归 failed", async () => {
+        expect((await commonRecent(readyCommon, { limit: 5 })).status).toBe("recorded");
+        expect((await commonFavorites(readyCommon)).status).toBe("recorded");
+        const bad = await commonSearch(() => ({ protocol: 1, search: async () => ({ unexpected: true }) }), {});
+        expect(bad.status).toBe("failed");
+        expect(bad.message).toContain("形状异常");
     });
 });

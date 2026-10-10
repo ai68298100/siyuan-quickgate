@@ -63,7 +63,7 @@ function makeService(mem: MemKernel, store: BridgeStore) {
         openSetting: () => {},
         getCheckin: () => undefined,
         getContacts: () => undefined,
-        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
     });
     return service;
 }

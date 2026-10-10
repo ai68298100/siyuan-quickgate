@@ -2,7 +2,7 @@
 
 > 各 AI 客户端（含国内千问/豆包/WorkBuddy 等无 MCP 平台）的接入路径与兼容矩阵见 [docs/ai-clients.md](../docs/ai-clients.md)。
 
-把小驴快门的 35 个 op 一比一暴露为 MCP tools，供 Claude Desktop / Cursor 等 AI 客户端调用。
+把小驴快门的 39 个 op 一比一暴露为 MCP tools，供 Claude Desktop / Cursor 等 AI 客户端调用。
 零插件改动：代理 ↔ 思源内核 HTTP API（NDJSON 桥文件 + 广播快路径），消费的端点均已真机实证。
 
 ## 运行
@@ -30,7 +30,7 @@ Claude Desktop 配置（`claude_desktop_config.json`）：
 
 ## 安全模型
 
-- **默认只读**：18 个只读工具（ping/清单/概览/搜索/上下文/诊断/事件拉取…）
+- **默认只读**：22 个只读工具（ping/清单/概览/搜索/上下文/诊断/事件拉取…）
 - **写工具默认隐藏**：`LV_MCP_WRITE=1` 才进 tools/list；tools/call 直接调写工具会被诚实拒绝
 - **参数校验前置（L562）**：tools/call 先按登记 schema 本地校验，缺失必填/错型直接回 JSON-RPC **-32602**（协议级 invalid params），不消耗桥队列槽位——与工具执行失败（isError result）分离
 - **stdio 并发限额（L560）**：并发 tools/call 上限 4，超限立即回 -32000（服务忙请重试），防并发写者放大 NDJSON 队列竞争
@@ -41,7 +41,7 @@ Claude Desktop 配置（`claude_desktop_config.json`）：
 
 ## 工具面
 
-35 op 一比一（tools 集合由测试强制 === src/ops.ts ALL_OPS）：
+39 op 一比一（tools 集合由测试强制 === src/ops.ts ALL_OPS）：
 逐 op 参数 schema 见 tools.ts ARGS 表（required 已穿透；无参 op 为空 properties；本地校验同表驱动）。
 等待策略：普通 op 15s；commands.run / workflow.execute 35s（覆盖确认窗口）。
 回执等待经共享监视器（L555）：并发调用共享单一 results.ndjson 读取循环按 id 分发；

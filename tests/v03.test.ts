@@ -53,7 +53,7 @@ function make(mem: MemKernel, over: Record<string, unknown> = {}) {
         dailyStatus: async () => ({ docId: null, exists: false }),
         openDoc: () => {}, openSetting: () => {},
         getCheckin: () => undefined, getContacts: () => undefined,
-        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
         loadPetals: async () => [],
         discoverConfig: async () => ({ diaryNotebookId: null, inboxDocId: null, notes: [] }),
         ...over,

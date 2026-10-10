@@ -519,4 +519,108 @@ export async function examOpen(getBridge: () => unknown, args: { target?: unknow
     }
 }
 
+/* ---------------- 常用 v1（window.xiaolvCommon，契约=上游 ADR-0013 · 只读子集） ---------------- */
+
+export interface CommonBridgeLike {
+    protocol?: number;
+    protocolName?: string;
+    capabilities?: readonly string[];
+    whenReady?: () => Promise<unknown>;
+    getCapabilities?: () => unknown;
+    search?: (query?: unknown) => Promise<unknown>;
+    get?: (itemId: string) => Promise<unknown>;
+    getRecent?: (limit?: number) => Promise<unknown>;
+    getFavorites?: () => Promise<unknown>;
+}
+
+const COMMON_MISSING = "小驴常用未安装或无 window.xiaolvCommon v1 桥";
+
+/** 桥协商：protocol=1 才可用 */
+function commonBridgeOf(getBridge: () => unknown): CommonBridgeLike | undefined {
+    const b = getBridge() as CommonBridgeLike | undefined;
+    return b && b.protocol === 1 ? b : undefined;
+}
+
+/** SearchResultAction → 快门回执（信封透传：ok=false 映射 rejected/failed，reason 保留给消费方） */
+function commonResult(r: unknown, okMessage: string): BridgeResult {
+    const env = r as { ok?: boolean; reason?: string; message?: string; data?: unknown } | undefined;
+    if (!env || typeof env.ok !== "boolean") {
+        return { status: "failed", data: null, message: "常用桥返回形状异常（缺 ActionResult 信封）" };
+    }
+    if (!env.ok) {
+        // not-found/invalid-input = 调用方语义问题（rejected）；kernel-error/timeout = failed
+        const soft = env.reason === "not-found" || env.reason === "invalid-input" || env.reason === "protocol-mismatch";
+        return { status: soft ? "rejected" : "failed", data: null, message: env.message || `常用桥拒绝（${env.reason ?? "unknown"}）` };
+    }
+    return { status: "recorded", data: env.data ?? null, message: okMessage };
+}
+
+export async function commonSearch(getBridge: () => unknown, args: { keyword?: unknown; itemType?: unknown; tag?: unknown; category?: unknown; scope?: unknown; limit?: unknown }): Promise<BridgeResult> {
+    const b = commonBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: COMMON_MISSING };
+    if (typeof b.search !== "function") {
+        return { status: "unsupported", data: null, message: "常用桥缺少 search 方法" };
+    }
+    const query: Record<string, unknown> = {};
+    for (const k of ["keyword", "itemType", "tag", "category", "scope"] as const) {
+        if (args[k] !== undefined && typeof args[k] === "string") query[k === "keyword" ? "text" : k] = args[k];
+    }
+    try {
+        const r = await b.search(query);
+        const out = commonResult(r, "已检索");
+        if (out.status === "recorded" && typeof args.limit === "number" && Array.isArray(out.data)) {
+            out.data = (out.data as unknown[]).slice(0, Math.max(1, Math.min(200, Math.floor(args.limit))));
+        }
+        return out;
+    } catch (e) {
+        return { status: "failed", data: null, message: `常用检索失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function commonGet(getBridge: () => unknown, args: { id?: unknown }): Promise<BridgeResult> {
+    const b = commonBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: COMMON_MISSING };
+    if (typeof b.get !== "function") {
+        return { status: "unsupported", data: null, message: "常用桥缺少 get 方法" };
+    }
+    if (typeof args.id !== "string" || !args.id.trim() || args.id.length > 64) {
+        return { status: "rejected", data: null, message: "id 缺失或超长（≤64）" };
+    }
+    try {
+        const r = await b.get(args.id);
+        return commonResult(r, "已读取");
+    } catch (e) {
+        return { status: "failed", data: null, message: `常用读取失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function commonRecent(getBridge: () => unknown, args: { limit?: unknown }): Promise<BridgeResult> {
+    const b = commonBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: COMMON_MISSING };
+    if (typeof b.getRecent !== "function") {
+        return { status: "unsupported", data: null, message: "常用桥缺少 getRecent 方法" };
+    }
+    const limit = typeof args.limit === "number" ? args.limit : undefined;
+    try {
+        const r = await b.getRecent(limit);
+        return commonResult(r, "已读取（最近使用）");
+    } catch (e) {
+        return { status: "failed", data: null, message: `常用读取失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
+export async function commonFavorites(getBridge: () => unknown): Promise<BridgeResult> {
+    const b = commonBridgeOf(getBridge);
+    if (!b) return { status: "unsupported", data: null, message: COMMON_MISSING };
+    if (typeof b.getFavorites !== "function") {
+        return { status: "unsupported", data: null, message: "常用桥缺少 getFavorites 方法" };
+    }
+    try {
+        const r = await b.getFavorites();
+        return commonResult(r, "已读取（收藏）");
+    } catch (e) {
+        return { status: "failed", data: null, message: `常用读取失败：${e instanceof Error ? e.message : String(e)}` };
+    }
+}
+
 export const _internal = { waitReady, REFETCH_WAIT_MS, READY_TIMEOUT_MS };

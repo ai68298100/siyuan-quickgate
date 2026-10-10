@@ -61,6 +61,10 @@
 | `home.open` | `{target?}` | `{ok, target}` | `butler`（默认，总览）或 `reminders`（提醒中枢）；受控导航 |
 | `exam.stats` | `{}` | `{stats|null}` | 走考试 `window.siyuanExam.statsRead()`（按需重算脱敏快照，无题目内容/key/路径）；应用未就绪回 null |
 | `exam.open` | `{target?}` | `{ok, target}` | `practice`（默认）/ `wrongbook` / `mock` / `report`；走 siyuanExam 稳定入口 |
+| `common.search` | `{keyword?, itemType?, tag?, category?, scope?, limit?≤200}` | `CommonItemRef[]` | 走常用 v1 `window.xiaolvCommon.search`（ADR-0013 只读子集）；上游 ActionResult 信封透传，仅元数据出域 |
+| `common.get` | `{id≤64}` | `CommonItem` | 完整条目（含 markdown 内容）；not-found/invalid-input → rejected 透出 reason |
+| `common.recent` | `{limit?1-100}` | `CommonItemRef[]` | 最近使用（服务层钳制 1–100，默认 20） |
+| `common.favorites` | `{}` | `CommonItemRef[]` | 收藏清单 |
 | `doc.open` | `{id}` | `{ok:true}` | 受控导航，不改数据 |
 | `daily.status` | `{}` | `{docId, exists}` | 只探测不创建 |
 | `setting.open` | `{}` | `{ok:true}` | 打开思源设置 |

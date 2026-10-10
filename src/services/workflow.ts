@@ -41,6 +41,7 @@ export const WORKFLOW_ALLOWED_OPS = new Set([
     "glean.list", "glean.get", "glean.status",
     "home.summary", "home.memo", "home.open",
     "exam.stats", "exam.open",
+    "common.search", "common.get", "common.recent", "common.favorites",
     "doc.open", "daily.status", "template.new", "editor.context",
 ]);
 

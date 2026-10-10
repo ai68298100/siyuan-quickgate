@@ -167,7 +167,7 @@ describe("executeAndRecord（预留语义）", () => {
             openSetting: () => {},
             getCheckin: () => undefined,
             getContacts: () => undefined,
-            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
         });
 
         const cmd: BridgeCommand = { v: 1, id: "bc-1", op: "bridge.ping", args: {}, createdAt: new Date().toISOString() };
@@ -212,7 +212,7 @@ describe("executeAndRecord（预留语义）", () => {
             openSetting: () => {},
             getCheckin: () => undefined,
             getContacts: () => undefined,
-            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
         });
         const other = await mk().executeAndRecord({ v: 1, id: "d1", op: "bridge.ping", args: {}, createdAt: new Date().toISOString(), device: "dev-b" });
         expect(other.executed).toBe(false);
@@ -249,7 +249,7 @@ describe("executeAndRecord（预留语义）", () => {
             openSetting: () => {},
             getCheckin: () => undefined,
             getContacts: () => undefined,
-            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+            getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
         });
         const cmd: BridgeCommand = { v: 1, id: "ex-1", op: "bridge.ping", args: {}, createdAt: new Date(Date.now() - 60000).toISOString(), ttlMs: 1000 };
         const first = await service.executeAndRecord(cmd);

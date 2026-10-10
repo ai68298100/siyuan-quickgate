@@ -61,7 +61,7 @@ function make(mem: MemKernel) {
         openSetting: () => {},
         getCheckin: () => undefined,
         getContacts: () => undefined,
-        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined,
+        getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
         loadPetals: async () => mem.petals,
         discoverConfig: async () => {
             const diary = mem.notebooks.find((n) => !n.closed && n.conf?.dailynoteSavePath);
