@@ -79,14 +79,18 @@
 
 ### P3 · 等上游（小驴插件/思源）
 
+> v0.9.1（2026-10-11）销账：管家/拾遗/考试三家上游契约已实装（本地仓库 docs/BRIDGE.md、docs/ecosystem-contracts.md），
+> 快门侧 adapter（home.\*/glean.\*/exam.\*）已接入并真机验收（verify-restart 10/10 + 新 op 定向验证 14/14，
+> 真实数据回执见 CHANGELOG v0.9.1）。manifest 校准轮已按 R228 模式执行（三家 stable + xiaolv-common 补录）。
+
 | 前提 | 条目 |
 |---|---|
-| 闪卡稳定 sessionId/completedAt（L602） | L602、L639 |
-| 管家仓库定位+契约（L605） | L605、L640 管家 projection |
-| 拾遗公开读写桥（L637） | L637、L641 |
-| 考试 descriptor/getStats（L638） | L638 |
+| 闪卡稳定 sessionId/completedAt（L602） | L602、L639（0.209.2 仍无公开桥，维持 design） |
+| ~~管家仓库定位+契约（L605）~~ ✅ v0.9.1 | L605、L640 管家 projection（window.LvHome v1 已接入 home.summary/memo/open） |
+| ~~拾遗公开读写桥（L637）~~ ✅ v0.9.1 | L637、L641（window.siyuanGlean v1 已接入 glean.list/get/status；写面受拾遗侧 bridgeWriteEnabled 门控） |
+| ~~考试 descriptor/getStats（L638）~~ ✅ v0.9.1 | L638（window.siyuanExam statsRead/稳定入口已接入 exam.stats/open） |
 | 人脉 descriptor ready/health（L640） | L640、L607 补强 |
-| 上游新版本 | manifest 校准轮（R228 模式） |
+| 上游新版本 | manifest 校准轮（R228 模式）——✅ v0.9.1 已执行（雷切 0.46.8/打卡 18.17.2/人脉 0.5.5/管家 0.4.2/拾遗 1.3.3/考试 0.9.6） |
 
 ### P4 · 产品级大工程（需要用户排期决策，不建议自主启动）
 

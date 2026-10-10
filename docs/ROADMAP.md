@@ -1,7 +1,7 @@
 # ROADMAP
 
 > 里程碑与验收对应项目主仓库 TODO §5；此处只列本仓库视角的顺序与门槛。
-> 状态（2026-10-07，源码与 GitHub 发布线 v0.8.8）：**内核侧 spike 已闭环**（⑥⑧⑨⓪⑤ 早期探针 + ③ R68 复测批 + ⑩ spike⑩ 真机全线 + ⑪ R230 事件物化 e2e）；前端 spike ①②⑦ 已做 bundle 静态核实；快门已部署真机工作空间并启用。剩余真机项：DevTools 现场三项（④双窗口/⑦blockId/⑪现场事件）+ **前端加载判别**（bug#15：index.js 部署后需完全退出重启，e2e-bg「前端 bundle 判别」应 pass）。v0.8.8 开发线继续通过主 CI、254 项测试和发布前扫描；集市仍按约定不推送。
+> 状态（2026-10-11，源码 v0.9.1 · GitHub 发布线 v0.9.0）：**v0.9.1 生态适配扩展已真机闭环**——拾遗/管家/考试三家公开桥接入（27→35 op，`glean.*`/`home.*`/`exam.*`），manifest 校准（三家 design→stable + 补录 xiaolv-common，清单 8 款）；AI 客户端矩阵落地（Codex/Claude Code/ZCode 配置就绪，MCP 协议冒烟 7/7 live recorded）+ **工作区内核端口自动发现**（3.8.7-alpha 双内核，未设 SIYUAN_URL 零配置）；在用工作区部署 v0.9.1 后 verify-restart full 10/10。真机新发现：3.8.7-alpha 双内核架构（6806=启动器、工作区内核动态端口、Token 不通用、失败鉴权 429 限流），已文档化（ai-clients §3.3）并有发现器兜底。剩余真机项：DevTools 现场三项（④双窗口/⑦blockId/⑪现场事件）+ 各 AI 客户端 app 内端到端与 C 类平台实测（ai-clients §5）。集市仍按约定不推送。
 
 ## M0 spike（需思源真机，半天）→ 产出 docs/WALKTHROUGH.md（现为 11 项实操手册）
 ① 命令注册表形状 ✅bundle 静态核实（v0.6.3：i18n/displayName 挂载+customHotkey 回写机制；DevTools 可选复核）
@@ -30,11 +30,11 @@
 - ✅ R231~R251 增量：路径安全守卫（L628）、写 op 统一审计（L446）、幂等注册表（L599）、桥消费权认领（L452）、命令搜索别名（L471）、收藏/最近使用 ops+UI（L472/474）、内置 Agent 原生能力（R245）、MCP 规范 annotations（R234）
 
 ## M3+（评估池，均有前置门槛）
-- MCP 通道 → **✅ 已完成（R42~R85 五个增量+真机 e2e）**：MCP 真 e2e 全链通过（三通道经真实前端消费，R81）；npm 打包脚手架（build:mcp）；CI 护栏（协议冒烟进 CI）。**剩余=①真 AI host 实测（用户贴配置即用）②npm registry 发布（需账号）**
-- **思源内置 Agent 集成** ◐（R244/R245）：原生能力注册 ✅ 已实现并真机验证（3.8.6 siyuan.agent.registerCapability，ping/discover/capture）；⬜ Agent 会话端到端（需思源 AI 配置接模型；内核需 ≥3.8.7-alpha.4 以规避 MCP 客户端连接 bug #19998——见 docs/10-生态调研-R4/R5）
+- MCP 通道 → **✅ 已完成（R42~R85 五个增量+真机 e2e）**：MCP 真 e2e 全链通过（三通道经真实前端消费，R81）；npm 打包脚手架（build:mcp）；CI 护栏（协议冒烟进 CI）。v0.9.1 追加：bundle 态含端口自动发现（SMOKE_TARGET 验证 7/7 live recorded）；**真 AI host 实测=协议层已闭环，app 内端到端待各客户端重启验证（Codex/Claude Code/ZCode 配置已写入）**；⬜ npm registry 发布（需账号）
+- **思源内置 Agent 集成** ◐（R244/R245）：原生能力注册 ✅ 已实现并真机验证（3.8.6 siyuan.agent.registerCapability，ping/discover/capture；v0.9.1 部署后内核日志 Agent 注册 3/3）；⬜ Agent 会话端到端（需思源 AI 配置接模型；内核需 ≥3.8.7-alpha.4 以规避 MCP 客户端连接 bug #19998——本机 3.8.7-alpha.6 已满足）
 - 菜单 schema v3（收藏动态组，设计=docs draft；**挂 L157 showmenu 动态菜单实测**）
 - 协议 v2 按写者分文件（评估=docs draft 裁定暂不立项，触发条件在案）
 - 笔记本级写权限分级（第二先例：siyuan-bridge-skill forbidden_notebooks）
 - doc.resolve（hpath 寻址，备选池）
-- OpenAPI 3 文档（集市上架门槛后）
+- OpenAPI 3 文档 → **◐ v0.9.1 已有工具 schema 导出器产出 OpenAPI 3.1 投影（tools/export-toolschema.mjs）**；集市上架门槛后再入正式文档
 - i18n 双语（集市上架门槛后）

@@ -1,17 +1,17 @@
 # 快门当前状态（自动快照）
 
-> 由 `node scripts/current-status.mjs` 生成于 2026-10-07 22:45。再跑即刷新；不手改本文件。
+> 由 `node scripts/current-status.mjs` 生成于 2026-10-11 01:41。再跑即刷新；不手改本文件。
 
 ## 版本与构建
 
 | 项 | 值 |
 |---|---|
-| 分支 / HEAD | `main` / `80e3293` |
-| 源码版本 | `0.8.8` |
-| 最新 tag | `v0.8.8` |
-| 远端 release tag（本地探测） | `v0.8.8` |
-| dist/index.js | 存在（构建于 2026-10-07 14:39） |
-| 工作区未提交项 | 0 个（git status --short） |
+| 分支 / HEAD | `main` / `210c039` |
+| 源码版本 | `0.9.1` |
+| 最新 tag | `v0.9.0` |
+| 远端 release tag（本地探测） | `v0.9.0` |
+| dist/index.js | 存在（构建于 2026-10-10 17:09） |
+| 工作区未提交项 | 2 个（git status --short） |
 
 ## 质量门（快照时点声明，权威以最近一次运行输出为准）
 
@@ -28,7 +28,7 @@
 | 命令面板 | Ctrl+Alt+P 或 命令「小驴快门：命令面板」 |
 | NDJSON 桥 | `data/storage/petal/siyuan-quickgate/bridge/commands.ndjson`（默认关） |
 | 内核路由 | `POST /plugin/private/siyuan-quickgate/exec`（随 petal 启用） |
-| MCP stdio | `node src/mcp/main.ts`（27 tools，默认 14 只读） |
+| MCP stdio | `node src/mcp/main.ts`（35 tools，默认 18 只读） |
 | 设置面板 | 设置 → 集市 → 已下载 → 小驴快门 → 齿轮 |
 
 ## 文档
