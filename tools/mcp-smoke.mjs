@@ -22,6 +22,8 @@ const check = (name, ok, detail = "") => {
 function session(writeMode) {
     return new Promise((resolve, reject) => {
         const env = { ...process.env, LV_MCP_WRITE: writeMode ? "1" : "0", SIYUAN_TOKEN: process.env.SIYUAN_TOKEN || "ci-dummy-token" };
+        // 无内核协议模式不扫描本机内核，也不把 dummy Token 发给共享工作区。
+        if (process.env.SMOKE_SKIP_LIVE === "1") env.SIYUAN_URL = "http://127.0.0.1:1";
         // SMOKE_TARGET 可指向打包产物（如 dist-mcp/mcp-quickgate.js）验证 bundle
         const target = process.env.SMOKE_TARGET || "src/mcp/main.ts";
         const child = spawn(process.execPath, [target], { env, stdio: ["pipe", "pipe", "pipe"] });

@@ -49,7 +49,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function waitPluginAlive(page, timeoutMs = 20000) {
     await page.waitForFunction((name) => {
         const p = window.siyuan?.ws?.app?.plugins?.find?.((x) => x.name === name);
-        return Boolean(p && typeof p.openCommandPalette === "function" && typeof p.takeoverBridge === "function");
+        return Boolean(p && p.lifecycleBooted && !p.tornDown && typeof p.openCommandPalette === "function" && typeof p.takeoverBridge === "function");
     }, PLUGIN, { timeout: timeoutMs, polling: 400 });
 }
 
@@ -68,18 +68,38 @@ if (!isolated) console.log("（共享内核豁免模式：捕获写入将落在�
 const { chromium } = resolvePlaywright();
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "zh-CN" });
+if (process.env.QG_AUTH_CODE) {
+    const res = await context.request.post(`${url}/api/system/loginAuth`, {
+        headers: { Authorization: `Token ${token}` }, data: { authCode: process.env.QG_AUTH_CODE },
+    });
+    if (!res.ok() || (await res.json()).code !== 0) throw new Error("靶场访问鉴权失败");
+}
 const page = await context.newPage();
 
 async function waitBoot() {
     await page.goto(`${url}/stage/build/desktop/`, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForFunction(() => Boolean(window.siyuan?.ws?.app && document.querySelector(".layout__center")), { timeout: 60000, polling: 500 });
 }
-const callPlugin = (method) => page.evaluate((m) => {
-    const p = window.siyuan.ws.app.plugins.find((x) => x.name === m.plugin);
-    if (typeof p?.[m.method] !== "function") return { ok: false };
-    p[m.method]();
-    return { ok: true };
-}, { plugin: PLUGIN, method });
+// 只重试等待只读 UI 入口就绪；选定同一实例后打开一次，不重试捕获/撤销等业务写操作。
+const callPlugin = async (method) => {
+    if (method === "takeoverBridge") {
+        await waitPluginAlive(page);
+        // 接管有副作用，只调用一次，并等待真正结果后再驱动表单。
+        return page.evaluate(async (name) => {
+            const p = window.siyuan.ws.app.plugins.find((x) => x.name === name);
+            if (!p || p.tornDown) throw new Error("接管前插件已退出");
+            return p.takeoverBridge();
+        }, PLUGIN);
+    }
+    if (!["openCommandPalette", "openSetting"].includes(method)) throw new Error(`未登记的 UI 入口：${method}`);
+    const ready = await page.waitForFunction((m) => {
+        const p = window.siyuan.ws.app.plugins.find((x) => x.name === m.plugin);
+        if (!p || !p.lifecycleBooted || p.tornDown || typeof p[m.method] !== "function") return false;
+        p[m.method]();
+        return { ok: true };
+    }, { plugin: PLUGIN, method }, { timeout: 20000, polling: 200 });
+    return ready.jsonValue();
+};
 
 try {
     await waitBoot();
@@ -88,13 +108,20 @@ try {
     // ═══ I2 面板键盘导航（无写副作用，先做）═══
     await callPlugin("openCommandPalette");
     await page.waitForSelector("#qg-palette", { timeout: 5000 });
-    await page.waitForTimeout(200); // 收敛渲染竞态（R293 探针兜底重渲染会重建行）
+    // 初始桥仍在启动时合法选项可能是 fallback 按钮，不能只查命令 div 或靠固定延迟。
+    await page.waitForFunction(() => {
+        const selected = document.querySelector('#qg-palette-list [role="option"][aria-selected="true"]');
+        return selected && document.querySelector('#qg-palette [data-role="q"]')?.getAttribute("aria-activedescendant") === selected.id;
+    }, undefined, { timeout: 5000 });
     await page.focus('#qg-palette [data-role="q"]');
-    const firstActive = await page.evaluate(() => document.querySelector("#qg-palette-list .qg-palette-item.active")?.id ?? "");
+    const firstActive = await page.evaluate(() => document.querySelector('#qg-palette-list [role="option"][aria-selected="true"]')?.id ?? "");
     await page.keyboard.press("ArrowDown");
-    await page.waitForTimeout(150);
+    await page.waitForFunction((first) => {
+        const selected = document.querySelector('#qg-palette-list [role="option"][aria-selected="true"]');
+        return selected && selected.id !== first && document.querySelector('#qg-palette [data-role="q"]')?.getAttribute("aria-activedescendant") === selected.id;
+    }, firstActive, { timeout: 5000 });
     const secondActive = await page.evaluate(() => ({
-        id: document.querySelector("#qg-palette-list .qg-palette-item.active")?.id ?? "",
+        id: document.querySelector('#qg-palette-list [role="option"][aria-selected="true"]')?.id ?? "",
         desc: document.querySelector('#qg-palette [data-role="q"]')?.getAttribute("aria-activedescendant") ?? "",
     }));
     hard("I2 键盘导航推进 + aria 同步",
@@ -189,12 +216,23 @@ try {
     await page.waitForSelector("#qg-palette", { timeout: 5000 });
     await page.fill('#qg-palette [data-role="q"]', "采购清单 压测捕获一条");
     await page.waitForTimeout(300);
+    const captureWrites = [];
+    const watchCaptureWrite = (request) => {
+        if (/\/api\/block\/append(?:DailyNote)?Block$/.test(new URL(request.url()).pathname)) captureWrites.push(request.url());
+    };
+    page.on("request", watchCaptureWrite);
     await page.click('[data-fb="capture"]');
     await page.waitForSelector("#qg-capture", { timeout: 5000 });
     await page.click('#qg-capture [data-target="daily"]');
+    await page.waitForSelector('#qg-capture [data-capture="confirm"]:not([disabled])', { timeout: 8000 });
+    hard("I6 选择去向仅核验，尚未出现成功卡", await page.locator("#qg-capture-done").count() === 0);
+    hard("I6 预检没有发送块写请求", captureWrites.length === 0);
+    await page.click('#qg-capture [data-capture="confirm"]');
     let doneOk = true;
     try { await page.waitForSelector("#qg-capture-done", { timeout: 8000 }); } catch { doneOk = false; }
     hard("I6a 捕获写入成功卡", doneOk);
+    hard("I6a 确认只发送一次块写请求", captureWrites.length === 1);
+    page.off("request", watchCaptureWrite);
     if (doneOk) {
         let undoOk = false;
         try {
@@ -357,6 +395,8 @@ try {
     await page.click('[data-fb="capture"]');
     await page.waitForSelector("#qg-capture", { timeout: 5000 });
     await page.click('#qg-capture [data-target="inbox"]');
+    await page.waitForSelector('#qg-capture [data-capture="confirm"]:not([disabled])', { timeout: 8000 });
+    await page.click('#qg-capture [data-capture="confirm"]');
     const palCount8 = await page.evaluate(() => document.querySelectorAll('#qg-palette').length);
         if (palCount8 > 1) {
             console.log('   ⚠ 检测到', palCount8, '个堆叠面板（重载瞬态复制）——保留最后一个');

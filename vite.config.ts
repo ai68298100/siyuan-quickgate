@@ -131,6 +131,8 @@ export default defineConfig((buildTarget === "kernel" ? {
 
     // R23：SSE 流式假件在 threads 池下会挂起 worker——单测统一走 forks 池
     test: {
+        // SiYuan SDK 仅有类型/宿主导出；Node 生命周期测试由 vi.mock 提供宿主实现。
+        alias: { siyuan: resolve(import.meta.dirname, "tests/helpers/siyuan-host.ts") },
         pool: "forks",
         testTimeout: 8000,
     }

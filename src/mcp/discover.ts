@@ -39,12 +39,14 @@ export interface DiscoverDeps {
     token: string;
     /** 探测某个候选 URL：true=该内核认这个 Token（即工作区内核）。默认 lsNotebooks code===0 */
     probe?: (url: string, token: string) => Promise<boolean>;
-    /** 进程表原始输出（win32: tasklist /fo csv /nh）。默认 tasklist；非 win32 回空 */
+    /** tasklist CSV；注入依赖与系统平台无关，默认命令仅用于 win32 */
     listProcesses?: () => Promise<string>;
-    /** netstat 原始输出。默认 `netstat -ano`；非 win32 回空 */
+    /** netstat -ano 输出；注入依赖与系统平台无关，默认命令仅用于 win32 */
     listPorts?: () => Promise<string>;
     /** 单个候选探测超时 ms（默认 1200） */
     timeoutMs?: number;
+    /** 默认扫描命令的运行平台；测试可注入，不限制显式提供的扫描依赖 */
+    platform?: string;
 }
 
 async function defaultProbe(url: string, token: string, timeoutMs: number): Promise<boolean> {
@@ -69,36 +71,31 @@ async function defaultProbe(url: string, token: string, timeoutMs: number): Prom
 export async function discoverWorkspaceKernel(deps: DiscoverDeps): Promise<string | null> {
     if (deps.url) return deps.url.replace(/\/$/, "");
     const probe = deps.probe ?? ((u, t) => defaultProbe(u, t, deps.timeoutMs ?? 1200));
-    const candidates: string[] = ["http://127.0.0.1:6806"];
+    const defaultUrl = "http://127.0.0.1:6806";
+    if (await probe(defaultUrl, deps.token)) return defaultUrl;
+    let ports: number[];
     try {
-        if (process.platform === "win32") {
-            if (deps.listProcesses && deps.listPorts) {
-                const pids = pidsFromTasklist(await deps.listProcesses());
-                if (pids.length > 0) {
-                    const ports = kernelPortsFromNetstat(await deps.listPorts(), pids);
-                    for (const p of ports) {
-                        const url = `http://127.0.0.1:${p}`;
-                        if (!candidates.includes(url)) candidates.push(url);
-                    }
-                }
-            } else {
-                const { execFile } = await import("node:child_process");
-                const prom = (cmd: string, args: string[]) =>
-                    new Promise<string>((resolve) => {
-                        execFile(cmd, args, { windowsHide: true, timeout: 4000 }, (err, stdout) => resolve(err ? "" : String(stdout)));
-                    });
-                const pids = pidsFromTasklist(await prom("tasklist", ["/fo", "csv", "/nh"]));
-                if (pids.length > 0) {
-                    const ports = kernelPortsFromNetstat(await prom("netstat", ["-ano"]), pids);
-                    for (const p of ports) {
-                        const url = `http://127.0.0.1:${p}`;
-                        if (!candidates.includes(url)) candidates.push(url);
-                    }
-                }
-            }
+        let listProcesses = deps.listProcesses;
+        let listPorts = deps.listPorts;
+        if (!listProcesses || !listPorts) {
+            if ((deps.platform ?? process.platform) !== "win32") return null;
+            const { execFile } = await import("node:child_process");
+            const command = (cmd: string, args: string[]) => new Promise<string>((resolve) => {
+                execFile(cmd, args, { windowsHide: true, timeout: 4000 }, (err, stdout) => resolve(err ? "" : String(stdout)));
+            });
+            listProcesses ??= () => command("tasklist", ["/fo", "csv", "/nh"]);
+            listPorts ??= () => command("netstat", ["-ano"]);
         }
-    } catch { /* 进程/netstat 不可达：只试 6806 */ }
-    for (const url of candidates) {
+        const pids = pidsFromTasklist(await listProcesses());
+        if (pids.length === 0) return null;
+        ports = kernelPortsFromNetstat(await listPorts(), pids);
+    } catch {
+        // 默认端口已探测；扫描失败不能认定任何动态端口有效。
+        return null;
+    }
+    for (const port of ports) {
+        const url = `http://127.0.0.1:${port}`;
+        if (url === defaultUrl) continue;
         if (await probe(url, deps.token)) return url;
     }
     return null;

@@ -12,6 +12,7 @@
 import { Dialog, showMessage, confirm, getFrontend } from "siyuan";
 
 import { KernelApi } from "./services/kernelApi";
+import type { CapturePlan, CaptureResult, CaptureTarget } from "./services/quick-capture";
 import { BridgeStore } from "./services/store";
 import { PROCESSED_CAP } from "./services/store";
 import { installFocusTrap } from "./services/focus-trap";
@@ -29,8 +30,14 @@ import { countRecoveryItems } from "./recovery-center";
 import { countNotifications } from "./notification-center-ui";
 import { classifyHeartbeat, heartbeatPath, readHeartbeat } from "./services/heartbeat";
 import { PLUGIN_VERSION } from "./version";
+import { buildToolDefs } from "./mcp/tools";
+import { KERNEL_OPS } from "./ops";
+import { INSTALLED_PLUGIN_ENDPOINT, installationFor, installationMessage, readInstallation } from "./services/plugin-status";
 
 const PLUGIN_NAME = "siyuan-quickgate";
+const toolDefs = buildToolDefs();
+const MCP_READONLY_COUNT = toolDefs.filter((tool) => !tool.write).length;
+const KERNEL_READONLY_COUNT = toolDefs.filter((tool) => !tool.write && new Set<string>(KERNEL_OPS).has(tool.name)).length;
 
 /** 重置撤销（L624 部分）：恢复默认后保留重置前设置快照；状态概览页提供本会话内撤销（模块级——重开会新面板仍可见） */
 let preResetSnapshot: QuickGateSettings | null = null;
@@ -67,7 +74,8 @@ export interface SettingsPanelHost {
     /** 首跑向导步骤 5 样例只读探针用（index.ts 已有方法转公开，R347 L562） */
     readDailyStatus(): Promise<{ docId: string | null; exists: boolean }>;
     /** 首跑向导步骤 6 可选样例写入用（复用快速捕获，R347 L562） */
-    captureQuick(text: string, target: "daily" | "inbox"): Promise<{ ok: boolean; message: string; blockId?: string; docId?: string }>;
+    prepareCapture(text: string, target: CaptureTarget): Promise<{ plan?: CapturePlan; message?: string }>;
+    captureQuick(plan: CapturePlan): Promise<CaptureResult>;
     /** 失联接管（docs/34 §3.3 · R348）：steal 破坏他窗锁并接管消费权 */
     takeoverBridge(): Promise<{ ok: boolean; holder: string | null }>;
     /** L610 部分：本会话启动时间（onload 时刻 ms）——关于页/状态页运行时长展示 */
@@ -167,7 +175,7 @@ interface WizardState {
         pingEvidence: string;
         sampleRead: "ok" | "err" | "skipped" | null;
         sampleReadEvidence: string;
-        sampleWrite: "ok" | "undone" | "skipped" | null;
+        sampleWrite: "ok" | "undone" | "skipped" | "unknown" | null;
     };
     completedAt: string | null;
 }
@@ -584,7 +592,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         let pingRunning = false;
         let probing = false;
         let sampleReadMsg = ws.stepResults.sampleRead === "ok" ? "探针已完成（见下方证据）" : "";
-        let sampleWriteMsg = "";
+        let sampleReadRunning = false;
+        let sampleWriteMsg = ws.stepResults.sampleWrite === "unknown" ? "写入结果未确认，请先在目标文档核查；可跳过此步，不要重复提交。" : "";
 
         const goto = async (step: number) => { ws.currentStep = step; await persist(); render(); };
         // L585/L562：data-wiz 动作走 content 级事件委托——render 每次重建内部 DOM，
@@ -626,7 +635,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
 
         const render = () => {
             content.innerHTML = pageHeader("首跑向导", "七步接通外部自动化 · 进度自动保存") +
-                `<p style="font-size:11px;color:var(--b3-theme-on-surface);margin:0 0 10px;line-height:1.6">两条路径按需选择：①<b>外部桥</b>（Quicker / CLI / 手机快捷指令）走步骤 3~4；②<b>不开桥也可用</b>——<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/src/mcp/README.md">MCP 只读工具</a>与内核同步路由 7 只读 op（见<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>），桥关闭时同样工作。</p>` +
+                `<p style="font-size:11px;color:var(--b3-theme-on-surface);margin:0 0 10px;line-height:1.6">两条路径按需选择：①<b>外部桥</b>（Quicker / CLI / 手机快捷指令）走步骤 3~4；②<b>不开桥也可用</b>——内核同步路由 ${KERNEL_READONLY_COUNT} 只读 op（见<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/api.md">op 契约</a>）。<a class="b3-link" target="_blank" rel="noopener" href="https://github.com/ai68298100/siyuan-quickgate/blob/main/src/mcp/README.md">MCP 默认 ${MCP_READONLY_COUNT} 个只读工具</a>中，依赖前端的工具仍需桥。</p>` +
                 `<div class="qg-steps" data-role="steps">${rail()}</div><div data-role="body"></div>` +
                 `<div style="font-size:11px;color:var(--b3-theme-on-surface);margin-top:8px">跳过向导，直接浏览<a data-role="skip" style="color:var(--qg-accent-text);cursor:pointer">全部设置</a>（进度已保存，随时回来续跑）</div>`;
             const bodyEl = root.querySelector("[data-role=body]") as HTMLElement;
@@ -661,7 +670,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 case 2: {
                     const caps: Array<{ key: string; label: string; hint: string }> = [
                         { key: "external", label: "外部自动化", hint: "Quicker / CLI / 手机快捷指令经桥发命令（步骤 3~4 开启桥）" },
-                        { key: "mcp", label: "MCP 只读（AI 助手）", hint: "不开桥也可用：14 只读工具，写入需独立开关" },
+                        { key: "mcp", label: "MCP 只读（AI 助手）", hint: `默认 ${MCP_READONLY_COUNT} 个只读工具；依赖前端的工具仍需桥，写入需独立开启权限` },
                     ];
                     card(`步骤 2 · 选择能力`, "按需勾选", "mute",
                         caps.map((cp) => `<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.6;margin-bottom:8px">` +
@@ -723,7 +732,8 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                     const ok = ws.stepResults.sampleRead === "ok";
                     const skipped = ws.stepResults.sampleRead === "skipped";
                     const c = card(`步骤 5 · 样例只读（今日日记状态）`, ok ? "通过" : ws.stepResults.sampleRead === "err" ? "失败" : skipped ? "已跳过" : "待执行", ok ? "ok" : ws.stepResults.sampleRead === "err" ? "err" : "mute",
-                        ok ? esc(sampleReadMsg) + (ws.stepResults.sampleReadEvidence ? `<div class="qg-mono" style="margin-top:4px">${esc(ws.stepResults.sampleReadEvidence)}</div>` : "") : `发一条只读探针（daily.status），验证「查询类」命令全链。不开桥路径的用户在此即可确认可用性。`);
+                        (sampleReadMsg ? esc(sampleReadMsg) : `检查今日日记读取是否可用；不创建文档，本步骤不验证外部桥。`) +
+                        (ws.stepResults.sampleReadEvidence ? `<div class="qg-mono" style="margin-top:4px">${esc(ws.stepResults.sampleReadEvidence)}</div>` : ""));
                     if (!ok && !skipped) {
                         const btn = document.createElement("button");
                         btn.className = "b3-button b3-button--outline";
@@ -733,6 +743,19 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                         btn.onclick = () => void runSampleRead();
                         c.appendChild(btn);
                         if (ws.stepResults.sampleRead === "err") c.insertAdjacentHTML("beforeend", failPaths("sampleRead"));
+                    }
+                    if (ws.stepResults.sampleReadEvidence) {
+                        const copy = document.createElement("button");
+                        copy.className = "b3-button b3-button--outline b3-button--small";
+                        copy.style.margin = "8px 0 0 6px";
+                        copy.textContent = "复制只读探针证据";
+                        copy.onclick = () => void (async () => {
+                            try {
+                                await navigator.clipboard.writeText(ws.stepResults.sampleReadEvidence);
+                                showMessage("只读探针证据已复制", 2000, "info");
+                            } catch { showMessage("证据复制失败，请检查剪贴板权限后重试", 4000, "error"); }
+                        })();
+                        c.appendChild(copy);
                     }
                     const skip = document.createElement("button");
                     skip.className = "b3-button b3-button--outline b3-button--small";
@@ -746,10 +769,11 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 case 6: {
                     const doneWrite = ws.stepResults.sampleWrite === "ok" || ws.stepResults.sampleWrite === "undone";
                     const skipped = ws.stepResults.sampleWrite === "skipped";
-                    const c = card(`步骤 6 · 样例写入（可选）`, ws.stepResults.sampleWrite === "ok" ? "已写入" : ws.stepResults.sampleWrite === "undone" ? "已写入并撤销" : skipped ? "已跳过" : "待执行", doneWrite || skipped ? "ok" : "mute",
-                        (ws.stepResults.sampleWrite === "ok" || ws.stepResults.sampleWrite === "undone" ? esc(sampleWriteMsg) + "<br>" : "") +
-                        `写入一条测试块验证「写入类」命令全链（默认今日日记，可撤销）。不想要写入可跳过——跳过不影响完成。`);
-                    if (!doneWrite && !skipped) {
+                    const unknownWrite = ws.stepResults.sampleWrite === "unknown";
+                    const c = card(`步骤 6 · 样例写入（可选）`, ws.stepResults.sampleWrite === "ok" ? "已写入" : ws.stepResults.sampleWrite === "undone" ? "已写入并撤销" : skipped ? "已跳过" : unknownWrite ? "结果未确认" : "待执行", doneWrite || skipped ? "ok" : unknownWrite ? "warn" : "mute",
+                        (doneWrite || unknownWrite ? esc(sampleWriteMsg) + "<br>" : "") +
+                        `核对目标后追加一条测试块，可在目标文档手动删除。不想写入可跳过；跳过不影响完成。`);
+                    if (!doneWrite && !skipped && !unknownWrite) {
                         const btn = document.createElement("button");
                         btn.className = "b3-button b3-button--outline";
                         btn.style.marginTop = "8px";
@@ -827,6 +851,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             await persist(); render();
         };
         const runSampleRead = async () => {
+            if (sampleReadRunning) return;
+            sampleReadRunning = true;
+            ws.stepResults.sampleReadEvidence = "";
             sampleReadMsg = "探针中…"; render();
             const started = performance.now();
             try {
@@ -838,18 +865,32 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             } catch (e) {
                 ws.stepResults.sampleRead = "err";
                 sampleReadMsg = `探针失败：${e instanceof Error ? e.message : String(e)}`;
+                ws.stepResults.sampleReadEvidence = JSON.stringify({ time: new Date().toISOString(), result: "err", error: e instanceof Error ? e.message : String(e), elapsedMs: Math.round(performance.now() - started), channel: "kernel-api", op: "daily.status" });
             }
-            await persist(); render();
+            await persist();
+            sampleReadRunning = false;
+            render();
         };
         const runSampleWrite = async () => {
             try {
-                const r = await host.captureQuick("快门首跑测试块（可撤销）", host.settings.captureTarget);
-                if (!r.ok) { showMessage(r.message, 5000, "error"); return; }
+                const { plan, message } = await host.prepareCapture("快门首跑测试块", host.settings.captureTarget);
+                if (!plan) { showMessage(message ?? "目标尚未确认", 5000, "error"); return; }
+                const approved = await new Promise<boolean>((resolve) => confirm("确认样例写入", `追加到：${plan.destination}\n${plan.details}\n\n将追加的 Markdown：\n${plan.body}`, () => resolve(true), () => resolve(false)));
+                if (!approved) return;
+                const r = await host.captureQuick(plan);
+                if (!r.ok) {
+                    if (r.status === "unknown") {
+                        ws.stepResults.sampleWrite = "unknown";
+                        sampleWriteMsg = r.message;
+                        await persist(); render();
+                    }
+                    showMessage(r.message, 5000, "error"); return;
+                }
                 ws.stepResults.sampleWrite = "ok";
-                sampleWriteMsg = `已写入${r.blockId ? `（块 ${r.blockId}，可撤销）` : ""}`;
+                sampleWriteMsg = `已写入 ${plan.destination}${r.blockId ? `（块 ${r.blockId}，可在目标文档手动删除）` : ""}`;
                 await persist(); render();
             } catch (e) {
-                showMessage(`写入失败：${e instanceof Error ? e.message : String(e)}（失败不留半写入垃圾）`, 5000, "error");
+                showMessage(`请求未完成：${e instanceof Error ? e.message : String(e)}。如已提交写入，请先核查目标文档。`, 5000, "error");
             }
         };
 
@@ -1669,7 +1710,7 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
             items.push(host.kernelRouteProbe === undefined
                 ? { dot: "warn", text: "内核同步路由：探测中" }
                 : host.kernelRouteProbe
-                    ? { dot: "ok", text: "内核同步路由可用（桥关闭时 7 只读 op 仍可用）" }
+                    ? { dot: "ok", text: `内核同步路由可用（桥关闭时 ${KERNEL_READONLY_COUNT} 只读 op 仍可用）` }
                     : { dot: "warn", text: "内核同步路由不可达（不影响 NDJSON 桥；内核升级/重启后自愈）" });
 
             const hasErr = items.some((i) => i.dot === "err");
@@ -1843,30 +1884,14 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
         void (async () => {
             try {
                 const manifest = manifestJson as EcosystemManifest;
-                let installed: Array<Record<string, unknown>> = [];
-                try {
-                    installed = await host.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() });
-                } catch { /* 内核不可达 → 只展示 manifest 口径 */ }
-                const instMap = new Map(installed.map((p) => [String(p.name), p]));
+                const installation = await readInstallation(() => host.kernelApi.post(INSTALLED_PLUGIN_ENDPOINT, { frontend: getFrontend(), keyword: "" }));
                 const cards = manifest.plugins.map((m) => {
-                    const inst = instMap.get(m.pluginId) as { version?: unknown; enabled?: unknown } | undefined;
-                    const iv = typeof inst?.version === "string" ? inst.version : null;
-                    const enabled = inst ? inst.enabled !== false : false;
+                    const inst = installationFor(installation, m.pluginId);
+                    const iv = inst.installedVersion;
                     const stale = iv !== null && m.version !== null && iv !== m.version;
-                    let status: string;
-                    let reason = "";
-                    if (iv === null) {
-                        status = chip("未安装", "mute");
-                        reason = m.maturity === "stable" ? "缺失原因：未安装（集市暂缓，<a class=\"b3-link\" target=\"_blank\" href=\"https://github.com/ai68298100/siyuan-quickgate/releases\">GitHub Releases</a> 获取上游；或用本页诊断核对环境）" : "";
-                    } else if (stale) {
-                        status = chip("版本漂移", "warn");
-                        reason = `缺失原因：实装 ${esc(iv)} ≠ 清单基准 ${esc(m.version)}（能力面可能变化，可校准清单）`;
-                    } else if (!enabled) {
-                        status = chip("已停用", "warn");
-                        reason = "缺失原因：插件在思源插件列表中已停用";
-                    } else {
-                        status = chip("已安装启用", "ok");
-                    }
+                    const notice = installationMessage(installation, m.pluginId);
+                    const status = chip(notice.label, inst.installationState === "enabled" ? "ok" : "warn") + (stale ? " · " + chip("版本漂移", "warn") : "");
+                    const reason = esc(notice.reason) + (stale ? ` · 实装 ${esc(iv)} ≠ 清单基准 ${esc(m.version)}；版本不同不等于协议不兼容。` : "");
                     const maturityBadge = m.maturity === "stable" ? "stable" : m.maturity === "design" ? "design" : "unlocated";
                     const caps = m.capabilities.length > 0 ? `能力 ${m.capabilities.length} 项（读写属性经 adapter 能力协商）` : "能力 0 项";
                     // L554 部分：stable 插件给仓库入口（design 态插件未公开仓库，不显示链接——诚实边界）
@@ -1883,8 +1908,9 @@ export async function openQuickGateSettings(host: SettingsPanelHost, initialPage
                 }).join("");
                 new Dialog({
                     title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>生态能力目录</span><span class="qg-title-ver">清单 v${esc(manifest.version)} · 校准 ${esc(manifest.updatedAt ?? "未知")}</span></span>`,
-                    content: `<div style="padding:14px 16px;font-size:12px">${cards}<div style="margin-top:6px;color:var(--b3-theme-on-surface)">诊断入口：设置→诊断与生态「导出诊断包」/ 仓库 tools（verify:bg）</div></div>`,
+                    content: `<div style="padding:14px 16px;font-size:12px"><div style="margin-bottom:10px">安装核验：${esc(new Date(installation.checkedAt).toLocaleString())} · ${installation.status === "ok" ? "公共安装清单" : "读取失败（安装状态未知）"}。目录不探测业务配置；命令参数页可检查公开调用条件。</div>${cards}<div style="margin-top:6px;color:var(--b3-theme-on-surface)">诊断入口：设置→诊断与生态「导出诊断包」/ 仓库 tools（verify:bg）</div></div>`,
                     width: "min(640px, 92vw)",
+                    height: "min(720px, 88vh)",
                 });
             } catch (e) {
                 showMessage(`读取失败：${e instanceof Error ? e.message : String(e)}`, 6000, "error");

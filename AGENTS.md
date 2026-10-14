@@ -4,7 +4,7 @@
 
 ## 这个仓库是什么
 
-思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 27 个 op 的公开契约。设计文档与总账本在本仓库 `design/` 目录（2026-10-05 起由原独立仓库 quicksrer 动作 subtree 并入，非代码）。
+思源笔记插件：**小驴生态联动中枢 + 外部网关**。外部客户端（Quicker/快捷指令/CLI/AI 助手）经三通道调用 39 个 op 的公开契约。设计文档与总账本在本仓库 `design/` 目录（2026-10-05 起由原独立仓库 quicksrer 动作 subtree 并入，非代码）。
 
 ## 常用命令
 
@@ -50,12 +50,13 @@ gh workflow run ci-e2e-experiment.yml && gh run watch
 - 写型一律打隔离靶场：`node scripts/smoke-range.mjs start [--with-frontend]`——独立 workspace（`tmp/smoke-range-ws`）起第二内核，端口 6807 起自动顺延，实例内只装快门；`--with-frontend` 加 headless Chromium 载体（桥类用例 U1~U10 需要；纯 serve 只有 U11 可测）。
 - 每个插件项目用自己的靶场 workspace，不跨项目共用；同一内核实例上的写型冒烟串行执行、不并发（清扫按前缀互认，混跑有互删风险）；只读走查可随时并发。
 - 靶场 token 与主工作区不同，`start` 完成后直接打印（等价于该实例 设置→关于）。
+- R370：靶场默认配置随机访问授权码（不打印，保留于 ignored 的 tmp/smoke-range.json）；前端载体自动按宿主登录。单独跑 ui-interactions 时传 QG_AUTH_CODE。未配置访问授权码的内核允许本地匿名请求，不能作为“无 Token 必拒绝”的验收环境；外部使用必须先配置宿主鉴权，独立鉴权元数据缺口见 TODO §28。
 - 收摊 `stop`；靶场 workspace 留在 tmp/（gitignore），删目录即重置。
 
 
 ## 发版流程（每版必经，缺一即回）
 
-1. 版本四处 bump：plugin.json / package.json / src/index.ts `PLUGIN_VERSION` / 双语 README 徽章
+1. 版本四处 bump：plugin.json / package.json / src/version.ts `PLUGIN_VERSION` / 双语 README 徽章
 2. `npm run accept` 全绿
 3. `npm run build` → dist 自检版本 → 部署 `D:\小飞驴的SIYUAN\data\plugins\siyuan-quickgate\`
 4. **CHANGELOG + docs/PROGRESS 同轮更新**（漏了就是下轮漂移）
@@ -98,7 +99,7 @@ gh workflow run ci-e2e-experiment.yml && gh run watch
 ## 关键文档
 
 - docs/WALKTHROUGH.md — spike 实证记录（①~⑪ 状态与证据）
-- docs/api.md — 27 op 契约面（用户可见）
+- docs/api.md — 39 op 契约面（用户可见）
 - docs/DECISIONS.md — D-0001~D-0015 决策记录
 - docs/ROADMAP.md — M0~M3 路线与门槛
 - src/mcp/README.md — MCP 服务器（运行/配置/安全模型）

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
     discoverWorkspaceKernel, kernelPortsFromNetstat, pidsFromTasklist,
 } from "../src/mcp/discover";
@@ -50,26 +50,40 @@ describe("工作区内核端口自动发现（3.8.7-alpha 双内核，ai-clients
 
     it("discover：6806 命中即返回（≤3.8.6 单内核快路径，不触发进程扫描）", async () => {
         const probed: string[] = [];
+        const listProcesses = vi.fn(async () => { throw new Error("不应扫描进程"); });
+        const listPorts = vi.fn(async () => { throw new Error("不应扫描端口"); });
         const found = await discoverWorkspaceKernel({
             token: "t",
             probe: async (u) => { probed.push(u); return u.endsWith(":6806"); },
-            listProcesses: async () => { throw new Error("不应扫描进程"); },
+            listProcesses,
+            listPorts,
         });
         expect(found).toBe("http://127.0.0.1:6806");
         expect(probed).toEqual(["http://127.0.0.1:6806"]);
+        expect(listProcesses).not.toHaveBeenCalled();
+        expect(listPorts).not.toHaveBeenCalled();
     });
 
-    it("discover：6806 被 429/401 拒 → 扫描 SiYuan-Kernel 端口按升序探测，认 Token 者胜出", async () => {
+    it.each(["win32", "linux", "darwin"])("discover：%s 注入扫描依赖时按候选端口鉴权，不受宿主平台屏蔽", async (platform) => {
         const probed: string[] = [];
         const found = await discoverWorkspaceKernel({
             token: "good",
+            platform,
             probe: async (u) => { probed.push(u); return u.endsWith(":5993"); },
             listProcesses: async () => TASKLIST,
             listPorts: async () => NETSTAT,
         });
         expect(found).toBe("http://127.0.0.1:5993");
-        // 5993 在 6806/6808 之后（升序），但 6806/6808 探测失败继续
+        // 默认端口先探测一次，剩余候选按升序；不重复探测 netstat 中的 6806。
         expect(probed).toEqual(["http://127.0.0.1:6806", "http://127.0.0.1:5993"]);
+    });
+
+    it("非 Windows 缺少完整注入时不执行系统扫描，只探测默认端口", async () => {
+        const listProcesses = vi.fn(async () => TASKLIST);
+        const probe = vi.fn(async (_url: string) => false);
+        expect(await discoverWorkspaceKernel({ token: "t", platform: "linux", probe, listProcesses })).toBeNull();
+        expect(listProcesses).not.toHaveBeenCalled();
+        expect(probe.mock.calls.map(([url]) => url)).toEqual(["http://127.0.0.1:6806"]);
     });
 
     it("discover：全部失败回 null（调用方回退 6806 让错误自然暴露）", async () => {

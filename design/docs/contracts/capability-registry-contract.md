@@ -19,7 +19,9 @@
 }
 ```
 
-## 2. 可用性五态（planned：registry.list 现只回 `installed`；五态拆分是升级项）
+## 2. 可用性五态（planned：registry.list 未合成五态；安装核验证据已拆分）
+
+R368：安装核验改用公共 getInstalledPlugin，包含停用项；registry.list 新增 enabled/incompatible/invalidReason/installationState 和 installation 来源/采样时间/status/error。installed 为 true/false/null，读取失败为 null；没有 enabled 字段保留 null，不等价停用。目录显示“安装清单未列出”，不把上游 API 的未列出扩成文件系统证明；未知业务配置不从桥缺席推断。公开字段可确认安装/启用，不能单独合成 available；命令表单的公开方法/协议/ready 检查是逐调用证据，仍不代表业务成功。
 
 | 态 | 判定 | 数据来源 |
 |---|---|---|
@@ -38,10 +40,10 @@
 
 | 消费方 | 用法 |
 |---|---|
-| `registry.list` op | 输出七插件 {pluginId, displayName, maturity, manifestVersion, installedVersion, installed, protocol, capabilities, hubIntegration} |
+| `registry.list` op | 输出八插件及公共安装核验证据（字段详见根 docs/api.md）；静态 manifest 可 recorded，安装读取失败独立保留 |
 | `plugin.api` 允许名单 | windowBridge 映射来自 manifest（非硬编码，D-0001） |
 | `events.list/pull` 白名单 | 仅 stable 插件且 available 的事件（events-workflow.test 强制） |
-| 设置页生态清单 | manifest × loadPetals 对照展示 |
+| 设置页生态清单 | manifest × getInstalledPlugin 对照展示，不以读取失败当未安装 |
 | 诊断报告 | registrySource + hostPlugins 计数 |
 
 ## 4. 已知差距（登记进 TODO，见 §18.2 对应条目）

@@ -314,7 +314,7 @@
       "args": {},
       "effect": "read",
       "since": "0.2.0",
-      "note": "生态插件清单：manifest×loadPetals 合并"
+      "note": "生态插件清单：manifest×公共 getInstalledPlugin；停用项保留，安装核验失败 installed=null，附 installation 来源/时间/状态/原因"
     },
     {
       "op": "diagnostics.report",

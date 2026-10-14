@@ -9,8 +9,8 @@ function makeDeps(opts?: { petals?: unknown[]; failLoadPetals?: boolean; files?:
     const deps: KernelDeps = {
         kpost: async (endpoint, payload = {}) => {
             calls.push({ endpoint, payload });
-            if (opts?.failLoadPetals && endpoint === "/api/petal/loadPetals") throw new Error("kernel self-call unsupported");
-            if (endpoint === "/api/petal/loadPetals") return (opts?.petals ?? []) as never;
+            if (opts?.failLoadPetals && endpoint === "/api/bazaar/getInstalledPlugin") throw new Error("kernel self-call unsupported");
+            if (endpoint === "/api/bazaar/getInstalledPlugin") return ({ packages: opts?.petals ?? [] }) as never;
             const scripted = opts?.kpostScript?.get(endpoint);
             if (scripted !== undefined) return scripted as never;
             throw new Error(`unexpected kpost ${endpoint}`);
@@ -49,19 +49,20 @@ describe("kernel-ops（内核同步路由纯逻辑）", () => {
         expect((r.data as { channel: string }).channel).toBe("kernel-sync");
     });
 
-    it("registry.list：manifest × loadPetals 合并；loadPetals 失败按空降级", async () => {
+    it("registry.list：manifest × 安装清单合并；读取失败保持 unknown", async () => {
         const { deps, calls } = makeDeps({ petals: [{ name: "siyuan-checkin", version: "18.16.0" }] });
         const r = await createKernelOpHandler(deps)("registry.list", {});
         expect(r.status).toBe("recorded");
         const plugins = (r.data as { plugins: Array<{ pluginId: string; installed: boolean; installedVersion: string | null }> }).plugins;
         expect(plugins.find((p) => p.pluginId === "siyuan-checkin")!.installed).toBe(true);
         expect(plugins.find((p) => p.pluginId === "siyuan-contacts")!.installed).toBe(false);
-        expect(calls[0].endpoint).toBe("/api/petal/loadPetals");
+        expect(calls[0].endpoint).toBe("/api/bazaar/getInstalledPlugin");
 
         const { deps: deps2 } = makeDeps({ failLoadPetals: true });
         const r2 = await createKernelOpHandler(deps2)("registry.list", {});
         expect(r2.status).toBe("recorded");
-        expect((r2.data as { plugins: unknown[] }).plugins.length).toBe(3);
+        expect((r2.data as { plugins: Array<{ installed: boolean | null }> }).plugins).toHaveLength(3);
+        expect((r2.data as { plugins: Array<{ installed: boolean | null }> }).plugins.every((p) => p.installed === null)).toBe(true);
     });
 
     it("events.list：白名单目录（仅 available；observed 不因 stable 旁路——R77-P0 治理）", async () => {

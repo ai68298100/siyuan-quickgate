@@ -2,7 +2,7 @@
  * G3-01 命令面板 MVP：条目合成纯逻辑（收藏置顶→最近次之→其余；别名过滤；去重）。
  */
 import { describe, expect, it } from "vitest";
-import { buildPaletteEntries, formFieldsFor, buildArgs, CAPABILITY_OPS, PaletteEntry, paletteNavMaxIndex, clampPaletteActiveIndex, paletteActionIndex } from "../src/command-palette";
+import { buildPaletteEntries, formFieldsFor, buildArgs, buildInvocationExamples, CAPABILITY_OPS, PaletteEntry, paletteNavMaxIndex, clampPaletteActiveIndex, paletteActionIndex, paletteFallbacks } from "../src/command-palette";
 import { buildToolDefs } from "../src/mcp/tools";
 
 const e = (plugin: string, id: string, title: string): PaletteEntry => ({
@@ -19,6 +19,37 @@ const RECENT = [
     { plugin: "siyuan-checkin", command: "summary", at: "2026-10-06T01:00:00Z" },
     { plugin: "siyuan-checkin", command: "record", at: "2026-10-06T02:00:00Z" },
 ];
+
+describe("已填写调用示例", () => {
+    it("两个入口共用已校验参数，保留零、换行和引号，不复制未登记凭据字段", () => {
+        const note = '第一行\n"双引号"、反斜杠 \\、中文';
+        const result = buildInvocationExamples("checkin.record", { itemId: "i1", value: "0", note, token: "not-in-schema" }, 1_791_940_200_000, "copy-fixed");
+        expect(result.error).toBeUndefined();
+        expect(result.envelope?.args).toEqual({ itemId: "i1", value: 0, note });
+        expect(result.mcp).toEqual({ name: "checkin.record", arguments: result.envelope?.args });
+        expect(JSON.parse(JSON.stringify(result.envelope))).toMatchObject({ id: "copy-fixed", v: 1, ttlMs: 60_000, reply: true });
+        expect(JSON.stringify(result)).not.toContain("not-in-schema");
+    });
+
+    it("显式 false 与合法 JSON 数组保留，省略空白可选参数", () => {
+        const items = buildInvocationExamples("checkin.items", { includeArchived: false, limit: "" });
+        expect(items.envelope?.args).toEqual({ includeArchived: false });
+        const contacts = buildInvocationExamples("contacts.interaction", { names: '甲、乙', docIds: "[]", note: "" });
+        expect(contacts.mcp?.arguments).toEqual({ names: "甲、乙", docIds: [] });
+    });
+
+    it.each([
+        ["checkin.record", {}],
+        ["contacts.interaction", { docIds: "{}" }],
+        ["contacts.interaction", { docIds: "not-json" }],
+        ["no.such.op", {}],
+    ])("%s 缺失、错型或未登记时不生成可复制示例", (op, values) => {
+        const result = buildInvocationExamples(op as string, values as Record<string, string>);
+        expect(result.error).toBeTruthy();
+        expect(result.envelope).toBeUndefined();
+        expect(result.mcp).toBeUndefined();
+    });
+});
 
 describe("buildPaletteEntries（G3-01 排序与过滤）", () => {
     it("空 query：收藏置顶 → 最近（新→旧）→ 其余；收藏/最近双标记去重", () => {
@@ -64,11 +95,15 @@ describe("命令面板键盘导航边界", () => {
     });
 
     it("无匹配时 fallback 按钮纳入导航范围", () => {
-        expect(paletteNavMaxIndex(0, 0, 100, 4)).toBe(3);
-        expect(clampPaletteActiveIndex(99, 0, 0, 100, 4)).toBe(3);
-        // 清空搜索时只有面板/诊断/指南三个动作，仍应覆盖最后一个可选项。
-        expect(paletteNavMaxIndex(0, 0, 100, 3)).toBe(2);
-        expect(clampPaletteActiveIndex(99, 0, 0, 100, 3)).toBe(2);
+        for (const query of ["未匹配", ""]) {
+            const fallbacks = paletteFallbacks(query);
+            expect(fallbacks.some(([action]) => action === "plugins")).toBe(true);
+            expect(fallbacks.some(([action]) => action === "capture")).toBe(Boolean(query));
+            const last = fallbacks.length - 1;
+            expect(paletteNavMaxIndex(0, 0, 100, fallbacks.length)).toBe(last);
+            expect(clampPaletteActiveIndex(99, 0, 0, 100, fallbacks.length)).toBe(last);
+            expect(paletteActionIndex(last, 0, 0)).toEqual({ kind: "fallback", index: last });
+        }
     });
 
     it("命令超过渲染上限时，能力动作偏移使用可见命令数", () => {
@@ -106,5 +141,31 @@ describe("R6-A 参数化二段式（schema 驱动表单 + args 收敛）", () =>
         expect(ops).not.toContain("workflow.execute");
         const names = new Set(buildToolDefs().map((d) => d.name));
         for (const op of ops) expect(names.has(op), `${op} 应在 MCP 工具面内`).toBe(true);
+    });
+
+    it.each(["{}", "null", "1", "true", '"text"'])("array 字段拒绝合法但错型的 JSON：%s", (value) => {
+        const result = buildArgs(formFieldsFor("contacts.interaction"), { names: "某人", docIds: value });
+        expect(result.error).toContain("docIds");
+        expect(result.error).toContain("array");
+        expect(result.args).toBeUndefined();
+    });
+
+    it.each(["[]", "null", "1", "false"])("object 字段拒绝错型 JSON：%s", (value) => {
+        const result = buildArgs([{ key: "options", type: "object", description: "", required: false }], { options: value });
+        expect(result.error).toContain("options");
+        expect(result.args).toBeUndefined();
+    });
+
+    it("合法空数组、对象、0 与 false 不被判为缺失，错误布尔值不静默转 false", () => {
+        const fields = [
+            { key: "list", type: "array", description: "", required: true },
+            { key: "options", type: "object", description: "", required: true },
+            { key: "count", type: "number", description: "", required: true },
+            { key: "enabled", type: "boolean", description: "", required: true },
+        ];
+        expect(buildArgs(fields, { list: "[]", options: "{}", count: "0", enabled: false }).args)
+            .toEqual({ list: [], options: {}, count: 0, enabled: false });
+        expect(buildArgs([fields[3]], { enabled: "not-a-boolean" }).error).toContain("enabled");
+        expect(buildArgs([fields[2]], { count: "Infinity" }).args).toBeUndefined();
     });
 });

@@ -27,6 +27,7 @@ const DOCS = [
     "README.zh-CN.md",
     "docs/api.md",
     "src/mcp/README.md",
+    "docs/ai-clients.md",
 ];
 
 // 声明模式 → 期望值（→ 前的历史数字不匹配，跳过）
@@ -35,6 +36,7 @@ const EXPECT_PATTERNS = [
     { re: /(?<!→\s)(\d+)\s+ops\b(?!\s*→)/g, expect: null, allowed: ALLOWED_OP_COUNTS, label: `ops 总数应为 ${OPS}${KERNEL !== OPS ? `（或内核子集 ${KERNEL}）` : ""}` },
     { re: /(\d+)\s*个只读工具/g, allowed: new Set([READONLY]), label: `只读工具数应为 ${READONLY}` },
     { re: /(\d+)\s*只读工具/g, allowed: new Set([READONLY]), label: `只读工具数应为 ${READONLY}` },
+    { re: /(\d+)\s+read-only\s+tools\b/g, allowed: new Set([READONLY]), label: `read-only tools 应为 ${READONLY}` },
 ];
 
 let failed = false;

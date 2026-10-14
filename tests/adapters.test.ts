@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-    checkinItems, checkinRecord, checkinSummary, contactsEnsure, contactsInteraction, splitNames,
+    checkinItems, checkinRecord, checkinSummary, contactsSearch, contactsEnsure, contactsInteraction, splitNames,
     gleanList, gleanGet, gleanStatus,
     homeSummary, homeMemo, homeOpen,
     examStats, examOpen,
@@ -95,6 +95,21 @@ describe("checkin 适配器（能力协商）", () => {
 });
 
 describe("contacts 适配器", () => {
+    it.each([undefined, 0, 2, "1"])("不兼容协议 %s 在所有通道的业务边界之前拒绝", async (protocol) => {
+        let reads = 0;
+        let writes = 0;
+        const b = {
+            protocol,
+            searchPeople: async () => { reads++; return []; },
+            ensurePerson: async () => { writes++; return { docId: "d1" }; },
+            recordInteraction: async () => { writes++; return { status: "unknown" }; },
+        } as ContactsBridgeLike;
+        expect((await contactsSearch(() => b, {})).status).toBe("unsupported");
+        expect((await contactsEnsure(() => b, { name: "甲" })).status).toBe("unsupported");
+        expect((await contactsInteraction(() => b, { docIds: ["d1"] }, "ref")).status).toBe("unsupported");
+        expect(reads).toBe(0);
+        expect(writes).toBe(0);
+    });
     const bridge: ContactsBridgeLike = {
         protocol: 1,
         ensurePerson: async (name) => ({ docId: `doc-${name}`, name, created: true }),

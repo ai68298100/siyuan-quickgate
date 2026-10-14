@@ -54,6 +54,9 @@ export function makeTestService(
         registry?: () => { source: string; plugins: Array<{ name: string; displayName?: string; commands: Array<{ title: string; id: string; plugin: string; callback?(): unknown }> }> };
         audit?: (e: AuditEntry) => void;
         settings?: () => QuickGateSettings;
+        dailyStatus?: () => Promise<{ docId: string | null; exists: boolean }>;
+        now?: () => number;
+        listInstalledPlugins?: () => Promise<unknown>;
     } = {},
 ) {
     const store = new BridgeStore({ load: async () => null, save: async () => {} });
@@ -65,7 +68,9 @@ export function makeTestService(
         confirm: async () => true,
         audit: overrides.audit ?? (() => {}),
         editorContext: () => null,
-        dailyStatus: async () => ({ docId: null, exists: false }),
+        dailyStatus: overrides.dailyStatus ?? (async () => ({ docId: null, exists: false })),
+        now: overrides.now,
+        listInstalledPlugins: overrides.listInstalledPlugins ?? (async () => ({ packages: [] })),
         openDoc: () => {}, openSetting: () => {},
         getCheckin: () => undefined, getContacts: () => undefined,
     });

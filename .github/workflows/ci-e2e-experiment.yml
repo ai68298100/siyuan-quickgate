@@ -38,15 +38,14 @@ jobs:
           set -euo pipefail
           echo "::add-mask::$SIYUAN_CI_TOKEN"
           docker run --rm -v "$SIYUAN_VOLUME:/ws" -e TK="$SIYUAN_CI_TOKEN" alpine sh -c \
-            'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"},\"bazaar\":{\"trust\":true,\"petalDisabled\":false}}" "$TK" > /ws/conf/conf.json'
+            'mkdir -p /ws/conf && printf "{\"api\":{\"token\":\"%s\"},\"accessAuthCode\":\"ci-isolated-access-code\",\"bazaar\":{\"trust\":true,\"petalDisabled\":false}}" "$TK" > /ws/conf/conf.json'
 
-      - name: 启动思源容器（serve + bypass）
+      - name: 启动思源容器（serve + 访问鉴权）
         run: |
           set -euo pipefail
           docker run -d --name siyuan \
             -p 127.0.0.1:6806:6806 \
             -v "$SIYUAN_VOLUME:/siyuan/workspace" \
-            -e SIYUAN_ACCESS_AUTH_CODE_BYPASS=true \
             "$SIYUAN_IMAGE" \
             serve --workspace=/siyuan/workspace/
 

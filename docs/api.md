@@ -2,6 +2,17 @@
 
 > 人读版。机器可读：[contracts/quickgate-api-v1.json](./contracts/quickgate-api-v1.json)。
 > 传输与信封规范见项目设计文档「02-小驴桥协议 v1.1」，此处只列 op 契约。
+> v0.9.3 发布面仍为 39 op；新增输入与调用条件检查不改变信封及业务确认契约。人脉 v2 保持 unsupported，等待明确身份与逐项回执适配。
+
+当前公开契约为 39 个 op，MCP 默认 22 只读工具。MCP 与命令面板按登记 schema 校验声明字段：可选字段不传时省略；传入 null、错型 JSON 或非有限数值均拒绝。面板对文本控件先做类型收敛，校验错误定位字段且不派发；MCP 返回 JSON-RPC -32602。未声明字段仍按透传契约处理。
+
+外部鉴权的前置条件：思源必须配置访问授权码，客户端发送 API Token。快门私有路由继承宿主鉴权；访问授权码为空时，本机 SiYuan 3.8.6 会允许无凭据访问（R370 靶场实际发现），不能将该状态视为“无 Token 必被拒绝”。插件收到的请求已移除 Authorization，当前无法自行重新校验此字段；独立鉴权缺口已登记，启用外部面前须实际验证匿名 HTTP 401/403。
+
+命令面板可显式复制已填写参数：命令信封为单行 JSON（新 id、createdAt、60 秒 ttlMs、reply=true），MCP 参数为 tools/call 的 `{name, arguments}`。复制先经过表单校验，不执行请求、不读取连接 Token，也不长期保存填写正文；复制内容包含用户输入，分享前应核对。发送信封时仍需满足所选通道、权限和确认契约。
+
+参数表单可只读检查调用条件，执行前始终重检：输入/桥与生态插件的公开安装、启用、协议、方法/能力分别核对。未公开的业务配置与目标条件保留未核验；检查不调用业务方法，也不代表执行成功。contacts.* 当前只支持 protocol=1；其它主版本返回 unsupported，v2 的身份/ref/逐项与 unknown 契约尚未适配。
+
+`daily.status` 按当前客户端日期查询思源原生日记属性，不按日期标题猜文档。成功数据仍为 `{docId, exists}`；合法空结果才表示未创建，查询或响应异常生成失败回执。未带原生属性的人工日期标题文档不作为日记匹配，不自动补属性。
 
 ## 通道
 
@@ -26,7 +37,7 @@
 
 设置页状态概览实时呈现桥/广播/事件物化/内核路由四路状态；本表为静态口径，两者冲突时以状态概览为准。
 
-**参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec|fast>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼、`fast` 广播快路径）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec] [-Fast]`。**AI 客户端**：`src/mcp/`（MCP stdio 代理，27 op→tools，默认 14 只读，详见其 README）。
+**参考客户端**（tools/，零依赖）：`node tools/lv-cli.mjs <ping|send|run|events|exec|fast>`（`events pull|list` 事件拉取、`exec --op` 内核路由直呼、`fast` 广播快路径）；PowerShell `.\tools/Send-LvCommand.ps1 -Op <op> [-Exec] [-Fast]`。**AI 客户端**：`src/mcp/`（MCP stdio 代理，39 op→tools，默认 22 只读，详见其 README）。内核同步路由支持 7 op，其中 6 个只读；`template.new` 是写操作，不计入只读。MCP 的前端工具仍依赖前端消费与外部桥，不能把默认只读等同于无需桥。
 
 ## 通用
 
@@ -74,7 +85,7 @@
 | `workflow.plan` | `{steps:[{op,args}≤8]}` | `{plan:{planId,steps[],expiresAt}}` | 受控 op 白名单；写步骤带 confirm 标记；只出计划不执行 |
 | `workflow.execute` | `{planId}` | `{done, stoppedAt?, steps[]}` | 总确认（30s）→ 逐步执行 → 单步失败停止；计划一次性 |
 | `workflow.cancel` | `{planId}` | `{planId}` | 请求取消运行中的计划（每步开始前检查）；已完成步骤保留不回滚；幂等 recorded |
-| `registry.list` | `{}` | `{manifestVersion, plugins:[{pluginId,displayName,maturity,manifestVersion,installedVersion,installed,protocol,capabilities,hubIntegration}], registrySource}` | 生态七插件清单（v0.2.0）；maturity ∈ stable/design/unlocated |
+| `registry.list` | `{}` | `{manifestVersion, plugins:[{pluginId,displayName,maturity,manifestVersion,installedVersion,installed,enabled,incompatible,invalidReason,installationState,protocol,capabilities,hubIntegration}], registrySource, installation:{source,checkedAt,status,error}}` | 生态八插件；公共安装清单含停用项。installed 为 true/false/null，null 表示读取失败；enabled/incompatible 缺失为 null。静态清单可 recorded，安装证据失败独立保留；maturity ∈ stable/design/unlocated |
 | `diagnostics.report` | `{}` | `{protocol, plugin, version, bridge:{enabled,pollMs,basePath,commandsFileLines}, registry:{source,hostPlugins}, confirmExec, rawApiEnabled}` | 脱敏诊断快照（不含 Token/正文/个人路径） |
 | `config.discover` | `{}` | `{diaryNotebookId, inboxDocId, notes[]}` | 自动发现（spike⑧ 校准前 best-effort；失败回 null + notes 说明） |
 | `template.new` | `{notebook, hpath, template?\|templatePath?}` | `{docId}` | 内核 renderSprig 渲染（支持 `{{}}` 语法）后 createDocWithMd；templatePath 相对 `/templates/`（v0.3.0） |

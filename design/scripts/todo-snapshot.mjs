@@ -9,10 +9,13 @@
  *   B. 不存在无规范主线（mainline=null）的条目。
  * 运行：node scripts/todo-snapshot.mjs [--write]
  */
-import { readFileSync, writeFileSync, mkdirSync, existsSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const TODO_PATH = "TODO.md";
 const OUT_PATH = "snapshot/todo-snapshot.json";
+const DESIGN_ROOT = fileURLToPath(new URL("../", import.meta.url));
 
 /* ---------- 规范主线归属（§18.1-R123-G0 第二条：每条归属 C1~C8 之一） ---------- */
 /* 关键词启发式，按序首个命中生效。顺序即优先级（越具体的越靠前）。 */
@@ -34,8 +37,11 @@ function classifyMainline(text) {
     return "C8";
 }
 
-/* ---------- 证据等级（§18.1-R123-G0 第六条 E0~E5，按当前事实初判） ---------- */
+/* ---------- 证据等级：显式标记优先；历史启发式可能含待验目标，不能当作已取得证据 ---------- */
 function classifyEvidence(text, section) {
+    // 显式证据标记优先，防止“调研”章节把已实现且验收的条目降为 E1。
+    const explicit = text.match(/【证据[:：](E[0-5])】/);
+    if (explicit) return explicit[1];
     if (/已实证|✅|真机复测|全线打通|3\.8\.5 真机|3\.8\.6 真机/.test(text)) return "E4";
     if (section.includes("实测") || /【实测】/.test(text)) return "E4"; // 待真机执行，登记目标等级
     if (section.includes("spike") || /【spike】/.test(text)) return "E4";
@@ -76,15 +82,18 @@ function normalizeStatus(parsedStatus, done) {
     return { status: "pending", blockedBy: null };
 }
 
-function parseTag(tag) {
+export function parseTag(tag) {
     const out = { round: null, priority: null, topic: null, type: null, status: null };
     if (!tag) return out;
+    // Rxxx-Gx-Px 中 Gx 是泳道，Px 才是优先级；保留只有 Gx 的历史格式。
+    out.priority = tag.match(/(?:^|[-·])(P\d+)(?=[-·]|$)/)?.[1] ?? null;
     const parts = tag.split("·").map((s) => s.trim()).filter(Boolean);
     for (const p of parts) {
         if (!out.round) {
             const r = p.match(/R\d+/);
             if (r) { out.round = r[0]; if (!/P\d|G\d/.test(p)) continue; }
         }
+        if (out.priority && (/^R\d+(?:-[GP]\d+)+$/.test(p) || /^[GP]\d+$/.test(p))) continue;
         if (!out.priority) {
             const pr = p.match(/(?:^|[-·])?(P\d|G\d)(?:[-·]|$)/);
             if (pr) { out.priority = pr[1]; continue; }
@@ -138,11 +147,11 @@ function parseEntry(line, sectionPath, sectionRound, sectionBlocked) {
 }
 
 function main() {
-    if (!existsSync(TODO_PATH)) {
-        console.error(`错误：找不到 ${TODO_PATH}（请在设计文档项目根目录运行）`);
+    if (!existsSync(resolve(DESIGN_ROOT, TODO_PATH))) {
+        console.error(`错误：设计文档目录中找不到 ${TODO_PATH}`);
         process.exit(2);
     }
-    const raw = readFileSync(TODO_PATH, "utf8");
+    const raw = readFileSync(resolve(DESIGN_ROOT, TODO_PATH), "utf8");
     const lines = raw.split(/\r?\n/);
     const entries = [];
     const sectionStack = [];
@@ -212,8 +221,8 @@ function main() {
     };
 
     if (process.argv.includes("--write")) {
-        mkdirSync("snapshot", { recursive: true });
-        writeFileSync(OUT_PATH, JSON.stringify(snapshot, null, 2) + "\n");
+        mkdirSync(resolve(DESIGN_ROOT, "snapshot"), { recursive: true });
+        writeFileSync(resolve(DESIGN_ROOT, OUT_PATH), JSON.stringify(snapshot, null, 2) + "\n");
         const bySection = {};
         for (const e of entries) {
             if (e.status === "done") continue;
@@ -227,13 +236,13 @@ function main() {
             ...Object.entries(byBlocked).sort((a, b) => b[1] - a[1]).map(([k, v]) => `- ${k}: ${v}`),
             "", "## 规范主线分布", "",
             ...Object.entries(byMainline).sort((a, b) => b[1] - a[1]).map(([k, v]) => `- ${k}: ${v}`),
-            "", "## 证据等级分布", "",
+            "", "## 证据等级分布（历史启发式含待验目标，不代表已取得）", "",
             ...Object.entries(byEvidence).sort((a, b) => b[1] - a[1]).map(([k, v]) => `- ${k}: ${v}`),
             "", "## 未完成条目 Top 章节", "",
             ...Object.entries(bySection).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([k, v]) => `- ${k}: ${v}`),
             "",
         ].join("\n");
-        writeFileSync("snapshot/report.md", report + "\n");
+        writeFileSync(resolve(DESIGN_ROOT, "snapshot/report.md"), report + "\n");
         console.log(`已写入 snapshot/report.md`);
     }
 
@@ -248,5 +257,5 @@ function main() {
     console.log("✓ R123 验收 A/B 通过");
 }
 
-const isMain = process.argv[1] && (process.argv[1].endsWith("todo-snapshot.mjs"));
-if (isMain || (statSync(process.argv[1] ?? "").size >= 0 && false)) main();
+const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) main();

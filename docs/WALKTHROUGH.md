@@ -1,6 +1,10 @@
 # WALKTHROUGH — M0 spike 实证记录
 
 > 状态标记：⬜ 待实证 · ✅ 已实证（含结论与日期） · ◐ 部分实证 · ❌ 证伪（附替代方案）
+> **R370 发布线（2026-10-14，v0.9.3）**：375 测试、离线协议 6/6、版本/类型/Svelte 检查通过；独立 SiYuan 3.8.6 靶场 UI 16/16，三轮实际退出/重载误报零次，受保护内核三通道 9/9，MCP 独立包 live 7/7。通用 onunload 不再误报用户停用，完整清理由宿主等待。首次访问授权码为空时匿名请求为 HTTP 200；配置宿主鉴权后为 401。独立鉴权缺口仍是上游阻塞 P0，外部使用须配置访问授权码。打卡事件现场、真实多设备/Android 与完整生态仍未验证；远端 CI 结果见 PROGRESS。
+> **R368 增量（2026-10-14，未发布）**：公开安装状态改用 getInstalledPlugin，避免 loadPetals 过滤停用/不兼容；失败 installed=null。表单预检/执行前重检、迟到取消与连点单飞 E3 已过，371 测试/MCP 6/6/check 全绿；生态目录八条读失败卡均为未知，长目录可关闭。人脉安装产物声明 v2（E2），旧 v1 adapter 各通道统一拒绝不支持的主版本，完整 v2 独立待适配。不以浏览器宿主替身声明真实全生态通过。
+> **R368 内核正例 E4（2026-10-14）**：独立 SiYuan 3.8.6 靶场，公共安装接口显示快门启用；新 kernel.js 哈希核对一致，私有 registry.list 返回八插件声明及 installation.status=ok/公共接口来源/采样时间。范围为接口与内核正例，非实际停用/拒绝/全生态调用链。
+> **2026-10-14 状态核对**：本文的日期、端口样例与版本均保留历史语境。R364 核对的正式基线为 v0.9.2；v0.9.3 证据见本轮 R370。R364 当轮新增证据是本地自动化与预览宿主，不新增思源/Android/双窗口实证。历史 PROGRESS 已记录 v0.7.3 的 recorded 事件物化闭环，deleted 现场、④双窗口、⑦光标 blockId 与多设备隔离仍分别待验。
 > 规则：每一项实证后立即回填本文件与对应源码；未实证的代码路径必须保持"探测失败自动降级"。
 > **环境（2026-10-02 实测更正）**：内核 `http://127.0.0.1:6806`（默认端口；早前记录的 1568 已过时）、内核版本 **3.8.6**、Token 在 `%APPDATA%\siyuan\env`（`SIYUAN_TOKEN=`/`SIYUAN_URL=`）。快门 **v0.7.3+（未发布构建随 R 轮部署）** 已部署至 `data/plugins/siyuan-quickgate/` 并启用；**外部命令桥与广播快路径已开启（R70 代开，用户可随时在设置页关回）**。下文 `$TOKEN` 即该值。
 > **M0 spike 复测收官（R70，2026-10-02）**：`npm run verify:restart` **9/9 全绿**——③桥 444ms / ⑩⓪ 401 / ⑩内核路由功能面（bug#9 修复后）/ ⑤广播 / **v1.5 真机 227ms** / MCP 内核路由 / §10-10 日志 +254B。唯余：⑪（需在打卡里记/删一条）、④多窗口与 ⑦blockId/①复核（DevTools 现场）。
@@ -87,14 +91,30 @@
 - 功能面全绿（v0.7.1 复测批）：路由 ping `channel=kernel-sync` ✓ / events.list 白名单=8 ✓ / 前端专属 op 诚实降级（消息指引 NDJSON）✓ / **MCP registry.list 经 exec isError=false** ✓
 - 结论：✅ **内核路由功能面收官**（v0.5.0 实验通道转正依据成立）；前端中继仍按 D-0010 暂缓
 
-## ⑪ event-deleted 物化验证 ⬜（v0.5.4 新增订阅）
+## ⑪ event-deleted 物化验证 ◐（recorded 物化已闭环，deleted 现场待验）
 
-## ⑫ 前端加载判别与热重载接管 ⬜（R234/R239 新增 · bug#15）
-- 判别式：NDJSON 发 favorites.list → recorded=新前端；「未知 op」=旧 bundle（Electron 模块缓存，**需托盘完全退出后重启**，窗口重开无效——进程实证主进程 16:06 起未退）
-- 已布防：构造器所有权令牌 + 3s onload 自检自愈（实测未被 push_reload 路径触发，机制待 DevTools）
-- 走查步骤：完全退出 → 重启 → 跑 e2e-bg（「前端 bundle 判别」项应 pass）→ favorites.add/list/remove 全链
+- 历史 PROGRESS（v0.7.3）已有 checkin.record → events.ndjson → events.pull 的真机闭环；该证据不等于现场删除事件已复测。
 - 计划：装打卡 ≥18.16 → 打卡里删除一条打卡记录 → 检查
   `curl -s http://127.0.0.1:1568/api/file/getFile -H "Authorization: Token $TOKEN" -H "Content-Type: application/json" -d "{\"path\":\"/storage/petal/siyuan-checkin/bridge/events.ndjson\"}"`
 - 验收：出现 `name:"checkin:event-deleted"` 行，幂等键以 `:deleted` 结尾；同时 `events.pull`（内核路由或 NDJSON）能拉到它
 - 备注：本项同时验证 v0.5.2 的 window CustomEvent 订阅通道修正——若 recorded 行也从未出现，优先排查通道
 - 结论：（待填）
+
+## ⑫ 前端加载判别与热重载接管 ⬜（R234/R239 新增 · bug#15）
+- 判别式：NDJSON 发 favorites.list → recorded=新前端；「未知 op」=旧 bundle（Electron 模块缓存，**需托盘完全退出后重启**，窗口重开无效——进程实证主进程 16:06 起未退）
+- 已布防：构造器所有权令牌 + 3s onload 自检自愈（实测未被 push_reload 路径触发，机制待 DevTools）
+- 走查步骤：完全退出 → 重启 → 跑 e2e-bg（「前端 bundle 判别」项应 pass）→ favorites.add/list/remove 全链
+
+## ⑬ 捕获目标核验与确认 ✅（R366，2026-10-14 独立靶场）
+
+- SiYuan 3.8.6，快门独立 workspace；`e2e/ui-interactions.mjs` 16/16。选择日记仅核验，确认后出现写入成功卡；日记和收集箱均经宿主确认撤销，deleteBlock 返回成功且测试块已删除。
+- E3 另覆盖目标/配置变化、读取异常、过期/跨日、并发确认和 unknown 不重发；宿主替身浏览器覆盖复制零派发/错误字段零复制与 unknown 禁止再次提交。
+- 范围：捕获样板与现有桌面交互，不关闭 Android/双窗口/现场上下文/真实断网或 Quicker 作者链待办。日记最终路径仍由内核模板决定，预检没有事务锁。
+
+R367 补记：R366 交互增加 API 请求计数后 16/16，预检零块写请求、确认恰好一次；导航用 role/aria 状态涵盖合法 fallback，不再以固定延迟和 div 类型判断准备状态。
+
+## ⑭ 原生日记属性只读查询 ✅（R367，2026-10-14）
+
+- 新 daily-status 服务只读查询独立快门 SiYuan 3.8.6 靶场，返回日记文档 ID 与 exists=true（E4，仅内核正例）。根据上游 CreateDailyNote 的 custom-dailynote 属性识别，不按标题日期猜测。
+- 十项回归（E3）覆盖空结果、异常形状、权限错误、无效时钟与桥失败回执；首跑宿主替身显示读取失败和可复制证据、零捕获写入。
+- 真实断网/权限拒绝、历史手工日记、跨日期/时区与多设备仍待相应现场证据；不关闭原首跑完成门槛。

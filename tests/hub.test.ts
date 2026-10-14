@@ -21,8 +21,8 @@ class MemKernel {
                 this.files.set(String(form.get("path")), await (form.get("file") as File).text());
                 return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: null }) } as Response;
             }
-            if (u === "/api/petal/loadPetals") {
-                return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: this.petals }) } as Response;
+            if (u === "/api/bazaar/getInstalledPlugin") {
+                return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: { packages: this.petals } }) } as Response;
             }
             if (u === "/api/notebook/lsNotebooks") {
                 return { ok: true, status: 200, text: async () => JSON.stringify({ code: 0, msg: "", data: { notebooks: this.notebooks } }) } as Response;
@@ -62,7 +62,7 @@ function make(mem: MemKernel) {
         getCheckin: () => undefined,
         getContacts: () => undefined,
         getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
-        loadPetals: async () => mem.petals,
+        listInstalledPlugins: async () => ({ packages: mem.petals }),
         discoverConfig: async () => {
             const diary = mem.notebooks.find((n) => !n.closed && n.conf?.dailynoteSavePath);
             const inbox = mem.notebooks.find((n) => !n.closed && /收集箱|inbox/i.test(n.name));
@@ -87,7 +87,7 @@ async function run(mem: MemKernel, service: BridgeService) {
 }
 
 describe("生态中枢 op（R1）", () => {
-    it("registry.list 合并 manifest 与 loadPetals", async () => {
+    it("registry.list 合并 manifest 与公共安装清单", async () => {
         const mem = new MemKernel();
         mem.petals = [{ name: "siyuan-checkin", version: "18.9.0", enabled: true }, { name: "siyuan-glean", version: "1.1.0", enabled: true }];
         send(mem, "r1", "registry.list");

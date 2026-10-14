@@ -8,7 +8,7 @@
 
 [English](./README.md) · [上手指南](./docs/GETTING-STARTED.md) · [op 契约](./docs/api.md) · [AI 客户端矩阵](./docs/ai-clients.md) · [下载安装](https://github.com/ai68298100/siyuan-quickgate/releases)
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.2-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 <img src="./preview.png" alt="分层设置面板 · 命令面板 · 四中心" width="820" />
 
@@ -20,7 +20,8 @@ Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小
 - `checkin.*` / `contacts.*` — 向小驴打卡（API v5）、小驴人脉（bridge v1）的公开桥做结构化透传
 - `glean.*` / `home.*` / `exam.*` — 拾遗读库（列表/详情/五态改状态，写面受拾遗侧桥写开关门控）、管家提醒有界计数与快速备忘、考试脱敏统计与练习台入口
 - `favorites.*` — 收藏与最近使用（命令面板体验：去重前移、隐私清除，载体独立于桥文件）
-- `registry.list` / `diagnostics.report` / `config.discover` — 小驴生态插件清单（成熟度×实装版本）、脱敏诊断、日记笔记本+收集箱自动发现
+- `registry.list` / `diagnostics.report` / `config.discover` — 小驴生态插件清单（公开安装/启用状态、版本和读取证据）、脱敏诊断、日记笔记本+收集箱自动发现
+- 命令参数页支持只读检查调用条件，执行前重检；未知业务配置明确保留，预检通过不代表执行成功。人脉当前适配 v1，v2 暂回 unsupported。
 - `events.list` / `events.pull` — 白名单事件流（打卡记录/删除已自动物化；删除标记以 `:deleted` 幂等后缀与原行共存）
 - `workflow.plan` / `workflow.execute` — 受控编排（≤8 步、白名单 op、总确认 30s、失败停止不回滚）
 - `template.new` / `doc.open` / `daily.status` / `editor.context` / `setting.open` — 模板建文档、受控导航、编辑器上下文
@@ -40,7 +41,7 @@ Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小
 
 观感对齐 [design/ui-prototype/mvp1.html](./design/ui-prototype/mvp1.html)（全部 `--b3-*` 令牌、亮暗随宿主主题，不硬编码颜色）：
 
-- **分层设置面板**：状态概览（健康首页：通道卡片 / 运行 KPI / 下一步 / 最近回执）· 首跑向导（**七步可恢复状态机**：环境检查→选择能力→桥权限→连接探针→样例只读→可选样例写入→完成；wizard-state.json 续跑；样例写入可撤销）· 连接与通道 · 安全与权限 · 队列与数据（含**全量备份/恢复**与清空队列预览）· 诊断与生态 · 关于；顶部搜索条**跨分组过滤**设置项。
+- **分层设置面板**：状态概览（健康首页：通道卡片 / 运行 KPI / 下一步 / 最近回执）· 首跑向导（**七步可恢复状态机**：环境检查→选择能力→桥权限→连接探针→样例只读→可选样例写入→完成；wizard-state.json 续跑；样例写入先预览确认，测试块可手动删除）· 连接与通道 · 安全与权限 · 队列与数据（含**全量备份/恢复**与清空队列预览）· 诊断与生态 · 关于；顶部搜索条**跨分组过滤**设置项。
 - **命令面板**（`Ctrl+Alt+P`）：搜索宿主命令（中英/拼音别名，收藏★/最近自动置顶）；「能力动作」二段式（先填参数后执行，写动作双档标注）；空结果兜底 = 一句话**快速捕获**到今日日记 / 收集箱。
 - **通知中心 / 恢复中心 / 回执中心**：待关注事态聚合（一键跳转处理面）· unknown/失败/过期回执的人工处置（换新 id 重试 / 放弃并记录 / 批量）· `results.ndjson` 查询（状态/时间筛选、关键词、分页、导出 CSV/JSON）。
 - **失联检测与接管**：他窗持有消费权时显示心跳状态；卡死嫌疑/高度失联可一键接管（台账防双执行）。
@@ -51,6 +52,8 @@ Quicker、手机快捷指令、CLI、PowerShell、AI 助手、HA 脚本以及小
 2. 思源 → 设置 → 集市 → 下载页 → 右上角菜单 → **导入安装包**。
 3. 启用插件，打开设置，将**外部命令桥**打开（产品默认关闭）。
 4. **更新版本后需完全退出思源（托盘右键退出）再启动**——窗口重开不会刷新插件前端代码；可双击工作区的 `重启思源.bat`（仓库 `tools/restart-siyuan.bat`）一键完成。
+
+启用外部访问前，为思源配置访问授权码，客户端使用 API Token；访问授权码为空时，宿主会允许本地匿名访问，快门私有 HTTP 路由继承这一鉴权行为。请确认无凭据请求返回 HTTP 401/403。已登录的前端使用宿主会话机制。
 
 ## 协议
 
@@ -73,6 +76,8 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 - **默认只暴露 22 个只读工具**；写工具在设置 `LV_MCP_WRITE=1` 前不进列表（直接调用会被诚实拒绝）
 - `plugin.api` / `workflow.execute` 额外标注 `destructiveHint`
 - 快门侧防线全部共用：确认门控、黑名单、审计日志、plugin.api 允许名单
+
+v0.9.3 修复插件重载时反复弹出的“已停用”误报；快速捕获先核验和预览、再确认追加；参数表单与 MCP 共用类型校验，并核对公开安装与调用条件；已填写调用示例可复制而不执行。变更与人脉 v2 限制见 [CHANGELOG](./CHANGELOG.md)。
 
 ```json
 { "mcpServers": { "lv-quickgate": {
@@ -102,7 +107,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | v0.7.0~0.7.3 | MCP stdio 服务器（AI 助手）+ 内核路由 3.8.6 真机打通（bug#9）+ 验收入口收敛 → 池清账八处正确性修复 + 版本/发布双门禁 + bug#11/12/13 |
 | **v0.7.4** | **template.new 路径穿越安全修复**（三通道守卫）+ 收藏/最近使用全链 + **思源内置 Agent 原生三能力**（零配置）+ 并发正确性（幂等注册表/桥消费权认领/多写者竞态缓解）+ 契约 23→27 op + manifest v2（真机校准） |
 | **v0.7.5** | 发布链补强：package.zip 解包断言（bug#9 回归门）+ Agent 集成指南 + 重启工具 + bug#17 登记（lifecycle 钩子噪音，功能零影响） |
-| **v0.8.0** | **首跑七步可恢复状态机**（wizard-state.json 续跑、样例只读/写入可撤销）· **失联检测与接管**（heartbeat + Web Locks steal）· **workflow.cancel 取消通道**（每步开始前检查点，已完成步骤保留）· 天数保留 retentionDays（默认关）· 备份来源设备 + 收藏合并导入 · UI 对齐原型打磨 |
+| **v0.8.0** | **首跑七步可恢复状态机**（wizard-state.json 续跑、样例只读/写入，测试块可手动删除）· **失联检测与接管**（heartbeat + Web Locks steal）· **workflow.cancel 取消通道**（每步开始前检查点，已完成步骤保留）· 天数保留 retentionDays（默认关）· 备份来源设备 + 收藏合并导入 · UI 对齐原型打磨 |
 | **v0.8.1** | CI/发布可复现性加固 · MCP 冒烟计数改为跟随单一 op 清单 · Dependabot 与 GitHub Issue/PR 流程整理 · 中英文文档与安全策略更新 |
 | **v0.8.2** | 入口、设置页、诊断包统一读取运行时版本源 · 容器 E2E 改为严格门禁，补齐健康探测、Token 脱敏与失败诊断资产 |
 | **v0.8.3** | 诊断包加入会话健康快照 · 命令面板空态键盘安全 · combobox/listbox 无障碍关联 · E2E 启动就绪判定加固 |
@@ -112,6 +117,7 @@ events.ndjson     # 公开宿主事件流（快门代打卡物化：记录/删�
 | **v0.8.7** | 修复命令超过 100 条时能力动作的键盘执行偏移 · 清除无效动态导入构建警告 |
 | **v0.8.8** | 串行化桥启停过渡 · 释放接管超时后的迟到 Web Lock · 补齐设置页读屏控件名称 |
 | **v0.9.0** | **UI 全面打磨**：设置面板/命令面板/四中心对齐原型（配色证据化求解 ≥4.5:1、窄屏与触屏适配、交互 e2e 13 项真机断言）· 修复捕获撤销误报失败 · 设置搜索命中高亮 · 全新图标与品牌视觉 |
+| **v0.9.3** | 捕获预览确认 · 公开安装状态与调用条件检查 · 表单/MCP 校验 · 修复重载停用误报并等待完整退出清理 · 人脉 v2 暂回 unsupported |
 | **v0.9.2** | **生态适配收尾 35→39 op**：小驴常用 window.xiaolvCommon v1 落地（上游 0.4.0 · ADR-0013 只读子集）并接入 common.search/get/recent/favorites（全部只读；manifest 8 款全 stable/design 双轨齐整） |
 | **v0.9.1** | **生态适配扩展 27→35 op**：拾遗 siyuanGlean v1 / 管家 LvHome v1 / 考试 siyuanExam 接入（glean.*/home.*/exam.*）· manifest 校准（三家 design→stable + 补录 xiaolv-common，清单 8 款）· AI 客户端接入矩阵（docs/ai-clients.md）+ 工具 schema 导出器 |
 

@@ -7,6 +7,7 @@ import { eventWhitelist, parseEventLine } from "./services/events";
 import type { EcosystemManifest } from "./services/bridge-service";
 import { validateTemplatePath, validateTemplateContent } from "./services/path-guard";
 import { FRONTEND_ONLY_OPS } from "./ops";
+import { INSTALLED_PLUGIN_ENDPOINT, installationFor, readInstallation } from "./services/plugin-status";
 
 export type Args = Record<string, unknown>;
 
@@ -36,26 +37,17 @@ export function kernelPing(deps: KernelDeps): Receipt {
 }
 
 export async function kernelRegistryList(deps: KernelDeps): Promise<Receipt> {
-    let petals: Array<Record<string, unknown>> = [];
-    try {
-        petals = await deps.kpost<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: "desktop" });
-    } catch { /* kernel.js 内自呼失败（spike⑩ handler 待内核重启复测）→ 按空清单降级 */ }
-    const byName = new Map<string, Record<string, unknown>>();
-    for (const p of petals) {
-        const n = (p as { name?: unknown }).name;
-        if (typeof n === "string") byName.set(n, p);
-    }
+    const installation = await readInstallation(() => deps.kpost(INSTALLED_PLUGIN_ENDPOINT, { frontend: "desktop", keyword: "" }));
     const plugins = deps.manifest.plugins.map((m) => {
-        const petal = byName.get(m.pluginId) as { version?: unknown } | undefined;
         return {
             pluginId: m.pluginId, displayName: m.displayName, maturity: m.maturity,
             manifestVersion: m.version,
-            installedVersion: typeof petal?.version === "string" ? petal.version : null,
-            installed: byName.has(m.pluginId),
+            ...installationFor(installation, m.pluginId),
             protocol: m.protocol, capabilities: m.capabilities, hubIntegration: m.hubIntegration,
         };
     });
-    return { id: "kernel", op: "registry.list", status: "recorded", data: { manifestVersion: deps.manifest.version, plugins, registrySource: "kernel" }, message: `生态清单 ${plugins.length} 款` };
+    return { id: "kernel", op: "registry.list", status: "recorded", data: { manifestVersion: deps.manifest.version, plugins, registrySource: "kernel",
+        installation: { source: installation.source, checkedAt: installation.checkedAt, status: installation.status, error: installation.error } }, message: `生态清单 ${plugins.length} 款` };
 }
 
 export function kernelEventsList(deps: KernelDeps): Receipt {

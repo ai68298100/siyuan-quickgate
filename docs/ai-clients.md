@@ -1,15 +1,15 @@
 # AI 客户端接入矩阵（外部 Agent 调用快门）
 
 > 快门的 AI 接入口是**协议级**的，不绑定任何单一客户端：MCP 是开放标准，内核 HTTP 路由与工具 schema 导出面则覆盖不支持 MCP 的平台。本文按客户端能力分三条路径，各家任选其一。
-> 版本基线：v0.9.1（35 op / MCP 默认 18 只读工具）。客户端 MCP 支持状态随版本变化快，配置文件位置以各客户端当前文档为准；实测结果请回填 §5 兼容表。
+> 版本基线：v0.9.2（39 op / MCP 默认 22 只读工具）。客户端 MCP 支持状态随版本变化快，配置文件位置以各客户端当前文档为准；实测结果请回填 §5 兼容表。
 
 ## 0. 路径总览
 
 | 路径 | 适用客户端 | 前置 | 工具面 |
 |---|---|---|---|
-| **A. MCP stdio** | Claude Desktop / Claude Code、OpenAI Codex CLI、ZCode、Google Antigravity（反重力）、Qwen Code、TRAE、Cherry Studio、Chatbox 等一切支持「本地 MCP 服务器」的客户端 | Node ≥24 | 35 op → MCP tools（默认 18 只读） |
+| **A. MCP stdio** | Claude Desktop / Claude Code、OpenAI Codex CLI、ZCode、Google Antigravity（反重力）、Qwen Code、TRAE、Cherry Studio、Chatbox 等一切支持「本地 MCP 服务器」的客户端 | Node ≥24 | 39 op → MCP tools（默认 22 只读） |
 | **B. 思源内置 Agent**（零配置） | 思源 ≥3.8.6 的内置 AI Agent | 无（插件启用即注册） | `quickgate_ping` / `quickgate_discover` / `quickgate_capture` 三能力；全工具面可经外部 MCP 挂载（见 §2） |
-| **C. 自定义工具 / HTTP** | 千问办公、豆包办公、WorkBuddy、DeepSeek dsh 等无 MCP 但支持 function-calling 或 HTTP 插件的 Agent | 思源 API Token | 35 op 全量（schema 由导出器生成；调用走内核 HTTP 路由或 NDJSON 桥） |
+| **C. 自定义工具 / HTTP** | 千问办公、豆包办公、WorkBuddy、DeepSeek dsh 等无 MCP 但支持 function-calling 或 HTTP 插件的 Agent | 思源 API Token | 39 op 全量（schema 由导出器生成；调用走内核 HTTP 路由或 NDJSON 桥） |
 
 **写权限门控对所有客户端一致**：MCP 写工具需 `LV_MCP_WRITE=1` 才进 tools/list（直接调用被诚实拒绝）；`plugin.api` / `workflow.execute` 标注 `destructiveHint`；快门侧防线（确认框 30s、黑名单、审计、plugin.api 允许名单、桥默认关）与客户端无关，任何客户端都无法绕过。
 
@@ -20,12 +20,12 @@
 ```
 command: node
 args:    <仓库路径>/src/mcp/main.ts
-env:     SIYUAN_URL=http://127.0.0.1:6806
+env:     SIYUAN_URL=<工作区内核 URL；Windows 可省略以自动发现>
          SIYUAN_TOKEN=<思源 设置→关于→API 令牌>
          LV_MCP_WRITE=1   # 可选：放开写工具；缺省只读
 ```
 
-协议与安全模型详见 [src/mcp/README.md](../src/mcp/README.md)。常见客户端的配置位置：
+协议与安全模型详见 [MCP 指南](https://github.com/ai68298100/siyuan-quickgate/blob/main/src/mcp/README.md)。常见客户端的配置位置：
 
 | 客户端 | 配置文件 | 形状 |
 |---|---|---|
@@ -41,7 +41,7 @@ env:     SIYUAN_URL=http://127.0.0.1:6806
 ```json
 { "mcpServers": { "lv-quickgate": {
     "command": "node",
-    "args": ["D:/path/to/siyuan-quickgate/src/mcp/main.ts"],
+    "args": ["<仓库绝对路径>/src/mcp/main.ts"],
     "env": { "SIYUAN_TOKEN": "<token>", "LV_MCP_WRITE": "1" }
 } } }
 ```
@@ -56,7 +56,7 @@ env:     SIYUAN_URL=http://127.0.0.1:6806
 - `quickgate_discover`——日记笔记本 + 收集箱发现
 - `quickgate_capture`——一句话追加今日日记
 
-要给内置 Agent 全部 35 工具面：把 Agent 设置的「外部 MCP」指向本仓库 stdio 服务器（同 §1 env），字段级挂法与审批策略见 [docs/agent-integration.md](./agent-integration.md)。注意内核需 ≥3.8.7-alpha.4 以规避上游 MCP 客户端连接 bug #19998。
+要给内置 Agent 全部 39 工具面：把 Agent 设置的「外部 MCP」指向本仓库 stdio 服务器（同 §1 env），字段级挂法与审批策略见 [docs/agent-integration.md](./agent-integration.md)。注意内核需 ≥3.8.7-alpha.4 以规避上游 MCP 客户端连接 bug #19998。
 
 ## 3. 路径 C：自定义工具 / HTTP（无 MCP 平台）
 
@@ -92,15 +92,15 @@ Content-Type: application/json
 
 思源 3.8.7-alpha 起按「启动器内核 + 工作区内核」双进程运行：**6806 由无工作区的启动器内核持有，工作区内核在每次启动时分配动态端口**（如 5993），且两者 Token 不通用。外部客户端的 `SIYUAN_URL` 必须指向**工作区内核**端口：
 
-- **快门自带工具已内置自动发现**：MCP 服务器（`src/mcp/main.ts`）与 `lv-cli` 在**未设置 `SIYUAN_URL`** 时自动定位工作区内核（6806 老单内核快路径 → 扫描 SiYuan-Kernel 进程监听端口 → 以 Token 鉴权通过为准，实测 <1s）；显式给 `SIYUAN_URL` 则跳过探测
+- **Windows 自带工具已内置自动发现**：MCP 服务器（`src/mcp/main.ts`）与 `lv-cli` 在**未设置 `SIYUAN_URL`** 时自动定位工作区内核（6806 老单内核快路径 → 扫描 SiYuan-Kernel 进程监听端口 → 以 Token 鉴权通过为准，历史实测 <1s）；显式给 `SIYUAN_URL` 则跳过探测。非 Windows 默认只探测 6806，动态端口须显式设置工作区 URL；跨平台注入测试通过不等于已有各平台原生扫描器。
 - 手动查端口：`netstat -ano | findstr LISTENING | findstr <SiYuan-Kernel PID>`；工作区内核同时监听 6808 辅助端口可作识别特征
 - 单工作区老版本（≤3.8.6）仍是固定 6806，无需处理
 - NDJSON 桥（文件载体）不受影响，但读写文件同样要经工作区内核的 HTTP API
 
-curl 验证：
+curl 验证（先将 `SIYUAN_URL` 设置为已核实的工作区内核地址）：
 
 ```bash
-curl -s -X POST http://127.0.0.1:6806/plugin/private/siyuan-quickgate/exec \
+curl -s -X POST "${SIYUAN_URL}/plugin/private/siyuan-quickgate/exec" \
   -H "Authorization: Token <token>" -H "Content-Type: application/json" \
   -d '{"op":"bridge.ping","args":{}}'
 ```

@@ -5,6 +5,8 @@
  */
 
 export interface CheckinBridgeLike {
+    /** Public v5 descriptor uses version=5 (verified installed bundle), not apiVersion. */
+    version?: number;
     protocolName?: string;
     apiVersion?: number;
     whenReady?: () => Promise<unknown>;
@@ -194,13 +196,15 @@ export async function checkinSummary(getBridge: () => CheckinBridgeLike | undefi
 
 /* ---------------- 人脉 v1 ---------------- */
 
+const CONTACTS_V1_REQUIRED = "人脉公开桥缺席或协议不兼容（当前适配仅支持 protocol=1）；请检查插件状态与公开契约。";
+
 export async function contactsSearch(
     getBridge: () => ContactsBridgeLike | undefined,
     args: { keyword?: unknown }
 ): Promise<BridgeResult> {
     const b = getBridge();
-    if (!b || typeof b.protocol !== "number" || typeof b.searchPeople !== "function") {
-        return { status: "unsupported", data: null, message: "小驴人脉未安装或协议不可用" };
+    if (!b || b.protocol !== 1 || typeof b.searchPeople !== "function") {
+        return { status: "unsupported", data: null, message: CONTACTS_V1_REQUIRED };
     }
     try {
         const kw = typeof args.keyword === "string" ? args.keyword : "";
@@ -216,8 +220,8 @@ export async function contactsEnsure(
     args: { name?: unknown }
 ): Promise<BridgeResult> {
     const b = getBridge();
-    if (!b || typeof b.ensurePerson !== "function") {
-        return { status: "unsupported", data: null, message: "小驴人脉未安装或协议不可用" };
+    if (!b || b.protocol !== 1 || typeof b.ensurePerson !== "function") {
+        return { status: "unsupported", data: null, message: CONTACTS_V1_REQUIRED };
     }
     const name = typeof args.name === "string" ? args.name.trim() : "";
     if (!name || name.length > 64) {
@@ -247,8 +251,8 @@ export async function contactsInteraction(
     ref: string
 ): Promise<BridgeResult> {
     const b = getBridge();
-    if (!b || typeof b.recordInteraction !== "function" || typeof b.ensurePerson !== "function") {
-        return { status: "unsupported", data: null, message: "小驴人脉未安装或协议不可用" };
+    if (!b || b.protocol !== 1 || typeof b.recordInteraction !== "function" || typeof b.ensurePerson !== "function") {
+        return { status: "unsupported", data: null, message: CONTACTS_V1_REQUIRED };
     }
     const names = splitNames(args.names);
     const docIds = Array.isArray(args.docIds) ? args.docIds.filter((x): x is string => typeof x === "string") : [];

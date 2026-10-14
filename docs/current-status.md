@@ -1,25 +1,25 @@
 # 快门当前状态（自动快照）
 
-> 由 `node scripts/current-status.mjs` 生成于 2026-10-11 02:52。再跑即刷新；不手改本文件。
+> 由 `node scripts/current-status.mjs` 生成于 2026-10-14 19:52。再跑即刷新；不手改本文件。
 
 ## 版本与构建
 
 | 项 | 值 |
 |---|---|
-| 分支 / HEAD | `main` / `7fa49e2` |
-| 源码版本 | `0.9.2` |
+| 分支 / HEAD | `codex/research-r10-reliability` / `5a05745` |
+| 源码版本 | `0.9.3` |
 | 最新 tag | `v0.9.2` |
-| 远端 release tag（本地探测） | `v0.9.2` |
-| dist/index.js | 存在（构建于 2026-10-10 18:51） |
-| 工作区未提交项 | 0 个（git status --short） |
+| 远端最新版本 tag（不代表 Release 状态） | `v0.9.2` |
+| dist/index.js | 存在（构建于 2026-10-14 19:23） |
+| 工作区未提交项 | 72 个（git status --short） |
 
-## 质量门（快照时点声明，权威以最近一次运行输出为准）
+## 质量门（本快照不执行检查，结果以最近一次运行输出为准）
 
 | 门 | 状态 |
 |---|---|
-| tsc --noEmit | ✓（生成时点通过） |
+| tsc --noEmit | 以最近一次 `pnpm check:types` 输出为准 |
 | vitest（tests/） | 以最近一次 `pnpm test` 输出为准（快照不硬编码数量） |
-| check 链（含数字门禁） | ✓（生成时点通过） |
+| check 链（含数字门禁） | 以最近一次 `pnpm check` 输出为准 |
 
 ## 通道与入口
 

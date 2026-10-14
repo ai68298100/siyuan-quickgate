@@ -8,6 +8,8 @@ import {
 import "./index.scss";
 
 import { KernelApi } from "./services/kernelApi";
+import { QuickCaptureService, type CapturePlan, type CaptureTarget } from "./services/quick-capture";
+import { readDailyStatus } from "./services/daily-status";
 import { BridgeStore, DataIO } from "./services/store";
 import { BridgeService, EditorContextResult } from "./services/bridge-service";
 import { SingleFlightPoller } from "./services/poller";
@@ -35,6 +37,7 @@ export default class QuickGatePlugin extends Plugin {
     store = new BridgeStore(this.asDataIO());
     private idempotency = new IdempotencyRegistry(this.asDataIO());
     kernelApi = new KernelApi();
+    private readonly quickCapture = new QuickCaptureService(this.kernelApi, () => this.discoverConfig());
     poller?: SingleFlightPoller;
     activeService?: BridgeService;
     settings: QuickGateSettings = { ...DEFAULT_SETTINGS };
@@ -43,6 +46,8 @@ export default class QuickGatePlugin extends Plugin {
     private lifecycleBooted = false;
     /** 卸载标记：停用后构造器自愈不得复活后台循环 */
     private tornDown = false;
+    /** 同一实例只清理一次；返回给宿主的 Promise 覆盖停桥和最后一次持久化。 */
+    private unloadTask?: Promise<void>;
     /** 桥启停串行化：快速关开/改轮询间隔时，旧 stop 未释放消费权前不得插入新 start。 */
     private readonly bridgeTransitions = new SerialTransitionQueue();
 
@@ -133,23 +138,23 @@ export default class QuickGatePlugin extends Plugin {
         // 轮询已在 onload 启动；为布局相关扩展留位
     }
 
-    onunload() {
-        // 优雅停机：先等待当前 tick 完成，再释放消费权，避免热重载时旧实例仍写回。
+    onunload(): Promise<void> {
+        if (this.unloadTask) return this.unloadTask;
+        // 宿主重载也调用此钩子，不能据此判定用户停用了插件或弹出停用提示。
         this.tornDown = true; // 停用后构造器的热重载自愈不得复活后台循环
-        const stopping = this.stopBridge().catch((e) => {
-            console.warn(`[${PLUGIN_NAME}] 停止桥时出现异常：`, e);
-        });
         this.stopEventBridge();
-        const auditFlushed = this.flushAudit();
-        // L554：等最后一个 tick 完成后再回写统计，避免 in-flight 结果丢失。
-        void Promise.allSettled([stopping, auditFlushed]).then(() => {
+        this.unloadTask = this.stopBridge().catch((e) => {
+            console.warn(`[${PLUGIN_NAME}] 停止桥时出现异常：`, e);
+        }).then(async () => {
+            // 当前 tick 仍可能追加审计；停桥后再 flush，并让宿主等待所有清理完成。
+            await this.flushAudit();
             if (this.activeService) {
-                void this.store.saveStats(this.activeService.stats).catch((e) => {
+                await this.store.saveStats(this.activeService.stats).catch((e) => {
                     console.warn(`[${PLUGIN_NAME}] 保存运行统计失败：`, e);
                 });
             }
         });
-        showMessage("小驴快门已停用；其桥目录随插件数据一并保留/清理", 3000, "info");
+        return this.unloadTask;
     }
 
     /**
@@ -483,19 +488,9 @@ export default class QuickGatePlugin extends Plugin {
         }
     }
 
-    /** 今日日记状态：只探测不创建（对齐雷切语义）；SQL 标题日期法已于 R25 真机实测 code=0 ✓（字段名实证见 spike⑧）。R347 转公开——首跑向导步骤 5 样例只读探针 */
+    /** 只读原生日记属性；读取异常交由桥/向导分类，不改写为文档不存在。 */
     async readDailyStatus(): Promise<{ docId: string | null; exists: boolean }> {
-        try {
-            const today = new Date();
-            const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-            const data = await this.kernelApi.post<Array<{ root_id: string }>>("/api/query/sql", {
-                stmt: `SELECT root_id FROM blocks WHERE type='d' AND content LIKE '%${ymd}%' LIMIT 1`,
-            });
-            const docId = data?.[0]?.root_id ?? null;
-            return { docId, exists: docId !== null };
-        } catch {
-            return { docId: null, exists: false };
-        }
+        return readDailyStatus(this.kernelApi);
     }
 
     private async openDocById(id: string) {
@@ -536,7 +531,7 @@ export default class QuickGatePlugin extends Plugin {
             getHome: () => (window as unknown as { LvHome?: unknown }).LvHome,
             getExam: () => (window as unknown as { siyuanExam?: unknown }).siyuanExam,
             getCommon: () => (window as unknown as { xiaolvCommon?: unknown }).xiaolvCommon,
-            loadPetals: () => this.kernelApi.post<Array<Record<string, unknown>>>("/api/petal/loadPetals", { frontend: getFrontend() }),
+            listInstalledPlugins: () => this.kernelApi.post("/api/bazaar/getInstalledPlugin", { frontend: getFrontend(), keyword: "" }),
             discoverConfig: () => this.discoverConfig(),
         };
     }
@@ -748,48 +743,9 @@ export default class QuickGatePlugin extends Plugin {
         });
     }
 
-    /** 快速捕获（G3-04 + R7 结论②）：目标二选一——今日日记（HH:mm 前缀）或收集箱（纯文本）。
-     * 笔记本/收集箱自动发现（只探测不创建）；返回块/文档 id 供原文操作（R7-A）。 */
-    async captureQuick(text: string, target: "daily" | "inbox"): Promise<{ ok: boolean; message: string; blockId?: string; docId?: string }> {
-        const clean = text.trim();
-        if (!clean) return { ok: false, message: "捕获内容为空" };
-        const disc = await this.discoverConfig();
-        if (target === "inbox" && !disc.inboxDocId) {
-            return { ok: false, message: "未发现收集箱（建一个名为「收集箱」的顶层文档，或在捕获设置里手填 id）——已取消" };
-        }
-        if (target === "daily" && !disc.diaryNotebookId) {
-            return { ok: false, message: "未发现日记笔记本（请确认某笔记本配置了日记保存路径）——已取消" };
-        }
-        const hhmm = new Date().toTimeString().slice(0, 5);
-        let res: unknown;
-        if (target === "inbox") {
-            res = await this.kernelApi.post("/api/block/appendBlock", {
-                dataType: "markdown",
-                data: clean,
-                parentID: disc.inboxDocId,
-            });
-        } else {
-            res = await this.kernelApi.post("/api/block/appendDailyNoteBlock", {
-                notebook: disc.diaryNotebookId,
-                dataType: "markdown",
-                data: `- ${hhmm} ${clean}`,
-            });
-        }
-        // 返回形状（真机实证 R298/R299）：data[0].doOperations[*].id = 新块 id
-        let blockId: string | undefined;
-        try {
-            const ops = (res as Array<{ doOperations?: Array<{ id?: string }> }>)?.[0]?.doOperations;
-            blockId = ops?.[ops.length - 1]?.id;
-        } catch { /* 形状异常不阻断成功路径 */ }
-        const daily = target === "daily" ? await this.readDailyStatus() : null;
-        const where = target === "inbox" ? "收集箱" : "今日日记";
-        return {
-            ok: true,
-            message: `已记到${where}（${target === "daily" ? hhmm : new Date().toTimeString().slice(0, 5)}）：${clean.slice(0, 40)}${clean.length > 40 ? "…" : ""}`,
-            blockId,
-            docId: target === "daily" ? daily?.docId ?? undefined : disc.inboxDocId ?? undefined,
-        };
-    }
+    /** 快速捕获：只读目标核验与已确认预览的执行分开；不新增外部 op。 */
+    prepareCapture(text: string, target: CaptureTarget) { return this.quickCapture.prepare(text, target); }
+    captureQuick(plan: CapturePlan) { return this.quickCapture.execute(plan); }
 
     /** 命令面板（G3-01 MVP）：与桥共用 runCommand 语义（确认门控/审计一致） */
     openCommandPalette(): void {
@@ -801,7 +757,7 @@ export default class QuickGatePlugin extends Plugin {
             registry: () => probeCommandRegistry(),
             confirm: (t) => this.confirmWithFront(t),
             audit: (e) => this.pushAudit(e),
-            openSettingPanel: () => this.openSettingPanel(),
+            openSettingPanel: (page) => this.openSettingPanel(page),
             copyDiagnostics: async () => {
                 const service = this.activeService ?? new BridgeService(this.deps());
                 const commandsText = await this.kernelApi.getFileText(`${this.settings.bridgeBasePath}/commands.ndjson`).catch(() => null);
@@ -809,7 +765,8 @@ export default class QuickGatePlugin extends Plugin {
                 await navigator.clipboard.writeText(JSON.stringify(mem, null, 2));
                 showMessage("诊断包已复制到剪贴板（脱敏）", 3000);
             },
-            captureQuick: (text, target) => this.captureQuick(text, target),
+            prepareCapture: (text, target) => this.prepareCapture(text, target),
+            captureQuick: (plan) => this.captureQuick(plan),
             openCommandPalette: () => this.openCommandPalette(),
             lastCaptureTarget: () => this.settings.captureTarget,
             rememberCaptureTarget: (target) => {
@@ -819,6 +776,7 @@ export default class QuickGatePlugin extends Plugin {
             },
             openDoc: async (id) => { await this.openDocById(id); },
             bridgeAlive: () => Boolean(this.activeService),
+            preflightOp: (op, args) => (this.activeService ?? new BridgeService(this.deps())).preflight(op, args, () => Boolean(this.activeService)),
             dispatchOp: async (op, args) => {
                 if (!this.activeService) return { status: "failed", message: "桥未运行——请先在 连接与通道 开启外部命令桥", data: null };
                 const command: BridgeCommand = {

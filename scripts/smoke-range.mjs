@@ -21,6 +21,7 @@ import path from "node:path";
 import net from "node:net";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { randomBytes } from "node:crypto";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const TMP = path.join(ROOT, "tmp");
@@ -67,6 +68,18 @@ function readToken(wsPath) {
         const conf = JSON.parse(fs.readFileSync(confPath, "utf-8"));
         return conf?.api?.token ?? "";
     } catch { return ""; }
+}
+
+/** 访问授权码为空的内核允许本地匿名访问，不能作为负向鉴权靶场。只写启动器自有 workspace。 */
+function ensureRangeAuthCode() {
+    const confPath = path.join(WS, "conf", "conf.json");
+    const conf = JSON.parse(fs.readFileSync(confPath, "utf-8"));
+    if (typeof conf.accessAuthCode !== "string" || !conf.accessAuthCode) {
+        conf.accessAuthCode = randomBytes(24).toString("hex");
+        fs.writeFileSync(confPath, JSON.stringify(conf, null, "\t"), "utf-8");
+        console.log("  已为自有靶场配置访问鉴权（不打印授权码）");
+    }
+    return conf.accessAuthCode;
 }
 
 function deployPlugin(wsPath) {
@@ -145,6 +158,13 @@ async function runFrontendHold(base) {
         ],
     });
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const state = readState();
+    if (state?.authCode) {
+        const res = await context.request.post(`${base}/api/system/loginAuth`, {
+            headers: { Authorization: `Token ${state.token}` }, data: { authCode: state.authCode },
+        });
+        if (!res.ok() || (await res.json()).code !== 0) throw new Error("靶场前端访问鉴权失败");
+    }
     const page = await context.newPage();
     page.on("console", (m) => {
         if (/quickgate/i.test(m.text())) console.log(`[frontend] ${m.text().slice(0, 160)}`);
@@ -224,6 +244,7 @@ async function cmdStart(args) {
     try { execSync(`taskkill /PID ${pid} /T /F`, { stdio: "ignore" }); } catch { /* 已退出 */ }
     await sleep(2000);
     patchTrustIfNeeded();
+    const authCode = ensureRangeAuthCode();
     deployPlugin(WS);
     seedBridgeSettings(WS);
     seedPetalEnabled(WS);
@@ -233,7 +254,7 @@ async function cmdStart(args) {
         process.exit(1);
     }
     token = readToken(WS);
-    fs.writeFileSync(STATE, JSON.stringify({ pid, port, base, ws: WS, token, startedAt: new Date().toISOString() }, null, 2), "utf-8");
+    fs.writeFileSync(STATE, JSON.stringify({ pid, port, base, ws: WS, token, authCode, startedAt: new Date().toISOString() }, null, 2), "utf-8");
 
     if (withFrontend) {
         const fe = spawn(process.execPath, [path.join(ROOT, "scripts", "smoke-range.mjs"), "frontend", base], {

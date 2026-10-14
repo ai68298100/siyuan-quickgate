@@ -10,7 +10,7 @@
 ```bash
 # Node ≥24（原生 TS 类型剥离）
 SIYUAN_TOKEN=<思源API令牌> node src/mcp/main.ts
-# 不设 SIYUAN_URL 时自动发现工作区内核（6806 快路径 → 扫描 SiYuan-Kernel 端口，Token 鉴权判定；
+# Windows 不设 SIYUAN_URL 时自动发现工作区内核（6806 快路径 → 扫描 SiYuan-Kernel 端口，Token 鉴权判定；
 # 3.8.7-alpha 双内核架构下工作区内核是动态端口，见 docs/ai-clients.md §3.3）；LV_MCP_WRITE=1 开启写工具
 ```
 

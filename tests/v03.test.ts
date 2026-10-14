@@ -54,7 +54,7 @@ function make(mem: MemKernel, over: Record<string, unknown> = {}) {
         openDoc: () => {}, openSetting: () => {},
         getCheckin: () => undefined, getContacts: () => undefined,
         getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
-        loadPetals: async () => [],
+        listInstalledPlugins: async () => ({ packages: [] }),
         discoverConfig: async () => ({ diaryNotebookId: null, inboxDocId: null, notes: [] }),
         ...over,
     });
@@ -86,7 +86,7 @@ describe("v0.3.0 新增", () => {
         const mem = new MemKernel();
         send(mem, "s1", "registry.list");
         const service = make(mem, {
-            loadPetals: () => new Promise<Array<Record<string, unknown>>>( () => {} ), // 永不 resolve
+            listInstalledPlugins: () => new Promise<Array<Record<string, unknown>>>( () => {} ), // 永不 resolve
             execTimeoutMs: () => 50,
         });
         const r = await service.tick();
@@ -100,7 +100,7 @@ describe("v0.3.0 新增", () => {
         send(mem, "s2", "registry.list");
         let calls = 0;
         const service = make(mem, {
-            loadPetals: () => { calls += 1; return new Promise<Array<Record<string, unknown>>>( () => {} ); }, // 挂起
+            listInstalledPlugins: () => { calls += 1; return new Promise<Array<Record<string, unknown>>>( () => {} ); }, // 挂起
             execTimeoutMs: () => 50,
         });
         await service.tick(); // 超时回执 failed

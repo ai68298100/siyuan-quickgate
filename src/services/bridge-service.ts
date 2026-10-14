@@ -11,6 +11,8 @@ import { BridgeStore } from "./store";
 import { KernelApi } from "./kernelApi";
 import { FileReadError } from "./file-read";
 import { RegistryProbeResult, runCommand } from "./registry";
+import { installationFor, readInstallation } from "./plugin-status";
+import { checkOpPreflight } from "./op-preflight";
 import { eventWhitelist, pullEvents } from "./events";
 import { executePlan, makePlan, WorkflowPlan, WORKFLOW_ALLOWED_OPS, nextWorkflowPlanId } from "./workflow";
 import {
@@ -117,8 +119,8 @@ export interface BridgeServiceDeps {
     openDoc: (id: string) => Promise<void> | void;
     /** 打开设置 */
     openSetting: () => void;
-    /** petal/loadPetals（已装插件表） */
-    loadPetals: () => Promise<Array<Record<string, unknown>>>;
+    /** bazaar/getInstalledPlugin（包括停用插件；不加载代码） */
+    listInstalledPlugins: () => Promise<unknown>;
     /** 业务执行可观测上限 ms（缺省 15000；commands.run 不受此限） */
     execTimeoutMs?: () => number;
     /** 日记笔记本/收集箱自动发现（与内核通道同口径：约定名 SQL 根文档发现；args 透传 inboxName/createInboxIfMissing） */
@@ -156,6 +158,21 @@ export class BridgeService {
 
     constructor(private deps: BridgeServiceDeps) {
         if (deps.initialStats) Object.assign(this.stats, deps.initialStats);
+    }
+
+    /** Command form preflight: no envelope reservation, receipt, audit, or business call. */
+    preflight(op: string, args: Record<string, unknown>, bridgeAlive: () => boolean) {
+        return checkOpPreflight(op, args, {
+            bridgeAlive, listInstalledPlugins: this.deps.listInstalledPlugins, now: this.deps.now,
+            getBridge: (plugin) => {
+                const getters = {
+                    "siyuan-checkin": this.deps.getCheckin, "siyuan-contacts": this.deps.getContacts,
+                    "siyuan-glean": this.deps.getGlean, "siyuan-home": this.deps.getHome,
+                    "siyuan-exam": this.deps.getExam, "xiaolv-common": this.deps.getCommon,
+                };
+                return getters[plugin]?.();
+            },
+        });
     }
 
     private paths() {
@@ -585,25 +602,15 @@ export class BridgeService {
 
             // ---- 生态中枢（R1）----
             case "registry.list": {
-                let petals: Array<Record<string, unknown>> = [];
-                try {
-                    petals = await this.deps.loadPetals();
-                } catch { /* 内核不可达时也返回 manifest 口径 */ }
+                const installation = await readInstallation(this.deps.listInstalledPlugins, this.deps.now);
                 const manifest = manifestJson as EcosystemManifest;
-                const enabledMap = new Map<string, unknown>();
-                for (const p of petals) {
-                    const name = (p as { name?: unknown }).name;
-                    if (typeof name === "string") enabledMap.set(name, p);
-                }
                 const plugins = manifest.plugins.map((m) => {
-                    const petal = enabledMap.get(m.pluginId) as { version?: unknown; enabled?: unknown } | undefined;
                     return {
                         pluginId: m.pluginId,
                         displayName: m.displayName,
                         maturity: m.maturity,
                         manifestVersion: m.version,
-                        installedVersion: typeof petal?.version === "string" ? petal.version : null,
-                        installed: enabledMap.has(m.pluginId),
+                        ...installationFor(installation, m.pluginId),
                         protocol: m.protocol,
                         capabilities: m.capabilities,
                         hubIntegration: m.hubIntegration,
@@ -611,7 +618,8 @@ export class BridgeService {
                 });
                 return {
                     status: "recorded",
-                    data: { manifestVersion: manifest.version, plugins, registrySource: this.deps.registry().source },
+                    data: { manifestVersion: manifest.version, plugins, registrySource: this.deps.registry().source,
+                        installation: { source: installation.source, checkedAt: installation.checkedAt, status: installation.status, error: installation.error } },
                     message: `生态清单 ${plugins.length} 款（stable ${plugins.filter((p) => p.maturity === "stable").length}）`,
                 };
             }

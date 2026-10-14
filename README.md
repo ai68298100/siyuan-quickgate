@@ -8,7 +8,7 @@
 
 [中文文档](./README.zh-CN.md) · [Getting started](./docs/GETTING-STARTED.md) · [op contract](./docs/api.md) · [AI client matrix](./docs/ai-clients.md) · [Download](https://github.com/ai68298100/siyuan-quickgate/releases)
 
-[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.2-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
+[![CI](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ai68298100/siyuan-quickgate/actions/workflows/ci.yml) [![Version](https://img.shields.io/badge/version-0.9.3-blue)](./plugin.json) [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/ai68298100/siyuan-quickgate/blob/main/LICENSE) [![SiYuan](https://img.shields.io/badge/SiYuan-%E2%89%A53.8.4-ff5c67)](https://b3log.org/siyuan)
 
 <img src="./preview.png" alt="Layered settings · command palette · four centers" width="820" />
 
@@ -19,7 +19,8 @@ Outside clients (Quicker, iOS Shortcuts, CLI, PowerShell, AI assistants, HA scri
 - `commands.*` — discover / search / run command-palette entries of any installed plugin (confirm-gated, audited; search understands zh/en/pinyin aliases — 打卡/daka/checkin all hit)
 - `checkin.*` / `contacts.*` — structured pass-through to the public bridges of Lv Check-in (API v5) and Lv Contacts (bridge v1)
 - `favorites.*` — favorites & recent usage (command-palette UX: dedupe-and-move-to-front, privacy clearing; stored separately from bridge files)
-- `registry.list` / `diagnostics.report` / `config.discover` — Lv ecosystem manifest (7 plugins, maturity × installed version), sanitized diagnostics, daily-note notebook + inbox auto-discovery
+- `registry.list` / `diagnostics.report` / `config.discover` — Lv ecosystem manifest (8 plugins, public installation/enabled metadata and read evidence), sanitized diagnostics, daily-note notebook + inbox auto-discovery
+- Command forms provide read-only invocation checks and recheck before dispatch; unknown business configuration remains explicit. Contacts currently support protocol v1; v2 returns unsupported pending adaptation.
 - `events.list` / `events.pull` — whitelisted event stream (check-in record/deletion auto-materialized; deletions as `:deleted`-suffixed markers coexisting with originals)
 - `workflow.plan` / `workflow.execute` — controlled orchestration (≤8 steps, op whitelist, 30s total confirm, stop-on-failure)
 - `template.new` / `doc.open` / `daily.status` / `editor.context` / `setting.open` — doc-from-template, controlled navigation, editor context
@@ -51,6 +52,8 @@ Visual language follows [design/ui-prototype/mvp1.html](./design/ui-prototype/mv
 3. Enable the plugin, open its settings, switch **External command bridge** on (default off by design).
 4. **After updating, fully quit SiYuan (tray → quit) and start it again** — reopening the window does not refresh plugin frontend code. Or just double-click `tools/restart-siyuan.bat`.
 
+Before enabling external access, configure SiYuan's access authorization code and use its API token in clients. A kernel with an empty access authorization code permits local anonymous access; QuickGate's private HTTP route inherits the host's authentication. Confirm unauthenticated requests are rejected with HTTP 401/403. Authenticated frontend sessions use the host's normal session mechanism.
+
 ## Protocol
 
 One NDJSON file set per plugin under `data/storage/petal/<plugin>/bridge/`:
@@ -69,9 +72,11 @@ Clients included in [`tools/`](https://github.com/ai68298100/siyuan-quickgate/tr
 
 [`src/mcp/`](https://github.com/ai68298100/siyuan-quickgate/tree/main/src/mcp) exposes all 39 ops as MCP tools over stdio — AI clients can run SiYuan commands, log check-ins, record contacts interactions and execute controlled workflows, including the Lv ecosystem actions that are outside SiYuan's built-in MCP surface. See the [MCP guide](./src/mcp/README.md) for the protocol and safety model.
 
-- **14 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
+- **22 read-only tools by default**; write tools stay hidden until `LV_MCP_WRITE=1` (calls to hidden tools are honestly refused)
 - `plugin.api` / `workflow.execute` additionally carry the `destructiveHint` annotation
 - All QuickGate-side defenses still apply: confirm dialogs, blacklist, audit log, plugin.api allowlist
+
+v0.9.3 fixes the repeated disabled notice during plugin reloads, adds capture target previews and confirmation, checks public installation and invocation conditions, and validates form/MCP inputs. Validated invocation examples can be copied without dispatching a request. See the [changelog](./CHANGELOG.md) for details and the contacts v2 limitation.
 
 ```json
 { "mcpServers": { "lv-quickgate": {
@@ -101,7 +106,7 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | v0.7.0–0.7.3 | MCP stdio server for AI assistants + kernel route live-verified on 3.8.6 (bug#9) + acceptance entry points → backlog cleanup (eight correctness fixes + version/release gates) + bug#11/12/13 |
 | **v0.7.4** | **template.new path-traversal security fix** (three-channel guard) + favorites/recents full chain + **built-in SiYuan Agent native capabilities** (zero config) + concurrency correctness (idempotency registry / bridge claim / multi-writer mitigation) + contract 23→27 + manifest v2 (live-calibrated) |
 | **v0.7.5** | release-chain hardening: package.zip unpack assertions (bug#9 regression gate) + Agent integration guide + restart tool + bug#17 documented (lifecycle hook noise, zero functional impact) |
-| **v0.8.0** | **resumable seven-step first-run wizard** (wizard-state.json resume, sample read/write with undo) · **liveness detection & takeover** (heartbeat + Web Locks steal) · **workflow.cancel channel** (checkpoint before each step, completed steps preserved) · day-based retention (retentionDays, off by default) · backup sourceDevice + favorites merge import · prototype-aligned UI polish |
+| **v0.8.0** | **resumable seven-step first-run wizard** (wizard-state.json resume, sample read/write; test blocks can be deleted manually) · **liveness detection & takeover** (heartbeat + Web Locks steal) · **workflow.cancel channel** (checkpoint before each step, completed steps preserved) · day-based retention (retentionDays, off by default) · backup sourceDevice + favorites merge import · prototype-aligned UI polish |
 | **v0.8.1** | CI/release reproducibility hardening · MCP smoke count derived from the single op registry · Dependabot and GitHub issue/PR workflow hygiene · bilingual documentation and security policy refresh |
 | **v0.8.2** | Runtime version source unified across entry/settings/diagnostics · container E2E failures made visible with strict gates, health probes, token masking, and diagnostic artifacts |
 | **v0.8.3** | Session health snapshot in diagnostics · command palette empty-state keyboard safety · combobox/listbox accessibility · stricter E2E startup readiness |
@@ -111,6 +116,7 @@ On SiYuan ≥3.8.6 the plugin registers three capabilities natively with the **b
 | **v0.8.7** | Fix keyboard execution offsets after the 100-command render limit · remove an ineffective dynamic import warning |
 | **v0.8.8** | Serialize bridge start/stop transitions · release late Web Lock grants after takeover timeout · improve settings screen-reader labels |
 | **v0.9.0** | **Full UI overhaul**: settings panel / palette / four centers aligned to the prototype (evidence-solved palette contrast ≥4.5:1, narrow-screen & touch support, 13-assertion real-kernel interaction e2e) · fixed capture-undo false failure · settings search hit highlighting · new icon & brand visuals |
+| **v0.9.3** | Capture preview and confirmation · public installation and invocation checks · form/MCP validation · fix reload disabled notices and await complete teardown · contacts v2 safely returns unsupported |
 | **v0.9.2** | **Ecosystem completion 35→39 op**: xiaolv-common window bridge shipped upstream (0.4.0 · ADR-0013 read-only subset) and integrated as common.search/get/recent/favorites (all read-only) |
 | **v0.9.1** | **Ecosystem adapters 27→35 op**: glean (siyuanGlean v1) / home (LvHome v1) / exam (siyuanExam) integration · manifest calibration (three plugins design→stable + xiaolv-common added, 8 entries) · AI client matrix (docs/ai-clients.md) + tool-schema exporter |
 

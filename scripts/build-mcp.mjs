@@ -7,6 +7,8 @@
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { ALL_OPS } from "../src/ops.ts";
+import { buildToolDefs } from "../src/mcp/tools.ts";
 
 const root = process.cwd();
 const out = `${root}/dist-mcp`;
@@ -43,7 +45,7 @@ writeFileSync(`${out}/package.json`, JSON.stringify({
     name: "mcp-quickgate",
     displayName: "Lv QuickGate MCP",
     version: rootPkg.version,
-    description: "MCP stdio server exposing the Lv QuickGate 23-op contract to AI assistants (13 read-only by default)",
+    description: `MCP stdio server exposing the Lv QuickGate ${ALL_OPS.length}-op contract to AI assistants (${buildToolDefs().filter((tool) => !tool.write).length} read-only by default)`,
     type: "module",
     main: "mcp-quickgate.js",
     bin: { "mcp-quickgate": "mcp-quickgate.js" },

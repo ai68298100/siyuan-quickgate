@@ -1,9 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SingleFlightPoller } from "../src/services/poller";
 
-const flush = () => new Promise<void>((r) => setTimeout(r, 0));
-
 describe("poller 单飞调度（阻断项5）", () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-10-14T00:00:00Z"));
+    });
+    afterEach(() => {
+        vi.clearAllTimers();
+        vi.useRealTimers();
+    });
+
     it("慢 tick 期间不重入", async () => {
         let active = 0;
         let maxConcurrent = 0;
@@ -17,11 +24,12 @@ describe("poller 单飞调度（阻断项5）", () => {
                 active -= 1;
             },
             shouldRun: () => true,
-            delay: () => flush(),
         });
         poller.start();
-        await new Promise((r) => setTimeout(r, 120));
-        await poller.stop();
+        await vi.advanceTimersByTimeAsync(120);
+        const stopping = poller.stop();
+        await vi.advanceTimersByTimeAsync(20);
+        await stopping;
         expect(maxConcurrent).toBe(1);
     });
 
@@ -34,14 +42,13 @@ describe("poller 单飞调度（阻断项5）", () => {
                 if (fail) throw new Error("down");
             },
             shouldRun: () => true,
-            delay: () => flush(),
         });
         poller.start();
-        await new Promise((r) => setTimeout(r, 60));
+        await vi.advanceTimersByTimeAsync(60);
         expect(poller.consecutiveFailures).toBeGreaterThanOrEqual(2);
         expect(poller.currentInterval()).toBeGreaterThan(10);
         fail = false;
-        await new Promise((r) => setTimeout(r, 60));
+        await vi.advanceTimersByTimeAsync(60);
         expect(poller.consecutiveFailures).toBe(0);
         await poller.stop();
     });
@@ -53,12 +60,13 @@ describe("poller 单飞调度（阻断项5）", () => {
             backoffMaxMs: 5,
             tick: async () => { ticks += 1; },
             shouldRun: () => ticks < 3,
-            delay: () => flush(),
         });
         poller.start();
-        await new Promise((r) => setTimeout(r, 80));
+        await vi.advanceTimersByTimeAsync(2);
         expect(ticks).toBe(3);
         expect(poller.isRunning).toBe(false);
+        await vi.advanceTimersByTimeAsync(100);
+        expect(ticks).toBe(3);
     });
 
     it("stop 等待当前 tick 完成后才返回（释放消费权前不留写入竞态）", async () => {
@@ -74,13 +82,12 @@ describe("poller 单飞调度（阻断项5）", () => {
                 await tickRelease;
             },
             shouldRun: () => true,
-            delay: () => flush(),
         });
         poller.start();
         await tickStarted;
         let stopped = false;
         const stopping = poller.stop().then(() => { stopped = true; });
-        await flush();
+        await Promise.resolve();
         expect(stopped).toBe(false);
         releaseTick();
         await stopping;

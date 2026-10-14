@@ -28,6 +28,17 @@ describe("L562 validateArgs（统一参数校验）", () => {
         expect(validateArgs(pull, { names: ["a"], limit: 5, undeclared: { x: 1 } })).toBeNull();
         expect(validateArgs(byName.get("bridge.ping")!, {})).toBeNull();
     });
+
+    it("声明字段的 null 与非有限 number 不能绕过 JSON schema 类型", () => {
+        const record = byName.get("checkin.record")!;
+        expect(validateArgs(record, { itemId: "x", value: null })).toContain("value");
+        expect(validateArgs(record, { itemId: "x", value: Infinity })).toContain("value");
+        expect(validateArgs(record, { itemId: "x", value: NaN })).toContain("value");
+        expect(validateArgs(record, { itemId: "x", value: 0 })).toBeNull();
+        const pull = byName.get("events.pull")!;
+        expect(validateArgs(pull, { names: null })).toContain("names");
+        expect(validateArgs(pull, { names: [] })).toBeNull();
+    });
 });
 
 describe("L562 server -32602 分离", () => {
@@ -55,6 +66,15 @@ describe("L562 server -32602 分离", () => {
         const server = createMcpServer(client, { writeEnabled: true, version: "test" });
         const resp = await server.handleRequest({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "bridge.ping", arguments: {} } });
         expect((resp as { result?: { isError?: boolean } }).result?.isError).toBe(false);
+    });
+
+    it.each([null, {}, true])("合法 JSON 的错型 names=%j 在派发前拒绝", async (names) => {
+        const client = fakeClient();
+        const server = createMcpServer(client, { writeEnabled: true, version: "test" });
+        const resp = await server.handleRequest({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "events.pull", arguments: { names } } });
+        expect((resp as { error?: { code: number } }).error?.code).toBe(-32602);
+        expect((resp as { error?: { message: string } }).error?.message).toContain("names");
+        expect(client.sent).toHaveLength(0);
     });
 });
 

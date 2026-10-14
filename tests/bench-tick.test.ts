@@ -54,7 +54,7 @@ function makeService(mem: BenchKernel) {
         openDoc: () => {}, openSetting: () => {},
         getCheckin: () => undefined, getContacts: () => undefined,
         getGlean: () => undefined, getHome: () => undefined, getExam: () => undefined, getCommon: () => undefined,
-        loadPetals: async () => [],
+        listInstalledPlugins: async () => ({ packages: [] }),
         discoverConfig: async () => ({ diaryNotebookId: null, inboxDocId: null, notes: [] }),
     });
 }

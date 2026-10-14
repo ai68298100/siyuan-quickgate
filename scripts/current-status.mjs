@@ -3,7 +3,7 @@
  * 单一状态页快照（G0-01 · R315）：把"当前是什么状态"收敛到一个可再生的文档。
  * 数据源全部本地/离线：git（HEAD/tag/未提交数）、dist 构建产物（存在性+mtime）、
  * 测试数不在快照中硬编码，避免与 Vitest 漂移；运行 `pnpm test` 查看权威数量。
- * 远端 Release 通过 git ls-remote tags 探测（网络不可达时诚实标注 unknown，不猜）。
+ * 远端版本 tag 通过 git ls-remote 探测；tag 不代表 Release，网络不可达时标 unknown。
  * 运行：node scripts/current-status.mjs → 重写 docs/current-status.md
  */
 import { execSync } from "node:child_process";
@@ -15,8 +15,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const { ALL_OPS } = await import(pathToFileURL(path.join(ROOT, "src/ops.ts")));
 const { buildToolDefs } = await import(pathToFileURL(path.join(ROOT, "src/mcp/tools.ts")));
 const READONLY_COUNT = buildToolDefs().filter((d) => !d.write).length;
-const now = new Date();
-const nowLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+const formatLocalTime = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+const nowLocal = formatLocalTime(new Date());
 
 const sh = (cmd) => {
     try { return execSync(cmd, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim(); } catch { return null; }
@@ -33,7 +33,7 @@ const releaseTag = (remoteTags.split("\n").map((l) => l.match(/refs\/tags\/(v[\d
 
 const distJs = path.join(ROOT, "dist", "index.js");
 const distOk = existsSync(distJs);
-const distMtime = distOk ? statSync(distJs).mtime.toISOString().slice(0, 16).replace("T", " ") : "缺失";
+const distMtime = distOk ? formatLocalTime(statSync(distJs).mtime) : "缺失";
 
 const lines = [];
 lines.push(`# 快门当前状态（自动快照）`);
@@ -47,17 +47,17 @@ lines.push(`|---|---|`);
 lines.push(`| 分支 / HEAD | \`${branch}\` / \`${head}\` |`);
 lines.push(`| 源码版本 | \`${(readFileSync(path.join(ROOT, "plugin.json"), "utf8").match(/"version": "([^"]+)"/) ?? [])[1] ?? "unknown"}\` |`);
 lines.push(`| 最新 tag | \`${latestTag}\` |`);
-lines.push(`| 远端 release tag（本地探测） | \`${releaseTag}\` |`);
+lines.push(`| 远端最新版本 tag（不代表 Release 状态） | \`${releaseTag}\` |`);
 lines.push(`| dist/index.js | ${distOk ? `存在（构建于 ${distMtime}）` : "**缺失——先 pnpm build**"} |`);
 lines.push(`| 工作区未提交项 | ${dirtyCount} 个（git status --short） |`);
 lines.push("");
-lines.push("## 质量门（快照时点声明，权威以最近一次运行输出为准）");
+lines.push("## 质量门（本快照不执行检查，结果以最近一次运行输出为准）");
 lines.push("");
 lines.push(`| 门 | 状态 |`);
 lines.push(`|---|---|`);
-lines.push(`| tsc --noEmit | ✓（生成时点通过） |`);
+lines.push("| tsc --noEmit | 以最近一次 `pnpm check:types` 输出为准 |");
 lines.push("| vitest（tests/） | 以最近一次 `pnpm test` 输出为准（快照不硬编码数量） |");
-lines.push(`| check 链（含数字门禁） | ✓（生成时点通过） |`);
+lines.push("| check 链（含数字门禁） | 以最近一次 `pnpm check` 输出为准 |");
 lines.push("");
 lines.push("## 通道与入口");
 lines.push("");
@@ -76,4 +76,4 @@ lines.push("- 契约：[docs/api.md](./api.md) · [docs/contracts/](./contracts/
 lines.push("- 变更：[CHANGELOG.md](https://github.com/ai68298100/siyuan-quickgate/blob/main/CHANGELOG.md) · [PROGRESS](./PROGRESS.md)");
 
 writeFileSync(path.join(ROOT, "docs", "current-status.md"), lines.join("\n") + "\n", "utf8");
-console.log(`✓ docs/current-status.md 已生成（HEAD=${head}，tag=${latestTag}，release=${releaseTag}）`);
+console.log(`✓ docs/current-status.md 已生成（HEAD=${head}，tag=${latestTag}，remoteTag=${releaseTag}）`);

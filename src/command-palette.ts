@@ -9,7 +9,10 @@ import { expandSearchKeyword } from "./services/search-alias";
 import { normalizeFavorites } from "./services/favorites";
 import { runCommand, RegistryProbeResult } from "./services/registry";
 import { installFocusTrap } from "./services/focus-trap";
-import { getArgsSpec, opDescription, opWriteAnnotation } from "./mcp/tools";
+import { argMatchesType, getArgsSpec, opDescription, opWriteAnnotation } from "./mcp/tools";
+import { openQuickCapture } from "./quick-capture-ui";
+import type { CapturePlan, CaptureResult, CaptureTarget } from "./services/quick-capture";
+import type { OpPreflight } from "./services/op-preflight";
 import type { Dialog, showMessage } from "siyuan";
 import type { KernelApi } from "./services/kernelApi";
 import type { QuickGateSettings, AuditEntry } from "./types/bridge";
@@ -25,19 +28,21 @@ export interface PaletteHost {
     confirm(title: string): Promise<boolean>;
     audit(entry: AuditEntry): void;
     /** fallback 兜底动作 */
-    openSettingPanel(): void;
+    openSettingPanel(page?: string): void;
     /** 再记一条：从捕获成功卡重开面板（清空输入即录即走） */
     openCommandPalette(): void;
     copyDiagnostics(): Promise<void>;
     /** 快速捕获（G3-04 + R7 结论②）：目标二选一（daily=今日日记 HH:mm 前缀 / inbox=收集箱纯文本） */
-    captureQuick(text: string, target: "daily" | "inbox"): Promise<{ ok: boolean; message: string; blockId?: string; docId?: string }>;
-    /** 上次捕获去向（R301：选择器预置；选择后经 rememberCaptureTarget 回写） */
+    prepareCapture(text: string, target: CaptureTarget): Promise<{ plan?: CapturePlan; message?: string }>;
+    captureQuick(plan: CapturePlan): Promise<CaptureResult>;
+    /** 上次成功捕获去向；选择与预检均不回写。 */
     lastCaptureTarget(): "daily" | "inbox";
     rememberCaptureTarget(target: "daily" | "inbox"): void;
     /** 打开文档/块（原文操作） */
     openDoc(id: string): Promise<void>;
     /** 桥是否在运行（能力动作分组门控） */
     bridgeAlive(): boolean;
+    preflightOp(op: string, args: Record<string, unknown>): Promise<OpPreflight>;
     /** 前端直派桥 op（R6-A 二段式执行；走完整簿记：确认门控/审计/幂等台账/回执） */
     dispatchOp(op: string, args: Record<string, unknown>): Promise<{ status: string; message: string; data: unknown }>;
 }
@@ -192,14 +197,41 @@ export function buildArgs(fields: PaletteFormField[], values: Record<string, str
             if (!Number.isFinite(n)) return { error: `参数 ${f.key} 须为数字` };
             args[f.key] = n;
         } else if (f.type === "boolean") {
+            if (raw !== true && raw !== false && raw !== "true" && raw !== "false") return { error: `参数 ${f.key} 须为布尔值` };
             args[f.key] = raw === true || raw === "true";
         } else if (f.type === "array" || f.type === "object") {
             try { args[f.key] = JSON.parse(String(raw)); } catch { return { error: `参数 ${f.key} 须为合法 JSON` }; }
         } else {
-            args[f.key] = String(raw);
+            args[f.key] = raw;
         }
+        if (!argMatchesType(args[f.key], f.type)) return { error: `参数 ${f.key} 类型应为 ${f.type}` };
     }
     return { args };
+}
+
+/** 显式复制当前表单；只包含 schema 字段，不读取设置、Token 或环境变量，不执行请求。 */
+export function buildInvocationExamples(op: string, values: Record<string, string | boolean>, now = Date.now(), id?: string) {
+    if (!getArgsSpec(op)) return { error: `未登记参数契约：${op}` };
+    const result = buildArgs(formFieldsFor(op), values);
+    if (result.error) return { error: result.error };
+    const args = result.args ?? {};
+    return {
+        envelope: { v: 1, id: id ?? `copy-${crypto.randomUUID()}`, op, args, createdAt: new Date(now).toISOString(), ttlMs: 60_000, reply: true },
+        mcp: { name: op, arguments: args },
+    };
+}
+
+/** 渲染与键盘导航使用同一空态动作清单，避免增加入口后索引漂移。 */
+export function paletteFallbacks(query: string): ReadonlyArray<readonly [string, string]> {
+    const q = query.trim();
+    const next: Array<readonly [string, string]> = [
+        ["plugins", "检查插件状态"],
+        ["panel", "打开快门设置（健康页）"],
+        ["diag", "复制诊断包"],
+        ["guide", "上手指南"],
+    ];
+    if (q) next.unshift(["capture", `捕获「${q.slice(0, 24)}${q.length > 24 ? "…" : ""}」`]);
+    return next;
 }
 
 export async function openCommandPalette(host: PaletteHost): Promise<void> {
@@ -227,12 +259,15 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
 
     // 焦点回归（L585 部分）：面板销毁后焦点回到触发元素
     const focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    let closed = false;
+    let formGeneration = 0;
+    let formBusy = false;
     const dialog = new Dialog({
         title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>命令面板</span><span class="qg-title-ver">↑↓ 选择 · Enter 执行 · Esc 关闭</span></span>`,
         content: `<div id="qg-palette"><input class="b3-text-field" data-role="q" role="combobox" aria-label="搜索命令" aria-controls="qg-palette-list" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list" placeholder="搜索命令（中英/拼音别名；收藏与最近自动置顶）" /><div id="qg-palette-list" data-role="list" role="listbox" aria-label="命令结果"></div><div class="qg-palette-foot" data-role="foot"></div></div>`,
         width: "min(620px, 92vw)",
         height: "auto",
-        destroyCallback: () => { try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
+        destroyCallback: () => { closed = true; formGeneration++; try { focusReturn?.focus({ preventScroll: true }); } catch { /* 焦点失败不阻断 */ } },
     });
     const root = dialog.element.querySelector("#qg-palette") as HTMLElement;
     installFocusTrap(dialog.element); // L585 部分：Tab 在对话框内循环
@@ -277,7 +312,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             : [];
         // 只允许导航到实际渲染的条目；超出 100 条时后续条目不会被隐藏的活动索引选中。
         // 空态 fallback 也必须纳入键盘导航，否则无匹配时只能用鼠标点击下一步。
-        const fallbackCount = entries.length === 0 && caps.length === 0 ? (input.value.trim() ? 4 : 3) : 0;
+        const fallbackCount = entries.length === 0 && caps.length === 0 ? paletteFallbacks(input.value).length : 0;
         active = clampPaletteActiveIndex(active, entries.length, caps.length, RENDER_LIMIT, fallbackCount);
         if (entries.length === 0 && caps.length === 0) {
             setFoot([["↑↓", "选择"], ["↵", "执行选中动作"], ["Esc", "关闭"]]);
@@ -297,9 +332,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             fallbacks.className = "qg-palette-fallbacks";
             fallbacks.setAttribute("role", "group");
             fallbacks.setAttribute("aria-label", "下一步操作");
-            const fallbackDefs: ReadonlyArray<readonly [string, string]> = q
-                ? [["capture", `捕获「${q.slice(0, 24)}${q.length > 24 ? "…" : ""}」`], ["panel", "打开快门设置（健康页）"], ["diag", "复制诊断包"], ["guide", "上手指南"]]
-                : [["panel", "打开快门设置（健康页）"], ["diag", "复制诊断包"], ["guide", "上手指南"]];
+            const fallbackDefs = paletteFallbacks(q);
             for (const [i, [fb, label]] of fallbackDefs.entries()) {
                 const b = document.createElement("button");
                 b.className = `b3-button ${fb === "capture" ? "b3-button--primary" : "b3-button--outline"}` + (i === active ? " active" : "");
@@ -450,6 +483,8 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
 
     /** R6-A 二段式参数面板：schema 驱动字段渲染，取消/返回无副作用 */
     const renderForm = () => {
+        formGeneration++;
+        formBusy = false;
         setStageInput(true);
         setFoot([["↵", "执行"], ["Tab", "切换字段"], ["Esc", "关闭"]]);
         input.removeAttribute("aria-activedescendant");
@@ -461,7 +496,7 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             const ctl = f.type === "boolean"
                 ? `<input class="b3-switch" type="checkbox" id="${fid}" data-f="${esc(f.key)}" />`
                 : f.type === "array" || f.type === "object"
-                    ? `<textarea class="b3-text-field qg-form-field" id="${fid}" data-f="${esc(f.key)}" rows="2" placeholder='JSON，如 ["a","b"]'></textarea>`
+                    ? `<textarea class="b3-text-field qg-form-field" id="${fid}" data-f="${esc(f.key)}" rows="2" placeholder='${f.type === "array" ? 'JSON 数组，如 ["a","b"]' : 'JSON 对象，如 {"key":"value"}'}'></textarea>`
                     : `<input class="b3-text-field qg-form-field" id="${fid}" data-f="${esc(f.key)}" type="${f.type === "number" ? "number" : "text"}" />`;
             // label 与控件 for/id 关联：点标签即聚焦字段（读屏同读）
             return `<div class="qg-form-item"><label class="qg-form-label" for="${fid}">${esc(f.key)}${req}</label>` +
@@ -486,13 +521,24 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
                 return "";
             })() +
             (fieldHtml || `<div style="color:var(--b3-theme-on-surface);font-size:12px;margin-bottom:8px">该动作无参数。</div>`) +
-            `<div style="display:flex;gap:8px;margin-top:12px">` +
+            `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">` +
             `<button class="b3-button b3-button--outline" data-form="back">返回</button>` +
-            `<button class="b3-button b3-button--primary" data-form="exec">执行</button></div>` +
+            `<button class="b3-button b3-button--outline" data-form="preflight">检查调用条件</button>` +
+            `<button class="b3-button b3-button--primary" data-form="exec">执行</button>` +
+            `<button class="b3-button b3-button--outline" data-form="copy-envelope">复制命令信封</button>` +
+            `<button class="b3-button b3-button--outline" data-form="copy-mcp">复制 MCP 参数</button></div>` +
+            `<div data-form="preflight-result" role="status" aria-live="polite" style="margin-top:8px;font-size:12px"></div>` +
             `<div data-form="msg" role="status" aria-live="polite" style="margin-top:8px;font-size:12px"></div>`;
         list.scrollTop = 0; // 从列表切表单时清除残留滚动，标题不被裁
-        list.querySelector('[data-form="back"]')?.addEventListener("click", () => { stage = "list"; render(); });
+        list.querySelector('[data-form="back"]')?.addEventListener("click", () => { formGeneration++; stage = "list"; render(); });
+        list.querySelector('[data-form="preflight"]')?.addEventListener("click", () => void runForm(false));
         list.querySelector('[data-form="exec"]')?.addEventListener("click", () => void execForm());
+        list.querySelector('[data-form="copy-envelope"]')?.addEventListener("click", () => void copyForm("envelope"));
+        list.querySelector('[data-form="copy-mcp"]')?.addEventListener("click", () => void copyForm("mcp"));
+        list.querySelectorAll('[data-f]').forEach((field) => field.addEventListener("input", () => {
+            const result = list.querySelector('[data-form="preflight-result"]');
+            if (result) result.textContent = "参数已变更；执行前会重新检查。";
+        }));
         // 文本字段内 Enter 直执行（textarea 保留换行语义）；组字中的 Enter 属输入法确认，不执行
         list.querySelectorAll('input[data-f]').forEach((inp) => {
             inp.addEventListener("keydown", ((ev: KeyboardEvent) => {
@@ -502,16 +548,16 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         });
     };
 
-    const execForm = async () => {
-        const execBtn = list.querySelector('[data-form="exec"]') as HTMLButtonElement | null;
-        if (execBtn?.disabled) return; // 防重入：派发在途时按钮已禁用，字段内 Enter 不得重复派发
+    const formValues = () => {
         const fields = formFieldsFor(formOp);
         const values: Record<string, string | boolean> = {};
         for (const f of fields) {
             const el = list.querySelector(`[data-f="${f.key}"]`) as HTMLInputElement | HTMLTextAreaElement | null;
             values[f.key] = el ? (el instanceof HTMLInputElement && el.type === "checkbox" ? el.checked : el.value) : "";
         }
-        const { args, error } = buildArgs(fields, values);
+        return values;
+    };
+    const formError = (error?: string) => {
         const msg = list.querySelector('[data-form="msg"]') as HTMLElement;
         // 先清上一轮错误高亮
         list.querySelectorAll("[data-f]").forEach((el) => ((el as HTMLElement).style.borderColor = "", (el as HTMLElement).style.boxShadow = ""));
@@ -533,20 +579,88 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
             }
             msg.style.color = "var(--qg-error-text)";
             msg.textContent = error;
-            return;
+            return true;
         }
+        return false;
+    };
+    const copyForm = async (format: "envelope" | "mcp") => {
+        const examples = buildInvocationExamples(formOp, formValues());
+        if (formError(examples.error)) return;
+        const msg = list.querySelector('[data-form="msg"]') as HTMLElement;
+        try {
+            await navigator.clipboard.writeText(format === "envelope" ? JSON.stringify(examples.envelope) : JSON.stringify(examples.mcp, null, 2));
+            msg.style.color = "var(--b3-theme-on-surface)";
+            msg.textContent = `${format === "envelope" ? "命令信封" : "tools/call 的 MCP 参数"}已复制；包含当前填写内容，未执行。分享前请核对。`;
+        } catch {
+            msg.style.color = "var(--qg-error-text)";
+            msg.textContent = "剪贴板写入失败，请检查系统剪贴板权限后重试。";
+        }
+    };
+    const showPreflight = (report: OpPreflight) => {
+        const box = list.querySelector('[data-form="preflight-result"]') as HTMLElement;
+        box.replaceChildren();
+        const title = document.createElement("div");
+        title.textContent = `${report.canInvoke ? "已核验的调用条件通过" : "调用条件需要修复"} · ${new Date(report.checkedAt).toLocaleTimeString()}；预检不代表执行成功。`;
+        box.appendChild(title);
+        for (const check of report.checks) {
+            if (check.state === "pass") continue;
+            const row = document.createElement("div");
+            row.textContent = `${check.state === "blocked" ? "需修复" : "未核验"}：${check.message}`;
+            box.appendChild(row);
+        }
+        const repairs = new Set(report.checks.filter((check) => check.blocking && check.repair).map((check) => check.repair));
+        for (const page of repairs) {
+            const button = document.createElement("button");
+            button.className = "b3-button b3-button--outline";
+            button.textContent = page === "connection" ? "打开连接与通道" : "检查插件状态";
+            button.onclick = () => host.openSettingPanel(page);
+            box.appendChild(button);
+        }
+    };
+    const execForm = () => runForm(true);
+    const runForm = async (execute: boolean) => {
+        if (formBusy || closed) return;
+        const { args, error } = buildArgs(formFieldsFor(formOp), formValues());
+        if (formError(error)) return;
+        const requestGeneration = formGeneration;
+        const op = formOp;
+        const msg = list.querySelector('[data-form="msg"]') as HTMLElement;
         msg.style.color = "var(--b3-theme-on-surface)";
-        msg.textContent = "执行中……";
-        if (execBtn) execBtn.disabled = true; // 执行期间禁用，防双击重复派发
-        const r = await host.dispatchOp(formOp, args ?? {});
-        if (r.status === "recorded" || r.status === "duplicate") {
-            showMessage(`已执行（${r.status}）：${r.message}`, 4000, "info");
-            dialog.destroy();
-            return;
+        msg.textContent = "检查调用条件中……";
+        formBusy = true;
+        const controls = [...list.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLButtonElement>('input[data-f], textarea[data-f], button[data-form]:not([data-form="back"])')];
+        controls.forEach((control) => { control.disabled = true; });
+        const current = () => !closed && stage === "form" && requestGeneration === formGeneration;
+        let dispatched = false;
+        try {
+            const report = await host.preflightOp(op, args ?? {});
+            if (!current()) return;
+            showPreflight(report);
+            if (!report.canInvoke) { msg.textContent = "尚未执行；请修复列出的条件后重试。"; return; }
+            if (!execute) { msg.textContent = "检查结束，未执行；执行前会重新检查。"; return; }
+            msg.textContent = "执行中……";
+            dispatched = true;
+            const r = await host.dispatchOp(op, args ?? {});
+            if (!current()) return;
+            if (r.status === "recorded" || r.status === "duplicate") {
+                showMessage(`已执行（${r.status}）：${r.message}`, 4000, "info");
+                dialog.destroy();
+                return;
+            }
+            msg.style.color = "var(--qg-error-text)";
+            msg.textContent = `${r.status}：${r.message}`;
+            if (r.status === "unknown") { controls.splice(0, controls.length); }
+        } catch (e) {
+            if (!current()) return;
+            msg.style.color = "var(--qg-error-text)";
+            msg.textContent = `检查或调用失败：${e instanceof Error ? e.message : String(e)}。请先核对回执和目标状态。`;
+            if (dispatched) controls.splice(0, controls.length);
+        } finally {
+            if (current() && controls.length) {
+                formBusy = false;
+                controls.forEach((control) => { control.disabled = false; });
+            }
         }
-        if (execBtn) execBtn.disabled = false; // 失败可修正参数后重试
-        msg.style.color = "var(--qg-error-text)";
-        msg.textContent = `${r.status}：${r.message}`;
     };
 
     /** R311：★ 收藏/取消收藏（favorites.add/remove 走完整簿记；本地 favorites 数组即时更新免重拉） */
@@ -643,114 +757,12 @@ export async function openCommandPalette(host: PaletteHost): Promise<void> {
         const fb = (ev.target as HTMLElement).closest("[data-fb]") as HTMLElement | null;
         if (!fb) return;
         if (fb.dataset.fb === "capture") {
-            // G3-04 + R7 结论②：目标二选一（先询问去向再写入；失败保留文本可改后重试）
-            // R7-A：成功后给原文操作（打开原文 / 复制块引用）
-            const text = input.value.trim();
-                const ask = new Dialog({
-                    title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>捕获到哪儿？</span></span>`,
-                    content: `<div id="qg-capture" style="padding:14px 16px">` +
-                        `<div style="font-size:12px;color:var(--b3-theme-on-surface);margin-bottom:12px;line-height:1.6">` +
-                        `「${esc(text.slice(0, 40))}${text.length > 40 ? "…" : ""}」——选择写入去向（可在 设置→连接与通道 改默认值）：</div>` +
-                        `<div style="display:flex;gap:8px;flex-wrap:wrap">` +
-                        (host.lastCaptureTarget() === "inbox"
-                            ? `<button class="b3-button b3-button--primary" data-target="inbox">收集箱（上次）</button><button class="b3-button" data-target="daily">今日日记</button>`
-                            : `<button class="b3-button b3-button--primary" data-target="daily">今日日记（上次）</button><button class="b3-button" data-target="inbox">收集箱</button>`) +
-                        `</div>` +
-                        // L567 部分：写入前格式预览——用户看到的确切落盘内容（与 captureQuick 的拼装一致）
-                        `<div style="margin-top:12px;font-size:11px;color:var(--b3-theme-on-surface)">写入内容预览（随选择变化）：</div>` +
-                        `<pre data-role="capture-preview" style="margin:4px 0 8px;padding:8px 10px;border:1px solid var(--b3-border-color);border-radius:6px;background:var(--b3-theme-surface);font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-all;font-family:var(--b3-font-family-code, ui-monospace, Consolas, monospace)"></pre>` +
-                        `<div style="font-size:11px;color:var(--b3-theme-on-surface)">今日日记 = 追加 <span class="qg-mono">- HH:mm 内容</span>；收集箱 = 纯文本段落。</div></div>`,
-                    width: "min(420px, 92vw)",
-                    height: "auto",
-                });
-                // 预览随悬停/聚焦的目标按钮联动（默认高亮上次去向）
-                {
-                    const previewEl = ask.element.querySelector("[data-role=capture-preview]") as HTMLElement;
-                    const renderPreview = (target: "daily" | "inbox") => {
-                        const hhmm = new Date().toTimeString().slice(0, 5);
-                        const line = target === "daily" ? `- ${hhmm} ${text}` : text;
-                        previewEl.textContent = line.length > 200 ? `${line.slice(0, 200)}…（共 ${text.length} 字）` : line;
-                    };
-                    const defaultTarget = host.lastCaptureTarget() === "inbox" ? "inbox" : "daily";
-                    renderPreview(defaultTarget);
-                    ask.element.querySelectorAll<HTMLElement>("[data-target]").forEach((b) => {
-                        const on = () => renderPreview(b.dataset.target as "daily" | "inbox");
-                        b.addEventListener("mouseenter", on);
-                        b.addEventListener("focus", on);
-                    });
-                }
-            ask.element.addEventListener("click", (ev) => {
-                const b = (ev.target as HTMLElement).closest("[data-target]") as HTMLElement | null;
-                if (!b) return;
-                const target = b.dataset.target as "daily" | "inbox";
-                ask.destroy();
-                host.rememberCaptureTarget(target);
-                void host.captureQuick(text, target).then((r) => {
-                    if (!r.ok) {
-                        showMessage(r.message, 6000, "error");
-                        return;
-                    }
-                    dialog.destroy();
-                    showMessage(r.message, 2500, "info");
-                    const done = new Dialog({
-                        title: `<span class="qg-title-wrap"><span class="qg-title-logo">门</span><span>捕获成功</span></span>`,
-                        content: `<div id="qg-capture-done" style="padding:14px 16px;font-size:12px;line-height:1.8">` +
-                            `<div style="display:flex;gap:8px;align-items:center"><span class="qg-chip ok">已写入</span><span>${esc(r.message)}</span></div>` +
-                            `<div style="margin-top:4px;color:var(--b3-theme-on-surface)" class="qg-mono">${r.blockId ? `块 ${esc(r.blockId)}` : ""}${r.blockId && r.docId ? " · " : ""}${r.docId ? `文档 ${esc(r.docId)}` : ""}</div>` +
-                            `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">` +
-                            (r.docId ? `<button class="b3-button" data-cap-doc="${esc(r.docId)}">打开原文</button>` : "") +
-                            (r.blockId ? `<button class="b3-button" data-cap-ref="${esc(r.blockId)}">复制块引用</button>` : "") +
-                            `<button class="b3-button b3-button--primary" data-cap-again>再记一条</button>` +
-                            (r.blockId ? `<button class="b3-button qg-btn-danger" data-cap-undo="${esc(r.blockId)}">撤销写入</button>` : "") +
-                            `<button class="b3-button" data-cap-close>关闭</button></div>` +
-                            (r.blockId ? `<div style="margin-top:8px;font-size:11px;color:var(--b3-theme-on-surface)">撤销 = 删除刚写入的块（测试写入可撤销）；若你已在思源中编辑过该块，请勿撤销。</div>` : "") +
-                            `</div>`,
-                        width: "min(520px, 92vw)",
-                        height: "auto",
-                    });
-                    const root2 = done.element;
-                    root2.querySelector("[data-cap-doc]")?.addEventListener("click", () => {
-                        const id = (root2.querySelector("[data-cap-doc]") as HTMLElement).dataset.capDoc as string;
-                        void host.openDoc(id);
-                        done.destroy();
-                    });
-                    root2.querySelector("[data-cap-ref]")?.addEventListener("click", () => {
-                        const id = (root2.querySelector("[data-cap-ref]") as HTMLElement).dataset.capRef as string;
-                        void navigator.clipboard.writeText(`((${id} ''))`).then(() => {
-                            host.ui.showMessage("块引用已复制", 2000, "info");
-                            done.destroy();
-                        });
-                    });
-                    // L566 部分：撤销写入——删除刚追加的块（内核 deleteBlock；走 PaletteHost.confirm 二次把关）
-                    root2.querySelector("[data-cap-undo]")?.addEventListener("click", () => {
-                        const blockId = (root2.querySelector("[data-cap-undo]") as HTMLElement).dataset.capUndo as string;
-                        const undoBtn = root2.querySelector("[data-cap-undo]") as HTMLButtonElement;
-                        void host.confirm(`撤销本次捕获：将删除刚写入的块 ${blockId}。若你已在思源中编辑过该块，请取消。`).then((ok) => {
-                            if (!ok) return;
-                            undoBtn.disabled = true;
-                            // kernelApi.post 语义：code!=0 抛错、成功返回解包 data——成败以 then/catch 判定，
-                            // 不得读返回值上的 code 字段（undefined!==0 会把成功误报为失败，靶场 E4 实测踩坑）
-                            void host.kernelApi.post("/api/block/deleteBlock", { id: blockId }).then(() => {
-                                undoBtn.textContent = "已撤销";
-                                host.ui.showMessage("已撤销本次捕获（块已删除）", 2500, "info");
-                            }).catch((e: unknown) => {
-                                undoBtn.disabled = false;
-                                host.ui.showMessage(`撤销失败：${e instanceof Error ? e.message : String(e)}`, 5000, "error");
-                            });
-                        });
-                    });
-                    root2.querySelector("[data-cap-close]")?.addEventListener("click", () => done.destroy());
-                    // 再记一条：关闭结果卡并重开面板（输入框为空，即录即走）
-                    root2.querySelector("[data-cap-again]")?.addEventListener("click", () => {
-                        done.destroy();
-                        host.openCommandPalette();
-                    });
-                });
-            });
+            openQuickCapture(host, input.value.trim(), () => dialog.destroy());
             return;
         }
         dialog.destroy();
-        if (fb.dataset.fb === "panel") host.openSettingPanel();
+        if (fb.dataset.fb === "plugins") host.openSettingPanel("diagnostics");
+        else if (fb.dataset.fb === "panel") host.openSettingPanel();
         else if (fb.dataset.fb === "diag") void host.copyDiagnostics();
         else window.open("https://github.com/ai68298100/siyuan-quickgate/blob/main/docs/GETTING-STARTED.md", "_blank");
     });

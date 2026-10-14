@@ -299,6 +299,18 @@ export function getArgsSpec(op: string): { properties: Record<string, { type: st
     return ARGS[op] ?? null;
 }
 
+/** 面板类型收敛与 MCP 校验共用；JSON 可解析不代表符合声明的结构。 */
+export function argMatchesType(value: unknown, type: string): boolean {
+    switch (type) {
+        case "string": return typeof value === "string";
+        case "number": return typeof value === "number" && Number.isFinite(value);
+        case "boolean": return typeof value === "boolean";
+        case "array": return Array.isArray(value);
+        case "object": return value !== null && typeof value === "object" && !Array.isArray(value);
+        default: return true;
+    }
+}
+
 export function validateArgs(def: McpToolDef, args: Record<string, unknown>): string | null {
     const spec = ARGS[def.name];
     if (!spec) return null; // 未登记 schema 的 op 不校验（纪律测试保证全登记）
@@ -310,13 +322,8 @@ export function validateArgs(def: McpToolDef, args: Record<string, unknown>): st
     }
     for (const [key, meta] of Object.entries(spec.properties)) {
         const v = args?.[key];
-        if (v === undefined || v === null) continue;
-        const wrong = (meta.type === "string" && typeof v !== "string")
-            || (meta.type === "number" && typeof v !== "number")
-            || (meta.type === "boolean" && typeof v !== "boolean")
-            || (meta.type === "array" && !Array.isArray(v))
-            || (meta.type === "object" && (typeof v !== "object" || Array.isArray(v)));
-        if (wrong) return `参数 ${key} 类型应为 ${meta.type}（实得 ${Array.isArray(v) ? "array" : typeof v}）`;
+        if (v === undefined) continue;
+        if (!argMatchesType(v, meta.type)) return `参数 ${key} 类型应为 ${meta.type}（实得 ${v === null ? "null" : Array.isArray(v) ? "array" : typeof v}）`;
     }
     return null;
 }
