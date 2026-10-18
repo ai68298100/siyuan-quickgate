@@ -6,7 +6,9 @@
 
 - GitHub 主分支与本地发布候选均为 e9f4d99，版本 0.9.3；核对时没有 v0.9.3 tag 或 Release，最新正式发布仍为 v0.9.2。上轮仅完成代码推送和验收，未完成附件发布；依赖更新分支的后续 CI 不代表主分支新增提交，本次不合入。
 - 上轮候选的 [CI](https://github.com/ai68298100/siyuan-quickgate/actions/runs/38560308726) 与 [容器内核验收](https://github.com/ai68298100/siyuan-quickgate/actions/runs/38560369394) 均已成功，headSha 同为 e9f4d99556b31ab8f32b6e02c1d6705c86e8ad2c。本轮只校准发布日期与事实记录，再校验和打包，不增加版本号或功能。
-- 本机安装核对仍为 0.9.0，思源正在运行；发布候选与本机安装分别记录，安全退出前不覆盖安装目录。GitHub Release、latest、下载附件与本机安装的最终结果完成后补记。
+- 本轮复核 check、46 文件/375 测试、源码与独立 MCP 离线协议各 6/6、build/build:mcp 与包门禁通过（17 md/58 链接、ZIP 27/4 文件）；三份程序文件 SHA-256 与 R370 验收构建一致。文档校准提交 c85384f 的 [CI](https://github.com/ai68298100/siyuan-quickgate/actions/runs/39153533378) 也已成功。
+- [v0.9.3 Release 草稿](https://github.com/ai68298100/siyuan-quickgate/releases/tag/untagged-95902fc6762aef4f4699) 已创建，目标 c85384f；五个附件的本地/下载文件/GitHub digest 全部一致，SHA256SUMS 四条均通过。此时尚未公开发布，也未生成 v0.9.3 tag；latest 仍是 v0.9.2。
+- 本机安装核对仍为 0.9.0，思源正在运行；按 AGENTS 的在用工作区防护，不覆盖安装目录。已请求用户安全退出后安装，或明确本次仅发布 GitHub；该选择未完成前保留草稿，不把准备完成写成已发布。
 
 ## 2026-10-14 · R370（v0.9.3 发布准备）
 
